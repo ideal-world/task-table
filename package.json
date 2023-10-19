@@ -1,0 +1,72 @@
+{
+  "name": "@idealworld/task-table",
+  "version": "0.5.5",
+  "description": "Table component to support task management",
+  "scripts": {
+    "build": "rimraf dist && vue-tsc && vite build",
+    "docs:dev": "npm run publish-typedoc && vitepress dev docs --host 0.0.0.0",
+    "docs:build": "npm run publish-typedoc && vitepress build docs",
+    "docs:serve": "vitepress serve docs",
+    "test": "vitest --run",
+    "coverage": "vitest run --coverage",
+    "publish-typedoc": "typedoc --options typedoc.json"
+  },
+  "keywords": [
+    "task",
+    "table",
+    "project",
+    "editor"
+  ],
+  "license": "MIT",
+  "author": {
+    "name": "gudaoxuri",
+    "email": "i@sunisle.org",
+    "url": "https://idealworld.group/"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/task-table.es.js",
+      "require": "./dist/task-table.umd.js"
+    },
+    "./dist/style.css": "./dist/style.css"
+  },
+  "type": "module",
+  "module": "./dist/task-table.es.js",
+  "types": "./dist/types/index.d.ts",
+  "dependencies": {
+    "vue-i18n": "^9.5.0"
+  },
+  "peerDependencies": {
+    "@element-plus/icons-vue": "^2.1.0",
+    "element-plus": "^2.3.12",
+    "vue": "^3.3.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.3.3",
+    "@vitejs/plugin-vue": "^4.2.3",
+    "@vitest/ui": "^0.34.5",
+    "happy-dom": "^12.2.0",
+    "rimraf": "^5.0.1",
+    "sass": "^1.63.6",
+    "scss": "^0.2.4",
+    "typedoc": "^0.25.1",
+    "typedoc-plugin-markdown": "^4.0.0-next.22",
+    "typedoc-vitepress-theme": "^1.0.0-next.3",
+    "typescript": "^5.1.6",
+    "unplugin-auto-import": "^0.16.6",
+    "unplugin-icons": "^0.17.0",
+    "unplugin-vue-components": "^0.25.2",
+    "vite": "^4.4.9",
+    "vitepress": "1.0.0-rc.20",
+    "vitest": "^0.34.5",
+    "vue-tsc": "^1.8.13"
+  },
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ideal-world/task-table.git"
+  }
+}
