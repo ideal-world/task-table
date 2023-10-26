@@ -5,6 +5,7 @@ import { TableBasicConf, TableColumnConf, TableConf, TableStyleConf } from './co
 const { t } = useI18n()
 import FixedComp from './fixed.vue'
 import SortComp from './sort.vue'
+import ResizeComp from './resize.vue'
 import { setFixedColumnStyles } from './fixed.vue'
 
 const tableConf = defineProps<TableConf>()
@@ -39,11 +40,26 @@ const showHeaderContextMenu = (event: MouseEvent) => {
 }
 </script>
 
+<script lang="ts">
+export function closeHeaderContextMenu(event: MouseEvent) {
+  const targetEle = event.target as HTMLElement
+  const contextmenuEle = targetEle.closest('.iw-table-header-contextmenu') as HTMLElement
+  contextmenuEle.style.display = 'none'
+}
+</script>
+
 <template>
   <div style="overflow: auto; width: 100%; height: 100%">
     <div className="iw-table" :style="{ width: columnsConf.reduce((count, col) => count + col.width, 0) + 'px' }">
       <div :className="stylesConf.headerClass + ' iw-table-header'">
-        <div v-for="(column, colIndex) in columnsConf" :className="stylesConf.cellClass + ' iw-table-cell'" :style="setColumnStyles(colIndex)" @click="showHeaderContextMenu">
+        <div
+          v-for="(column, colIndex) in columnsConf"
+          :key="column.name"
+          :className="stylesConf.cellClass + ' iw-table-cell iw-table-header-cell'"
+          :data-column-name="column.name"
+          :style="setColumnStyles(colIndex)"
+          @click="showHeaderContextMenu"
+        >
           <svg v-html="column.icon"></svg> {{ column.name }}
           <div className="iw-table-header-contextmenu" style="display: none">
             <fixed-comp :current-col-idx="colIndex" :basic-conf="basicConf"></fixed-comp>
@@ -51,15 +67,16 @@ const showHeaderContextMenu = (event: MouseEvent) => {
         </div>
       </div>
       <div v-for="(row, rowIndex) in data" :key="row[columnsConf.find((col) => col.unique)?.name ?? 0]" :className="stylesConf.rowClass + ' iw-table-row'">
-        <template v-for="(column, colIndex) in columnsConf">
-          <div :className="stylesConf.cellClass + ' iw-table-cell iw-table--size-' + stylesConf.sizeClass" :style="setColumnStyles(colIndex)">
+        <template v-for="(column, colIndex) in columnsConf" :key="column.name">
+          <div :className="stylesConf.cellClass + ' iw-table-cell iw-table-row-cell iw-table--size-' + stylesConf.sizeClass" :style="setColumnStyles(colIndex)">
             {{ row[column.name] + rowIndex }}
           </div>
         </template>
       </div>
     </div>
   </div>
-  <sort-comp></sort-comp>
+  <sort-comp :columns-conf="columnsConf"></sort-comp>
+  <resize-comp :columns-conf="columnsConf"></resize-comp>
 </template>
 
 <style lang="scss" scoped>

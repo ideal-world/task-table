@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-const show = { fixedColumn: 'phone' }
+const show = { fixedColumn: '' }
 const columns = [{ name: 'no', unique: true }, { name: 'name' }, { name: 'phone' }, { name: 'addr' }, { name: 'time' }]
 const data = [
   { no: 1, name: 'Name1', phone: 'Phone1', addr: 'Addr1', time: '2023-10-23' },

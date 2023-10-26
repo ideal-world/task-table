@@ -3,7 +3,8 @@ export default {
     },
     table:{
         fixed:{
-            title: 'Fixed'
+            fixedTitle: 'Fixed',
+            unFixedTitle: 'UnFixed'
         }
     }
 }

@@ -45,6 +45,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.3.3",
+    "@types/sortablejs": "^1.15.4",
     "@vitejs/plugin-vue": "^4.2.3",
     "@vitest/ui": "^0.34.5",
     "happy-dom": "^12.2.0",

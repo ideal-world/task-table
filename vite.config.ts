@@ -33,7 +33,7 @@ export default defineConfig({
             fileName: (format) => `task-table.${format}.js`
         },
         rollupOptions: {
-            external: ['vue', 'vue-i18n', 'element-plus', /@element-plus\/.+/],
+            external: ['vue', 'vue-i18n', 'element-plus', 'sortablejs', /@element-plus\/.+/],
             output: {
                 exports: 'named',
                 globals: {

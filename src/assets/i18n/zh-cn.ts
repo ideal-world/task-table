@@ -1,9 +1,10 @@
 export default {
     _: {
     },
-    table:{
-        fixed:{
-            title: '固定'
+    table: {
+        fixed: {
+            fixedTitle: '固定',
+            unFixedTitle: '取消固定'
         }
     }
 }
