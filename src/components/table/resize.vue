@@ -14,7 +14,7 @@ onMounted(() => {
   const tableHeaderEle = document.getElementsByClassName('iw-table-header')[0] as HTMLElement
   const dragDiv = document.createElement('div')
   dragDiv.style.position = 'fixed'
-  dragDiv.style.display = 'flex'
+  dragDiv.style.display = 'none'
   dragDiv.style.zIndex = '1000'
   dragDiv.style.width = '24px'
   dragDiv.style.padding = '2px 10px'
@@ -26,10 +26,6 @@ onMounted(() => {
   tableHeaderEle.appendChild(dragDiv)
 
   dragDiv.addEventListener('mousedown', () => {
-    // dragDiv.style.margin = '20px'
-    // dragDiv.style.left = dragDiv.style.left - 8 + 'px'
-    // dragDiv.style.top = dragDiv.style.top - 8 + 'px'
-    
     isDragging = true
   })
 
@@ -42,7 +38,7 @@ onMounted(() => {
     if (!isDragging) {
       return
     }
-    dragDiv.style.left = (event as MouseEvent).clientX - 8 + 'px'
+    dragDiv.style.left = (event as MouseEvent).clientX - 12 + 'px'
     const newWidth = (event as MouseEvent).clientX - currCellRect.left
     let columnConf = props.columnsConf.find((col) => col.name == currColumnName)
     if (columnConf) {
@@ -70,13 +66,6 @@ onMounted(() => {
 })
 </script>
 
-<script lang="ts"></script>
-
 <template></template>
 
-<style lang="scss">
-@import '../../assets/main.scss';
 
-@include b('table-header-cell') {
-}
-</style>

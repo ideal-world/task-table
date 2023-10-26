@@ -6,6 +6,7 @@ const { t } = useI18n()
 import FixedComp from './fixed.vue'
 import SortComp from './sort.vue'
 import ResizeComp from './resize.vue'
+import FillComp from './fill.vue'
 import { setFixedColumnStyles } from './fixed.vue'
 
 const tableConf = defineProps<TableConf>()
@@ -49,7 +50,7 @@ export function closeHeaderContextMenu(event: MouseEvent) {
 </script>
 
 <template>
-  <div style="overflow: auto; width: 100%; height: 100%">
+  <div className="iw-table-wrap" style="overflow: auto; width: 100%; height: 100%">
     <div className="iw-table" :style="{ width: columnsConf.reduce((count, col) => count + col.width, 0) + 'px' }">
       <div :className="stylesConf.headerClass + ' iw-table-header'">
         <div
@@ -68,8 +69,13 @@ export function closeHeaderContextMenu(event: MouseEvent) {
       </div>
       <div v-for="(row, rowIndex) in data" :key="row[columnsConf.find((col) => col.unique)?.name ?? 0]" :className="stylesConf.rowClass + ' iw-table-row'">
         <template v-for="(column, colIndex) in columnsConf" :key="column.name">
-          <div :className="stylesConf.cellClass + ' iw-table-cell iw-table-row-cell iw-table--size-' + stylesConf.sizeClass" :style="setColumnStyles(colIndex)">
-            {{ row[column.name] + rowIndex }}
+          <div
+            :className="stylesConf.cellClass + ' iw-table-cell iw-table-row-cell iw-table--size-' + stylesConf.sizeClass"
+            :data-column-name="column.name"
+            :data-row-idx="rowIndex"
+            :style="setColumnStyles(colIndex)"
+          >
+            {{ row[column.name] }}
           </div>
         </template>
       </div>
@@ -77,11 +83,13 @@ export function closeHeaderContextMenu(event: MouseEvent) {
   </div>
   <sort-comp :columns-conf="columnsConf"></sort-comp>
   <resize-comp :columns-conf="columnsConf"></resize-comp>
+  <fill-comp :columns-conf="columnsConf" :data="data"></fill-comp>
 </template>
 
 <style lang="scss" scoped>
 @import '../../assets/main.scss';
 @include b('table') {
+  position: relative;
   border-top: 1px solid var(--el-border-color);
   border-left: 1px solid var(--el-border-color);
 
