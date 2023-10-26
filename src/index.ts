@@ -14,3 +14,5 @@ declare module 'vue' {
     'IwTaskTable': typeof IwTaskTableComp,
   }
 }
+
+export * from './components/props'

@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --host 0.0.0.0",
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "build-only": "vite build",
@@ -12,8 +12,7 @@
   "dependencies": {
     "@element-plus/icons-vue": "^2.1.0",
     "element-plus": "^2.3.12",
-    "vue": "^3.3.4",
-    "@idealworld/task-table":"0.5.3"
+    "vue": "^3.3.4"
   },
   "devDependencies": {
     "@tsconfig/node18": "^18.2.2",

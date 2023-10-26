@@ -29,7 +29,7 @@ export default defineConfig({
         lib: {
             entry: path.resolve(__dirname, 'src/index.ts'),
             name: 'task-table',
-            formats: ['es','umd'],
+            formats: ['es', 'umd'],
             fileName: (format) => `task-table.${format}.js`
         },
         rollupOptions: {

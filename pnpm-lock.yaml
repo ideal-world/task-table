@@ -11,6 +11,9 @@ dependencies:
   element-plus:
     specifier: ^2.3.12
     version: 2.4.1(vue@3.3.4)
+  sortablejs:
+    specifier: ^1.15.0
+    version: 1.15.0
   vue:
     specifier: ^3.3.4
     version: 3.3.4
@@ -66,7 +69,7 @@ devDependencies:
     version: 4.5.0(@types/node@20.8.7)(sass@1.69.4)
   vitepress:
     specifier: 1.0.0-rc.20
-    version: 1.0.0-rc.20(@algolia/client-search@4.20.0)(@types/node@20.8.7)(sass@1.69.4)(search-insights@2.9.0)
+    version: 1.0.0-rc.20(@algolia/client-search@4.20.0)(@types/node@20.8.7)(sass@1.69.4)(search-insights@2.9.0)(sortablejs@1.15.0)
   vitest:
     specifier: ^0.34.5
     version: 0.34.6(@vitest/ui@0.34.6)(happy-dom@12.9.1)(sass@1.69.4)
@@ -892,7 +895,7 @@ packages:
       - vue
     dev: false
 
-  /@vueuse/integrations@10.5.0(focus-trap@7.5.4)(vue@3.3.4):
+  /@vueuse/integrations@10.5.0(focus-trap@7.5.4)(sortablejs@1.15.0)(vue@3.3.4):
     resolution: {integrity: sha512-fm5sXLCK0Ww3rRnzqnCQRmfjDURaI4xMsx+T+cec0ngQqHx/JgUtm8G0vRjwtonIeTBsH1Q8L3SucE+7K7upJQ==}
     peerDependencies:
       async-validator: '*'
@@ -936,6 +939,7 @@ packages:
       '@vueuse/core': 10.5.0(vue@3.3.4)
       '@vueuse/shared': 10.5.0(vue@3.3.4)
       focus-trap: 7.5.4
+      sortablejs: 1.15.0
       vue-demi: 0.14.6(vue@3.3.4)
     transitivePeerDependencies:
       - '@vue/composition-api'
@@ -1838,6 +1842,9 @@ packages:
       totalist: 3.0.1
     dev: true
 
+  /sortablejs@1.15.0:
+    resolution: {integrity: sha512-bv9qgVMjUMf89wAvM6AxVvS/4MX3sPeN0+agqShejLU5z5GX4C75ow1O2e5k4L6XItUyAK3gH6AxSbXrOM5e8w==}
+
   /source-map-js@1.0.2:
     resolution: {integrity: sha512-R0XvVJ9WusLiqTCEiGCmICCMplcCkIwwR11mOSD9CR5u+IXYdiseeEuXCVAjS54zqwkLcPNnmU4OeJ6tUrWhDw==}
     engines: {node: '>=0.10.0'}
@@ -2151,7 +2158,7 @@ packages:
       fsevents: 2.3.3
     dev: true
 
-  /vitepress@1.0.0-rc.20(@algolia/client-search@4.20.0)(@types/node@20.8.7)(sass@1.69.4)(search-insights@2.9.0):
+  /vitepress@1.0.0-rc.20(@algolia/client-search@4.20.0)(@types/node@20.8.7)(sass@1.69.4)(search-insights@2.9.0)(sortablejs@1.15.0):
     resolution: {integrity: sha512-CykMUJ8JLxLcGWek0ew3wln4RYbsOd1+0YzXITTpajggpynm2S331TNkJVOkHrMRc6GYe3y4pS40GfgcW0ZwAw==}
     hasBin: true
     peerDependencies:
@@ -2168,7 +2175,7 @@ packages:
       '@types/markdown-it': 13.0.4
       '@vue/devtools-api': 6.5.1
       '@vueuse/core': 10.5.0(vue@3.3.4)
-      '@vueuse/integrations': 10.5.0(focus-trap@7.5.4)(vue@3.3.4)
+      '@vueuse/integrations': 10.5.0(focus-trap@7.5.4)(sortablejs@1.15.0)(vue@3.3.4)
       focus-trap: 7.5.4
       mark.js: 8.11.1
       minisearch: 6.1.0

@@ -1,4 +1,4 @@
-import IwTaskTable from './Table.vue'
+import IwTaskTable from './skeleton.vue'
 
 export {
   IwTaskTable,
