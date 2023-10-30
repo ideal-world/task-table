@@ -72,10 +72,11 @@ export interface TableColumnProps {
     name: string
     title?: string
     dataKind?: DataKind
-    unique?: boolean
+    pk?: boolean
     sortable?: boolean
     filterable?: boolean
     editable?: boolean
+    fillable?: boolean
     aggAble?: AggregateKind[]
     width?: number
 }

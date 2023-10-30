@@ -46,7 +46,6 @@ onMounted(() => {
     if (!isDragging) {
       return
     }
-    console.log(startRowIdx, movedRowIdx)
     isDragging = false
     selectDiv.style.display = 'none'
     let targetData = props.data[startRowIdx][startColumnName]
@@ -90,12 +89,16 @@ onMounted(() => {
     if (!targetEle.classList.contains('iw-table-row-cell')) {
       return
     }
+    const currColumnName = targetEle.dataset.columnName || ''
+    if (props.columnsConf.find((item) => item.name == currColumnName)?.fillable == false) {
+      return
+    }
     selectDiv.style.display = 'flex'
     selectDiv.style.left = targetEle.offsetLeft - 1 + 'px'
     selectDiv.style.top = targetEle.offsetTop - 1 + 'px'
     selectDiv.style.width = targetEle.offsetWidth + 2 + 'px'
     selectDiv.style.height = targetEle.offsetHeight + 2 + 'px'
-    startColumnName = targetEle.dataset.columnName || ''
+    startColumnName = currColumnName
     startRowIdx = parseInt(targetEle.dataset.rowIdx || '0')
     startCellEle = targetEle
     startCellFixedX = targetEle.getBoundingClientRect().left

@@ -1,4 +1,4 @@
-import { DataKind, SizeKind, TableProps } from "../props"
+import { DataKind, SizeKind, TableFilterGroupProps, TableProps, TableSortProps } from "../props"
 import { FilterGroupConf } from "../filter/conf"
 import { SortConf } from "../sort/conf"
 import * as iconSvg from "../../assets/icon"
@@ -13,6 +13,9 @@ export interface TableConf {
 
 export interface TableBasicConf {
     fixedColumnIdx: number,
+    fillable: boolean
+    addable: boolean
+    editable: boolean
     clientOnly: boolean
 }
 
@@ -21,13 +24,17 @@ export interface TableColumnConf {
     title: string
     icon: string
     dataKind: DataKind
-    unique: boolean
+    pk: boolean
     width: number
+    fillable: boolean
 }
 
 
 export interface TableEventConf {
-    loadData: (filters?: FilterGroupConf[][], sorts?: SortConf[], offsetRowNumber?: number, fetchRowNumber?: number) => Promise<{ name: string, value: any }[][]>
+    loadData: (filters?: TableFilterGroupProps[][], sorts?: TableSortProps[], offsetRowNumber?: number, fetchRowNumber?: number) => Promise<{ name: string, value: any }[][]>
+    saveData: (data: { name: string, value: any }[][]) => Promise<boolean>
+    deleteData: (ids: string[]) => Promise<boolean>
+    loadCellOptions: (columnName: string, cellValue: any) => Promise<{ title: string, value: any }[]>
 }
 
 export interface TableStyleConf {
@@ -42,8 +49,11 @@ export function initConf(props: TableProps): TableConf {
     if (props.show?.fixedColumn) {
         fixedColumnIdx = props.columns.findIndex(column => column.name === props.show?.fixedColumn)
     }
-    const tableConf = {
+    const tableBasicConf = {
         fixedColumnIdx: fixedColumnIdx,
+        fillable: props.edit?.fillable || true,
+        addable: props.edit?.addable || true,
+        editable: props.edit?.editable || true,
         clientOnly: props.show?.clientOnly || true
     }
     const tableColumnsConf = props.columns.map(column => {
@@ -108,13 +118,18 @@ export function initConf(props: TableProps): TableConf {
             title: column.title || column.name,
             icon: icon,
             dataKind: column.dataKind || DataKind.TEXT,
-            unique: column.unique || false,
-            width: column.width || 200
+            pk: column.pk || false,
+            width: column.width || 200,
+            fillable: column.fillable || true
         }
     })
     const tableEventConf = {
-        loadData: props.events?.loadData || (() => Promise.resolve([]))
+        loadData: props.events?.loadData || (() => Promise.resolve([])),
+        saveData: props.events?.saveData || (() => Promise.resolve(true)),
+        deleteData: props.events?.deleteData || (() => Promise.resolve(true)),
+        loadCellOptions: props.events?.loadCellOptions || (() => Promise.resolve([]))
     }
+
     const tableStyleConf = {
         sizeClass: props.styles?.size || SizeKind.MEDIUM,
         headerClass: props.styles?.headerClass || '',
@@ -122,7 +137,7 @@ export function initConf(props: TableProps): TableConf {
         cellClass: props.styles?.cellClass || ''
     }
     return {
-        basic: tableConf,
+        basic: tableBasicConf,
         columns: tableColumnsConf,
         data: props.data,
         events: tableEventConf,

@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { TableBasicConf, TableColumnConf } from './conf'
 import { closeHeaderContextMenu } from './table.vue'
-const { t } = useI18n()
 import * as iconSvg from '../../assets/icon'
+const { t } = useI18n()
 
 const props = defineProps<{
   currentColIdx: number

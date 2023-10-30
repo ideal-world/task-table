@@ -2,12 +2,12 @@
 import { reactive } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { TableBasicConf, TableColumnConf, TableConf, TableStyleConf } from './conf'
-const { t } = useI18n()
 import FixedComp from './fixed.vue'
 import SortComp from './sort.vue'
 import ResizeComp from './resize.vue'
 import FillComp from './fill.vue'
 import { setFixedColumnStyles } from './fixed.vue'
+const { t } = useI18n()
 
 const tableConf = defineProps<TableConf>()
 
@@ -67,7 +67,7 @@ export function closeHeaderContextMenu(event: MouseEvent) {
           </div>
         </div>
       </div>
-      <div v-for="(row, rowIndex) in data" :key="row[columnsConf.find((col) => col.unique)?.name ?? 0]" :className="stylesConf.rowClass + ' iw-table-row'">
+      <div v-for="(row, rowIndex) in data" :key="row[columnsConf.find((col) => col.pk)?.name ?? 0]" :className="stylesConf.rowClass + ' iw-table-row'">
         <template v-for="(column, colIndex) in columnsConf" :key="column.name">
           <div
             :className="stylesConf.cellClass + ' iw-table-cell iw-table-row-cell iw-table--size-' + stylesConf.sizeClass"
@@ -83,7 +83,7 @@ export function closeHeaderContextMenu(event: MouseEvent) {
   </div>
   <sort-comp :columns-conf="columnsConf"></sort-comp>
   <resize-comp :columns-conf="columnsConf"></resize-comp>
-  <fill-comp :columns-conf="columnsConf" :data="data"></fill-comp>
+  <fill-comp :columns-conf="columnsConf" :data="data" v-if="basic"></fill-comp>
 </template>
 
 <style lang="scss" scoped>
