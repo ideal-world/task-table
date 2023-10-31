@@ -26,7 +26,7 @@ const setFixedColumn = (event: MouseEvent) => {
 export function setFixedColumnStyles(styles: any, colIdx: number, fixedColumnIdx: number, columnsConf: ListColumnConf[]) {
   if (fixedColumnIdx >= colIdx) {
     styles.position = 'sticky'
-    styles.zIndex = 99
+    styles.zIndex = 1099
     // TODO 判断left要小于视口宽度
     styles.left = columnsConf.slice(0, colIdx).reduce((count, col) => count + col.width, 0) + 'px'
     if (fixedColumnIdx == colIdx) {

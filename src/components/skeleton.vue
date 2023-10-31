@@ -94,9 +94,9 @@ const listConf = List.initConf(props, tableBasicConf)
 onMounted(async () => {
   Array.prototype.forEach.call(document.getElementsByClassName('iw-tt'), function (ttEle) {
     let outHeight = ttEle.parentElement?.clientHeight
-    let layoutHeight = ttEle.getElementsByClassName('iw-tt-layouts')[0].clientHeight
+    let layoutHeight = ttEle.getElementsByClassName('iw-tt-layouts')[0].offsetHeight
     Array.prototype.forEach.call(ttEle.getElementsByClassName('iw-tt-shows'), function (showEle) {
-      let toolsHeight = showEle.getElementsByClassName('iw-tt-tools')[0].clientHeight
+      let toolsHeight = showEle.getElementsByClassName('iw-tt-tools')[0].offsetHeight
       showEle.getElementsByClassName('iw-tt-table')[0].style.height = outHeight - layoutHeight - toolsHeight + 'px'
     })
   })
@@ -137,6 +137,7 @@ onMounted(async () => {
 
 @include b('tt-layouts') {
   height: 40px;
+  border: 1px solid red;
 }
 
 @include b('tt-tools') {

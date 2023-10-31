@@ -121,8 +121,6 @@ export function closeContextMenu(event: MouseEvent) {
 @import '../../assets/main.scss';
 @include b('list') {
   position: relative;
-  border-top: 1px solid var(--el-border-color);
-  border-left: 1px solid var(--el-border-color);
 
   @include m('size-mini') {
     padding: 1px;
@@ -147,10 +145,12 @@ export function closeContextMenu(event: MouseEvent) {
 
 @include b('list-header') {
   display: flex;
+  border-top: 1px solid var(--el-border-color);
+  border-right: 1px solid var(--el-border-color);
   align-items: center;
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 1100;
 
   @include b('list-cell') {
     display: flex;
@@ -183,6 +183,7 @@ export function closeContextMenu(event: MouseEvent) {
 
 @include b('list-row') {
   display: flex;
+  border-right: 1px solid var(--el-border-color);
 
   &:hover .iw-list-cell {
     background-color: var(--el-color-info-light-9);
@@ -190,7 +191,7 @@ export function closeContextMenu(event: MouseEvent) {
 }
 
 @include b('list-cell') {
-  border-right: 1px solid var(--el-border-color);
+  border-left: 1px solid var(--el-border-color);
   border-bottom: 1px solid var(--el-border-color);
   background-color: var(--el-bg-color);
 }
