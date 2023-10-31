@@ -95,12 +95,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v3
-
-      - name: Install dependencies
-        run: pnpm ci
-
       - name: Test
         run: pnpm run test
 
@@ -108,6 +102,9 @@ jobs:
         run: |
           pnpm run docs:build
           touch docs/.vitepress/dist/.nojekyll
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
