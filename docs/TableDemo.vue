@@ -1,12 +1,37 @@
 <template>
   <div style="height: 400px">
-    <iw-task-table :show="show" :columns="columns" :data="data"></iw-task-table>
+    <iw-task-table :columns="columns" :events="events"></iw-task-table>
   </div>
 </template>
 
 <script setup lang="ts">
-const show = { fixedColumn: '' }
-const columns = [{ name: 'no', unique: true }, { name: 'name' }, { name: 'phone' }, { name: 'addr' }, { name: 'time' }]
+import { TableFilterGroupProps, TableSortProps } from '../src/components/props'
+
+const columns = [{ name: 'no', pk: true, fillable: false }, { name: 'name' }, { name: 'phone' }, { name: 'addr' }, { name: 'time' }]
+const events = {
+  loadData: (filters: TableFilterGroupProps[], sorts: TableSortProps[], offsetRowNumber?: number, fetchRowNumber?: number) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(data)
+      }, 1000)
+    })
+  },
+  saveData: (data: { [key: string]: any }[]) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(true)
+      }, 1000)
+    })
+  },
+  deleteData: (ids: string[]) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(true)
+      }, 1000)
+    })
+  },
+}
+
 const data = [
   { no: 1, name: 'Name1', phone: 'Phone1', addr: 'Addr1', time: '2023-10-23' },
   { no: 2, name: 'Name2', phone: 'Phone2', addr: 'Addr2', time: '2023-10-24' },
@@ -23,7 +48,7 @@ const data = [
   { no: 13, name: 'Name13', phone: 'Phone13', addr: 'Addr13', time: '2023-11-4' },
   { no: 14, name: 'Name14', phone: 'Phone14', addr: 'Addr14', time: '2023-11-5' },
   { no: 15, name: 'Name15', phone: 'Phone15', addr: 'Addr15', time: '2023-11-6' },
-  { no: 16, name: 'Name16', phone: 'Phone16', addr: 'Addr16', time: '2023-11-7'},
+  { no: 16, name: 'Name16', phone: 'Phone16', addr: 'Addr16', time: '2023-11-7' },
   { no: 17, name: 'Name17', phone: 'Phone17', addr: 'Addr17', time: '2023-11-8' },
   { no: 18, name: 'Name18', phone: 'Phone18', addr: 'Addr18', time: '2023-11-9' },
   { no: 19, name: 'Name19', phone: 'Phone19', addr: 'Addr19', time: '2023-11-10' },

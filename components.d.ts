@@ -7,11 +7,14 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
-    Fill: typeof import('./src/components/table/fill.vue')['default']
-    Fixed: typeof import('./src/components/table/fixed.vue')['default']
-    Resize: typeof import('./src/components/table/resize.vue')['default']
+    copy: typeof import('./src/components/list/fill copy.vue')['default']
+    Delete: typeof import('./src/components/list/delete.vue')['default']
+    Fill: typeof import('./src/components/list/fill.vue')['default']
+    Fixed: typeof import('./src/components/list/fixed.vue')['default']
+    List: typeof import('./src/components/list/list.vue')['default']
+    Resize: typeof import('./src/components/list/resize.vue')['default']
     Skeleton: typeof import('./src/components/skeleton.vue')['default']
-    Sort: typeof import('./src/components/table/sort.vue')['default']
-    Table: typeof import('./src/components/table/table.vue')['default']
+    Sort: typeof import('./src/components/list/sort.vue')['default']
+    Table: typeof import('./src/components/list/table.vue')['default']
   }
 }

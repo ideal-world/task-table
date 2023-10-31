@@ -1,10 +1,18 @@
 export default {
     _: {
     },
-    table:{
+    show:{
+        title:{
+            default: 'Default'
+        }
+    },
+    list:{
         fixed:{
             fixedTitle: 'Fixed',
             unFixedTitle: 'UnFixed'
+        },
+        delete:{
+            title: 'Delete',
         }
     }
 }

@@ -57,14 +57,20 @@ export enum SizeKind {
     MEDIUM = 'medium',
     LARGE = 'large',
 }
+export enum LayoutKind {
+    LIST = 'LIST',
+    GANTT = 'GANTT',
+    CALENDAR = 'CALENDAR',
+    BOARD = 'BOARD',
+    CHART = 'CHART',
+}
 
 export interface TableProps {
     tableId?: string
     columns: TableColumnProps[]
-    data: any[]
-    show?: TableShowProps
+    shows?: TableShowProps[]
     edit?: TableEditProps
-    events?: TableEventProps
+    events: TableEventProps
     styles?: TableStyleProps
 }
 
@@ -82,11 +88,13 @@ export interface TableColumnProps {
 }
 
 export interface TableShowProps {
+    id: string,
+    title: string,
+    layout: LayoutKind,
     dateColumn?: { start: string, end: string }
-    fixedColumn:string,
+    fixedColumn?: string,
     filters?: TableFilterGroupProps[][]
     sorts?: TableSortProps[]
-    clientOnly?: boolean
 }
 
 export interface TableEditProps {
@@ -96,10 +104,10 @@ export interface TableEditProps {
 }
 
 export interface TableEventProps {
-    loadData: (filters?: TableFilterGroupProps[][], sorts?: TableSortProps[], offsetRowNumber?: number, fetchRowNumber?: number) => Promise<{ name: string, value: any }[][]>
-    saveData: (data: { name: string, value: any }[][]) => Promise<boolean>
-    deleteData: (ids: string[]) => Promise<boolean>
-    loadCellOptions: (columnName: string, cellValue: any) => Promise<{ title: string, value: any }[]>
+    loadData: (filters: TableFilterGroupProps[], sorts: TableSortProps[], offsetRowNumber?: number, fetchRowNumber?: number) => Promise<{ [key: string]: any }[]>
+    saveData?: (data: { [key: string]: any }[]) => Promise<boolean>
+    deleteData?: (ids: string[] | number[]) => Promise<boolean>
+    loadCellOptions?: (columnName: string, cellValue: any) => Promise<{ title: string, value: any }[]>
 }
 
 export interface TableSortProps {

@@ -1,60 +1,41 @@
-import { DataKind, SizeKind, TableFilterGroupProps, TableProps, TableSortProps } from "../props"
-import { FilterGroupConf } from "../filter/conf"
-import { SortConf } from "../sort/conf"
+import { DataKind, SizeKind, TableProps } from "../props"
 import * as iconSvg from "../../assets/icon"
+import { TableBasicConf, TableShowConf } from "../conf"
 
-export interface TableConf {
-    basic: TableBasicConf
-    columns: TableColumnConf[]
-    data: any[]
-    events: TableEventConf
-    styles: TableStyleConf
+export interface ListConf {
+    basic: ListBasicConf
+    columns: ListColumnConf[]
+    styles: ListStyleConf
 }
-
-export interface TableBasicConf {
-    fixedColumnIdx: number,
+export interface ListBasicConf {
     fillable: boolean
     addable: boolean
     editable: boolean
-    clientOnly: boolean
+    pkColumnName: string
 }
 
-export interface TableColumnConf {
+export interface ListColumnConf {
     name: string
     title: string
     icon: string
     dataKind: DataKind
-    pk: boolean
     width: number
     fillable: boolean
 }
 
-
-export interface TableEventConf {
-    loadData: (filters?: TableFilterGroupProps[][], sorts?: TableSortProps[], offsetRowNumber?: number, fetchRowNumber?: number) => Promise<{ name: string, value: any }[][]>
-    saveData: (data: { name: string, value: any }[][]) => Promise<boolean>
-    deleteData: (ids: string[]) => Promise<boolean>
-    loadCellOptions: (columnName: string, cellValue: any) => Promise<{ title: string, value: any }[]>
-}
-
-export interface TableStyleConf {
+export interface ListStyleConf {
     sizeClass: SizeKind
     headerClass: string
     rowClass: string
     cellClass: string
 }
 
-export function initConf(props: TableProps): TableConf {
-    let fixedColumnIdx = -1
-    if (props.show?.fixedColumn) {
-        fixedColumnIdx = props.columns.findIndex(column => column.name === props.show?.fixedColumn)
-    }
+export function initConf(props: TableProps, basicConf: TableBasicConf): ListConf {
     const tableBasicConf = {
-        fixedColumnIdx: fixedColumnIdx,
-        fillable: props.edit?.fillable || true,
-        addable: props.edit?.addable || true,
-        editable: props.edit?.editable || true,
-        clientOnly: props.show?.clientOnly || true
+        fillable: props.edit?.fillable ?? true,
+        addable: props.edit?.addable ?? true,
+        editable: props.edit?.editable ?? true,
+        pkColumnName: basicConf.pkColumnName
     }
     const tableColumnsConf = props.columns.map(column => {
         let icon = ''
@@ -115,32 +96,23 @@ export function initConf(props: TableProps): TableConf {
         }
         return {
             name: column.name,
-            title: column.title || column.name,
+            title: column.title ?? column.name,
             icon: icon,
-            dataKind: column.dataKind || DataKind.TEXT,
-            pk: column.pk || false,
-            width: column.width || 200,
-            fillable: column.fillable || true
+            dataKind: column.dataKind ?? DataKind.TEXT,
+            pk: column.pk ?? false,
+            width: column.width ?? 200,
+            fillable: column.fillable ?? true
         }
     })
-    const tableEventConf = {
-        loadData: props.events?.loadData || (() => Promise.resolve([])),
-        saveData: props.events?.saveData || (() => Promise.resolve(true)),
-        deleteData: props.events?.deleteData || (() => Promise.resolve(true)),
-        loadCellOptions: props.events?.loadCellOptions || (() => Promise.resolve([]))
-    }
-
     const tableStyleConf = {
-        sizeClass: props.styles?.size || SizeKind.MEDIUM,
-        headerClass: props.styles?.headerClass || '',
-        rowClass: props.styles?.rowClass || '',
-        cellClass: props.styles?.cellClass || ''
+        sizeClass: props.styles?.size ?? SizeKind.MEDIUM,
+        headerClass: props.styles?.headerClass ?? '',
+        rowClass: props.styles?.rowClass ?? '',
+        cellClass: props.styles?.cellClass ?? ''
     }
     return {
         basic: tableBasicConf,
         columns: tableColumnsConf,
-        data: props.data,
-        events: tableEventConf,
         styles: tableStyleConf
     }
 }

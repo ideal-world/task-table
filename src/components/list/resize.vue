@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { TableColumnConf } from './conf'
+import { onMounted } from 'vue';
+import { ListColumnConf } from './conf';
 
 const props = defineProps<{
-  columnsConf: TableColumnConf[]
+  columnsConf: ListColumnConf[]
 }>()
 
 let currColumnName = ''
@@ -11,7 +11,7 @@ let currCellRect: DOMRect
 let isDragging = false
 
 onMounted(() => {
-  const tableHeaderEle = document.getElementsByClassName('iw-table-header')[0] as HTMLElement
+  const listHeaderEle = document.getElementsByClassName('iw-list-header')[0] as HTMLElement
   const dragDiv = document.createElement('div')
   dragDiv.style.position = 'fixed'
   dragDiv.style.display = 'none'
@@ -23,7 +23,7 @@ onMounted(() => {
   subDragDiv.style.flex = '1'
   subDragDiv.style.backgroundColor = 'var(--el-color-primary-light-3)'
   dragDiv.appendChild(subDragDiv)
-  tableHeaderEle.appendChild(dragDiv)
+  listHeaderEle.appendChild(dragDiv)
 
   dragDiv.addEventListener('mousedown', () => {
     isDragging = true
@@ -46,9 +46,9 @@ onMounted(() => {
     }
   })
 
-  tableHeaderEle.addEventListener('mousemove', (event) => {
+  listHeaderEle.addEventListener('mousemove', (event) => {
     const targetEle = event.target as HTMLElement
-    if (!targetEle.classList.contains('iw-table-header-cell')) {
+    if (!targetEle.classList.contains('iw-list-header-cell')) {
       return
     }
     isDragging = false
@@ -59,7 +59,7 @@ onMounted(() => {
       dragDiv.style.height = targetEleRect.height + 6 + 'px'
       dragDiv.style.left = targetEleRect.right - 12 + 'px'
       dragDiv.style.top = targetEleRect.top - 4 + 'px'
-      currColumnName = targetEle.dataset.columnName || ''
+      currColumnName = targetEle.dataset.columnName ?? ''
       currCellRect = targetEleRect
     }
   })
@@ -67,5 +67,3 @@ onMounted(() => {
 </script>
 
 <template></template>
-
-

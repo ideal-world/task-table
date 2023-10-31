@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { TableColumnConf } from './conf'
+import { ListColumnConf } from './conf'
 import Sortable from 'sortablejs'
 
 const props = defineProps<{
-  columnsConf: TableColumnConf[]
+  columnsConf: ListColumnConf[]
 }>()
 
 onMounted(() => {
-  Sortable.create(document.getElementsByClassName('iw-table-header')[0] as HTMLElement, {
-    draggable: '.iw-table-header-cell',
+  Sortable.create(document.getElementsByClassName('iw-list-header')[0] as HTMLElement, {
+    draggable: '.iw-list-header-cell',
     // @ts-ignore
     onEnd: function (evt) {
       if (evt.oldIndex != evt.newIndex) {
