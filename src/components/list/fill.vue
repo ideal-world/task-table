@@ -42,11 +42,11 @@ onMounted(() => {
   selectDiv.appendChild(dragDiv)
   listEle.appendChild(selectDiv)
 
-  dragDiv.addEventListener('mousedown', () => {
+  dragDiv.addEventListener('pointerdown', () => {
     isDragging = true
   })
 
-  selectDiv.addEventListener('mouseup', () => {
+  selectDiv.addEventListener('pointerup', () => {
     if (!isDragging) {
       return
     }
@@ -76,7 +76,7 @@ onMounted(() => {
   })
 
   // 不用dragDiv为解决向上拖拽的问题
-  selectDiv.addEventListener('mousemove', (event) => {
+  selectDiv.addEventListener('pointermove', (event) => {
     if (!isDragging) {
       return
     }

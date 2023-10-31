@@ -18,5 +18,5 @@ const deleteData = (event: MouseEvent) => {
 </script>
 
 <template>
-  <p className="iw-list-contextmenu__item" @click="deleteData"><svg v-html="iconSvg.DELETE"></svg> {{ $t('list.delete.title') }}</p>
+  <p className="iw-contextmenu__item" @click="deleteData"><svg v-html="iconSvg.DELETE"></svg> {{ $t('list.delete.title') }}</p>
 </template>

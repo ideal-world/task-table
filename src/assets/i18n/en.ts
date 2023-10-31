@@ -3,7 +3,8 @@ export default {
     },
     show:{
         title:{
-            default: 'Default'
+            default: 'Default',
+            rename: 'Rename'
         }
     },
     list:{

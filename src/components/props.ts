@@ -90,7 +90,7 @@ export interface TableColumnProps {
 export interface TableShowProps {
     id: string,
     title: string,
-    layout: LayoutKind,
+    layoutKind: LayoutKind,
     dateColumn?: { start: string, end: string }
     fixedColumn?: string,
     filters?: TableFilterGroupProps[][]

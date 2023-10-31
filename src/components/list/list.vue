@@ -38,7 +38,7 @@ const showHeaderContextMenu = (event: MouseEvent) => {
     contextmenuEle.style.display = 'flex'
     contextmenuEle.style.left = targetOffset.left + 'px'
     contextmenuEle.style.top = targetOffset.top + targetOffset.height + 5 + 'px'
-    document.addEventListener('mousedown', (e) => {
+    document.addEventListener('pointerdown', (e) => {
       // @ts-ignore
       if (e.target == null || !contextmenuEle.contains(e.target)) {
         contextmenuEle.style.display = 'none'
@@ -60,7 +60,7 @@ const showRowContextMenu = (event: MouseEvent) => {
     contextmenuEle.style.display = 'flex'
     contextmenuEle.style.left = event.x + 'px'
     contextmenuEle.style.top = event.y + 'px'
-    document.addEventListener('mousedown', (e) => {
+    document.addEventListener('pointerdown', (e) => {
       // @ts-ignore
       if (e.target == null || !contextmenuEle.contains(e.target)) {
         contextmenuEle.style.display = 'none'
@@ -73,7 +73,7 @@ const showRowContextMenu = (event: MouseEvent) => {
 <script lang="ts">
 export function closeContextMenu(event: MouseEvent) {
   const targetEle = event.target as HTMLElement
-  const contextmenuEle = targetEle.closest('.iw-list-contextmenu') as HTMLElement
+  const contextmenuEle = targetEle.closest('.iw-contextmenu') as HTMLElement
   contextmenuEle.style.display = 'none'
 }
 </script>
@@ -90,7 +90,7 @@ export function closeContextMenu(event: MouseEvent) {
         @click="showHeaderContextMenu"
       >
         <svg v-html="column.icon"></svg> {{ column.name }}
-        <div className="iw-list-header-contextmenu iw-list-contextmenu" style="display: none">
+        <div className="iw-list-header-contextmenu iw-contextmenu" style="display: none">
           <fixed-comp :current-col-idx="colIndex" :basic-conf="basicConf" :show="listConf.show"></fixed-comp>
         </div>
       </div>
@@ -108,7 +108,7 @@ export function closeContextMenu(event: MouseEvent) {
         </div>
       </template>
     </div>
-    <div className="iw-list-row-contextmenu iw-list-contextmenu" style="display: none">
+    <div className="iw-list-row-contextmenu iw-contextmenu" style="display: none">
       <delete-comp :select-pks="selectedDataPks" v-show="basicConf.editable"></delete-comp>
     </div>
   </div>
@@ -168,19 +168,6 @@ export function closeContextMenu(event: MouseEvent) {
   }
 }
 
-@include b('list-contextmenu') {
-  flex-direction: column;
-  align-items: flex-start;
-  position: fixed;
-  min-width: 120px;
-  min-height: 80px;
-  z-index: 1000;
-  border-radius: 3px;
-  background-color: var(--el-bg-color);
-  border: 1px solid var(--el-border-color);
-  box-shadow: 0 0 5px var(--el-border-color);
-}
-
 @include b('list-row') {
   display: flex;
   border-right: 1px solid var(--el-border-color);
@@ -194,25 +181,5 @@ export function closeContextMenu(event: MouseEvent) {
   border-left: 1px solid var(--el-border-color);
   border-bottom: 1px solid var(--el-border-color);
   background-color: var(--el-bg-color);
-}
-</style>
-
-<style lang="scss">
-@import '../../assets/main.scss';
-
-@include b('list-contextmenu') {
-  @include e('item') {
-    display: flex;
-    align-items: center;
-    padding: 6px;
-    margin: 0;
-    cursor: pointer;
-
-    & svg {
-      width: 1em;
-      height: 1em;
-      margin-right: 3px;
-    }
-  }
 }
 </style>

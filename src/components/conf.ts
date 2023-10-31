@@ -4,6 +4,8 @@ import { SortConf } from "./sort/conf"
 import * as Filter from './filter/conf'
 import * as Sort from './sort/conf'
 import i18n from '../i18n'
+import * as iconSvg from "../assets/icon"
+
 const { t } = i18n.global
 
 export interface TableBasicConf {
@@ -17,7 +19,8 @@ export interface TableStyleConf {
 
 export interface TableShowConf {
     title: string,
-    layout: LayoutKind,
+    layoutKind: LayoutKind,
+    icon: string,
     dateColumn?: { start: string, end: string }
     fixedColumnIdx: number,
     filters: FilterGroupConf[]
@@ -31,9 +34,27 @@ export function initConf(props: TableProps): [TableBasicConf, { [key: string]: T
     let shows: { [key: string]: TableShowConf } = {}
     if (props.shows) {
         props.shows.forEach(show => {
+            let icon = ''
+            switch (show.layoutKind) {
+                case LayoutKind.CHART:
+                    icon = iconSvg.CHART
+                    break
+                case LayoutKind.CALENDAR:
+                    icon = iconSvg.CALENDAR
+                    break
+                case LayoutKind.BOARD:
+                    icon = iconSvg.BOARD
+                    break
+                case LayoutKind.GANTT:
+                    icon = iconSvg.GANTT
+                    break
+                default:
+                    icon = iconSvg.TEXT
+            }
             shows[show.id] = {
                 title: show.title,
-                layout: show.layout,
+                layoutKind: show.layoutKind,
+                icon: icon,
                 dateColumn: show.dateColumn,
                 fixedColumnIdx: props.columns.findIndex(column => column.name === show.fixedColumn) ?? -1,
                 filters: Filter.initConf(props),
@@ -44,7 +65,8 @@ export function initConf(props: TableProps): [TableBasicConf, { [key: string]: T
     } else {
         shows['default'] = {
             title: t('show.title.default'),
-            layout: LayoutKind.LIST,
+            layoutKind: LayoutKind.LIST,
+            icon: iconSvg.TEXT,
             fixedColumnIdx: -1,
             filters: [],
             sorts: [],

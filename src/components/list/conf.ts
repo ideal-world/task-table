@@ -1,6 +1,6 @@
 import { DataKind, SizeKind, TableProps } from "../props"
 import * as iconSvg from "../../assets/icon"
-import { TableBasicConf, TableShowConf } from "../conf"
+import { TableBasicConf } from "../conf"
 
 export interface ListConf {
     basic: ListBasicConf

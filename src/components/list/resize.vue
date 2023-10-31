@@ -25,16 +25,16 @@ onMounted(() => {
   dragDiv.appendChild(subDragDiv)
   listHeaderEle.appendChild(dragDiv)
 
-  dragDiv.addEventListener('mousedown', () => {
+  dragDiv.addEventListener('pointerdown', () => {
     isDragging = true
   })
 
-  dragDiv.addEventListener('mouseup', () => {
+  dragDiv.addEventListener('pointerup', () => {
     isDragging = false
     dragDiv.style.display = 'none'
   })
 
-  dragDiv.addEventListener('mousemove', (event) => {
+  dragDiv.addEventListener('pointermove', (event) => {
     if (!isDragging) {
       return
     }
@@ -46,7 +46,7 @@ onMounted(() => {
     }
   })
 
-  listHeaderEle.addEventListener('mousemove', (event) => {
+  listHeaderEle.addEventListener('pointermove', (event) => {
     const targetEle = event.target as HTMLElement
     if (!targetEle.classList.contains('iw-list-header-cell')) {
       return

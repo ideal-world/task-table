@@ -7,6 +7,7 @@ import * as List from './list/conf'
 import ListComp from './list/list.vue'
 import { LayoutKind, TableProps } from './props'
 import * as Sort from './sort/conf'
+import * as iconSvg from '../assets/icon'
 
 const props = defineProps<TableProps>()
 
@@ -102,11 +103,33 @@ onMounted(async () => {
   })
   await init()
 })
+
+const showLayoutMenu = (event: MouseEvent) => {
+  const targetEle = event.target as HTMLElement
+  const selectedLayoutEle = targetEle.parentElement as HTMLElement
+  const contextmenuEle = selectedLayoutEle.parentElement?.parentElement?.querySelector('.iw-tt-layout-contextmenu') as HTMLElement
+  if (contextmenuEle) {
+    let targetOffset = selectedLayoutEle.getBoundingClientRect()
+    contextmenuEle.style.display = 'flex'
+    contextmenuEle.style.left = targetOffset.left + 'px'
+    contextmenuEle.style.top = targetOffset.top + targetOffset.height + 5 + 'px'
+    document.addEventListener('pointerdown', (e) => {
+      // @ts-ignore
+      if (e.target == null || !contextmenuEle.contains(e.target)) {
+        contextmenuEle.style.display = 'none'
+      }
+    })
+  }
+}
 </script>
 
 <template>
   <div :className="tableStyleConf.tableClass + ' iw-tt'" :id="tableBasicConf.tableId">
-    <div className="iw-tt-layouts">layout...</div>
+    <div className="iw-tt-layouts">
+      <div v-for="(show, showId) in showsConf" :class="'iw-tt-layout' + [currentShowId == showId ? ' iw-tt-layout--active' : '']">
+        <svg v-html="show.icon"></svg> {{ show.title }}<svg @click="showLayoutMenu" v-html="iconSvg.MORE1"></svg>
+      </div>
+    </div>
     <div className="iw-tt-shows">
       <template v-for="(show, showId) in showsConf">
         <div className="iw-tt-tools">tools...</div>
@@ -117,11 +140,15 @@ onMounted(async () => {
             :columns="listConf.columns"
             :show="show"
             :styles="listConf.styles"
-            v-if="show.layout == LayoutKind.LIST"
+            v-if="show.layoutKind == LayoutKind.LIST"
             v-show="showId == currentShowId"
           />
         </div>
       </template>
+    </div>
+    <div className="iw-tt-layout-contextmenu iw-contextmenu" style="display: none">
+      <div className="iw-contextmenu__item"><svg v-html="iconSvg.RENAME"></svg> <input v-model="showsConf[currentShowId].title" /></div>
+      <!-- showsConf[currentShowId].title -->
     </div>
   </div>
 </template>
@@ -136,8 +163,35 @@ onMounted(async () => {
 }
 
 @include b('tt-layouts') {
-  height: 40px;
-  border: 1px solid red;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  margin: 0;
+  border-bottom: 1px solid var(--el-border-color);
+}
+
+@include b('tt-layout') {
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  margin: 0;
+  cursor: pointer;
+  border: 1px solid var(--el-border-color);
+  border-radius: 6px;
+
+  & svg {
+    width: 1em;
+    height: 1em;
+    margin-right: 3px;
+  }
+
+  @include m('active') {
+    background-color: var(--el-color-info-light-7);
+  }
+}
+
+@include b('tt-layout-contextmenu') {
+  z-index: 2000;
 }
 
 @include b('tt-tools') {
@@ -147,5 +201,36 @@ onMounted(async () => {
 @include b('tt-table') {
   overflow: auto;
   width: 100%;
+}
+</style>
+
+<style lang="scss">
+@import '../assets/main.scss';
+
+@include b('contextmenu') {
+  flex-direction: column;
+  align-items: flex-start;
+  position: fixed;
+  min-width: 180px;
+  min-height: 80px;
+  z-index: 1000;
+  border-radius: 3px;
+  background-color: var(--el-bg-color);
+  border: 1px solid var(--el-border-color);
+  box-shadow: 0 0 5px var(--el-border-color);
+
+  @include e('item') {
+    display: flex;
+    align-items: center;
+    padding: 6px;
+    margin: 0;
+    cursor: pointer;
+
+    & svg {
+      width: 1em;
+      height: 1em;
+      margin-right: 3px;
+    }
+  }
 }
 </style>

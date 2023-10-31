@@ -39,7 +39,7 @@ export function setFixedColumnStyles(styles: any, colIdx: number, fixedColumnIdx
 </script>
 
 <template>
-  <p className="iw-list-contextmenu__item" @click="setFixedColumn">
+  <p className="iw-contextmenu__item" @click="setFixedColumn">
     <svg v-html="iconSvg.LOCK"></svg> {{ props.currentColIdx == props.show.fixedColumnIdx ? $t('list.fixed.unFixedTitle') : $t('list.fixed.fixedTitle') }}
   </p>
 </template>

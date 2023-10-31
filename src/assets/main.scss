@@ -60,3 +60,9 @@ $modifier-separator: '--' !default;
     }
   }
 }
+
+input{
+  padding: 1px;
+  border: 1px solid var(--el-border-color);
+  border-radius: 4px;
+}

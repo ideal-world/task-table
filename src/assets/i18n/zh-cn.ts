@@ -3,7 +3,8 @@ export default {
     },
     show: {
         title: {
-            default: '默认'
+            default: '默认',
+            rename: '重命名'
         }
     },
     list: {

@@ -13,6 +13,7 @@ declare module 'vue' {
     Fixed: typeof import('./src/components/list/fixed.vue')['default']
     List: typeof import('./src/components/list/list.vue')['default']
     Resize: typeof import('./src/components/list/resize.vue')['default']
+    Size: typeof import('./src/components/tools/size.vue')['default']
     Skeleton: typeof import('./src/components/skeleton.vue')['default']
     Sort: typeof import('./src/components/list/sort.vue')['default']
     Table: typeof import('./src/components/list/table.vue')['default']
