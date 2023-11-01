@@ -12,6 +12,7 @@ declare module 'vue' {
     Fill: typeof import('./src/components/list/fill.vue')['default']
     Fixed: typeof import('./src/components/list/fixed.vue')['default']
     List: typeof import('./src/components/list/list.vue')['default']
+    Menu: typeof import('./src/components/common/menu.vue')['default']
     Resize: typeof import('./src/components/list/resize.vue')['default']
     Size: typeof import('./src/components/tools/size.vue')['default']
     Skeleton: typeof import('./src/components/skeleton.vue')['default']

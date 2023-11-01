@@ -1,17 +1,18 @@
 <script setup lang="ts">
 import { inject } from 'vue'
 import * as iconSvg from '../../assets/icon'
-import { closeContextMenu } from './list.vue'
-import { FN_DELETE_DATA } from '../../constant'
+import { FN_CLOSE_CONTEXT_MENU, FN_DELETE_DATA } from '../../constant'
 
 const props = defineProps<{
   selectPks: string[] | number[]
 }>()
 
+let closeContextMenuFun = inject(FN_CLOSE_CONTEXT_MENU)
 let deleteDataFun = inject(FN_DELETE_DATA)
 
 const deleteData = (event: MouseEvent) => {
-  closeContextMenu(event)
+  // @ts-ignore
+  closeContextMenuFun()
   // @ts-ignore
   deleteDataFun(props.selectPks)
 }

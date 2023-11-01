@@ -2,6 +2,7 @@
 import { onMounted, provide, reactive, ref } from 'vue'
 import { FN_ADD_DATA, FN_DELETE_DATA, FN_LOAD_CELL_OPTIONS_DATA, FN_LOAD_DATA, FN_UPDATE_DATA } from '../constant'
 import { TableShowConf, initConf } from './conf'
+import MenuComp from './common/menu.vue'
 import * as Filter from './filter/conf'
 import * as List from './list/conf'
 import ListComp from './list/list.vue'
@@ -12,6 +13,7 @@ import * as iconSvg from '../assets/icon'
 const props = defineProps<TableProps>()
 
 const [tableBasicConf, tableShowsConf, tableStyleConf] = initConf(props)
+const menuCompRef = ref()
 
 const showsConf = reactive<{ [key: string]: TableShowConf }>(tableShowsConf)
 const currentShowId = ref<string>('default')
@@ -93,6 +95,7 @@ provide(FN_LOAD_CELL_OPTIONS_DATA, loadCellOptions)
 const listConf = List.initConf(props, tableBasicConf)
 
 onMounted(async () => {
+  // Set table height
   Array.prototype.forEach.call(document.getElementsByClassName('iw-tt'), function (ttEle) {
     let outHeight = ttEle.parentElement?.clientHeight
     let layoutHeight = ttEle.getElementsByClassName('iw-tt-layouts')[0].offsetHeight
@@ -107,19 +110,7 @@ onMounted(async () => {
 const showLayoutMenu = (event: MouseEvent) => {
   const targetEle = event.target as HTMLElement
   const selectedLayoutEle = targetEle.parentElement as HTMLElement
-  const contextmenuEle = selectedLayoutEle.parentElement?.parentElement?.querySelector('.iw-tt-layout-contextmenu') as HTMLElement
-  if (contextmenuEle) {
-    let targetOffset = selectedLayoutEle.getBoundingClientRect()
-    contextmenuEle.style.display = 'flex'
-    contextmenuEle.style.left = targetOffset.left + 'px'
-    contextmenuEle.style.top = targetOffset.top + targetOffset.height + 5 + 'px'
-    document.addEventListener('pointerdown', (e) => {
-      // @ts-ignore
-      if (e.target == null || !contextmenuEle.contains(e.target)) {
-        contextmenuEle.style.display = 'none'
-      }
-    })
-  }
+  menuCompRef.value.show(selectedLayoutEle)
 }
 </script>
 
@@ -146,10 +137,9 @@ const showLayoutMenu = (event: MouseEvent) => {
         </div>
       </template>
     </div>
-    <div className="iw-tt-layout-contextmenu iw-contextmenu" style="display: none">
-      <div className="iw-contextmenu__item"><svg v-html="iconSvg.RENAME"></svg> <input v-model="showsConf[currentShowId].title" /></div>
-      <!-- showsConf[currentShowId].title -->
-    </div>
+    <menu-comp ref="menuCompRef" className="iw-tt-layout-contextmenu">
+        <div class="iw-contextmenu__item"><svg v-html="iconSvg.RENAME"></svg> <input v-model="showsConf[currentShowId].title" /></div>
+    </menu-comp>
   </div>
 </template>
 
@@ -190,10 +180,6 @@ const showLayoutMenu = (event: MouseEvent) => {
   }
 }
 
-@include b('tt-layout-contextmenu') {
-  z-index: 2000;
-}
-
 @include b('tt-tools') {
   height: 40px;
 }
@@ -201,36 +187,5 @@ const showLayoutMenu = (event: MouseEvent) => {
 @include b('tt-table') {
   overflow: auto;
   width: 100%;
-}
-</style>
-
-<style lang="scss">
-@import '../assets/main.scss';
-
-@include b('contextmenu') {
-  flex-direction: column;
-  align-items: flex-start;
-  position: fixed;
-  min-width: 180px;
-  min-height: 80px;
-  z-index: 1000;
-  border-radius: 3px;
-  background-color: var(--el-bg-color);
-  border: 1px solid var(--el-border-color);
-  box-shadow: 0 0 5px var(--el-border-color);
-
-  @include e('item') {
-    display: flex;
-    align-items: center;
-    padding: 6px;
-    margin: 0;
-    cursor: pointer;
-
-    & svg {
-      width: 1em;
-      height: 1em;
-      margin-right: 3px;
-    }
-  }
 }
 </style>

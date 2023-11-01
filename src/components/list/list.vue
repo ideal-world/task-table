@@ -3,6 +3,7 @@ import { reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { TableShowConf } from '../conf'
 import { ListBasicConf, ListColumnConf, ListConf, ListStyleConf } from './conf'
+import MenuComp from '../common/menu.vue'
 import FixedComp from './fixed.vue'
 import SortComp from './sort.vue'
 import ResizeComp from './resize.vue'
@@ -22,6 +23,8 @@ const basicConf = reactive<ListBasicConf>(listConf.basic)
 const columnsConf = reactive<ListColumnConf[]>(listConf.columns)
 const stylesConf = reactive<ListStyleConf>(listConf.styles)
 const selectedDataPks = ref<string[] | number[] | undefined>()
+const headerMenuCompRefs = ref()
+const rowMenuCompRef = ref()
 
 const setColumnStyles = (colIdx: number) => {
   const styles: any = {}
@@ -30,21 +33,9 @@ const setColumnStyles = (colIdx: number) => {
   return styles
 }
 
-const showHeaderContextMenu = (event: MouseEvent) => {
+const showHeaderContextMenu = (event: MouseEvent, colIndex: number) => {
   const targetEle = event.target as HTMLElement
-  const contextmenuEle = targetEle.querySelector('.iw-list-header-contextmenu') as HTMLElement
-  if (contextmenuEle) {
-    let targetOffset = targetEle.getBoundingClientRect()
-    contextmenuEle.style.display = 'flex'
-    contextmenuEle.style.left = targetOffset.left + 'px'
-    contextmenuEle.style.top = targetOffset.top + targetOffset.height + 5 + 'px'
-    document.addEventListener('pointerdown', (e) => {
-      // @ts-ignore
-      if (e.target == null || !contextmenuEle.contains(e.target)) {
-        contextmenuEle.style.display = 'none'
-      }
-    })
-  }
+  headerMenuCompRefs.value[colIndex].show(targetEle)
 }
 
 const showRowContextMenu = (event: MouseEvent) => {
@@ -55,26 +46,7 @@ const showRowContextMenu = (event: MouseEvent) => {
   } else {
     selectedDataPks.value = [selectedRowEle.dataset.pk as string]
   }
-  const contextmenuEle = selectedRowEle.parentElement?.querySelector('.iw-list-row-contextmenu') as HTMLElement
-  if (contextmenuEle) {
-    contextmenuEle.style.display = 'flex'
-    contextmenuEle.style.left = event.x + 'px'
-    contextmenuEle.style.top = event.y + 'px'
-    document.addEventListener('pointerdown', (e) => {
-      // @ts-ignore
-      if (e.target == null || !contextmenuEle.contains(e.target)) {
-        contextmenuEle.style.display = 'none'
-      }
-    })
-  }
-}
-</script>
-
-<script lang="ts">
-export function closeContextMenu(event: MouseEvent) {
-  const targetEle = event.target as HTMLElement
-  const contextmenuEle = targetEle.closest('.iw-contextmenu') as HTMLElement
-  contextmenuEle.style.display = 'none'
+  rowMenuCompRef.value.show(event)
 }
 </script>
 
@@ -87,12 +59,12 @@ export function closeContextMenu(event: MouseEvent) {
         :className="stylesConf.cellClass + ' iw-list-cell iw-list-header-cell'"
         :data-column-name="column.name"
         :style="setColumnStyles(colIndex)"
-        @click="showHeaderContextMenu"
+        @click="(event:MouseEvent) => showHeaderContextMenu(event,colIndex)"
       >
         <svg v-html="column.icon"></svg> {{ column.name }}
-        <div className="iw-list-header-contextmenu iw-contextmenu" style="display: none">
+        <menu-comp ref="headerMenuCompRefs" className="iw-list-header-contextmenu">
           <fixed-comp :current-col-idx="colIndex" :basic-conf="basicConf" :show="listConf.show"></fixed-comp>
-        </div>
+        </menu-comp>
       </div>
     </div>
     <div v-for="(row, rowIndex) in listConf.show.data" :key="row[basicConf.pkColumnName]" :data-pk="row[basicConf.pkColumnName]" :className="stylesConf.rowClass + ' iw-list-row'">
@@ -108,9 +80,9 @@ export function closeContextMenu(event: MouseEvent) {
         </div>
       </template>
     </div>
-    <div className="iw-list-row-contextmenu iw-contextmenu" style="display: none">
+    <menu-comp ref="rowMenuCompRef" className="iw-list-row-contextmenu">
       <delete-comp :select-pks="selectedDataPks" v-show="basicConf.editable"></delete-comp>
-    </div>
+    </menu-comp>
   </div>
   <sort-comp :columns-conf="columnsConf"></sort-comp>
   <resize-comp :columns-conf="columnsConf"></resize-comp>

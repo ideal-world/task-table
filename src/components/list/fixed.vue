@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import { inject } from 'vue'
 import { useI18n } from 'vue-i18n'
 import * as iconSvg from '../../assets/icon'
+import { FN_CLOSE_CONTEXT_MENU } from '../../constant'
 import { TableShowConf } from '../conf'
 import { ListBasicConf, ListColumnConf } from './conf'
-import { closeContextMenu } from './list.vue'
 const { t } = useI18n()
 
 const props = defineProps<{
@@ -12,13 +13,16 @@ const props = defineProps<{
   basicConf: ListBasicConf
 }>()
 
+let closeContextMenuFun = inject(FN_CLOSE_CONTEXT_MENU)
+
 const setFixedColumn = (event: MouseEvent) => {
-  closeContextMenu(event)
   if (props.currentColIdx == props.show.fixedColumnIdx) {
     props.show.fixedColumnIdx = -1
   } else {
     props.show.fixedColumnIdx = props.currentColIdx
   }
+  // @ts-ignore
+  closeContextMenuFun()
 }
 </script>
 
