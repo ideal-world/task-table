@@ -3,23 +3,23 @@ import { inject } from 'vue'
 import { useI18n } from 'vue-i18n'
 import * as iconSvg from '../../assets/icon'
 import { FN_CLOSE_CONTEXT_MENU } from '../../constant'
-import { TableShowConf } from '../conf'
+import { TableLayoutConf } from '../conf'
 import { ListBasicConf, ListColumnConf } from './conf'
 const { t } = useI18n()
 
 const props = defineProps<{
   currentColIdx: number
-  show: TableShowConf
+  layout: TableLayoutConf
   basicConf: ListBasicConf
 }>()
 
 let closeContextMenuFun = inject(FN_CLOSE_CONTEXT_MENU)
 
 const setFixedColumn = () => {
-  if (props.currentColIdx == props.show.fixedColumnIdx) {
-    props.show.fixedColumnIdx = -1
+  if (props.currentColIdx == props.layout.fixedColumnIdx) {
+    props.layout.fixedColumnIdx = -1
   } else {
-    props.show.fixedColumnIdx = props.currentColIdx
+    props.layout.fixedColumnIdx = props.currentColIdx
   }
   // @ts-ignore
   closeContextMenuFun()
@@ -44,6 +44,6 @@ export function setFixedColumnStyles(styles: any, colIdx: number, fixedColumnIdx
 
 <template>
   <p className="iw-contextmenu__item" @click="setFixedColumn">
-    <svg v-html="iconSvg.LOCK"></svg> {{ props.currentColIdx == props.show.fixedColumnIdx ? $t('list.fixed.unFixedTitle') : $t('list.fixed.fixedTitle') }}
+    <svg v-html="iconSvg.LOCK"></svg> {{ props.currentColIdx == props.layout.fixedColumnIdx ? $t('list.fixed.unFixedTitle') : $t('list.fixed.fixedTitle') }}
   </p>
 </template>

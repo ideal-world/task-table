@@ -69,7 +69,7 @@ export enum LayoutKind {
 export interface TableProps {
     tableId?: string
     columns: TableColumnProps[]
-    shows?: TableShowProps[]
+    layouts?: TableLayoutProps[]
     edit?: TableEditProps
     events: TableEventProps
     styles?: TableStyleProps
@@ -88,7 +88,7 @@ export interface TableColumnProps {
     width?: number
 }
 
-export interface TableShowProps {
+export interface TableLayoutProps {
     id: string,
     title: string,
     layoutKind: LayoutKind,
@@ -96,6 +96,7 @@ export interface TableShowProps {
     fixedColumn?: string,
     filters?: TableFilterGroupProps[][]
     sorts?: TableSortProps[]
+    group?: TableGroupProps
 }
 
 export interface TableEditProps {
@@ -126,6 +127,14 @@ export interface TableFilterProps {
     operator: OperatorKind
     value: any
     value2?: any
+}
+
+export interface TableGroupProps {
+    columnName: string
+    desc: boolean
+    useDictValue: boolean
+    hideEmptyRecord: boolean
+    columnAggs: { [key: string]: AggregateKind }[]
 }
 
 export interface TableStyleProps {

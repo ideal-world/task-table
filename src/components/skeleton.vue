@@ -1,55 +1,55 @@
 <script setup lang="ts">
 import { onMounted, provide, reactive, ref } from 'vue'
+import * as iconSvg from '../assets/icon'
 import { FN_ADD_DATA, FN_DELETE_DATA, FN_LOAD_CELL_OPTIONS_DATA, FN_LOAD_DATA, FN_UPDATE_DATA } from '../constant'
-import { TableShowConf, TableStyleConf, initConf } from './conf'
 import MenuComp from './common/menu.vue'
+import { TableLayoutConf, TableStyleConf, initConf } from './conf'
 import * as Filter from './filter/conf'
 import * as List from './list/conf'
 import ListComp from './list/list.vue'
-import SizeComp from './tools/size.vue'
-import { LayoutKind, SizeKind, TableProps } from './props'
+import { SizeKind, TableProps } from './props'
 import * as Sort from './sort/conf'
-import * as iconSvg from '../assets/icon'
+import SizeComp from './tools/size.vue'
 
 const props = defineProps<TableProps>()
 
-const [tableBasicConf, _tableShowsConf, _tableStyleConf] = initConf(props)
+const [tableBasicConf, _tableLayoutsConf, _tableStyleConf] = initConf(props)
 const menuCompRef = ref()
 
-const showsConf = reactive<{ [key: string]: TableShowConf }>(_tableShowsConf)
+const layoutsConf = reactive<{ [key: string]: TableLayoutConf }>(_tableLayoutsConf)
 const styleConf = reactive<TableStyleConf>(_tableStyleConf)
-const currentShowId = ref<string>('default')
+const currentLayoutId = ref<string>('default')
 
 // ------------- Common Events -------------
-async function loadData(showId?: string) {
-  let show = showsConf[showId ? showId : currentShowId.value]
-  const d = await props.events.loadData(Filter.parseProps(show.filters), Sort.parseProps(show.sorts), show.offsetRowNumber, show.fetchRowNumber)
-  show.data.splice(0, show.data.length, ...d)
+async function loadData(layoutId?: string) {
+  let layout = layoutsConf[layoutId ? layoutId : currentLayoutId.value]
+  const d = await props.events.loadData(Filter.parseProps(layout.filters), Sort.parseProps(layout.sorts), layout.offsetRowNumber, layout.fetchRowNumber)
+  layout.data.splice(0, layout.data.length, ...d)
 }
 
 async function addData(newData: { [key: string]: any }[], insertIdx?: number, reFilter?: boolean, reSort?: boolean, reLoad?: boolean) {
-  let show = showsConf[currentShowId.value]
+  let layout = layoutsConf[currentLayoutId.value]
   if (props.events.saveData && (await props.events.saveData(newData))) {
     if (reLoad) {
       loadData()
       return
     }
     if (insertIdx) {
-      show.data.splice(insertIdx, 0, ...newData)
+      layout.data.splice(insertIdx, 0, ...newData)
     } else {
-      show.data.splice(0, 0, ...newData)
+      layout.data.splice(0, 0, ...newData)
     }
   }
 }
 
 async function updateData(changeData: { [key: string]: any }[], reFilter?: boolean, reSort?: boolean, reLoad?: boolean) {
-  let show = showsConf[currentShowId.value]
+  let layout = layoutsConf[currentLayoutId.value]
   if (props.events.saveData && (await props.events.saveData(changeData))) {
     if (reLoad) {
       loadData()
       return
     }
-    show.data.forEach((item) => {
+    layout.data.forEach((item) => {
       const changeItem = changeData.find((d) => d[tableBasicConf.pkColumnName] == item[tableBasicConf.pkColumnName])
       if (changeItem) {
         for (let key in changeItem) {
@@ -61,15 +61,15 @@ async function updateData(changeData: { [key: string]: any }[], reFilter?: boole
 }
 
 async function deleteData(ids: string[] | number[], reFilter?: boolean, reSort?: boolean, reLoad?: boolean) {
-  let show = showsConf[currentShowId.value]
+  let layout = layoutsConf[currentLayoutId.value]
   if (props.events.deleteData && (await props.events.deleteData(ids))) {
     if (reLoad) {
       loadData()
       return
     }
-    show.data.forEach((item, idx) => {
+    layout.data.forEach((item, idx) => {
       if (ids.find((id) => id == item[tableBasicConf.pkColumnName])) {
-        show.data.splice(idx, 1)
+        layout.data.splice(idx, 1)
       }
     })
   }
@@ -92,8 +92,8 @@ provide(FN_LOAD_CELL_OPTIONS_DATA, loadCellOptions)
 // ------------- Init Events -------------
 
 async function init() {
-  for (let showId in showsConf) {
-    await loadData(showId)
+  for (let layoutId in layoutsConf) {
+    await loadData(layoutId)
   }
 }
 
@@ -101,10 +101,10 @@ onMounted(async () => {
   // Set table height
   Array.prototype.forEach.call(document.getElementsByClassName('iw-tt'), function (ttEle) {
     let outHeight = ttEle.parentElement?.clientHeight
-    let layoutHeight = ttEle.getElementsByClassName('iw-tt-layouts')[0].offsetHeight
-    Array.prototype.forEach.call(ttEle.getElementsByClassName('iw-tt-shows'), function (showEle) {
-      let toolsHeight = showEle.getElementsByClassName('iw-tt-tools')[0].offsetHeight
-      showEle.getElementsByClassName('iw-tt-table')[0].style.height = outHeight - layoutHeight - toolsHeight + 'px'
+    let headerHeight = ttEle.getElementsByClassName('iw-tt-header')[0].offsetHeight
+    Array.prototype.forEach.call(ttEle.getElementsByClassName('iw-tt-main'), function (layoutEle) {
+      let toolbarHeight = layoutEle.getElementsByClassName('iw-tt-toolbar')[0].offsetHeight
+      layoutEle.getElementsByClassName('iw-tt-table')[0].style.height = outHeight - headerHeight - toolbarHeight + 'px'
     })
   })
   await init()
@@ -122,37 +122,30 @@ const listConf = List.initConf(props, tableBasicConf)
 
 <template>
   <div :className="styleConf.tableClass + ' iw-tt'" :id="tableBasicConf.tableId">
-    <div className="iw-tt-layouts">
-      <div v-for="(show, showId) in showsConf" :class="'iw-tt-layout' + [currentShowId == showId ? ' iw-tt-layout--active' : '']">
-        <svg v-html="show.icon"></svg> {{ show.title }}<svg @click="showLayoutMenu" v-html="iconSvg.MORE1"></svg>
-      </div>
-    </div>
-    <div className="iw-tt-shows">
-      <template v-for="(show, showId) in showsConf">
-        <div className="iw-tt-tools">
-          <div className="iw-tt-tools-main">main</div>
-          <div className="iw-tt-tools-more">
-            <size-comp :size="styleConf.size" @size="(size:SizeKind)=> styleConf.size=size"></size-comp>
-          </div>
-        </div>
-        <div class="iw-tt-table">
-          <list-comp
-            :key="showId"
-            :basic="listConf.basic"
-            :columns="listConf.columns"
-            :show="show"
-            :styles="listConf.styles"
-            :global-styles="styleConf"
-            v-if="show.layoutKind == LayoutKind.LIST"
-            v-show="showId == currentShowId"
-          />
+    <div class="iw-tt-header">
+      <template v-for="(layout, layoutId) in layoutsConf">
+        <div :class="currentLayoutId == layoutId ? 'iw-tt-header__item iw-tt-header__item--active' : 'iw-tt-header__item'">
+          <svg v-html="layout.icon"></svg> {{ layout.title }}<svg @click="showLayoutMenu" v-html="iconSvg.MORE1"></svg>
         </div>
       </template>
     </div>
-    <menu-comp ref="menuCompRef" className="iw-tt-layout-contextmenu">
-      <div class="iw-contextmenu__item"><svg v-html="iconSvg.RENAME"></svg> <input v-model="showsConf[currentShowId].title" /></div>
-    </menu-comp>
+    <div class="iw-tt-main">
+      <template v-for="(layout, layoutId) in layoutsConf">
+        <div className="iw-tt-toolbar" v-if="currentLayoutId == layoutId">
+          <div className="iw-tt-toolbar-main">main</div>
+          <div className="iw-tt-toolbars-more">
+            <size-comp :size="styleConf.size" @size="(size:SizeKind)=> styleConf.size=size"></size-comp>
+          </div>
+        </div>
+        <div class="iw-tt-table" v-if="currentLayoutId == layoutId">
+          <list-comp :key="layoutId" :basic="listConf.basic" :columns="listConf.columns" :layout="layout" :styles="listConf.styles" :global-styles="styleConf" />
+        </div>
+      </template>
+    </div>
   </div>
+  <menu-comp ref="menuCompRef" className="iw-tt-contextmenu">
+    <div class="iw-contextmenu__item"><svg v-html="iconSvg.RENAME"></svg> <input v-model="layoutsConf[currentLayoutId].title" /></div>
+  </menu-comp>
 </template>
 
 <style lang="scss" scoped>
@@ -165,35 +158,35 @@ const listConf = List.initConf(props, tableBasicConf)
   width: 100%;
 }
 
-@include b('tt-layouts') {
+@include b('tt-header') {
   display: flex;
   align-items: center;
   padding: 2px;
   margin: 0;
   border-bottom: 1px solid var(--el-border-color);
+
+  @include e('item') {
+    display: flex;
+    align-items: center;
+    padding: 1px;
+    margin: 0;
+    cursor: pointer;
+    border: 1px solid var(--el-border-color);
+    border-radius: 6px;
+
+    & svg {
+      width: 1em;
+      height: 1em;
+      margin-right: 3px;
+    }
+
+    @include m('active') {
+      background-color: var(--el-color-info-light-7);
+    }
+  }
 }
 
-@include b('tt-layout') {
-  display: flex;
-  align-items: center;
-  padding: 1px;
-  margin: 0;
-  cursor: pointer;
-  border: 1px solid var(--el-border-color);
-  border-radius: 6px;
-
-  & svg {
-    width: 1em;
-    height: 1em;
-    margin-right: 3px;
-  }
-
-  @include m('active') {
-    background-color: var(--el-color-info-light-7);
-  }
-}
-
-@include b('tt-tools') {
+@include b('tt-toolbar') {
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -201,11 +194,11 @@ const listConf = List.initConf(props, tableBasicConf)
   height: 40px;
 }
 
-@include b('tt-tools-main') {
+@include b('tt-toolbar-main') {
   display: flex;
 }
 
-@include b('tt-tools-more') {
+@include b('tt-toolbar-more') {
   display: flex;
 }
 
@@ -218,7 +211,7 @@ const listConf = List.initConf(props, tableBasicConf)
 <style lang="scss">
 @import '../assets/main.scss';
 
-@include b('tt-tools') {
+@include b('tt-toolbar') {
   & svg {
     width: 1em;
     height: 1em;

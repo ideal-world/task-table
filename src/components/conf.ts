@@ -18,7 +18,7 @@ export interface TableStyleConf {
     size: SizeKind
 }
 
-export interface TableShowConf {
+export interface TableLayoutConf {
     title: string,
     layoutKind: LayoutKind,
     icon: string,
@@ -31,12 +31,12 @@ export interface TableShowConf {
     fetchRowNumber?: number
 }
 
-export function initConf(props: TableProps): [TableBasicConf, { [key: string]: TableShowConf }, TableStyleConf] {
-    let shows: { [key: string]: TableShowConf } = {}
-    if (props.shows) {
-        props.shows.forEach(show => {
+export function initConf(props: TableProps): [TableBasicConf, { [key: string]: TableLayoutConf }, TableStyleConf] {
+    let layouts: { [key: string]: TableLayoutConf } = {}
+    if (props.layouts) {
+        props.layouts.forEach(layout => {
             let icon = ''
-            switch (show.layoutKind) {
+            switch (layout.layoutKind) {
                 case LayoutKind.CHART:
                     icon = iconSvg.CHART
                     break
@@ -52,20 +52,20 @@ export function initConf(props: TableProps): [TableBasicConf, { [key: string]: T
                 default:
                     icon = iconSvg.TEXT
             }
-            shows[show.id] = {
-                title: show.title,
-                layoutKind: show.layoutKind,
+            layouts[layout.id] = {
+                title: layout.title,
+                layoutKind: layout.layoutKind,
                 icon: icon,
-                dateColumn: show.dateColumn,
-                fixedColumnIdx: props.columns.findIndex(column => column.name === show.fixedColumn) ?? -1,
+                dateColumn: layout.dateColumn,
+                fixedColumnIdx: props.columns.findIndex(column => column.name === layout.fixedColumn) ?? -1,
                 filters: Filter.initConf(props),
                 sorts: Sort.initConf(props),
                 data: []
             }
         })
     } else {
-        shows['default'] = {
-            title: t('show.title.default'),
+        layouts['default'] = {
+            title: t('layout.title.default'),
             layoutKind: LayoutKind.LIST,
             icon: iconSvg.TEXT,
             fixedColumnIdx: -1,
@@ -78,7 +78,7 @@ export function initConf(props: TableProps): [TableBasicConf, { [key: string]: T
         {
             tableId: props.tableId ?? 'iw-table' + Math.floor(Math.random() * 1000000),
             pkColumnName: props.columns.find(column => column.pk)?.name ?? 'id'
-        }, shows, {
+        }, layouts, {
             tableClass: '',
             size: SizeKind.MEDIUM
         }

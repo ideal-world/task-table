@@ -1,7 +1,7 @@
 export default {
     _: {
     },
-    show: {
+    layout: {
         title: {
             default: '默认',
             rename: '重命名'

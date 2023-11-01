@@ -1,7 +1,7 @@
 export default {
     _: {
     },
-    show:{
+    layout:{
         title:{
             default: 'Default',
             rename: 'Rename'

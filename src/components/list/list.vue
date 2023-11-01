@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { TableShowConf, TableStyleConf } from '../conf'
+import { TableLayoutConf, TableStyleConf } from '../conf'
 import { ListBasicConf, ListColumnConf, ListConf, ListStyleConf } from './conf'
 import MenuComp from '../common/menu.vue'
 import FixedComp from './fixed.vue'
@@ -15,7 +15,7 @@ const { t } = useI18n()
 
 const listConf = defineProps<
   ListConf & {
-    show: TableShowConf
+    layout: TableLayoutConf
     globalStyles: TableStyleConf
   }
 >()
@@ -30,7 +30,7 @@ const rowMenuCompRef = ref()
 const setColumnStyles = (colIdx: number) => {
   const styles: any = {}
   styles.width = columnsConf[colIdx].width + 'px'
-  setFixedColumnStyles(styles, colIdx, listConf.show.fixedColumnIdx, columnsConf)
+  setFixedColumnStyles(styles, colIdx, listConf.layout.fixedColumnIdx, columnsConf)
   return styles
 }
 
@@ -64,11 +64,16 @@ const showRowContextMenu = (event: MouseEvent) => {
       >
         <svg v-html="column.icon"></svg> {{ column.name }}
         <menu-comp ref="headerMenuCompRefs" className="iw-list-header-contextmenu">
-          <fixed-comp :current-col-idx="colIndex" :basic-conf="basicConf" :show="listConf.show"></fixed-comp>
+          <fixed-comp :current-col-idx="colIndex" :basic-conf="basicConf" :layout="listConf.layout"></fixed-comp>
         </menu-comp>
       </div>
     </div>
-    <div v-for="(row, rowIndex) in listConf.show.data" :key="row[basicConf.pkColumnName]" :data-pk="row[basicConf.pkColumnName]" :className="stylesConf.rowClass + ' iw-list-row'">
+    <div
+      v-for="(row, rowIndex) in listConf.layout.data"
+      :key="row[basicConf.pkColumnName]"
+      :data-pk="row[basicConf.pkColumnName]"
+      :className="stylesConf.rowClass + ' iw-list-row'"
+    >
       <template v-for="(column, colIndex) in columnsConf" :key="column.name">
         <div
           :className="stylesConf.cellClass + ' iw-list-cell iw-list-row-cell'"
@@ -87,7 +92,7 @@ const showRowContextMenu = (event: MouseEvent) => {
   </div>
   <sort-comp :columns-conf="columnsConf"></sort-comp>
   <resize-comp :columns-conf="columnsConf"></resize-comp>
-  <fill-comp :columns-conf="columnsConf" :data="listConf.show.data" :pkColumnName="listConf.basic.pkColumnName" v-if="basic.fillable"></fill-comp>
+  <fill-comp :columns-conf="columnsConf" :data="listConf.layout.data" :pkColumnName="listConf.basic.pkColumnName" v-if="basic.fillable"></fill-comp>
 </template>
 
 <style lang="scss" scoped>
