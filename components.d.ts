@@ -8,16 +8,16 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     copy: typeof import('./src/components/list/fill copy.vue')['default']
-    Delete: typeof import('./src/components/list/delete.vue')['default']
-    Fill: typeof import('./src/components/list/fill.vue')['default']
-    Fixed: typeof import('./src/components/list/fixed.vue')['default']
+    Delete: typeof import('./src/components/layout/list/delete.vue')['default']
+    Fill: typeof import('./src/components/layout/list/fill.vue')['default']
+    Fixed: typeof import('./src/components/layout/list/fixed.vue')['default']
     Group: typeof import('./src/components/function/group/group.vue')['default']
-    List: typeof import('./src/components/list/list.vue')['default']
+    List: typeof import('./src/components/layout/list/list.vue')['default']
     Menu: typeof import('./src/components/common/menu.vue')['default']
-    Resize: typeof import('./src/components/list/resize.vue')['default']
+    Resize: typeof import('./src/components/function/resize/resize.vue')['default']
     Size: typeof import('./src/components/function/resize/size.vue')['default']
     Skeleton: typeof import('./src/components/skeleton.vue')['default']
-    Sort: typeof import('./src/components/list/sort.vue')['default']
+    Sort: typeof import('./src/components/layout/list/sort.vue')['default']
     Table: typeof import('./src/components/list/table.vue')['default']
   }
 }

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { inject } from 'vue'
 import { useI18n } from 'vue-i18n'
-import * as iconSvg from '../../assets/icon'
-import { FN_CLOSE_CONTEXT_MENU } from '../../constant'
-import { TableLayoutConf } from '../conf'
+import * as iconSvg from '../../../assets/icon'
+import { FN_CLOSE_CONTEXT_MENU } from '../../../constant'
+import { TableLayoutConf } from '../../conf'
 import { ListBasicConf, ListColumnConf } from './conf'
 const { t } = useI18n()
 

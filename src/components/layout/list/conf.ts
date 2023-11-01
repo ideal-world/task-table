@@ -1,6 +1,6 @@
-import * as iconSvg from "../../assets/icon"
-import { TableBasicConf } from "../conf"
-import { DataKind, TableProps } from "../props"
+import * as iconSvg from "../../../assets/icon"
+import { TableBasicConf } from "../../conf"
+import { DataKind, TableProps } from "../../props"
 
 export interface ListConf {
     basic: ListBasicConf

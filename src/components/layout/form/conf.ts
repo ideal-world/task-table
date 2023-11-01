@@ -1,4 +1,4 @@
-import { DataKind } from "../props"
+import { DataKind } from "../../props"
 
 export interface FormConf {
     fillable: boolean

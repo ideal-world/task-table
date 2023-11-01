@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { TableLayoutConf, TableStyleConf } from '../conf'
+import { TableLayoutConf, TableStyleConf } from '../../conf'
 import { ListBasicConf, ListColumnConf, ListConf, ListStyleConf } from './conf'
-import MenuComp from '../common/menu.vue'
+import MenuComp from '../../common/menu.vue'
 import FixedComp from './fixed.vue'
 import SortComp from './sort.vue'
 import ResizeComp from './resize.vue'
 import FillComp from './fill.vue'
 import DeleteComp from './delete.vue'
 import { setFixedColumnStyles } from './fixed.vue'
-import { DataKind } from '../props'
+import { DataKind } from '../../props'
 const { t } = useI18n()
 
 const listConf = defineProps<
@@ -96,7 +96,7 @@ const showRowContextMenu = (event: MouseEvent) => {
 </template>
 
 <style lang="scss" scoped>
-@import '../../assets/main.scss';
+@import '../../../assets/main.scss';
 
 @include b('list') {
   position: relative;

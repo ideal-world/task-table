@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { inject, onMounted } from 'vue';
-import { FN_UPDATE_DATA } from '../../constant';
+import { FN_UPDATE_DATA } from '../../../constant';
 import { ListColumnConf } from './conf';
 
 const props = defineProps<{

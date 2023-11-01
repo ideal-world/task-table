@@ -7,8 +7,8 @@ import { TableLayoutConf, TableStyleConf, initConf } from './conf'
 import * as Filter from './function/filter/conf'
 import * as Sort from './function/sort/conf'
 import ResizeComp from './function/resize/resize.vue'
-import * as List from './list/conf'
-import ListComp from './list/list.vue'
+import * as List from './layout/list/conf'
+import ListComp from './layout/list/list.vue'
 import { SizeKind, TableProps } from './props'
 
 const props = defineProps<TableProps>()
