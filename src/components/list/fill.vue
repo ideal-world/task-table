@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { onMounted, inject } from 'vue'
-import { ListColumnConf } from './conf'
-import { FN_UPDATE_DATA } from '../../constant'
+import { inject, onMounted } from 'vue';
+import { FN_UPDATE_DATA } from '../../constant';
+import { ListColumnConf } from './conf';
 
 const props = defineProps<{
   columnsConf: ListColumnConf[]
@@ -42,15 +42,19 @@ onMounted(() => {
   selectDiv.appendChild(dragDiv)
   listEle.appendChild(selectDiv)
 
-  dragDiv.addEventListener('pointerdown', () => {
+  dragDiv.addEventListener('pointerdown', (event: PointerEvent) => {
     isDragging = true
+    const targetEle = event.target as HTMLElement
+    targetEle.setPointerCapture(event.pointerId)
   })
 
-  selectDiv.addEventListener('pointerup', () => {
+  dragDiv.addEventListener('pointerup', (event: PointerEvent) => {
     if (!isDragging) {
       return
     }
     isDragging = false
+    const targetEle = event.target as HTMLElement
+    targetEle.releasePointerCapture(event.pointerId)
     selectDiv.style.display = 'none'
     let targetData = props.data[startRowIdx][startColumnName]
     let changedData = []
@@ -75,8 +79,7 @@ onMounted(() => {
     updateDataFun(changedData)
   })
 
-  // 不用dragDiv为解决向上拖拽的问题
-  selectDiv.addEventListener('pointermove', (event) => {
+  dragDiv.addEventListener('pointermove', (event) => {
     if (!isDragging) {
       return
     }

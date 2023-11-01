@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
-import { ListColumnConf } from './conf';
+import { onMounted } from 'vue'
+import { ListColumnConf } from './conf'
 
 const props = defineProps<{
   columnsConf: ListColumnConf[]
@@ -25,13 +25,17 @@ onMounted(() => {
   dragDiv.appendChild(subDragDiv)
   listHeaderEle.appendChild(dragDiv)
 
-  dragDiv.addEventListener('pointerdown', () => {
+  dragDiv.addEventListener('pointerdown', (event: PointerEvent) => {
     isDragging = true
+    const targetEle = event.target as HTMLElement
+    targetEle.setPointerCapture(event.pointerId)
   })
 
-  dragDiv.addEventListener('pointerup', () => {
+  dragDiv.addEventListener('pointerup', (event: PointerEvent) => {
     isDragging = false
     dragDiv.style.display = 'none'
+    const targetEle = event.target as HTMLElement
+    targetEle.releasePointerCapture(event.pointerId)
   })
 
   dragDiv.addEventListener('pointermove', (event) => {
