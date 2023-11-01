@@ -1,10 +1,9 @@
-import { FilterGroupConf } from "./filter/conf"
-import { LayoutKind, SizeKind, TableProps } from "./props"
-import { SortConf } from "./sort/conf"
-import * as Filter from './filter/conf'
-import * as Sort from './sort/conf'
-import i18n from '../i18n'
 import * as iconSvg from "../assets/icon"
+import i18n from '../i18n'
+import * as Filter from './function/filter/conf'
+import * as Group from "./function/group/conf"
+import * as Sort from './function/sort/conf'
+import { LayoutKind, SizeKind, TableProps } from "./props"
 
 const { t } = i18n.global
 
@@ -24,8 +23,9 @@ export interface TableLayoutConf {
     icon: string,
     dateColumn?: { start: string, end: string }
     fixedColumnIdx: number,
-    filters: FilterGroupConf[]
-    sorts: SortConf[]
+    filters: Filter.FilterGroupConf[]
+    sorts: Sort.SortConf[]
+    group?: Group.GroupConf
     data: { [key: string]: any }[]
     offsetRowNumber?: number
     fetchRowNumber?: number
@@ -58,8 +58,9 @@ export function initConf(props: TableProps): [TableBasicConf, { [key: string]: T
                 icon: icon,
                 dateColumn: layout.dateColumn,
                 fixedColumnIdx: props.columns.findIndex(column => column.name === layout.fixedColumn) ?? -1,
-                filters: Filter.initConf(props),
-                sorts: Sort.initConf(props),
+                filters: Filter.initConf(layout.filters),
+                sorts: Sort.initConf(layout.sorts),
+                group: Group.initConf(layout.group),
                 data: []
             }
         })

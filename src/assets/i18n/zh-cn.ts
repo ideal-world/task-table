@@ -7,8 +7,8 @@ export default {
             rename: '重命名'
         }
     },
-    tools: {
-        size: {
+    function: {
+        resize: {
             title: '调整大小',
         }
     },

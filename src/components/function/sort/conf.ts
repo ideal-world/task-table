@@ -1,4 +1,4 @@
-import { DataKind, TableProps, TableSortProps } from "../props"
+import { DataKind, TableProps, TableSortProps } from "../../props"
 
 export interface SortableColumnConf {
     name: string
@@ -11,7 +11,7 @@ export interface SortConf {
     desc: boolean
 }
 
-export function initConf(props: TableProps): SortConf[] {
+export function initConf(props?: TableSortProps[]): SortConf[] {
     return []
 }
 

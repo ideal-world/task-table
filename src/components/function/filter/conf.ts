@@ -1,5 +1,4 @@
-import { Filter } from "element-plus"
-import { DataKind, OperatorKind, TableFilterGroupProps, TableProps } from "../props"
+import { DataKind, OperatorKind, TableFilterGroupProps } from "../../props"
 
 export interface FilterableColumnConf {
     name: string
@@ -19,7 +18,7 @@ export interface FilterConf {
     value2?: any
 }
 
-export function initConf(props: TableProps): FilterGroupConf[] {
+export function initConf(props?: TableFilterGroupProps[]): FilterGroupConf[] {
     return []
 }
 

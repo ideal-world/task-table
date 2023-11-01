@@ -94,7 +94,7 @@ export interface TableLayoutProps {
     layoutKind: LayoutKind,
     dateColumn?: { start: string, end: string }
     fixedColumn?: string,
-    filters?: TableFilterGroupProps[][]
+    filters?: TableFilterGroupProps[]
     sorts?: TableSortProps[]
     group?: TableGroupProps
 }

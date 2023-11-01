@@ -4,12 +4,12 @@ import * as iconSvg from '../assets/icon'
 import { FN_ADD_DATA, FN_DELETE_DATA, FN_LOAD_CELL_OPTIONS_DATA, FN_LOAD_DATA, FN_UPDATE_DATA } from '../constant'
 import MenuComp from './common/menu.vue'
 import { TableLayoutConf, TableStyleConf, initConf } from './conf'
-import * as Filter from './filter/conf'
+import * as Filter from './function/filter/conf'
+import * as Sort from './function/sort/conf'
+import ResizeComp from './function/resize/resize.vue'
 import * as List from './list/conf'
 import ListComp from './list/list.vue'
 import { SizeKind, TableProps } from './props'
-import * as Sort from './sort/conf'
-import SizeComp from './tools/size.vue'
 
 const props = defineProps<TableProps>()
 
@@ -134,7 +134,7 @@ const listConf = List.initConf(props, tableBasicConf)
         <div className="iw-tt-toolbar" v-if="currentLayoutId == layoutId">
           <div className="iw-tt-toolbar-main">main</div>
           <div className="iw-tt-toolbars-more">
-            <size-comp :size="styleConf.size" @size="(size:SizeKind)=> styleConf.size=size"></size-comp>
+            <resize-comp :size="styleConf.size" @size="(size:SizeKind)=> styleConf.size=size"></resize-comp>
           </div>
         </div>
         <div class="iw-tt-table" v-if="currentLayoutId == layoutId">

@@ -7,8 +7,8 @@ export default {
             rename: 'Rename'
         }
     },
-    tools:{
-        size:{
+    function:{
+        resize:{
             title: 'Resize',
         }
     },
