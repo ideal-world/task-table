@@ -7,6 +7,11 @@ export default {
             rename: 'Rename'
         }
     },
+    tools:{
+        size:{
+            title: 'Resize',
+        }
+    },
     list:{
         fixed:{
             fixedTitle: 'Fixed',

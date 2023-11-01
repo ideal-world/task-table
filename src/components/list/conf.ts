@@ -1,6 +1,6 @@
-import { DataKind, SizeKind, TableProps } from "../props"
 import * as iconSvg from "../../assets/icon"
 import { TableBasicConf } from "../conf"
+import { DataKind, TableProps } from "../props"
 
 export interface ListConf {
     basic: ListBasicConf
@@ -24,20 +24,19 @@ export interface ListColumnConf {
 }
 
 export interface ListStyleConf {
-    sizeClass: SizeKind
     headerClass: string
     rowClass: string
     cellClass: string
 }
 
 export function initConf(props: TableProps, basicConf: TableBasicConf): ListConf {
-    const tableBasicConf = {
+    const listBasicConf = {
         fillable: props.edit?.fillable ?? true,
         addable: props.edit?.addable ?? true,
         editable: props.edit?.editable ?? true,
         pkColumnName: basicConf.pkColumnName
     }
-    const tableColumnsConf = props.columns.map(column => {
+    const listColumnsConf = props.columns.map(column => {
         let icon = ''
         switch (column.dataKind) {
             case DataKind.TEXT:
@@ -104,15 +103,14 @@ export function initConf(props: TableProps, basicConf: TableBasicConf): ListConf
             fillable: column.fillable ?? true
         }
     })
-    const tableStyleConf = {
-        sizeClass: props.styles?.size ?? SizeKind.MEDIUM,
+    const listStyleConf = {
         headerClass: props.styles?.headerClass ?? '',
         rowClass: props.styles?.rowClass ?? '',
         cellClass: props.styles?.cellClass ?? ''
     }
     return {
-        basic: tableBasicConf,
-        columns: tableColumnsConf,
-        styles: tableStyleConf
+        basic: listBasicConf,
+        columns: listColumnsConf,
+        styles: listStyleConf
     }
 }

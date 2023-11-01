@@ -7,6 +7,11 @@ export default {
             rename: '重命名'
         }
     },
+    tools: {
+        size: {
+            title: '调整大小',
+        }
+    },
     list: {
         fixed: {
             fixedTitle: '固定',

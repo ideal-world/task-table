@@ -15,7 +15,7 @@ const props = defineProps<{
 
 let closeContextMenuFun = inject(FN_CLOSE_CONTEXT_MENU)
 
-const setFixedColumn = (event: MouseEvent) => {
+const setFixedColumn = () => {
   if (props.currentColIdx == props.show.fixedColumnIdx) {
     props.show.fixedColumnIdx = -1
   } else {

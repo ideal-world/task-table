@@ -1,23 +1,26 @@
 <script setup lang="ts">
 import { onMounted, provide, reactive, ref } from 'vue'
 import { FN_ADD_DATA, FN_DELETE_DATA, FN_LOAD_CELL_OPTIONS_DATA, FN_LOAD_DATA, FN_UPDATE_DATA } from '../constant'
-import { TableShowConf, initConf } from './conf'
+import { TableShowConf, TableStyleConf, initConf } from './conf'
 import MenuComp from './common/menu.vue'
 import * as Filter from './filter/conf'
 import * as List from './list/conf'
 import ListComp from './list/list.vue'
-import { LayoutKind, TableProps } from './props'
+import SizeComp from './tools/size.vue'
+import { LayoutKind, SizeKind, TableProps } from './props'
 import * as Sort from './sort/conf'
 import * as iconSvg from '../assets/icon'
 
 const props = defineProps<TableProps>()
 
-const [tableBasicConf, tableShowsConf, tableStyleConf] = initConf(props)
+const [tableBasicConf, _tableShowsConf, _tableStyleConf] = initConf(props)
 const menuCompRef = ref()
 
-const showsConf = reactive<{ [key: string]: TableShowConf }>(tableShowsConf)
+const showsConf = reactive<{ [key: string]: TableShowConf }>(_tableShowsConf)
+const styleConf = reactive<TableStyleConf>(_tableStyleConf)
 const currentShowId = ref<string>('default')
 
+// ------------- Common Events -------------
 async function loadData(showId?: string) {
   let show = showsConf[showId ? showId : currentShowId.value]
   const d = await props.events.loadData(Filter.parseProps(show.filters), Sort.parseProps(show.sorts), show.offsetRowNumber, show.fetchRowNumber)
@@ -80,19 +83,19 @@ async function loadCellOptions(columnName: string, cellValue: any): Promise<{ ti
   }
 }
 
-async function init() {
-  for (let showId in showsConf) {
-    await loadData(showId)
-  }
-}
-
 provide(FN_LOAD_DATA, loadData)
 provide(FN_ADD_DATA, addData)
 provide(FN_UPDATE_DATA, updateData)
 provide(FN_DELETE_DATA, deleteData)
 provide(FN_LOAD_CELL_OPTIONS_DATA, loadCellOptions)
 
-const listConf = List.initConf(props, tableBasicConf)
+// ------------- Init Events -------------
+
+async function init() {
+  for (let showId in showsConf) {
+    await loadData(showId)
+  }
+}
 
 onMounted(async () => {
   // Set table height
@@ -107,15 +110,18 @@ onMounted(async () => {
   await init()
 })
 
+// ------------- Layout Process -------------
 const showLayoutMenu = (event: MouseEvent) => {
   const targetEle = event.target as HTMLElement
   const selectedLayoutEle = targetEle.parentElement as HTMLElement
   menuCompRef.value.show(selectedLayoutEle)
 }
+
+const listConf = List.initConf(props, tableBasicConf)
 </script>
 
 <template>
-  <div :className="tableStyleConf.tableClass + ' iw-tt'" :id="tableBasicConf.tableId">
+  <div :className="styleConf.tableClass + ' iw-tt'" :id="tableBasicConf.tableId">
     <div className="iw-tt-layouts">
       <div v-for="(show, showId) in showsConf" :class="'iw-tt-layout' + [currentShowId == showId ? ' iw-tt-layout--active' : '']">
         <svg v-html="show.icon"></svg> {{ show.title }}<svg @click="showLayoutMenu" v-html="iconSvg.MORE1"></svg>
@@ -123,7 +129,12 @@ const showLayoutMenu = (event: MouseEvent) => {
     </div>
     <div className="iw-tt-shows">
       <template v-for="(show, showId) in showsConf">
-        <div className="iw-tt-tools">tools...</div>
+        <div className="iw-tt-tools">
+          <div className="iw-tt-tools-main">main</div>
+          <div className="iw-tt-tools-more">
+            <size-comp :size="styleConf.size" @size="(size:SizeKind)=> styleConf.size=size"></size-comp>
+          </div>
+        </div>
         <div class="iw-tt-table">
           <list-comp
             :key="showId"
@@ -131,6 +142,7 @@ const showLayoutMenu = (event: MouseEvent) => {
             :columns="listConf.columns"
             :show="show"
             :styles="listConf.styles"
+            :global-styles="styleConf"
             v-if="show.layoutKind == LayoutKind.LIST"
             v-show="showId == currentShowId"
           />
@@ -138,7 +150,7 @@ const showLayoutMenu = (event: MouseEvent) => {
       </template>
     </div>
     <menu-comp ref="menuCompRef" className="iw-tt-layout-contextmenu">
-        <div class="iw-contextmenu__item"><svg v-html="iconSvg.RENAME"></svg> <input v-model="showsConf[currentShowId].title" /></div>
+      <div class="iw-contextmenu__item"><svg v-html="iconSvg.RENAME"></svg> <input v-model="showsConf[currentShowId].title" /></div>
     </menu-comp>
   </div>
 </template>
@@ -149,6 +161,7 @@ const showLayoutMenu = (event: MouseEvent) => {
 @include b('tt') {
   margin: 0;
   padding: 0;
+  font-size: 11pt;
   width: 100%;
 }
 
@@ -163,7 +176,7 @@ const showLayoutMenu = (event: MouseEvent) => {
 @include b('tt-layout') {
   display: flex;
   align-items: center;
-  padding: 2px;
+  padding: 1px;
   margin: 0;
   cursor: pointer;
   border: 1px solid var(--el-border-color);
@@ -181,11 +194,43 @@ const showLayoutMenu = (event: MouseEvent) => {
 }
 
 @include b('tt-tools') {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
   height: 40px;
+}
+
+@include b('tt-tools-main') {
+  display: flex;
+}
+
+@include b('tt-tools-more') {
+  display: flex;
 }
 
 @include b('tt-table') {
   overflow: auto;
   width: 100%;
+}
+</style>
+
+<style lang="scss">
+@import '../assets/main.scss';
+
+@include b('tt-tools') {
+  & svg {
+    width: 1em;
+    height: 1em;
+    margin-right: 3px;
+  }
+
+  & > div > div {
+    display: flex;
+    align-items: center;
+    padding: 6px;
+    margin: 0;
+    cursor: pointer;
+  }
 }
 </style>

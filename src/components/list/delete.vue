@@ -4,7 +4,7 @@ import * as iconSvg from '../../assets/icon'
 import { FN_CLOSE_CONTEXT_MENU, FN_DELETE_DATA } from '../../constant'
 
 const props = defineProps<{
-  selectPks: string[] | number[]
+  selectPks: string[] | number[] | undefined
 }>()
 
 let closeContextMenuFun = inject(FN_CLOSE_CONTEXT_MENU)

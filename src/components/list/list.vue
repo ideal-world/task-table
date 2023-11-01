@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { TableShowConf } from '../conf'
+import { TableShowConf, TableStyleConf } from '../conf'
 import { ListBasicConf, ListColumnConf, ListConf, ListStyleConf } from './conf'
 import MenuComp from '../common/menu.vue'
 import FixedComp from './fixed.vue'
@@ -16,6 +16,7 @@ const { t } = useI18n()
 const listConf = defineProps<
   ListConf & {
     show: TableShowConf
+    globalStyles: TableStyleConf
   }
 >()
 
@@ -51,7 +52,7 @@ const showRowContextMenu = (event: MouseEvent) => {
 </script>
 
 <template>
-  <div className="iw-list" :style="{ width: columnsConf.reduce((count, col) => count + col.width, 0) + 'px' }">
+  <div :class="'iw-list  iw-list--size-' + globalStyles.size" :style="{ width: columnsConf.reduce((count, col) => count + col.width, 0) + 'px' }">
     <div :className="stylesConf.headerClass + ' iw-list-header'">
       <div
         v-for="(column, colIndex) in columnsConf"
@@ -70,7 +71,7 @@ const showRowContextMenu = (event: MouseEvent) => {
     <div v-for="(row, rowIndex) in listConf.show.data" :key="row[basicConf.pkColumnName]" :data-pk="row[basicConf.pkColumnName]" :className="stylesConf.rowClass + ' iw-list-row'">
       <template v-for="(column, colIndex) in columnsConf" :key="column.name">
         <div
-          :className="stylesConf.cellClass + ' iw-list-cell iw-list-row-cell iw-list--size-' + stylesConf.sizeClass"
+          :className="stylesConf.cellClass + ' iw-list-cell iw-list-row-cell'"
           :data-column-name="column.name"
           :data-row-idx="rowIndex"
           :style="setColumnStyles(colIndex)"
@@ -91,27 +92,40 @@ const showRowContextMenu = (event: MouseEvent) => {
 
 <style lang="scss" scoped>
 @import '../../assets/main.scss';
+
 @include b('list') {
   position: relative;
 
   @include m('size-mini') {
-    padding: 1px;
     font-size: 9pt;
+
+    @include b('list-cell') {
+      padding: 1px;
+    }
   }
 
   @include m('size-small') {
-    padding: 3px;
     font-size: 10pt;
+
+    @include b('list-cell') {
+      padding: 3px;
+    }
   }
 
   @include m('size-medium') {
-    padding: 4px 5px;
     font-size: 11pt;
+
+    @include b('list-cell') {
+      padding: 4px 5px;
+    }
   }
 
   @include m('size-large') {
-    padding: 6px 7px;
     font-size: 13pt;
+
+    @include b('list-cell') {
+      padding: 6px 7px;
+    }
   }
 }
 

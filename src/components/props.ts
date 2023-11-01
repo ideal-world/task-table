@@ -57,6 +57,7 @@ export enum SizeKind {
     MEDIUM = 'medium',
     LARGE = 'large',
 }
+
 export enum LayoutKind {
     LIST = 'LIST',
     GANTT = 'GANTT',

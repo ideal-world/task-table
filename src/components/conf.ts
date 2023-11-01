@@ -1,5 +1,5 @@
 import { FilterGroupConf } from "./filter/conf"
-import { LayoutKind, TableProps } from "./props"
+import { LayoutKind, SizeKind, TableProps } from "./props"
 import { SortConf } from "./sort/conf"
 import * as Filter from './filter/conf'
 import * as Sort from './sort/conf'
@@ -15,6 +15,7 @@ export interface TableBasicConf {
 
 export interface TableStyleConf {
     tableClass: string
+    size: SizeKind
 }
 
 export interface TableShowConf {
@@ -78,7 +79,8 @@ export function initConf(props: TableProps): [TableBasicConf, { [key: string]: T
             tableId: props.tableId ?? 'iw-table' + Math.floor(Math.random() * 1000000),
             pkColumnName: props.columns.find(column => column.pk)?.name ?? 'id'
         }, shows, {
-            tableClass: ''
+            tableClass: '',
+            size: SizeKind.MEDIUM
         }
     ]
 }
