@@ -1,0 +1,23 @@
+{
+  "_": {},
+  "layout": {
+    "title": {
+      "default": "Default",
+      "rename": "Rename"
+    }
+  },
+  "function": {
+    "resize": {
+      "title": "Resize"
+    }
+  },
+  "list": {
+    "fixed": {
+      "fixedTitle": "Fixed",
+      "unFixedTitle": "UnFixed"
+    },
+    "delete": {
+      "title": "Delete"
+    }
+  }
+}

@@ -1,11 +1,11 @@
 import * as iconSvg from "../assets/icon"
-import i18n from '../i18n'
+import locales from '../locales'
 import * as Filter from './function/filter/conf'
 import * as Group from "./function/group/conf"
 import * as Sort from './function/sort/conf'
 import { LayoutKind, SizeKind, TableProps } from "./props"
 
-const { t } = i18n.global
+const { t } = locales.global
 
 export interface TableBasicConf {
     tableId: string
