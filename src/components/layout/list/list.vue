@@ -32,9 +32,9 @@ const setColumnStyles = (colIdx: number) => {
   return styles
 }
 
-const showHeaderContextMenu = (event: MouseEvent, colIndex: number) => {
+const showHeaderContextMenu = (event: MouseEvent, colIdx: number) => {
   const targetEle = event.target as HTMLElement
-  headerMenuCompRefs.value[colIndex].show(targetEle)
+  headerMenuCompRefs.value[colIdx].show(targetEle)
 }
 
 const showRowContextMenu = (event: MouseEvent) => {
@@ -65,9 +65,9 @@ const showRowContextMenu = (event: MouseEvent) => {
     <template v-if="listConf.layout.data && !Array.isArray(listConf.layout.data)">
       <div v-for="(row, rowIdx) in listConf.layout.data.records" :key="row[basicConf.pkColumnName]"
         :data-pk="row[basicConf.pkColumnName]" :className="stylesConf.rowClass + ' iw-list-row'">
-        <template v-for="(column, colIndex) in columnsConf" :key="column.name">
+        <template v-for="(column, colIdx) in columnsConf" :key="column.name">
           <div :className="stylesConf.cellClass + ' iw-list-cell iw-list-row-cell'" :data-column-name="column.name"
-            :data-row-idx="rowIdx" :style="setColumnStyles(colIndex)" @contextmenu.prevent="showRowContextMenu">
+            :data-row-idx="rowIdx" :style="setColumnStyles(colIdx)" @contextmenu.prevent="showRowContextMenu">
             {{ row[column.name] }}
           </div>
         </template>
@@ -78,14 +78,14 @@ const showRowContextMenu = (event: MouseEvent) => {
     </template>
     <template v-else-if="listConf.layout.data && Array.isArray(listConf.layout.data)">
       <template v-for="groupData in listConf.layout.data">
-        <div :data-group-value="groupData.groupValue" :className="stylesConf.rowClass + ' iw-list-row iw-list-group-row'">
-          xxx
-        </div>
+        <aggs-comp :styles-conf="stylesConf" :columns-conf="columnsConf" :layout-aggs="layout.aggs"
+          :data-basic="groupData" :pk-column-name="listConf.basic.pkColumnName" :group-value="groupData.groupValue"
+          :set-column-styles="setColumnStyles"></aggs-comp>
         <div v-for="(row, rowIdx) in groupData.records" :key="row[basicConf.pkColumnName]"
           :data-pk="row[basicConf.pkColumnName]" :className="stylesConf.rowClass + ' iw-list-row'">
-          <template v-for="(column, colIndex) in columnsConf" :key="column.name">
+          <template v-for="(column, colIdx) in columnsConf" :key="column.name">
             <div :className="stylesConf.cellClass + ' iw-list-cell iw-list-row-cell'" :data-column-name="column.name"
-              :data-row-idx="rowIdx" :style="setColumnStyles(colIndex)" @contextmenu.prevent="showRowContextMenu">
+              :data-row-idx="rowIdx" :style="setColumnStyles(colIdx)" @contextmenu.prevent="showRowContextMenu">
               {{ row[column.name] }}
             </div>
           </template>
@@ -143,6 +143,7 @@ const showRowContextMenu = (event: MouseEvent) => {
 
 @include b('list-header') {
   display: flex;
+  background-color: var(--el-bg-color);
   border-top: 1px solid var(--el-border-color);
   border-right: 1px solid var(--el-border-color);
   align-items: center;
@@ -166,24 +167,25 @@ const showRowContextMenu = (event: MouseEvent) => {
     }
   }
 }
-</style>
 
+@include b('list-row') {
+  &:hover .iw-list-cell {
+    background-color: var(--el-color-info-light-9);
+  }
+}
+</style>
 
 <style lang="scss">
 @import '../../../assets/main.scss';
 
 @include b('list-row') {
   display: flex;
+  background-color: var(--el-bg-color);
   border-right: 1px solid var(--el-border-color);
-
-  &:hover .iw-list-cell {
-    background-color: var(--el-color-info-light-9);
-  }
 }
 
 @include b('list-cell') {
   border-left: 1px solid var(--el-border-color);
   border-bottom: 1px solid var(--el-border-color);
-  background-color: var(--el-bg-color);
 }
 </style>

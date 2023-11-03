@@ -3,7 +3,7 @@ import locales from '../../../locales'
 const { t } = locales.global
 
 export interface GroupAggItem {
-    code: string
+    kind: AggregateKind
     title: string
 }
 
@@ -23,27 +23,27 @@ export function translateGroupAgg(aggKind: AggregateKind): string {
 
 export function showGroupAggMappingByDataKind(dataKind: DataKind): GroupAggItem[] {
     let items = [
-        { code: AggregateKind.COUNT, title: translateGroupAgg(AggregateKind.COUNT) },
+        { kind: AggregateKind.COUNT, title: translateGroupAgg(AggregateKind.COUNT) },
     ]
     switch (dataKind) {
         case DataKind.NUMBER:
         case DataKind.AMOUNT:
             items.push(...[
-                { code: AggregateKind.MAX, title: translateGroupAgg(AggregateKind.MAX) },
-                { code: AggregateKind.MIN, title: translateGroupAgg(AggregateKind.MIN) },
-                { code: AggregateKind.DISTINCT, title: translateGroupAgg(AggregateKind.DISTINCT) }
+                { kind: AggregateKind.MAX, title: translateGroupAgg(AggregateKind.MAX) },
+                { kind: AggregateKind.MIN, title: translateGroupAgg(AggregateKind.MIN) },
+                { kind: AggregateKind.DISTINCT, title: translateGroupAgg(AggregateKind.DISTINCT) }
             ])
             break
         case DataKind.TEXT:
         case DataKind.TEXTAREA:
             items.push(...[
-                { code: AggregateKind.SUM, title: translateGroupAgg(AggregateKind.SUM) },
-                { code: AggregateKind.AVG, title: translateGroupAgg(AggregateKind.AVG) },
-                { code: AggregateKind.MEDIAN, title: translateGroupAgg(AggregateKind.MEDIAN) },
-                { code: AggregateKind.STDDEV, title: translateGroupAgg(AggregateKind.STDDEV) },
-                { code: AggregateKind.MAX, title: translateGroupAgg(AggregateKind.MAX) },
-                { code: AggregateKind.MIN, title: translateGroupAgg(AggregateKind.MIN) },
-                { code: AggregateKind.DISTINCT, title: translateGroupAgg(AggregateKind.DISTINCT) }
+                { kind: AggregateKind.SUM, title: translateGroupAgg(AggregateKind.SUM) },
+                { kind: AggregateKind.AVG, title: translateGroupAgg(AggregateKind.AVG) },
+                { kind: AggregateKind.MEDIAN, title: translateGroupAgg(AggregateKind.MEDIAN) },
+                { kind: AggregateKind.STDDEV, title: translateGroupAgg(AggregateKind.STDDEV) },
+                { kind: AggregateKind.MAX, title: translateGroupAgg(AggregateKind.MAX) },
+                { kind: AggregateKind.MIN, title: translateGroupAgg(AggregateKind.MIN) },
+                { kind: AggregateKind.DISTINCT, title: translateGroupAgg(AggregateKind.DISTINCT) }
             ])
             break
         case DataKind.DATE:
