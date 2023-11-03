@@ -94,47 +94,16 @@ export interface TableLayoutProps {
     layoutKind: LayoutKind,
     dateColumn?: { start: string, end: string }
     fixedColumn?: string,
-    filters?: TableFilterGroupProps[]
-    sorts?: TableSortProps[]
-    group?: TableGroupProps
+    // And relationship between groups
+    filters?: TableDataFilterReq[]
+    sorts?: TableDataSortReq[]
+    group?: TableDataGroupReq
 }
 
 export interface TableEditProps {
     fillable: boolean
     addable: boolean
     editable: boolean
-}
-
-export interface TableEventProps {
-    loadData: (filters: TableFilterGroupProps[], sorts: TableSortProps[], offsetRowNumber?: number, fetchRowNumber?: number) => Promise<{ [key: string]: any }[]>
-    saveData?: (data: { [key: string]: any }[]) => Promise<boolean>
-    deleteData?: (ids: string[] | number[]) => Promise<boolean>
-    loadCellOptions?: (columnName: string, cellValue: any) => Promise<{ title: string, value: any }[]>
-}
-
-export interface TableSortProps {
-    columnName: string,
-    desc: boolean
-}
-
-export interface TableFilterGroupProps {
-    filters: TableFilterProps[]
-    and: boolean
-}
-
-export interface TableFilterProps {
-    columnName: string
-    operator: OperatorKind
-    value: any
-    value2?: any
-}
-
-export interface TableGroupProps {
-    columnName: string
-    desc: boolean
-    useDictValue: boolean
-    hideEmptyRecord: boolean
-    columnAggs: { [key: string]: AggregateKind }[]
 }
 
 export interface TableStyleProps {
@@ -145,3 +114,53 @@ export interface TableStyleProps {
     cellClass?: string
     aggClass?: string
 }
+
+export interface TableEventProps {
+    loadData: (filters?: TableDataFilterReq[], sorts?: TableDataSortReq[], group?: TableDataGroupReq, slice?: TableDataSliceReq) => Promise<TableDataResp | TableDataGroupResp[]>
+    saveData?: (data: { [key: string]: any }[]) => Promise<boolean>
+    deleteData?: (deletePks: string[] | number[]) => Promise<boolean>
+    loadCellOptions?: (columnName: string, cellValue: any) => Promise<{ title: string, value: any }[]>
+}
+
+export interface TableDataSortReq {
+    columnName: string
+    orderDesc: boolean
+}
+
+export interface TableDataFilterReq {
+    items: TableDataFilterItemReq[]
+    and: boolean
+}
+
+export interface TableDataFilterItemReq {
+    columnName: string
+    operator: OperatorKind
+    value: any
+    value2?: any
+}
+
+export interface TableDataGroupReq {
+    columnName: string
+    groupOrderDesc: boolean
+    useDictValue: boolean
+    hideEmptyRecord: boolean
+    columnAggs: { [key: string]: AggregateKind }
+}
+
+export interface TableDataSliceReq {
+    offsetNumber: number
+    fetchNumber: number
+}
+
+export interface TableDataResp {
+    records: { [key: string]: any }[]
+    aggs: { [key: string]: any }
+    totalNumber: number
+}
+
+export interface TableDataGroupResp extends TableDataResp {
+    groupValue: string
+    offsetNumber: number
+    fetchNumber: number
+}
+

@@ -9,6 +9,11 @@
   "function": {
     "resize": {
       "title": "调整大小"
+    },
+    "group": {
+      "agg": {
+        "sum": "求和"
+      }
     }
   },
   "list": {

@@ -9,6 +9,11 @@
   "function": {
     "resize": {
       "title": "Resize"
+    },
+    "group": {
+      "agg": {
+        "sum": "SUM"
+      }
     }
   },
   "list": {
