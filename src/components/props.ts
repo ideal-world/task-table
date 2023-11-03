@@ -84,13 +84,13 @@ export interface TableColumnProps {
     filterable?: boolean
     editable?: boolean
     fillable?: boolean
-    aggAble?: AggregateKind[]
     width?: number
 }
 
 export interface TableLayoutProps {
     id: string,
     title: string,
+    default: boolean,
     layoutKind: LayoutKind,
     dateColumn?: { start: string, end: string }
     fixedColumn?: string,
@@ -98,6 +98,7 @@ export interface TableLayoutProps {
     filters?: TableDataFilterReq[]
     sorts?: TableDataSortReq[]
     group?: TableDataGroupReq
+    aggs?: { [key: string]: AggregateKind }
 }
 
 export interface TableEditProps {
@@ -116,9 +117,13 @@ export interface TableStyleProps {
 }
 
 export interface TableEventProps {
-    loadData: (filters?: TableDataFilterReq[], sorts?: TableDataSortReq[], group?: TableDataGroupReq, slice?: TableDataSliceReq) => Promise<TableDataResp | TableDataGroupResp[]>
-    saveData?: (data: { [key: string]: any }[]) => Promise<boolean>
-    deleteData?: (deletePks: string[] | number[]) => Promise<boolean>
+    loadData: (filters?: TableDataFilterReq[],
+        sorts?: TableDataSortReq[],
+        group?: TableDataGroupReq,
+        aggs?: { [key: string]: AggregateKind },
+        slice?: TableDataSliceReq) => Promise<TableDataResp | TableDataGroupResp[]>
+    saveData?: (changedRecords: { [key: string]: any }[]) => Promise<boolean>
+    deleteData?: (deletedPks: any[]) => Promise<boolean>
     loadCellOptions?: (columnName: string, cellValue: any) => Promise<{ title: string, value: any }[]>
 }
 
@@ -144,7 +149,6 @@ export interface TableDataGroupReq {
     groupOrderDesc: boolean
     useDictValue: boolean
     hideEmptyRecord: boolean
-    columnAggs: { [key: string]: AggregateKind }
 }
 
 export interface TableDataSliceReq {

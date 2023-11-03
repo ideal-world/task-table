@@ -7,8 +7,10 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
-    copy: typeof import('./src/components/list/fill copy.vue')['default']
+    Aggs: typeof import('./src/components/layout/list/aggs.vue')['default']
+    copy: typeof import('./src/components/layout/list/delete copy.vue')['default']
     Delete: typeof import('./src/components/layout/list/delete.vue')['default']
+    Event: typeof import('./src/components/event.vue')['default']
     Fill: typeof import('./src/components/layout/list/fill.vue')['default']
     Fixed: typeof import('./src/components/layout/list/fixed.vue')['default']
     Group: typeof import('./src/components/function/group/group.vue')['default']

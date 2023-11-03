@@ -6,6 +6,7 @@ import { DataKind } from '../../props'
 import { ListBasicConf, ListColumnConf, ListConf, ListStyleConf } from './conf'
 import DeleteComp from './delete.vue'
 import FillComp from './fill.vue'
+import AggsComp from './aggs.vue'
 import FixedComp, { setFixedColumnStyles } from './fixed.vue'
 import ResizeComp from './resize.vue'
 import SortComp from './sort.vue'
@@ -49,47 +50,56 @@ const showRowContextMenu = (event: MouseEvent) => {
 </script>
 
 <template>
-  <div :class="'iw-list  iw-list--size-' + globalStyles.size" :style="{ width: columnsConf.reduce((count, col) => count + col.width, 0) + 'px' }">
+  <div :class="'iw-list  iw-list--size-' + globalStyles.size"
+    :style="{ width: columnsConf.reduce((count, col) => count + col.width, 0) + 'px' }">
     <div :className="stylesConf.headerClass + ' iw-list-header'">
-      <div
-        v-for="(column, colIndex) in columnsConf"
-        :key="column.name"
-        :className="stylesConf.cellClass + ' iw-list-cell iw-list-header-cell'"
-        :data-column-name="column.name"
-        :style="setColumnStyles(colIndex)"
-        @click="(event:MouseEvent) => showHeaderContextMenu(event,colIndex)"
-      >
+      <div v-for="(column, colIdx) in columnsConf" :key="column.name"
+        :className="stylesConf.cellClass + ' iw-list-cell iw-list-header-cell'" :data-column-name="column.name"
+        :style="setColumnStyles(colIdx)" @click="(event: MouseEvent) => showHeaderContextMenu(event, colIdx)">
         <svg v-html="column.icon"></svg> {{ column.name }}
         <menu-comp ref="headerMenuCompRefs" className="iw-list-header-contextmenu">
-          <fixed-comp :current-col-idx="colIndex" :basic-conf="basicConf" :layout="listConf.layout"></fixed-comp>
+          <fixed-comp :current-col-idx="colIdx" :basic-conf="basicConf" :layout="listConf.layout"></fixed-comp>
         </menu-comp>
       </div>
     </div>
-    <div
-      v-for="(row, rowIndex) in listConf.layout.data"
-      :key="row[basicConf.pkColumnName]"
-      :data-pk="row[basicConf.pkColumnName]"
-      :className="stylesConf.rowClass + ' iw-list-row'"
-    >
-      <template v-for="(column, colIndex) in columnsConf" :key="column.name">
-        <div
-          :className="stylesConf.cellClass + ' iw-list-cell iw-list-row-cell'"
-          :data-column-name="column.name"
-          :data-row-idx="rowIndex"
-          :style="setColumnStyles(colIndex)"
-          @contextmenu.prevent="showRowContextMenu"
-        >
-          {{ row[column.name] }}
+    <template v-if="listConf.layout.data && !Array.isArray(listConf.layout.data)">
+      <div v-for="(row, rowIdx) in listConf.layout.data.records" :key="row[basicConf.pkColumnName]"
+        :data-pk="row[basicConf.pkColumnName]" :className="stylesConf.rowClass + ' iw-list-row'">
+        <template v-for="(column, colIndex) in columnsConf" :key="column.name">
+          <div :className="stylesConf.cellClass + ' iw-list-cell iw-list-row-cell'" :data-column-name="column.name"
+            :data-row-idx="rowIdx" :style="setColumnStyles(colIndex)" @contextmenu.prevent="showRowContextMenu">
+            {{ row[column.name] }}
+          </div>
+        </template>
+      </div>
+      <aggs-comp :styles-conf="stylesConf" :columns-conf="columnsConf" :layout-aggs="layout.aggs"
+        :data-basic="layout.data" :pk-column-name="listConf.basic.pkColumnName"
+        :set-column-styles="setColumnStyles"></aggs-comp>
+    </template>
+    <template v-else-if="listConf.layout.data && Array.isArray(listConf.layout.data)">
+      <template v-for="groupData in listConf.layout.data">
+        <div :data-group-value="groupData.groupValue" :className="stylesConf.rowClass + ' iw-list-row iw-list-group-row'">
+          xxx
+        </div>
+        <div v-for="(row, rowIdx) in groupData.records" :key="row[basicConf.pkColumnName]"
+          :data-pk="row[basicConf.pkColumnName]" :className="stylesConf.rowClass + ' iw-list-row'">
+          <template v-for="(column, colIndex) in columnsConf" :key="column.name">
+            <div :className="stylesConf.cellClass + ' iw-list-cell iw-list-row-cell'" :data-column-name="column.name"
+              :data-row-idx="rowIdx" :style="setColumnStyles(colIndex)" @contextmenu.prevent="showRowContextMenu">
+              {{ row[column.name] }}
+            </div>
+          </template>
         </div>
       </template>
-    </div>
+    </template>
     <menu-comp ref="rowMenuCompRef" className="iw-list-row-contextmenu">
       <delete-comp :select-pks="selectedDataPks" v-show="basicConf.editable"></delete-comp>
     </menu-comp>
   </div>
   <sort-comp :columns-conf="columnsConf"></sort-comp>
   <resize-comp :columns-conf="columnsConf"></resize-comp>
-  <fill-comp :columns-conf="columnsConf" :data="listConf.layout.data" :pkColumnName="listConf.basic.pkColumnName" v-if="basic.fillable"></fill-comp>
+  <fill-comp :columns-conf="columnsConf" :data="listConf.layout.data" :pk-column-name="listConf.basic.pkColumnName"
+    v-if="basic.fillable"></fill-comp>
 </template>
 
 <style lang="scss" scoped>
@@ -143,6 +153,7 @@ const showRowContextMenu = (event: MouseEvent) => {
   @include b('list-cell') {
     display: flex;
     align-items: center;
+
     &:hover {
       cursor: pointer;
       background-color: var(--el-color-info-light-7);
@@ -155,6 +166,11 @@ const showRowContextMenu = (event: MouseEvent) => {
     }
   }
 }
+</style>
+
+
+<style lang="scss">
+@import '../../../assets/main.scss';
 
 @include b('list-row') {
   display: flex;

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, provide, reactive, ref } from 'vue'
+import { onMounted, provide, reactive, ref, toRaw } from 'vue'
 import * as iconSvg from '../assets/icon'
 import { FN_ADD_DATA, FN_DELETE_DATA, FN_LOAD_CELL_OPTIONS_DATA, FN_LOAD_DATA, FN_UPDATE_DATA } from '../constant'
 import MenuComp from './common/menu.vue'
@@ -8,7 +8,6 @@ import ResizeComp from './function/resize/resize.vue'
 import * as List from './layout/list/conf'
 import ListComp from './layout/list/list.vue'
 import { OperatorKind, SizeKind, TableProps } from './props'
-import { markRaw } from 'vue'
 
 const props = defineProps<TableProps>()
 
@@ -17,14 +16,14 @@ const menuCompRef = ref()
 
 const layoutsConf = reactive<{ [key: string]: TableLayoutConf }>(_tableLayoutsConf)
 const styleConf = reactive<TableStyleConf>(_tableStyleConf)
-const currentLayoutId = ref<string>('default')
+const currentLayoutId = ref<string>(props.layouts?.find((l) => l.default)?.id || Object.values(layoutsConf).sort((a, b) => a.sort - b.sort)[0].id)
 
 // ------------- Common Events -------------
 async function loadData(layoutId?: string, moreForGroupedValue?: any) {
   const layout = layoutsConf[layoutId ? layoutId : currentLayoutId.value]
   let filters
   if (layout.filters) {
-    filters = markRaw(layout.filters)
+    filters = toRaw(layout.filters)
   }
   if (moreForGroupedValue) {
     let groupFilter = {
@@ -45,17 +44,21 @@ async function loadData(layoutId?: string, moreForGroupedValue?: any) {
   }
   let sorts
   if (layout.sorts) {
-    sorts = markRaw(layout.sorts)
+    sorts = toRaw(layout.sorts)
   }
   let group
   if (layout.group) {
-    group = markRaw(layout.group)
+    group = toRaw(layout.group)
+  }
+  let aggs
+  if (layout.aggs) {
+    aggs = toRaw(layout.aggs)
   }
   let slice
   if (layout.slice) {
-    slice = markRaw(layout.slice)
+    slice = toRaw(layout.slice)
   }
-  const resp = await props.events.loadData(filters, sorts, group, slice)
+  const resp = await props.events.loadData(filters, sorts, group, aggs, slice)
   if (Array.isArray(resp)) {
     // (Re)group query
     if (layout.data && Array.isArray(layout.data)) {
@@ -81,9 +84,9 @@ async function loadData(layoutId?: string, moreForGroupedValue?: any) {
   }
 }
 
-async function addData(newData: { [key: string]: any }[], afterPkId?: number, groupValue?: any, reFilter?: boolean, reSort?: boolean, reLoad?: boolean) {
-  let layout = layoutsConf[currentLayoutId.value]
-  if (props.events.saveData && (await props.events.saveData(newData))) {
+async function addData(newRecords: { [key: string]: any }[], afterPkId?: number, groupValue?: any, reFilter?: boolean, reSort?: boolean, reLoad?: boolean) {
+  const layout = layoutsConf[currentLayoutId.value]
+  if (props.events.saveData && (await props.events.saveData(newRecords))) {
     if (reLoad) {
       loadData()
       return
@@ -98,54 +101,78 @@ async function addData(newData: { [key: string]: any }[], afterPkId?: number, gr
     }
     if (data) {
       if (afterPkId) {
-        data.records.splice(afterPkId, 0, ...newData)
+        data.records.splice(afterPkId, 0, ...newRecords)
       } else {
-        data.records.splice(0, 0, ...newData)
+        data.records.splice(0, 0, ...newRecords)
       }
     }
   }
   // TODO agg清空，重新计算
 }
 
-async function updateData(changeData: { [key: string]: any }[], reFilter?: boolean, reSort?: boolean, reLoad?: boolean) {
-  let layout = layoutsConf[currentLayoutId.value]
-  if (props.events.saveData && (await props.events.saveData(changeData))) {
+async function updateData(changedRecords: { [key: string]: any }[], reFilter?: boolean, reSort?: boolean, reLoad?: boolean) {
+  const layout = layoutsConf[currentLayoutId.value]
+  if (props.events.saveData && (await props.events.saveData(changedRecords))) {
     if (reLoad) {
       loadData()
       return
     }
-    let changePks = changeData.map((item) => item[tableBasicConf.pkColumnName])
-    let changeItems
     if (Array.isArray(layout.data)) {
-      changeItems = layout.data.map((d)=> d.records).flat().filter((item) => changePks.includes(item[tableBasicConf.pkColumnName]))
+      layout.data.forEach(groupData => {
+        groupData.records.forEach((needChangeRecord) => {
+          const changedRecord = changedRecords.find((r) => r[tableBasicConf.pkColumnName] === needChangeRecord[tableBasicConf.pkColumnName])
+          if (changedRecord) {
+            for (let key in changedRecord) {
+              needChangeRecord[key] = changedRecord[key]
+            }
+          }
+        })
+      })
     } else if (layout.data && !Array.isArray(layout.data)) {
-      changeItems = layout.data.records.filter((item) => changePks.includes(item[tableBasicConf.pkColumnName]))
+      layout.data.records.forEach((needChangeRecord) => {
+        const changedRecord = changedRecords.find((r) => r[tableBasicConf.pkColumnName] === needChangeRecord[tableBasicConf.pkColumnName])
+        if (changedRecord) {
+          for (let key in changedRecord) {
+            needChangeRecord[key] = changedRecord[key]
+          }
+        }
+      })
     } else {
       // Empty,unreachable
     }
-    if (changeItems) {
-      changeItems.forEach((changeItem) => {
-        for (let key in changeData) {
-          changeItem[key] = changeData[key]
-        }
-      })
-    }
   }
+  // TODO agg清空，重新计算
 }
 
-async function deleteData(deletePks: string[] | number[], reFilter?: boolean, reSort?: boolean, reLoad?: boolean) {
-  let layout = layoutsConf[currentLayoutId.value]
-  if (props.events.deleteData && (await props.events.deleteData(deletePks))) {
+async function deleteData(deletedPks: any[], reFilter?: boolean, reSort?: boolean, reLoad?: boolean) {
+  const layout = layoutsConf[currentLayoutId.value]
+  if (props.events.deleteData && (await props.events.deleteData(deletedPks))) {
     if (reLoad) {
       loadData()
       return
     }
-    layout.data.forEach((item, idx) => {
-      if (deletePks.find((id) => id == item[tableBasicConf.pkColumnName])) {
-        layout.data.splice(idx, 1)
-      }
-    })
+    if (Array.isArray(layout.data)) {
+      layout.data.forEach((d) => {
+        d.records.forEach((item, idx) => {
+          if (deletedPks.includes(item[tableBasicConf.pkColumnName])) {
+            d.records.splice(idx, 1)
+          }
+        })
+      })
+    } else if (layout.data && !Array.isArray(layout.data)) {
+      layout.data.records.forEach((item, idx) => {
+        console.log('----' + item[tableBasicConf.pkColumnName])
+        console.log('--+--' + deletedPks)
+        if (deletedPks.includes(item[tableBasicConf.pkColumnName])) {
+          // @ts-ignore
+          layout.data.records.splice(idx, 1)
+        }
+      })
+    } else {
+      // Empty,unreachable
+    }
   }
+  // TODO agg清空，重新计算
 }
 
 async function loadCellOptions(columnName: string, cellValue: any): Promise<{ title: string; value: any }[]> {
@@ -204,15 +231,15 @@ const listConf = List.initConf(props, tableBasicConf)
       </template>
     </div>
     <div class="iw-tt-main">
-      <template v-for="(layout, layoutId) in layoutsConf">
-        <div className="iw-tt-toolbar" v-if="currentLayoutId == layoutId">
+      <template v-for="layout in  Object.values(layoutsConf).sort((a, b) => a.sort - b.sort)">
+        <div className="iw-tt-toolbar" v-if="currentLayoutId == layout.id">
           <div className="iw-tt-toolbar-main">main</div>
           <div className="iw-tt-toolbars-more">
             <resize-comp :size="styleConf.size" @size="(size: SizeKind) => styleConf.size = size"></resize-comp>
           </div>
         </div>
-        <div class="iw-tt-table" v-if="currentLayoutId == layoutId">
-          <list-comp :key="layoutId" :basic="listConf.basic" :columns="listConf.columns" :layout="layout"
+        <div class="iw-tt-table" v-if="currentLayoutId == layout.id">
+          <list-comp :key="layout.id" :basic="listConf.basic" :columns="listConf.columns" :layout="layout"
             :styles="listConf.styles" :global-styles="styleConf" />
         </div>
       </template>

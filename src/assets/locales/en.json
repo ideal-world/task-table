@@ -12,7 +12,14 @@
     },
     "group": {
       "agg": {
-        "sum": "SUM"
+        "count": "COUNT",
+        "sum": "SUM",
+        "max": "MAX VALUE",
+        "min": "MIN VALUE",
+        "distinct": "DISTINCT COUNT",
+        "avg": "AVERAGE",
+        "median": "MEDIAN VALUE",
+        "stddev": "STDDEV VALUE"
       }
     }
   },

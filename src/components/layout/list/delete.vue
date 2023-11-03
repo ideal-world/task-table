@@ -10,7 +10,7 @@ const props = defineProps<{
 let closeContextMenuFun = inject(FN_CLOSE_CONTEXT_MENU)
 let deleteDataFun = inject(FN_DELETE_DATA)
 
-const deleteData = (event: MouseEvent) => {
+const deleteData = () => {
   // @ts-ignore
   closeContextMenuFun()
   // @ts-ignore

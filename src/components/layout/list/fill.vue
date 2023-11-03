@@ -2,10 +2,11 @@
 import { inject, onMounted } from 'vue';
 import { FN_UPDATE_DATA } from '../../../constant';
 import { ListColumnConf } from './conf';
+import { TableDataGroupResp, TableDataResp } from '../../props';
 
 const props = defineProps<{
   columnsConf: ListColumnConf[]
-  data: { [key: string]: any }[]
+  data: TableDataResp | TableDataGroupResp[]
   pkColumnName: string
 }>()
 
@@ -56,19 +57,30 @@ onMounted(() => {
     const targetEle = event.target as HTMLElement
     targetEle.releasePointerCapture(event.pointerId)
     selectDiv.style.display = 'none'
-    let targetData = props.data[startRowIdx][startColumnName]
+
+    let records
+    // TODO
+    const groupValue = undefined
+    if (!groupValue) {
+      const data = props.data as TableDataResp
+      records = data.records
+    } else {
+      const data = props.data as TableDataGroupResp[]
+      records = data.find((item) => item.groupValue == groupValue)?.records ?? []
+    }
+    let targetData = records[startRowIdx][startColumnName]
     let changedData = []
     if (startRowIdx == movedRowIdx) {
       return
     } else if (startRowIdx < movedRowIdx) {
-      changedData = props.data.slice(startRowIdx + 1, movedRowIdx + 1).map((item) => {
+      changedData = records.slice(startRowIdx + 1, movedRowIdx + 1).map((item) => {
         return {
           [props.pkColumnName]: item[props.pkColumnName],
           [startColumnName]: targetData,
         }
       })
     } else {
-      changedData = props.data.slice(movedRowIdx, startRowIdx).map((item) => {
+      changedData = records.slice(movedRowIdx, startRowIdx).map((item) => {
         return {
           [props.pkColumnName]: item[props.pkColumnName],
           [startColumnName]: targetData,

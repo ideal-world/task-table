@@ -1,18 +1,28 @@
 <template>
   <div style="height: 400px">
-    <iw-task-table :columns="columns" :events="events"></iw-task-table>
+    <iw-task-table :columns="columns" :events="events" :layouts="layouts"></iw-task-table>
   </div>
 </template>
 
 <script setup lang="ts">
-import { TableFilterGroupProps, TableSortProps } from '../src/components/props'
+import { TableDataFilterReq, TableDataSortReq, TableDataGroupReq, DataKind, LayoutKind, AggregateKind } from '../src/components/props'
 
-const columns = [{ name: 'no', pk: true, fillable: false }, { name: 'name' }, { name: 'phone' }, { name: 'addr' }, { name: 'time' }]
+const columns = [{ name: 'no', pk: true, fillable: false, dataKind: DataKind.NUMBER }, { name: 'name' }, { name: 'phone' }, { name: 'addr' }, { name: 'time' }]
+const layouts = [{
+  id: "hi",
+  title: "HI",
+  layoutKind: LayoutKind.LIST,
+  aggs: { name: AggregateKind.MIN }
+}]
 const events = {
-  loadData: (filters: TableFilterGroupProps[], sorts: TableSortProps[], offsetRowNumber?: number, fetchRowNumber?: number) => {
+  loadData: () => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        resolve(data)
+        resolve({
+          records: data,
+          totalNumber: data.length,
+          aggs: {"name": "Name1"}
+        })
       }, 1000)
     })
   },
@@ -23,7 +33,7 @@ const events = {
       }, 1000)
     })
   },
-  deleteData: (ids: string[]) => {
+  deleteData: (deletedPks: string[]) => {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve(true)
