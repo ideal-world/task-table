@@ -1,67 +1,26 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import * as iconSvg from '../../../assets/icon'
-import MenuComp, { MenuOffsetKind, MenuSizeKind } from '../../common/menu.vue'
-import { SizeKind } from '../../props'
+import * as iconSvg from '../../../assets/icon';
+import { SizeKind } from '../../props';
 
 const props = defineProps<{
   size: SizeKind
 }>()
 const emit = defineEmits(['size'])
 
-const menuCompRef = ref()
-
-const showMenu = (event: MouseEvent) => {
-  const targetEle = event.target as HTMLElement
-  const selectedLayoutEle = targetEle.parentElement as HTMLElement
-  menuCompRef.value.show(selectedLayoutEle, MenuOffsetKind.RIGHT_BOTTOM, MenuSizeKind.SMALL)
-}
-
 function setSize(size: SizeKind) {
   emit('size', size)
-  // @ts-ignore
-  menuCompRef.value.close()
 }
 </script>
 
 <template>
-  <div className="iw-function-resize" @click="showMenu" :title="$t('function.resize.title')"><svg v-html="iconSvg.SIZE"></svg></div>
-  <menu-comp ref="menuCompRef">
-    <div class="iw-contextmenu__item iw-function-resize-items">
-      <svg
-        v-html="iconSvg.SIZE"
-        @click="setSize(SizeKind.MINI)"
-        :class="props.size == SizeKind.MINI ? 'iw-function-resize-items--active' : ''"
-        style="width: 0.8em; height: 0.8em; padding-right: 3px"
-      ></svg>
-      <svg
-        v-html="iconSvg.SIZE"
-        @click="setSize(SizeKind.SMALL)"
-        :class="props.size == SizeKind.SMALL ? 'iw-function-resize-items--active' : ''"
-        style="width: 1em; height: 1em; padding-right: 3px"
-      ></svg>
-      <svg
-        v-html="iconSvg.SIZE"
-        @click="setSize(SizeKind.MEDIUM)"
-        :class="props.size == SizeKind.MEDIUM ? 'iw-function-resize-items--active' : ''"
-        style="width: 1.2em; height: 1.2em; padding-right: 3px"
-      ></svg>
-      <svg
-        v-html="iconSvg.SIZE"
-        @click="setSize(SizeKind.LARGE)"
-        :class="props.size == SizeKind.LARGE ? 'iw-function-resize-items--active' : ''"
-        style="width: 1.5em; height: 1.5em"
-      ></svg>
-    </div>
-  </menu-comp>
+  <div class="iw-contextmenu__item w-full flex justify-between items-center">
+    <i :class="iconSvg.SIZE + ' cursor-pointer pr-1 text-xs' + (props.size == SizeKind.MINI ? ' text-primary' : '')"
+      @click="setSize(SizeKind.MINI)"></i>
+    <i :class="iconSvg.SIZE + ' cursor-pointer pr-1 text-sm' + (props.size == SizeKind.SMALL ? ' text-primary' : '')"
+      @click="setSize(SizeKind.SMALL)"></i>
+    <i :class="iconSvg.SIZE + ' cursor-pointer pr-1 text-base' + (props.size == SizeKind.MEDIUM ? ' text-primary' : '')"
+      @click="setSize(SizeKind.MEDIUM)"></i>
+    <i :class="iconSvg.SIZE + ' cursor-pointer pr-1 text-lg' + (props.size == SizeKind.LARGE ? ' text-primary' : '')"
+      @click="setSize(SizeKind.LARGE)"></i>
+  </div>
 </template>
-
-<style lang="scss" scoped>
-@import '../../../assets/main.scss';
-
-@include b('function-resize-items') {
-  @include m('active') {
-    color: var(--el-color-primary-light-3);
-  }
-}
-</style>

@@ -32,7 +32,8 @@ export function setFixedColumnStyles(styles: any, colIdx: number, fixedColumnIdx
     // TODO 判断left要小于视口宽度
     styles.left = columnsConf.slice(0, colIdx).reduce((count, col) => count + col.width, 0) + 'px'
     if (fixedColumnIdx == colIdx) {
-      styles.borderRight = '3px solid var(--el-border-color)'
+      // class: base-300
+      styles.borderRight = '3px solid hsl(var(--b3))'
     }
   } else {
     styles.position = 'static'
@@ -41,7 +42,9 @@ export function setFixedColumnStyles(styles: any, colIdx: number, fixedColumnIdx
 </script>
 
 <template>
-  <p className="iw-contextmenu__item" @click="setFixedColumn" style="cursor: pointer">
-    <svg v-html="iconSvg.LOCK"></svg> {{ props.currentColIdx == props.layout.fixedColumnIdx ? $t('list.fixed.unFixedTitle') : $t('list.fixed.fixedTitle') }}
-  </p>
+  <div class="iw-contextmenu__item" @click="setFixedColumn" style="cursor: pointer">
+    <i :class="iconSvg.LOCK"></i>
+    {{ props.currentColIdx == props.layout.fixedColumnIdx ? $t('list.fixed.unFixedTitle') : $t('list.fixed.fixedTitle') }}
+  </div>
 </template>
+

@@ -1,5 +1,6 @@
 import { App, defineCustomElement } from 'vue'
 import locales from './locales'
+import './assets/main.css'
 import { IwTaskTable } from './components'
 
 export default (app: App): void => {

@@ -1,0 +1,9 @@
+@import 'octicons-css/octicons.min.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+a {
+  text-decoration: none !important;
+}

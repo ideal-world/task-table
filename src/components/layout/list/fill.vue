@@ -22,23 +22,9 @@ let isDragging = false
 onMounted(() => {
   const listEle = document.getElementsByClassName('iw-list')[0] as HTMLElement
   const selectDiv = document.createElement('div')
-  selectDiv.style.position = 'absolute'
-  selectDiv.style.display = 'none'
-  selectDiv.style.zIndex = '1000'
-  selectDiv.style.border = '2px solid var(--el-color-primary-light-3)'
+  selectDiv.classList.add('iw-list-fill--select')
   const dragDiv = document.createElement('div')
-  dragDiv.style.position = 'absolute'
-  dragDiv.style.display = 'flex'
-  dragDiv.style.width = '28px'
-  dragDiv.style.height = '28px'
-  dragDiv.style.padding = '10px'
-  dragDiv.style.right = '-15px'
-  dragDiv.style.bottom = '-15px'
-  dragDiv.style.cursor = 'crosshair'
   const subDragDiv = document.createElement('div')
-  subDragDiv.style.flex = '1'
-  subDragDiv.style.border = '2px solid #FFF'
-  subDragDiv.style.backgroundColor = 'var(--el-color-primary-light-3)'
   dragDiv.appendChild(subDragDiv)
   selectDiv.appendChild(dragDiv)
   listEle.appendChild(selectDiv)
@@ -60,7 +46,7 @@ onMounted(() => {
 
     let records
     // TODO
-    const groupValue = undefined
+    const groupValue = 'Name1'
     if (!groupValue) {
       const data = props.data as TableDataResp
       records = data.records
@@ -134,6 +120,18 @@ onMounted(() => {
 })
 </script>
 
-<script lang="ts"></script>
-
 <template></template>
+
+<style lang="css">
+.iw-list-fill--select {
+  @apply absolute hidden z-[1000] border-solid border-2 border-primary;
+
+  &>div {
+    @apply absolute flex w-[28px] h-[28px] p-[10px] right-[-15px] bottom-[-15px] cursor-crosshair;
+
+    &>div {
+      @apply flex-1 border-solid border-2 border-base-100 bg-primary;
+    }
+  }
+}
+</style>

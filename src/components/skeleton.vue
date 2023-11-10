@@ -2,9 +2,10 @@
 import { onMounted, provide, reactive, ref, toRaw } from 'vue'
 import * as iconSvg from '../assets/icon'
 import { FN_ADD_DATA, FN_DELETE_DATA, FN_LOAD_CELL_OPTIONS_DATA, FN_LOAD_DATA, FN_UPDATE_DATA } from '../constant'
-import MenuComp from './common/menu.vue'
+import MenuComp, { MenuOffsetKind } from './common/menu.vue'
 import { TableLayoutConf, TableStyleConf, initConf } from './conf'
 import ResizeComp from './function/resize/resize.vue'
+import ThemeComp from './function/theme/theme.vue'
 import * as List from './layout/list/conf'
 import ListComp from './layout/list/list.vue'
 import { OperatorKind, SizeKind, TableProps } from './props'
@@ -12,7 +13,8 @@ import { OperatorKind, SizeKind, TableProps } from './props'
 const props = defineProps<TableProps>()
 
 const [tableBasicConf, _tableLayoutsConf, _tableStyleConf] = initConf(props)
-const menuCompRef = ref()
+const menuLayoutCompRef = ref()
+const menuMoreCompRef = ref()
 
 const layoutsConf = reactive<{ [key: string]: TableLayoutConf }>(_tableLayoutsConf)
 const styleConf = reactive<TableStyleConf>(_tableStyleConf)
@@ -161,8 +163,6 @@ async function deleteData(deletedPks: any[], reFilter?: boolean, reSort?: boolea
       })
     } else if (layout.data && !Array.isArray(layout.data)) {
       layout.data.records.forEach((item, idx) => {
-        console.log('----' + item[tableBasicConf.pkColumnName])
-        console.log('--+--' + deletedPks)
         if (deletedPks.includes(item[tableBasicConf.pkColumnName])) {
           // @ts-ignore
           layout.data.records.splice(idx, 1)
@@ -214,119 +214,56 @@ onMounted(async () => {
 const showLayoutMenu = (event: MouseEvent) => {
   const targetEle = event.target as HTMLElement
   const selectedLayoutEle = targetEle.parentElement as HTMLElement
-  menuCompRef.value.show(selectedLayoutEle)
+  menuLayoutCompRef.value.show(selectedLayoutEle)
+}
+
+const showMoreMenu = (event: MouseEvent) => {
+  const targetEle = event.target as HTMLElement
+  menuMoreCompRef.value.show(targetEle, MenuOffsetKind.RIGHT_BOTTOM)
 }
 
 const listConf = List.initConf(props, tableBasicConf)
 </script>
 
 <template>
-  <div :className="styleConf.tableClass + ' iw-tt'" :id="tableBasicConf.tableId">
-    <div class="iw-tt-header">
-      <template v-for="(layout, layoutId) in layoutsConf">
-        <div
-          :class="currentLayoutId == layoutId ? 'iw-tt-header__item iw-tt-header__item--active' : 'iw-tt-header__item'">
-          <svg v-html="layout.icon"></svg> {{ layout.title }}<svg @click="showLayoutMenu" v-html="iconSvg.MORE1"></svg>
-        </div>
-      </template>
+  <div :class="styleConf.tableClass + ' iw-tt w-full text-base text-base-content bg-base-100'"
+    :id="tableBasicConf.tableId">
+    <div class=" iw-tt-header navbar p-0 min-h-0">
+      <div class="flex-1">
+        <template v-for="(layout, layoutId) in layoutsConf">
+          <a :class="'iw-tt-header__item tab tab-bordered ' + (currentLayoutId == layoutId ? 'tab-active' : '') + ' flex flex-col'"
+            @contextmenu.prevent="showLayoutMenu">
+            <i :class="layout.icon + ''"></i> {{ layout.title }}
+          </a>
+        </template>
+      </div>
+      <div class="flex-none">
+        <a class="cursor-pointer" @click="showMoreMenu"><i :class="iconSvg.MORE"></i></a>
+        <menu-comp ref="menuMoreCompRef">
+          <resize-comp :size="styleConf.size" @size="(size: SizeKind) => styleConf.size = size"></resize-comp>
+          <theme-comp></theme-comp>
+        </menu-comp>
+      </div>
     </div>
     <div class="iw-tt-main">
       <template v-for="layout in  Object.values(layoutsConf).sort((a, b) => a.sort - b.sort)">
-        <div className="iw-tt-toolbar" v-if="currentLayoutId == layout.id">
-          <div className="iw-tt-toolbar-main">main</div>
-          <div className="iw-tt-toolbars-more">
-            <resize-comp :size="styleConf.size" @size="(size: SizeKind) => styleConf.size = size"></resize-comp>
+        <div class="iw-tt-toolbar flex items-center justify-between h-10" v-if="currentLayoutId == layout.id">
+          <div class="iw-tt-toolbar-main flex ">main</div>
+          <div class="iw-tt-toolbars-more flex">
+            more...
           </div>
         </div>
-        <div class="iw-tt-table" v-if="currentLayoutId == layout.id">
+        <div class="iw-tt-table overflow-auto w-full" v-if="currentLayoutId == layout.id">
           <list-comp :key="layout.id" :basic="listConf.basic" :columns="listConf.columns" :layout="layout"
             :styles="listConf.styles" :global-styles="styleConf" />
         </div>
       </template>
     </div>
   </div>
-  <menu-comp ref="menuCompRef" className="iw-tt-contextmenu">
-    <div class="iw-contextmenu__item"><svg v-html="iconSvg.RENAME"></svg> <input
-        v-model="layoutsConf[currentLayoutId].title" /></div>
+  <menu-comp ref="menuLayoutCompRef">
+    <div class="iw-contextmenu__item">
+      <i :class="iconSvg.RENAME"></i>
+      <input class="input input-bordered input-sm" type="text" v-model="layoutsConf[currentLayoutId].title" />
+    </div>
   </menu-comp>
 </template>
-
-<style lang="scss" scoped>
-@import '../assets/main.scss';
-
-@include b('tt') {
-  margin: 0;
-  padding: 0;
-  font-size: 11pt;
-  width: 100%;
-}
-
-@include b('tt-header') {
-  display: flex;
-  align-items: center;
-  padding: 2px;
-  margin: 0;
-  border-bottom: 1px solid var(--el-border-color);
-
-  @include e('item') {
-    display: flex;
-    align-items: center;
-    padding: 1px;
-    margin: 0;
-    cursor: pointer;
-    border: 1px solid var(--el-border-color);
-    border-radius: 6px;
-
-    & svg {
-      width: 1em;
-      height: 1em;
-      margin-right: 3px;
-    }
-
-    @include m('active') {
-      background-color: var(--el-color-info-light-7);
-    }
-  }
-}
-
-@include b('tt-toolbar') {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  height: 40px;
-}
-
-@include b('tt-toolbar-main') {
-  display: flex;
-}
-
-@include b('tt-toolbar-more') {
-  display: flex;
-}
-
-@include b('tt-table') {
-  overflow: auto;
-  width: 100%;
-}
-</style>
-
-<style lang="scss">
-@import '../assets/main.scss';
-
-@include b('tt-toolbar') {
-  & svg {
-    width: 1em;
-    height: 1em;
-    margin-right: 3px;
-  }
-
-  &>div>div {
-    display: flex;
-    align-items: center;
-    padding: 6px;
-    margin: 0;
-    cursor: pointer;
-  }
-}
-</style>

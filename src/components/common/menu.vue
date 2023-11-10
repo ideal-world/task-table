@@ -72,7 +72,6 @@ function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: MenuOffset
     }
   }
   const contextMenuEle = contextmenu.value as HTMLElement
-  contextMenuEle.classList.add('iw-contextmenu')
   contextMenuEle.style.minHeight = minHeight + 'px'
   contextMenuEle.style.minWidth = minWidth + 'px'
   contextMenuEle.style.left = left + 'px'
@@ -128,37 +127,8 @@ export enum MenuSizeKind {
 </script>
 
 <template>
-  <div ref="contextmenu" className="iw-contextmenu" v-show="isShow">
+  <div ref="contextmenu"
+    class="iw-contextmenu flex flex-col items-start fixed z-[3000] shadow bg-base-100 p-1 rounded-md" v-show="isShow">
     <slot></slot>
   </div>
 </template>
-
-<style lang="scss">
-@import '../../assets/main.scss';
-
-@include b('contextmenu') {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  position: fixed;
-  z-index: 3000;
-  border-radius: 3px;
-  background-color: var(--el-bg-color);
-  border: 1px solid var(--el-border-color);
-  box-shadow: 0 0 5px var(--el-border-color);
-
-  @include e('item') {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    margin: 0;
-
-    & svg {
-      width: 1em;
-      height: 1em;
-      margin-right: 3px;
-    }
-  }
-}
-</style>
-
