@@ -2,7 +2,7 @@
 import { reactive, ref } from 'vue'
 import MenuComp from '../../common/menu.vue'
 import { TableLayoutConf, TableStyleConf } from '../../conf'
-import { DataKind, SizeKind } from '../../props'
+import { DataKind, SizeKind, TableDataResp } from '../../props'
 import { ListBasicConf, ListColumnConf, ListConf, ListStyleConf } from './conf'
 import DeleteComp from './delete.vue'
 import FillComp from './fill.vue'
@@ -78,13 +78,13 @@ const showRowContextMenu = (event: MouseEvent) => {
           </div>
         </template>
       </div>
-      <aggs-comp :styles-conf="stylesConf" :columns-conf="columnsConf" :layout-aggs="layout.aggs"
-        :data-basic="layout.data" :pk-column-name="listConf.basic.pkColumnName"
+      <aggs-comp :styles-conf="stylesConf" :columns-conf="columnsConf" :layout-aggs="layout.aggs!"
+        :data-basic="(layout.data as TableDataResp)" :pk-column-name="listConf.basic.pkColumnName"
         :set-column-styles="setColumnStyles"></aggs-comp>
     </template>
     <template v-else-if="listConf.layout.data && Array.isArray(listConf.layout.data)">
       <template v-for="groupData in listConf.layout.data">
-        <aggs-comp :styles-conf="stylesConf" :columns-conf="columnsConf" :layout-aggs="layout.aggs"
+        <aggs-comp :styles-conf="stylesConf" :columns-conf="columnsConf" :layout-aggs="layout.aggs!"
           :data-basic="groupData" :pk-column-name="listConf.basic.pkColumnName" :group-value="groupData.groupValue"
           :set-column-styles="setColumnStyles"></aggs-comp>
         <div v-for="(row, rowIdx) in groupData.records" :key="row[basicConf.pkColumnName]"
@@ -107,13 +107,14 @@ const showRowContextMenu = (event: MouseEvent) => {
   </div>
   <sort-comp :columns-conf="columnsConf"></sort-comp>
   <resize-comp :columns-conf="columnsConf"></resize-comp>
-  <fill-comp :columns-conf="columnsConf" :data="listConf.layout.data" :pk-column-name="listConf.basic.pkColumnName"
+  <fill-comp :columns-conf="columnsConf" :data="listConf.layout.data!" :pk-column-name="listConf.basic.pkColumnName"
     v-if="basic.fillable"></fill-comp>
 </template>
 
 <style lang="css" scoped>
 .iw-list--size-mini {
   @apply text-xs;
+
   .iw-list-cell {
     @apply p-0
   }
@@ -121,6 +122,7 @@ const showRowContextMenu = (event: MouseEvent) => {
 
 .iw-list--size-small {
   @apply text-sm;
+
   .iw-list-cell {
     @apply p-0.5
   }
@@ -128,6 +130,7 @@ const showRowContextMenu = (event: MouseEvent) => {
 
 .iw-list--size-medium {
   @apply text-base;
+
   .iw-list-cell {
     @apply p-1
   }
@@ -135,8 +138,8 @@ const showRowContextMenu = (event: MouseEvent) => {
 
 .iw-list--size-large {
   @apply text-lg;
+
   .iw-list-cell {
     @apply p-2
   }
-}
-</style>
+}</style>
