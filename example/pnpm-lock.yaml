@@ -6,7 +6,7 @@ settings:
 
 dependencies:
   task-table:
-    specifier: file:..
+    specifier: file:../
     version: file:..(vue@3.3.8)
   vue:
     specifier: ^3.3.8

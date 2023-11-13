@@ -8,7 +8,8 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     Aggs: typeof import('./src/components/layout/list/aggs.vue')['default']
-    copy: typeof import('./src/components/layout/list/delete copy.vue')['default']
+    Rows: typeof import('./src/components/layout/list/rows.vue')['default']
+    Wrap: typeof import('./src/components/layout/list/wrap.vue')['default']
     Delete: typeof import('./src/components/layout/list/delete.vue')['default']
     Event: typeof import('./src/components/event.vue')['default']
     Fill: typeof import('./src/components/layout/list/fill.vue')['default']
