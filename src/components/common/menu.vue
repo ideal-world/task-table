@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { provide, ref } from 'vue'
 import { FN_CLOSE_CONTEXT_MENU } from '../../constant'
+import { IwUtils } from '../../utils';
 
 const contextmenu = ref<HTMLElement | null>(null)
 const isShow = ref<boolean>(false)
 
 function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: MenuOffsetKind = MenuOffsetKind.LEFT_BOTTOM, size: MenuSizeKind = MenuSizeKind.MEDIUM) {
-  if (attachObj instanceof HTMLElement && attachObj.classList.contains('iw-contextmenu__item')) {
+  if (attachObj instanceof HTMLElement && IwUtils.hasParentWithClass(attachObj, 'iw-contextmenu__item')) {
     // Prevent accidental triggering from items
     return
   }
@@ -127,8 +128,8 @@ export enum MenuSizeKind {
 </script>
 
 <template>
-  <div ref="contextmenu"
-    class="iw-contextmenu flex flex-col items-start fixed z-[3000] shadow bg-base-100 p-1 rounded-md" v-show="isShow">
+  <div ref="contextmenu" class="iw-contextmenu flex flex-col items-start fixed z-[3000] shadow bg-base-100 p-1 rounded-md"
+    v-show="isShow">
     <slot></slot>
   </div>
 </template>

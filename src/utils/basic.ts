@@ -1,6 +1,15 @@
 export const groupBy = <T>(array: T[], predicate: (value: T, index: number, array: T[]) => string) =>
   array.reduce((acc, value, index, array) => {
-    ;(acc[predicate(value, index, array)] ||= []).push(value)
+    ; (acc[predicate(value, index, array)] ||= []).push(value)
     return acc
   }, {} as { [key: string]: T[] })
 
+export const hasParentWithClass = (element: HTMLElement | null, className: string): boolean => {
+  while (element) {
+    if (element.classList && element.classList.contains(className)) {
+      return true
+    }
+    element = element.parentElement;
+  }
+  return false
+}
