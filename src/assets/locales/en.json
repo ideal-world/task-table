@@ -30,6 +30,10 @@
     },
     "delete": {
       "title": "Delete"
+    },
+    "wrap": {
+      "wrap": "Break words",
+      "unWrap": "No break words"
     }
   }
 }

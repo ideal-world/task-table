@@ -10,6 +10,7 @@ import FixedComp, { setFixedColumnStyles } from './fixed.vue'
 import ResizeComp from './resize.vue'
 import RowsComp from './rows.vue'
 import SortComp from './sort.vue'
+import WrapComp from './wrap.vue'
 
 const listConf = defineProps<
   ListConf & {
@@ -49,6 +50,7 @@ const showHeaderContextMenu = (event: MouseEvent, colIdx: number) => {
         <i :class="column.icon"></i> {{ column.name }}
         <menu-comp ref="headerMenuCompRefs">
           <fixed-comp :current-col-idx="colIdx" :basic-conf="basicConf" :layout="listConf.layout"></fixed-comp>
+          <wrap-comp :column-conf="column"></wrap-comp>
         </menu-comp>
       </div>
     </div>

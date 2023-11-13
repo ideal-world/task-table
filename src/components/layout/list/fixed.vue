@@ -42,7 +42,7 @@ export function setFixedColumnStyles(styles: any, colIdx: number, fixedColumnIdx
 </script>
 
 <template>
-  <div class="iw-contextmenu__item" @click="setFixedColumn" style="cursor: pointer">
+  <div class="iw-contextmenu__item cursor-pointer" @click="setFixedColumn">
     <i :class="iconSvg.LOCK"></i>
     {{ props.currentColIdx == props.layout.fixedColumnIdx ? $t('list.fixed.unFixedTitle') : $t('list.fixed.fixedTitle') }}
   </div>
