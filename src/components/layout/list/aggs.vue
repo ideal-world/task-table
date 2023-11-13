@@ -1,18 +1,17 @@
 <script setup lang="ts">
-import { inject, onMounted, ref } from 'vue';
+import { inject, ref } from 'vue';
+import { FN_LOAD_DATA } from '../../../constant';
+import MenuComp, { MenuOffsetKind, MenuSizeKind } from '../../common/menu.vue';
 import { showGroupAggMappingByDataKind, translateGroupAgg } from '../../function/group/group';
 import { AggregateKind, TableDataResp } from '../../props';
 import { ListColumnConf, ListStyleConf } from './conf';
-import MenuComp from '../../common/menu.vue'
-import { MenuOffsetKind, MenuSizeKind } from '../../common/menu.vue';
-import { FN_LOAD_DATA } from '../../../constant';
 
 const props = defineProps<{
-  stylesConf: ListStyleConf
-  columnsConf: ListColumnConf[]
   layoutAggs: { [key: string]: AggregateKind }
   dataBasic: TableDataResp
   pkColumnName: string
+  columnsConf: ListColumnConf[]
+  stylesConf: ListStyleConf
   groupValue?: string
   setColumnStyles: (colIdx: number) => any
 }>()

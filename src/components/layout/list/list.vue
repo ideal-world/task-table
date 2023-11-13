@@ -2,13 +2,13 @@
 import { reactive, ref } from 'vue'
 import MenuComp from '../../common/menu.vue'
 import { TableLayoutConf, TableStyleConf } from '../../conf'
-import { DataKind, SizeKind, TableDataResp } from '../../props'
-import { ListBasicConf, ListColumnConf, ListConf, ListStyleConf } from './conf'
-import DeleteComp from './delete.vue'
-import FillComp from './fill.vue'
+import { TableDataResp } from '../../props'
 import AggsComp from './aggs.vue'
+import { ListBasicConf, ListColumnConf, ListConf, ListStyleConf } from './conf'
+import FillComp from './fill.vue'
 import FixedComp, { setFixedColumnStyles } from './fixed.vue'
 import ResizeComp from './resize.vue'
+import RowsComp from './rows.vue'
 import SortComp from './sort.vue'
 
 const listConf = defineProps<
@@ -21,9 +21,7 @@ const listConf = defineProps<
 const basicConf = reactive<ListBasicConf>(listConf.basic)
 const columnsConf = reactive<ListColumnConf[]>(listConf.columns)
 const stylesConf = reactive<ListStyleConf>(listConf.styles)
-const selectedDataPks = ref<string[] | number[] | undefined>()
 const headerMenuCompRefs = ref()
-const rowMenuCompRef = ref()
 
 const setColumnStyles = (colIdx: number) => {
   const styles: any = {}
@@ -35,17 +33,6 @@ const setColumnStyles = (colIdx: number) => {
 const showHeaderContextMenu = (event: MouseEvent, colIdx: number) => {
   const targetEle = event.target as HTMLElement
   headerMenuCompRefs.value[colIdx].show(targetEle)
-}
-
-const showRowContextMenu = (event: MouseEvent) => {
-  const targetEle = event.target as HTMLElement
-  const selectedRowEle = targetEle.parentElement as HTMLElement
-  if (columnsConf.find((col) => col.name == basicConf.pkColumnName)?.dataKind == DataKind.NUMBER) {
-    selectedDataPks.value = [parseInt(selectedRowEle.dataset.pk as string)]
-  } else {
-    selectedDataPks.value = [selectedRowEle.dataset.pk as string]
-  }
-  rowMenuCompRef.value.show(event)
 }
 
 </script>
@@ -66,44 +53,22 @@ const showRowContextMenu = (event: MouseEvent) => {
       </div>
     </div>
     <template v-if="listConf.layout.data && !Array.isArray(listConf.layout.data)">
-      <div v-for="(row, rowIdx) in listConf.layout.data.records" :key="row[basicConf.pkColumnName]"
-        :data-pk="row[basicConf.pkColumnName]"
-        :class="stylesConf.rowClass + ' iw-list-row flex border-r border-r-base-300'">
-        <template v-for="(column, colIdx) in columnsConf" :key="column.name">
-          <div
-            :class="stylesConf.cellClass + ' iw-list-cell iw-list-row-cell flex items-center bg-base-100 border-solid border-b border-b-base-300 border-l  border-l-base-300 hover:bg-base-200'"
-            :data-column-name="column.name" :data-row-idx="rowIdx" :style="setColumnStyles(colIdx)"
-            @contextmenu.prevent="showRowContextMenu">
-            {{ row[column.name] }}
-          </div>
-        </template>
-      </div>
-      <aggs-comp :styles-conf="stylesConf" :columns-conf="columnsConf" :layout-aggs="layout.aggs!"
-        :data-basic="(layout.data as TableDataResp)" :pk-column-name="listConf.basic.pkColumnName"
+      <rows-comp :records="listConf.layout.data.records" :pk-column-name="basicConf.pkColumnName"
+        :columns-conf="columnsConf" :styles-conf="stylesConf" :editable="basicConf.editable"
+        :set-column-styles="setColumnStyles"></rows-comp>
+      <aggs-comp :layout-aggs="layout.aggs!" :data-basic="(layout.data as TableDataResp)"
+        :pk-column-name="listConf.basic.pkColumnName" :columns-conf="columnsConf" :styles-conf="stylesConf"
         :set-column-styles="setColumnStyles"></aggs-comp>
     </template>
     <template v-else-if="listConf.layout.data && Array.isArray(listConf.layout.data)">
       <template v-for="groupData in listConf.layout.data">
-        <aggs-comp :styles-conf="stylesConf" :columns-conf="columnsConf" :layout-aggs="layout.aggs!"
-          :data-basic="groupData" :pk-column-name="listConf.basic.pkColumnName" :group-value="groupData.groupValue"
+        <aggs-comp :layout-aggs="layout.aggs!" :data-basic="groupData" :pk-column-name="listConf.basic.pkColumnName"
+          :columns-conf="columnsConf" :styles-conf="stylesConf" :group-value="groupData.groupValue"
           :set-column-styles="setColumnStyles"></aggs-comp>
-        <div v-for="(row, rowIdx) in groupData.records" :key="row[basicConf.pkColumnName]"
-          :data-pk="row[basicConf.pkColumnName]"
-          :class="stylesConf.rowClass + ' iw-list-row flex border-r border-r-base-300'">
-          <template v-for="(column, colIdx) in columnsConf" :key="column.name">
-            <div
-              :class="stylesConf.cellClass + ' iw-list-cell iw-list-row-cell flex items-center bg-base-100 border-solid border-b border-b-base-300 border-l border-l-base-300 hover:bg-base-200'"
-              :data-column-name="column.name" :data-row-idx="rowIdx" :style="setColumnStyles(colIdx)"
-              @contextmenu.prevent="showRowContextMenu">
-              {{ row[column.name] }}
-            </div>
-          </template>
-        </div>
+        <rows-comp :records="groupData.records" :pk-column-name="basicConf.pkColumnName" :columns-conf="columnsConf"
+          :styles-conf="stylesConf" :editable="basicConf.editable" :set-column-styles="setColumnStyles"></rows-comp>
       </template>
     </template>
-    <menu-comp ref="rowMenuCompRef">
-      <delete-comp :select-pks="selectedDataPks" v-show="basicConf.editable"></delete-comp>
-    </menu-comp>
   </div>
   <sort-comp :columns-conf="columnsConf"></sort-comp>
   <resize-comp :columns-conf="columnsConf"></resize-comp>
@@ -142,4 +107,5 @@ const showRowContextMenu = (event: MouseEvent) => {
   .iw-list-cell {
     @apply p-2
   }
-}</style>
+}
+</style>
