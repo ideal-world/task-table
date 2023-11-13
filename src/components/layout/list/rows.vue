@@ -2,6 +2,8 @@
 import { ref } from 'vue';
 import { DataKind } from '../../props';
 import { ListColumnConf, ListStyleConf } from './conf';
+import MenuComp from '../../common/menu.vue'
+import DeleteComp from './delete.vue'
 
 const props = defineProps<{
   records: { [key: string]: any }[]
