@@ -33,7 +33,7 @@ const showRowContextMenu = (event: MouseEvent) => {
     :class="props.stylesConf.rowClass + ' iw-list-row flex border-r border-r-base-300'">
     <template v-for="(column, colIdx) in props.columnsConf" :key="column.name">
       <div
-        :class="props.stylesConf.cellClass + ' iw-list-cell iw-list-row-cell flex items-center bg-base-100 border-solid border-b border-b-base-300 border-l border-l-base-300 hover:bg-base-200'"
+        :class="props.stylesConf.cellClass + ' iw-list-cell iw-list-row-cell flex items-center bg-base-100 border-solid border-b border-b-base-300 border-l border-l-base-300 hover:bg-base-200 ' + (column.wrap ? 'break-words' : '')"
         :data-column-name="column.name" :data-row-idx="rowIdx" :style="props.setColumnStyles(colIdx)"
         @contextmenu.prevent="showRowContextMenu">
         {{ row[column.name] }}

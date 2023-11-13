@@ -21,6 +21,7 @@ export interface ListColumnConf {
     dataKind: DataKind
     width: number
     fillable: boolean
+    wrap: boolean
 }
 
 export interface ListStyleConf {
@@ -100,7 +101,8 @@ export function initConf(props: TableProps, basicConf: TableBasicConf): ListConf
             dataKind: column.dataKind ?? DataKind.TEXT,
             pk: column.pk ?? false,
             width: column.width ?? 200,
-            fillable: column.fillable ?? true
+            fillable: column.fillable ?? true,
+            wrap: column.wrap ?? true
         }
     })
     const listStyleConf = {

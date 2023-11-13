@@ -49,7 +49,7 @@ const events = {
 
 
 const data1 = [
-  { no: 1, name: 'Name1', phone: 'Phone1', addr: 'Addr1', time: '2023-10-23' },
+  { no: 1, name: 'Name1', phone: 'Phone1', addr: 'Addr1 Addr1 Addr1 Addr1 Addr1 Addr1', time: '2023-10-23' },
   { no: 2, name: 'Name2', phone: 'Phone2', addr: 'Addr2', time: '2023-10-24' },
   { no: 3, name: 'Name3', phone: 'Phone3', addr: 'Addr3', time: '2023-10-25' },
   { no: 4, name: 'Name4', phone: 'Phone4', addr: 'Addr4', time: '2023-10-26' },
@@ -87,7 +87,7 @@ const resp1 = {
 }
 
 const data2 = [
-  { no: 1, name: 'Name1', phone: 'Phone1', addr: 'Addr1', time: '2023-10-23' },
+  { no: 1, name: 'Name1', phone: 'Phone1', addr: 'Addr1 Addr1 Addr1 Addr1 Addr1 Addr1', time: '2023-10-23' },
   { no: 2, name: 'Name1', phone: 'Phone2', addr: 'Addr2', time: '2023-10-24' },
   { no: 3, name: 'Name1', phone: 'Phone3', addr: 'Addr3', time: '2023-10-25' },
   { no: 4, name: 'Name1', phone: 'Phone4', addr: 'Addr4', time: '2023-10-26' },

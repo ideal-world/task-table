@@ -84,6 +84,7 @@ export interface TableColumnProps {
     filterable?: boolean
     editable?: boolean
     fillable?: boolean
+    wrap?: boolean
     width?: number
 }
 
