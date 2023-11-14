@@ -1,22 +1,15 @@
 import { defineConfig } from 'vite'
-import AutoImport from 'unplugin-auto-import/vite'
-import Icons from 'unplugin-icons/vite'
-import IconsResolver from 'unplugin-icons/resolver'
 import vue from '@vitejs/plugin-vue'
+import Components from 'unplugin-vue-components/vite'
 import * as path from "path";
 
 export default defineConfig({
     plugins: [
         vue(),
-        AutoImport({
-            resolvers: [
-                IconsResolver({
-                    prefix: 'Icon'
-                })
-            ]
-        }),
-        Icons({
-            autoInstall: true
+        Components({
+            dirs: ['src/components'],
+            extensions: ['vue'],
+            dts: 'components.d.ts'
         })
     ],
     build: {
@@ -27,7 +20,7 @@ export default defineConfig({
             fileName: (format) => `task-table.${format}.js`
         },
         rollupOptions: {
-            external: ['vue', 'vue-i18n', 'vanilla-framework', 'sortablejs'],
+            external: ['vue', 'vue-i18n', 'octicons-css', 'theme-change', 'sortablejs'],
             output: {
                 exports: 'named',
                 globals: {
