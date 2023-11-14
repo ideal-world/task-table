@@ -27,14 +27,14 @@
     "rowSelect":{
       "acrossGroupError": "不能跨分组选择"
     },
-    "fixed": {
+    "columnFixed": {
       "fixedTitle": "固定",
       "unFixedTitle": "取消固定"
     },
-    "delete": {
+    "rowDelete": {
       "title": "删除"
     },
-    "wrap": {
+    "cellWrap": {
       "wrap": "换行",
       "unWrap": "取消换行"
     }

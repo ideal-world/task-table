@@ -20,6 +20,6 @@ const deleteData = () => {
 
 <template>
   <div class="iw-contextmenu__item" @click="deleteData" style="cursor: pointer">
-    <i :class="iconSvg.DELETE"></i> {{ $t('list.delete.title') }}
+    <i :class="iconSvg.DELETE"></i> {{ $t('list.rowDelete.title') }}
   </div>
 </template>

@@ -27,14 +27,14 @@
     "rowSelect":{
       "acrossGroupError": "Cannot select across groups"
     },
-    "fixed": {
+    "columnFixed": {
       "fixedTitle": "Fixed",
       "unFixedTitle": "UnFixed"
     },
-    "delete": {
+    "rowDelete": {
       "title": "Delete"
     },
-    "wrap": {
+    "cellWrap": {
       "wrap": "Break words",
       "unWrap": "No break words"
     }

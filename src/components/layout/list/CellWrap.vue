@@ -17,7 +17,7 @@ const setWrapColumn = () => {
 
 <template>
   <div class="iw-contextmenu__item flex justify-between content-center w-full">
-    <span>{{ props.columnConf.wrap ? $t('list.wrap.unWrap') : $t('list.wrap.wrap') }}</span>
+    <span>{{ props.columnConf.wrap ? $t('list.cellWrap.unWrap') : $t('list.cellWrap.wrap') }}</span>
     <input type="checkbox" class="toggle toggle-sm " v-model="props.columnConf.wrap" @click="setWrapColumn" />
   </div>
 </template>

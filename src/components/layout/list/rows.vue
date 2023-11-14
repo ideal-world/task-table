@@ -38,7 +38,7 @@ const showRowContextMenu = (event: MouseEvent) => {
     </template>
   </div>
   <menu-comp ref="rowMenuCompRef">
-    <row-delete-comp :select-pks="selectedDataPks" v-show="props.editable"></row-delete-comp>
+    <row-delete-comp :select-pks="selectedDataPks" v-show="props.editable && selectedDataPks.length > 0"></row-delete-comp>
   </menu-comp>
   <row-select-comp :select-pks="selectedDataPks" :pk-column-name="pkColumnName"
     :pk-kind-is-number="pkKindIsNumber"></row-select-comp>
