@@ -1,5 +1,8 @@
 export const FN_LOAD_DATA = 'loadData'
 export const FN_ADD_DATA = 'addData'
+export const FN_NEW_COLUMN = 'newColumn'
+export const FN_MODIFY_COLUMN = 'modifyColumn'
+export const FN_DELETE_COLUMN = 'deleteColumn'
 export const FN_UPDATE_DATA = 'updateData'
 export const FN_DELETE_DATA = 'deleteData'
 export const FN_LOAD_CELL_OPTIONS_DATA = 'loadCellOptions'

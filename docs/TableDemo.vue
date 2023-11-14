@@ -6,7 +6,7 @@
 </template>
 
 <script setup lang="ts">
-import { DataKind, LayoutKind, AggregateKind } from '../src/components/props'
+import { DataKind, LayoutKind, AggregateKind, TableColumnProps } from '../src/components/props'
 
 const columns = [{ name: 'no', pk: true, fillable: false, dataKind: DataKind.NUMBER }, { name: 'name' }, { name: 'phone' }, { name: 'addr' }, { name: 'time' }]
 const layouts = [{
@@ -23,7 +23,7 @@ const group = {
 }
 
 const events = {
-  loadData: () => {
+  loadData: async () => {
     return new Promise((resolve) => {
       setTimeout(() => {
         // resolve(resp1)
@@ -31,20 +31,41 @@ const events = {
       }, 1000)
     })
   },
-  saveData: (data: { [key: string]: any }[]) => {
+  saveData: async (data: { [key: string]: any }[]) => {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve(true)
       }, 1000)
     })
   },
-  deleteData: (deletedPks: string[]) => {
+  deleteData: async (deletedPks: string[]) => {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve(true)
       }, 1000)
     })
   },
+  newColumn: async (newColumnConf: TableColumnProps, fromColumnName?: string) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(true)
+      }, 1000)
+    })
+  },
+  modifyColumn: async (changedColumnConf: TableColumnProps) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(true)
+      }, 1000)
+    })
+  },
+  deleteColumn: async (deletedColumnName: string) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(true)
+      }, 1000)
+    })
+  }
 }
 
 

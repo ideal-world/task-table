@@ -1,8 +1,12 @@
 <script setup lang="ts">
-import { inject, onMounted } from 'vue';
-import { FN_UPDATE_DATA } from '../../../constant';
-import { ListColumnConf } from './conf';
-import { TableDataGroupResp, TableDataResp } from '../../props';
+import { inject, onMounted } from 'vue'
+import { FN_UPDATE_DATA } from '../../../constant'
+import { ListColumnConf } from './conf'
+import { DataKind, TableDataGroupResp, TableDataResp } from '../../props'
+import { getChildIndex, getParentWithClass } from '../../../utils/basic'
+import { AlertKind, showAlert } from '../../common/Alert'
+import { useI18n } from 'vue-i18n'
+const { t } = useI18n()
 
 const props = defineProps<{
   columnsConf: ListColumnConf[]
@@ -42,34 +46,66 @@ onMounted(() => {
     const targetEle = event.target as HTMLElement
     targetEle.releasePointerCapture(event.pointerId)
     selectDiv.style.display = 'none'
-
-    let records
-    // TODO 判断dom idx @see row select
-    const groupValue = 'Name1'
-    if (!groupValue) {
-      const data = props.data as TableDataResp
-      records = data.records
-    } else {
-      const data = props.data as TableDataGroupResp[]
-      records = data.find((item) => item.groupValue == groupValue)?.records ?? []
-    }
-    let targetData = records[startRowIdx][startColumnName]
-    let changedData = []
     if (startRowIdx == movedRowIdx) {
       return
-    } else if (startRowIdx < movedRowIdx) {
-      changedData = records.slice(startRowIdx + 1, movedRowIdx + 1).map((item) => {
-        return {
-          [props.pkColumnName]: item[props.pkColumnName],
-          [startColumnName]: targetData,
+    }
+    let parentListEle = getParentWithClass(startCellEle, 'iw-list')
+    if (parentListEle == null) {
+      return
+    }
+
+    const pkKindIsNumber = props.columnsConf.find((col) => col.name == props.pkColumnName)?.dataKind == DataKind.NUMBER
+    let selectedPks: string[] | number[] = []
+    if (startRowIdx < movedRowIdx) {
+      for (let i = startRowIdx; i <= movedRowIdx; i++) {
+        if (pkKindIsNumber) {
+          // @ts-ignore
+          selectedPks.push(parseInt((parentListEle.children[i] as HTMLElement).dataset.pk ?? ''))
+        } else {
+          // @ts-ignore
+          selectedPks.push((parentListEle.children[i] as HTMLElement).dataset.pk ?? '')
+        }
+      }
+    } else {
+      for (let i = startRowIdx; i >= movedRowIdx; i--) {
+        if (pkKindIsNumber) {
+          // @ts-ignore
+          selectedPks.push(parseInt((parentListEle.children[i] as HTMLElement).dataset.pk ?? ''))
+        } else {
+          // @ts-ignore
+          selectedPks.push((parentListEle.children[i] as HTMLElement).dataset.pk ?? '')
+        }
+      }
+    }
+
+    let changedData: any[] = []
+    if (!Array.isArray(props.data)) {
+      let targetData = props.data.records.find((item) => item[props.pkColumnName] == selectedPks[0])?.[startColumnName]
+      props.data.records.forEach((item) => {
+        // @ts-ignore
+        if (selectedPks.includes(item[props.pkColumnName])) {
+          changedData.push(
+            {
+              [props.pkColumnName]: item[props.pkColumnName],
+              [startColumnName]: targetData,
+            }
+          )
         }
       })
     } else {
-      changedData = records.slice(movedRowIdx, startRowIdx).map((item) => {
-        return {
-          [props.pkColumnName]: item[props.pkColumnName],
-          [startColumnName]: targetData,
-        }
+      props.data.forEach((groupData) => {
+        let targetData = groupData.records.find((item) => item[props.pkColumnName] == selectedPks[0])?.[startColumnName]
+        groupData.records.forEach((item) => {
+          // @ts-ignore
+          if (selectedPks.includes(item[props.pkColumnName])) {
+            changedData.push(
+              {
+                [props.pkColumnName]: item[props.pkColumnName],
+                [startColumnName]: targetData,
+              }
+            )
+          }
+        })
       })
     }
     // @ts-ignore
@@ -80,12 +116,21 @@ onMounted(() => {
     if (!isDragging) {
       return
     }
-    const movedEleOpt = document.elementsFromPoint(startCellFixedX + 4, (event as MouseEvent).clientY).find((ele) => ele.classList.contains('iw-list-row-cell'))
+    const movedEleOpt = document.elementsFromPoint(startCellFixedX + 4, (event as MouseEvent).clientY).find((ele) => ele.classList.contains('iw-list-data-cell'))
     if (!movedEleOpt) {
+      showAlert(t("list.cellFill.acrossGroupError"), 2, AlertKind.WARNING)
       return
     }
     let movedEle = movedEleOpt as HTMLElement
-    movedRowIdx = parseInt(movedEle.dataset.rowIdx ?? '0')
+    let parentListEle = getParentWithClass(movedEle, 'iw-list')
+    if (parentListEle == null) {
+      return
+    }
+    let selectRowEle = getParentWithClass(movedEle, 'iw-list-data-row')
+    if (selectRowEle == null) {
+      return
+    }
+    movedRowIdx = getChildIndex(parentListEle, selectRowEle)
     if (startRowIdx <= movedRowIdx) {
       selectDiv.style.top = startCellEle.offsetTop - 1 + 'px'
       selectDiv.style.height = movedEle.offsetTop + movedEle.offsetHeight - startCellEle.offsetTop + 'px'
@@ -99,7 +144,15 @@ onMounted(() => {
     isDragging = false
     selectDiv.style.display = 'none'
     const targetEle = event.target as HTMLElement
-    if (!targetEle.classList.contains('iw-list-row-cell')) {
+    if (!targetEle.classList.contains('iw-list-data-cell')) {
+      return
+    }
+    let parentListEle = getParentWithClass(targetEle, 'iw-list')
+    if (parentListEle == null) {
+      return
+    }
+    let selectRowEle = getParentWithClass(targetEle, 'iw-list-data-row')
+    if (selectRowEle == null) {
       return
     }
     const currColumnName = targetEle.dataset.columnName ?? ''
@@ -112,7 +165,7 @@ onMounted(() => {
     selectDiv.style.width = targetEle.offsetWidth + 2 + 'px'
     selectDiv.style.height = targetEle.offsetHeight + 2 + 'px'
     startColumnName = currColumnName
-    startRowIdx = parseInt(targetEle.dataset.rowIdx ?? '0')
+    startRowIdx = getChildIndex(parentListEle, selectRowEle)
     startCellEle = targetEle
     startCellFixedX = targetEle.getBoundingClientRect().left
   })

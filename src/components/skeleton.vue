@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { onMounted, provide, reactive, ref, toRaw } from 'vue'
 import * as iconSvg from '../assets/icon'
-import { FN_ADD_DATA, FN_DELETE_DATA, FN_LOAD_CELL_OPTIONS_DATA, FN_LOAD_DATA, FN_UPDATE_DATA } from '../constant'
+import { FN_ADD_DATA, FN_DELETE_COLUMN, FN_DELETE_DATA, FN_LOAD_CELL_OPTIONS_DATA, FN_LOAD_DATA, FN_MODIFY_COLUMN, FN_NEW_COLUMN, FN_UPDATE_DATA } from '../constant'
 import MenuComp, { MenuOffsetKind } from './common/Menu.vue'
-import { TableLayoutConf, TableStyleConf, initConf } from './conf'
+import { TableLayoutConf, TableStyleConf, getDefaultValueByDataKind, initConf } from './conf'
 import ResizeComp from './function/resize/Resize.vue'
 import ThemeComp from './function/theme/Theme.vue'
 import ListComp from './layout/list/List.vue'
 import * as List from './layout/list/conf'
-import { OperatorKind, SizeKind, TableProps } from './props'
+import { OperatorKind, SizeKind, TableColumnProps, TableProps } from './props'
 
 const props = defineProps<TableProps>()
 
@@ -86,12 +86,12 @@ async function loadData(layoutId?: string, moreForGroupedValue?: any) {
   }
 }
 
-async function addData(newRecords: { [key: string]: any }[], afterPkId?: number, groupValue?: any, reFilter?: boolean, reSort?: boolean, reLoad?: boolean) {
+async function addData(newRecords: { [key: string]: any }[], afterPkId?: number, groupValue?: any, reFilter?: boolean, reSort?: boolean, reLoad?: boolean): Promise<boolean> {
   const layout = layoutsConf[currentLayoutId.value]
   if (props.events.saveData && (await props.events.saveData(newRecords))) {
     if (reLoad) {
-      loadData()
-      return
+      await loadData()
+      return true
     }
     let data
     if (groupValue && Array.isArray(layout.data)) {
@@ -108,16 +108,90 @@ async function addData(newRecords: { [key: string]: any }[], afterPkId?: number,
         data.records.splice(0, 0, ...newRecords)
       }
     }
+    return true
+  } else {
+    return false
   }
   // TODO agg清空，重新计算
 }
 
-async function updateData(changedRecords: { [key: string]: any }[], reFilter?: boolean, reSort?: boolean, reLoad?: boolean) {
+async function newColumn(newColumnConf: TableColumnProps, fromColumnName?: string, reFilter?: boolean, reSort?: boolean, reLoad?: boolean): Promise<boolean> {
+  const layout = layoutsConf[currentLayoutId.value]
+  if (props.events.newColumn && (await props.events.newColumn(newColumnConf, fromColumnName))) {
+    if (reLoad) {
+      await loadData()
+      return true
+    }
+    if (Array.isArray(layout.data)) {
+      layout.data.forEach((d) => {
+        d.records.forEach((record) => {
+          if (fromColumnName) {
+            record[newColumnConf.name] = record[fromColumnName]
+          } else {
+            record[newColumnConf.name] = getDefaultValueByDataKind(newColumnConf.dataKind!)
+          }
+        })
+      })
+    } else {
+      layout.data?.records.forEach((record) => {
+        if (fromColumnName) {
+          record[newColumnConf.name] = record[fromColumnName]
+        } else {
+          record[newColumnConf.name] = getDefaultValueByDataKind(newColumnConf.dataKind!)
+        }
+      })
+    }
+    return true
+  } else {
+    return false
+  }
+  // TODO agg清空，重新计算
+}
+
+async function modifyColumn(changedColumnConf: TableColumnProps, reFilter?: boolean, reSort?: boolean, reLoad?: boolean): Promise<boolean> {
+  const layout = layoutsConf[currentLayoutId.value]
+  if (props.events.modifyColumn && (await props.events.modifyColumn(changedColumnConf))) {
+    if (reLoad) {
+      await loadData()
+    }
+    return true
+  } else {
+    return false
+  }
+  // TODO agg清空，重新计算
+}
+
+async function deleteColumn(deletedColumnName: string, reFilter?: boolean, reSort?: boolean, reLoad?: boolean): Promise<boolean> {
+  const layout = layoutsConf[currentLayoutId.value]
+  if (props.events.deleteColumn && (await props.events.deleteColumn(deletedColumnName))) {
+    if (reLoad) {
+      await loadData()
+      return true
+    }
+    if (Array.isArray(layout.data)) {
+      layout.data.forEach((d) => {
+        d.records.forEach((record) => {
+          delete (record[deletedColumnName])
+        })
+      })
+    } else {
+      layout.data?.records.forEach((record) => {
+        delete (record[deletedColumnName])
+      })
+    }
+    return true
+  } else {
+    return false
+  }
+  // TODO agg清空，重新计算
+}
+
+async function updateData(changedRecords: { [key: string]: any }[], reFilter?: boolean, reSort?: boolean, reLoad?: boolean): Promise<boolean> {
   const layout = layoutsConf[currentLayoutId.value]
   if (props.events.saveData && (await props.events.saveData(changedRecords))) {
     if (reLoad) {
-      loadData()
-      return
+      await loadData()
+      return true
     }
     if (Array.isArray(layout.data)) {
       layout.data.forEach(groupData => {
@@ -142,16 +216,19 @@ async function updateData(changedRecords: { [key: string]: any }[], reFilter?: b
     } else {
       // Empty,unreachable
     }
+    return true
+  } else {
+    return false
   }
   // TODO agg清空，重新计算
 }
 
-async function deleteData(deletedPks: any[], reFilter?: boolean, reSort?: boolean, reLoad?: boolean) {
+async function deleteData(deletedPks: any[], reFilter?: boolean, reSort?: boolean, reLoad?: boolean): Promise<boolean> {
   const layout = layoutsConf[currentLayoutId.value]
   if (props.events.deleteData && (await props.events.deleteData(deletedPks))) {
     if (reLoad) {
-      loadData()
-      return
+      await loadData()
+      return true
     }
     if (Array.isArray(layout.data)) {
       layout.data.forEach((d) => {
@@ -162,6 +239,9 @@ async function deleteData(deletedPks: any[], reFilter?: boolean, reSort?: boolea
     } else {
       // Empty,unreachable
     }
+    return true
+  } else {
+    return false
   }
   // TODO agg清空，重新计算
 }
@@ -176,6 +256,9 @@ async function loadCellOptions(columnName: string, cellValue: any): Promise<{ ti
 
 provide(FN_LOAD_DATA, loadData)
 provide(FN_ADD_DATA, addData)
+provide(FN_NEW_COLUMN, newColumn)
+provide(FN_MODIFY_COLUMN, modifyColumn)
+provide(FN_DELETE_COLUMN, deleteColumn)
 provide(FN_UPDATE_DATA, updateData)
 provide(FN_DELETE_DATA, deleteData)
 provide(FN_LOAD_CELL_OPTIONS_DATA, loadCellOptions)

@@ -77,11 +77,10 @@ export interface TableProps {
 
 export interface TableColumnProps {
     name: string
+    icon?: string
     title?: string
     dataKind?: DataKind
     pk?: boolean
-    sortable?: boolean
-    filterable?: boolean
     editable?: boolean
     fillable?: boolean
     wrap?: boolean
@@ -124,6 +123,9 @@ export interface TableEventProps {
         aggs?: { [key: string]: AggregateKind },
         slice?: TableDataSliceReq) => Promise<TableDataResp | TableDataGroupResp[]>
     saveData?: (changedRecords: { [key: string]: any }[]) => Promise<boolean>
+    newColumn?: (newColumnConf: TableColumnProps, fromColumnName?: string) => Promise<boolean>
+    modifyColumn?: (changedColumnConf: TableColumnProps) => Promise<boolean>
+    deleteColumn?: (deletedColumnName: string) => Promise<boolean>
     deleteData?: (deletedPks: any[]) => Promise<boolean>
     loadCellOptions?: (columnName: string, cellValue: any) => Promise<{ title: string, value: any }[]>
 }
