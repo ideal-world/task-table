@@ -1,23 +1,24 @@
 <script setup lang="ts">
-import { inject } from 'vue'
-import * as iconSvg from '../../../assets/icon'
+import { inject, ref } from 'vue'
 import { FN_CLOSE_CONTEXT_MENU } from '../../../constant'
 import { TableLayoutConf } from '../../conf'
-import { ListBasicConf, ListColumnConf } from './conf'
+import { ListColumnConf } from './conf'
 
 const props = defineProps<{
-  currentColIdx: number
+  curColumnName: string
+  columnsConf: ListColumnConf[]
   layout: TableLayoutConf
-  basicConf: ListBasicConf
 }>()
+
 
 let closeContextMenuFun = inject(FN_CLOSE_CONTEXT_MENU)
 
 const setFixedColumn = () => {
-  if (props.currentColIdx == props.layout.fixedColumnIdx) {
+  const colIdx = props.columnsConf.findIndex((col) => col.name == props.curColumnName)
+  if (colIdx == props.layout.fixedColumnIdx) {
     props.layout.fixedColumnIdx = -1
   } else {
-    props.layout.fixedColumnIdx = props.currentColIdx
+    props.layout.fixedColumnIdx = colIdx
   }
   // @ts-ignore
   closeContextMenuFun()
@@ -42,9 +43,11 @@ export function setFixedColumnStyles(styles: any, colIdx: number, fixedColumnIdx
 </script>
 
 <template>
-  <div class="iw-contextmenu__item cursor-pointer" @click="setFixedColumn">
-    <i :class="iconSvg.LOCK"></i>
-    {{ props.currentColIdx == props.layout.fixedColumnIdx ? $t('list.columnFixed.unFixedTitle') : $t('list.columnFixed.fixedTitle') }}
+  <div class="iw-contextmenu__item flex justify-between content-center w-full">
+    {{ $t('list.columnFixed.title') }}
+    <input type="checkbox" class="toggle toggle-sm"
+      :checked="props.columnsConf.findIndex((col) => col.name == props.curColumnName) == layout.fixedColumnIdx"
+      @click="setFixedColumn" />
   </div>
 </template>
 

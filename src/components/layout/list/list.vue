@@ -11,6 +11,9 @@ import ColumnResizeComp from './ColumnResize.vue'
 import RowsComp from './Rows.vue'
 import ColumnSortComp from './ColumnSort.vue'
 import CellWrapComp from './CellWrap.vue'
+import ColumnCopyComp from './ColumnCopy.vue'
+import ColumnRenameComp from './ColumnRename.vue'
+import ColumnDeleteComp from './ColumnDelete.vue'
 
 const listConf = defineProps<
   ListConf & {
@@ -22,7 +25,8 @@ const listConf = defineProps<
 const basicConf = reactive<ListBasicConf>(listConf.basic)
 const columnsConf = reactive<ListColumnConf[]>(listConf.columns)
 const stylesConf = reactive<ListStyleConf>(listConf.styles)
-const headerMenuCompRefs = ref()
+const headerMenuCompRef = ref()
+const selectedColumnName = ref<string>('')
 
 const setColumnStyles = (colIdx: number) => {
   const styles: any = {}
@@ -31,9 +35,10 @@ const setColumnStyles = (colIdx: number) => {
   return styles
 }
 
-const showHeaderContextMenu = (event: MouseEvent, colIdx: number) => {
+const showHeaderContextMenu = (event: MouseEvent, columName: string) => {
+  selectedColumnName.value = columName
   const targetEle = event.target as HTMLElement
-  headerMenuCompRefs.value[colIdx].show(targetEle)
+  headerMenuCompRef.value.show(targetEle)
 }
 
 </script>
@@ -46,13 +51,8 @@ const showHeaderContextMenu = (event: MouseEvent, colIdx: number) => {
       <div v-for="(column, colIdx) in columnsConf" :key="column.name"
         :class="stylesConf.cellClass + ' iw-list-cell iw-list-header-cell flex items-center border-solid border-b border-b-base-300 border-l  border-l-base-300 hover:cursor-pointer hover:bg-base-200'"
         :data-column-name="column.name" :style="setColumnStyles(colIdx)"
-        @click="(event: MouseEvent) => showHeaderContextMenu(event, colIdx)">
-        <i :class="column.icon"></i> {{ column.name }}
-        <menu-comp ref="headerMenuCompRefs">
-          <column-fixed-comp :current-col-idx="colIdx" :basic-conf="basicConf"
-            :layout="listConf.layout"></column-fixed-comp>
-          <cell-wrap-comp :column-conf="column"></cell-wrap-comp>
-        </menu-comp>
+        @click="(event: MouseEvent) => showHeaderContextMenu(event, column.name)">
+        <i :class="column.icon+ ' mr-1'"></i> {{ column.title }}
       </div>
     </div>
     <template v-if="listConf.layout.data && !Array.isArray(listConf.layout.data)">
@@ -77,6 +77,16 @@ const showHeaderContextMenu = (event: MouseEvent, colIdx: number) => {
   <column-resize-comp :columns-conf="columnsConf"></column-resize-comp>
   <cell-fill-comp :columns-conf="columnsConf" :data="listConf.layout.data!" :pk-column-name="listConf.basic.pkColumnName"
     v-if="basic.fillable"></cell-fill-comp>
+  <menu-comp ref="headerMenuCompRef">
+    <column-rename-comp :cur-column-name="selectedColumnName" :columns-conf="columnsConf"
+      :pk-column-name="listConf.basic.pkColumnName"></column-rename-comp>
+    <column-copy-comp :cur-column-name="selectedColumnName" :columns-conf="columnsConf"></column-copy-comp>
+    <column-delete-comp :cur-column-name="selectedColumnName" :columns-conf="columnsConf"
+      :pk-column-name="listConf.basic.pkColumnName"></column-delete-comp>
+    <column-fixed-comp :cur-column-name="selectedColumnName" :columns-conf="columnsConf"
+      :layout="listConf.layout"></column-fixed-comp>
+    <cell-wrap-comp :cur-column-name="selectedColumnName" :columns-conf="columnsConf"></cell-wrap-comp>
+  </menu-comp>
 </template>
 
 <style lang="css" scoped>

@@ -1,6 +1,6 @@
 import * as iconSvg from "../assets/icon"
 import locales from '../locales'
-import { AggregateKind, LayoutKind, SizeKind, TableDataFilterReq, TableDataGroupReq, TableDataGroupResp, TableDataResp, TableDataSliceReq, TableDataSortReq, TableProps } from "./props"
+import { AggregateKind, DataKind, LayoutKind, SizeKind, TableDataFilterReq, TableDataGroupReq, TableDataGroupResp, TableDataResp, TableDataSliceReq, TableDataSortReq, TableProps } from "./props"
 
 const { t } = locales.global
 
@@ -28,6 +28,66 @@ export interface TableLayoutConf {
     aggs?: { [key: string]: AggregateKind }
     slice?: TableDataSliceReq
     data?: TableDataResp | TableDataGroupResp[]
+}
+
+export function getDefaultValueByDataKind(dataKind: DataKind): any {
+    switch (dataKind) {
+        case DataKind.NUMBER:
+        case DataKind.AMOUNT:
+            return 0
+        case DataKind.BOOLEAN:
+            return false
+        case DataKind.SELECT:
+        case DataKind.MULTISELECT:
+        case DataKind.CHECKBOX:
+        case DataKind.DATE:
+        case DataKind.DATETIME:
+        case DataKind.TIME:
+            return null
+        default:
+            return ''
+    }
+}
+
+export function getDefaultIconByDataKind(dataKind: DataKind): string {
+    switch (dataKind) {
+        case DataKind.TEXT:
+            return iconSvg.TEXT
+        case DataKind.TEXTAREA:
+            return iconSvg.TEXTAREA
+        case DataKind.NUMBER:
+            return iconSvg.NUMBER
+        case DataKind.BOOLEAN:
+            return iconSvg.BOOLEAN
+        case DataKind.FILE:
+            return iconSvg.FILE
+        case DataKind.IMAGE:
+            return iconSvg.IMAGE
+        case DataKind.AMOUNT:
+            return iconSvg.AMOUNT
+        case DataKind.SELECT:
+            return iconSvg.SELECT
+        case DataKind.MULTISELECT:
+            return iconSvg.MULTISELECT
+        case DataKind.CHECKBOX:
+            return iconSvg.CHECKBOX
+        case DataKind.DATE:
+            return iconSvg.DATE
+        case DataKind.DATETIME:
+            return iconSvg.DATETIME
+        case DataKind.TIME:
+            return iconSvg.TIME
+        case DataKind.EMAIL:
+            return iconSvg.EMAIL
+        case DataKind.URL:
+            return iconSvg.URL
+        case DataKind.PHONE:
+            return iconSvg.PHONE
+        case DataKind.PASSWORD:
+            return iconSvg.PASSWORD
+        default:
+            return iconSvg.TEXT
+    }
 }
 
 export function initConf(props: TableProps): [TableBasicConf, { [key: string]: TableLayoutConf }, TableStyleConf] {

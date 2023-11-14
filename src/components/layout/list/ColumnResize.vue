@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { inject, onMounted } from 'vue'
 import { ListColumnConf } from './conf'
+import { TableColumnProps } from '../../props';
+import { FN_MODIFY_COLUMN } from '../../../constant';
 
 const props = defineProps<{
   columnsConf: ListColumnConf[]
 }>()
+let modifyColumnFun = inject(FN_MODIFY_COLUMN)
 
 let currColumnName = ''
 let currCellRect: DOMRect
@@ -32,11 +35,23 @@ onMounted(() => {
     targetEle.setPointerCapture(event.pointerId)
   })
 
-  dragDiv.addEventListener('pointerup', (event: PointerEvent) => {
+  dragDiv.addEventListener('pointerup', async (event: PointerEvent) => {
     isDragging = false
     dragDiv.style.display = 'none'
     const targetEle = event.target as HTMLElement
     targetEle.releasePointerCapture(event.pointerId)
+
+    const curColumnConf = props.columnsConf.find((item) => item.name == currColumnName)
+    if (curColumnConf) {
+      let columnProps: TableColumnProps = {
+        name: curColumnConf.name,
+        width: curColumnConf.width
+      }
+      // @ts-ignore
+      if (await modifyColumnFun(columnProps)) {
+        curColumnConf.width = curColumnConf.width
+      }
+    }
   })
 
   dragDiv.addEventListener('pointermove', (event) => {

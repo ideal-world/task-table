@@ -65,5 +65,5 @@ export function showAlert(message: string, showTimeSec: number, kind: AlertKind 
   attachEle.append(alertEle)
   setTimeout(() => {
     alertEle.remove()
-  }, showTimeSec * 1000);
+  }, showTimeSec * 1000)
 }

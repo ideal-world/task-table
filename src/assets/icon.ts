@@ -33,4 +33,5 @@ export const OPEN = 'octicon-link-external-24'
 export const RENAME = 'octicon-stack-24'
 export const SIZE = 'octicon-typography-24'
 export const LOCK = 'octicon-lock-24'
+export const COPY = 'octicon-copy-24'
 

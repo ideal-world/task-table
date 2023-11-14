@@ -24,19 +24,26 @@
     }
   },
   "list": {
-    "rowSelect":{
+    "rowSelect": {
       "acrossGroupError": "Cannot select across groups"
     },
+    "cellFill": {
+      "acrossGroupError": "Cannot fill across groups"
+    },
     "columnFixed": {
-      "fixedTitle": "Fixed",
-      "unFixedTitle": "UnFixed"
+      "title": "Fixed"
     },
     "rowDelete": {
       "title": "Delete"
     },
     "cellWrap": {
-      "wrap": "Break words",
-      "unWrap": "No break words"
+      "title": "Break words"
+    },
+    "columnCopy": {
+      "title": "Copy Column"
+    },
+    "columnDelete": {
+      "title": "Delete Column"
     }
   }
 }

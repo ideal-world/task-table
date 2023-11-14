@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import * as iconSvg from '../../../assets/icon';
-import { SizeKind } from '../../props';
+import * as iconSvg from '../../../assets/icon'
+import { SizeKind } from '../../props'
 
 const props = defineProps<{
   size: SizeKind

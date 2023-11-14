@@ -3,13 +3,13 @@ let hasInit = false
 </script>
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { getChildIndex, getParentWithClass, hasParentWithClass } from '../../../utils/basic'
+import { useI18n } from 'vue-i18n'
+import { getChildIndex, getParentWithClass } from '../../../utils/basic'
 import { AlertKind, showAlert } from '../../common/Alert'
-import { useI18n } from 'vue-i18n';
 const { t } = useI18n()
 
 const props = defineProps<{
-  selectPks: string[] | number[],
+  selectedPks: string[] | number[],
   pkColumnName: string
   pkKindIsNumber: boolean
 }>()
@@ -17,10 +17,10 @@ const props = defineProps<{
 let selectStartRowEle: HTMLElement | null
 
 if (!hasInit) {
-  document.addEventListener('click', onRowClick as EventListener)
+  document.addEventListener('pointerdown', onRowSelect as EventListener)
   document.addEventListener('mousedown', function (event: PointerEvent) {
     if (event.shiftKey) {
-      event.preventDefault();
+      event.preventDefault()
     }
   } as EventListener)
 }
@@ -32,9 +32,12 @@ onMounted(() => {
 
 })
 
-function onRowClick(event: PointerEvent) {
+function onRowSelect(event: PointerEvent) {
+  if (event.button != 0) {
+    return
+  }
   const targetEle = event.target
-  if (!(targetEle instanceof HTMLElement) || targetEle instanceof HTMLElement && !targetEle.classList.contains('iw-list-row-cell')) {
+  if (!(targetEle instanceof HTMLElement) || targetEle instanceof HTMLElement && !targetEle.classList.contains('iw-list-data-cell')) {
     return
   }
   let parentListEle = getParentWithClass(targetEle, 'iw-list')
@@ -73,7 +76,7 @@ function onRowClick(event: PointerEvent) {
       }
     }
     if (selectedEles.find(ele => !ele.classList.contains('iw-list-data-row'))) {
-      showAlert(t("list.rowSelect.acrossGroupError"), 2, AlertKind.WARNING, parentListEle)
+      showAlert(t("list.rowSelect.acrossGroupError"), 2, AlertKind.WARNING)
       cleanSelect(parentListEle)
       return
     }
@@ -89,7 +92,7 @@ function onRowClick(event: PointerEvent) {
 
 function cleanSelect(parentEle: HTMLElement) {
   selectStartRowEle = null
-  props.selectPks.splice(0, props.selectPks.length)
+  props.selectedPks.splice(0, props.selectedPks.length)
   Array.prototype.forEach.call(parentEle.children, function (rowEle) {
     if (rowEle as HTMLElement && rowEle.classList.contains('iw-list-data-row')) {
       rowEle.classList.remove('iw-list-data-row--selected')
@@ -101,10 +104,10 @@ function cleanSelect(parentEle: HTMLElement) {
 function addSelect(selectedEle: HTMLElement) {
   if (props.pkKindIsNumber) {
     // @ts-ignore
-    props.selectPks.push(parseInt(selectedEle.dataset.pk as string))
+    props.selectedPks.push(parseInt(selectedEle.dataset.pk as string))
   } else {
     // @ts-ignore
-    props.selectPks.push(selectedEle.dataset.pk as string)
+    props.selectedPks.push(selectedEle.dataset.pk as string)
   }
   selectedEle.classList.add('iw-list-data-row--selected')
   selectedEle.classList.remove('iw-list-data-row--unselected')
