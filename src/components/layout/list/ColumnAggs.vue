@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { inject, ref } from 'vue';
 import { FN_LOAD_DATA } from '../../../constant';
-import MenuComp, { MenuOffsetKind, MenuSizeKind } from '../../common/menu.vue';
-import { showGroupAggMappingByDataKind, translateGroupAgg } from '../../function/group/group';
+import MenuComp, { MenuOffsetKind, MenuSizeKind } from '../../common/Menu.vue';
+import { showGroupAggMappingByDataKind, translateGroupAgg } from '../../function/group/Group';
 import { AggregateKind, TableDataResp } from '../../props';
 import { ListColumnConf, ListStyleConf } from './conf';
 

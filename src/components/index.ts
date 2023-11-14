@@ -1,4 +1,4 @@
-import IwTaskTable from './skeleton.vue'
+import IwTaskTable from './Skeleton.vue'
 import * as IwProps from './props'
 
 export {

@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
-import MenuComp from '../../common/menu.vue'
+import MenuComp from '../../common/Menu.vue'
 import { TableLayoutConf, TableStyleConf } from '../../conf'
 import { TableDataResp } from '../../props'
-import AggsComp from './aggs.vue'
+import ColumnAggsComp from './ColumnAggs.vue'
 import { ListBasicConf, ListColumnConf, ListConf, ListStyleConf } from './conf'
-import FillComp from './fill.vue'
-import FixedComp, { setFixedColumnStyles } from './fixed.vue'
-import ResizeComp from './resize.vue'
-import RowsComp from './rows.vue'
-import SortComp from './sort.vue'
-import WrapComp from './wrap.vue'
+import CellFillComp from './CellFill.vue'
+import ColumnFixedComp, { setFixedColumnStyles } from './ColumnFixed.vue'
+import ColumnResizeComp from './ColumnResize.vue'
+import RowsComp from './Rows.vue'
+import ColumnSortComp from './ColumnSort.vue'
+import CellWrapComp from './CellWrap.vue'
 
 const listConf = defineProps<
   ListConf & {
@@ -49,8 +49,9 @@ const showHeaderContextMenu = (event: MouseEvent, colIdx: number) => {
         @click="(event: MouseEvent) => showHeaderContextMenu(event, colIdx)">
         <i :class="column.icon"></i> {{ column.name }}
         <menu-comp ref="headerMenuCompRefs">
-          <fixed-comp :current-col-idx="colIdx" :basic-conf="basicConf" :layout="listConf.layout"></fixed-comp>
-          <wrap-comp :column-conf="column"></wrap-comp>
+          <column-fixed-comp :current-col-idx="colIdx" :basic-conf="basicConf"
+            :layout="listConf.layout"></column-fixed-comp>
+          <cell-wrap-comp :column-conf="column"></cell-wrap-comp>
         </menu-comp>
       </div>
     </div>
@@ -58,24 +59,24 @@ const showHeaderContextMenu = (event: MouseEvent, colIdx: number) => {
       <rows-comp :records="listConf.layout.data.records" :pk-column-name="basicConf.pkColumnName"
         :columns-conf="columnsConf" :styles-conf="stylesConf" :editable="basicConf.editable"
         :set-column-styles="setColumnStyles"></rows-comp>
-      <aggs-comp :layout-aggs="layout.aggs!" :data-basic="(layout.data as TableDataResp)"
+      <column-aggs-comp :layout-aggs="layout.aggs!" :data-basic="(layout.data as TableDataResp)"
         :pk-column-name="listConf.basic.pkColumnName" :columns-conf="columnsConf" :styles-conf="stylesConf"
-        :set-column-styles="setColumnStyles"></aggs-comp>
+        :set-column-styles="setColumnStyles"></column-aggs-comp>
     </template>
     <template v-else-if="listConf.layout.data && Array.isArray(listConf.layout.data)">
       <template v-for="groupData in listConf.layout.data">
-        <aggs-comp :layout-aggs="layout.aggs!" :data-basic="groupData" :pk-column-name="listConf.basic.pkColumnName"
-          :columns-conf="columnsConf" :styles-conf="stylesConf" :group-value="groupData.groupValue"
-          :set-column-styles="setColumnStyles"></aggs-comp>
+        <column-aggs-comp :layout-aggs="layout.aggs!" :data-basic="groupData"
+          :pk-column-name="listConf.basic.pkColumnName" :columns-conf="columnsConf" :styles-conf="stylesConf"
+          :group-value="groupData.groupValue" :set-column-styles="setColumnStyles"></column-aggs-comp>
         <rows-comp :records="groupData.records" :pk-column-name="basicConf.pkColumnName" :columns-conf="columnsConf"
           :styles-conf="stylesConf" :editable="basicConf.editable" :set-column-styles="setColumnStyles"></rows-comp>
       </template>
     </template>
   </div>
-  <sort-comp :columns-conf="columnsConf"></sort-comp>
-  <resize-comp :columns-conf="columnsConf"></resize-comp>
-  <fill-comp :columns-conf="columnsConf" :data="listConf.layout.data!" :pk-column-name="listConf.basic.pkColumnName"
-    v-if="basic.fillable"></fill-comp>
+  <column-sort-comp :columns-conf="columnsConf"></column-sort-comp>
+  <column-resize-comp :columns-conf="columnsConf"></column-resize-comp>
+  <cell-fill-comp :columns-conf="columnsConf" :data="listConf.layout.data!" :pk-column-name="listConf.basic.pkColumnName"
+    v-if="basic.fillable"></cell-fill-comp>
 </template>
 
 <style lang="css" scoped>

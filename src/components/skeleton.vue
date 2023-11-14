@@ -2,12 +2,12 @@
 import { onMounted, provide, reactive, ref, toRaw } from 'vue'
 import * as iconSvg from '../assets/icon'
 import { FN_ADD_DATA, FN_DELETE_DATA, FN_LOAD_CELL_OPTIONS_DATA, FN_LOAD_DATA, FN_UPDATE_DATA } from '../constant'
-import MenuComp, { MenuOffsetKind } from './common/menu.vue'
+import MenuComp, { MenuOffsetKind } from './common/Menu.vue'
 import { TableLayoutConf, TableStyleConf, initConf } from './conf'
-import ResizeComp from './function/resize/resize.vue'
-import ThemeComp from './function/theme/theme.vue'
+import ResizeComp from './function/resize/Resize.vue'
+import ThemeComp from './function/theme/Theme.vue'
 import * as List from './layout/list/conf'
-import ListComp from './layout/list/list.vue'
+import ListComp from './layout/list/List.vue'
 import { OperatorKind, SizeKind, TableProps } from './props'
 
 const props = defineProps<TableProps>()

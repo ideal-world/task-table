@@ -2,8 +2,8 @@
 import { ref } from 'vue';
 import { DataKind } from '../../props';
 import { ListColumnConf, ListStyleConf } from './conf';
-import MenuComp from '../../common/menu.vue'
-import DeleteComp from './delete.vue'
+import MenuComp from '../../common/Menu.vue'
+import RowDeleteComp from './RowDelete.vue'
 
 const props = defineProps<{
   records: { [key: string]: any }[]
@@ -43,6 +43,6 @@ const showRowContextMenu = (event: MouseEvent) => {
     </template>
   </div>
   <menu-comp ref="rowMenuCompRef">
-    <delete-comp :select-pks="selectedDataPks" v-show="props.editable"></delete-comp>
+    <row-delete-comp :select-pks="selectedDataPks" v-show="props.editable"></row-delete-comp>
   </menu-comp>
 </template>
