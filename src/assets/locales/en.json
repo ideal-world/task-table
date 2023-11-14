@@ -24,6 +24,9 @@
     }
   },
   "list": {
+    "rowSelect":{
+      "acrossGroupError": "Cannot select across groups"
+    },
     "fixed": {
       "fixedTitle": "Fixed",
       "unFixedTitle": "UnFixed"

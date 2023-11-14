@@ -19,6 +19,7 @@ declare module 'vue' {
     Resize: typeof import('./src/components/function/resize/Resize.vue')['default']
     RowDelete: typeof import('./src/components/layout/list/RowDelete.vue')['default']
     Rows: typeof import('./src/components/layout/list/Rows.vue')['default']
+    RowSelect: typeof import('./src/components/layout/list/RowSelect.vue')['default']
     Skeleton: typeof import('./src/components/Skeleton.vue')['default']
     Theme: typeof import('./src/components/function/theme/Theme.vue')['default']
   }

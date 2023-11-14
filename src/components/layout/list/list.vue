@@ -42,9 +42,9 @@ const showHeaderContextMenu = (event: MouseEvent, colIdx: number) => {
   <div :class="'iw-list relative iw-list--size-' + listConf.globalStyles.size"
     :style="{ width: columnsConf.reduce((count, col) => count + col.width, 0) + 'px' }">
     <div
-      :class="stylesConf.headerClass + ' iw-list-header flex items-center sticky top-0 z-[1100] border-solid border-t border-t-base-300 border-r border-r-base-300'">
+      :class="stylesConf.headerClass + ' iw-list-header flex items-center sticky top-0 z-[1100] bg-base-100 border-solid border-t border-t-base-300 border-r border-r-base-300'">
       <div v-for="(column, colIdx) in columnsConf" :key="column.name"
-        :class="stylesConf.cellClass + ' iw-list-cell iw-list-header-cell flex items-center bg-base-100 border-solid border-b border-b-base-300 border-l  border-l-base-300 hover:cursor-pointer hover:bg-base-200'"
+        :class="stylesConf.cellClass + ' iw-list-cell iw-list-header-cell flex items-center border-solid border-b border-b-base-300 border-l  border-l-base-300 hover:cursor-pointer hover:bg-base-200'"
         :data-column-name="column.name" :style="setColumnStyles(colIdx)"
         @click="(event: MouseEvent) => showHeaderContextMenu(event, colIdx)">
         <i :class="column.icon"></i> {{ column.name }}
