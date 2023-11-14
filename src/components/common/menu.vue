@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { provide, ref } from 'vue'
 import { FN_CLOSE_CONTEXT_MENU } from '../../constant'
-import { IwUtils } from '../../utils';
+import { IwUtils } from '../../utils'
 
 const contextmenuRef = ref<HTMLElement | null>(null)
 const isShow = ref<boolean>(false)
@@ -46,13 +46,13 @@ function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: MenuOffset
     case MenuSizeKind.MEDIUM: {
       minHeight = 80
       minWidth = 160
-      padding = 6
+      padding = 3
       break
     }
     case MenuSizeKind.LARGE: {
       minHeight = 100
       minWidth = 220
-      padding = 8
+      padding = 4
       break
     }
   }
@@ -87,13 +87,24 @@ function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: MenuOffset
     if (event.target == null) {
       isShow.value = false
     } else {
-      const contextMenuRect = contextMenuEle.getBoundingClientRect()
-      if (
-        event.x < contextMenuRect.left ||
-        event.y < contextMenuRect.top ||
-        event.x > contextMenuRect.left + contextMenuRect.width ||
-        event.y > contextMenuRect.top + contextMenuRect.height
-      ) {
+      let optInMenu = false
+      let contextmenuEles = document.querySelectorAll('.iw-contextmenu')
+      for (let i in contextmenuEles) {
+        if (!(contextmenuEles[i] instanceof HTMLElement) || (contextmenuEles[i] as HTMLElement).style.display == 'none') {
+          continue
+        }
+        const contextMenuRect = contextmenuEles[i].getBoundingClientRect()
+        if (
+          event.x >= contextMenuRect.left &&
+          event.y >= contextMenuRect.top &&
+          event.x <= contextMenuRect.left + contextMenuRect.width &&
+          event.y <= contextMenuRect.top + contextMenuRect.height
+        ) {
+          optInMenu = true
+          break
+        }
+      }
+      if (!optInMenu) {
         isShow.value = false
       }
     }
