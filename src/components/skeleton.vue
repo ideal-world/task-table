@@ -6,8 +6,8 @@ import MenuComp, { MenuOffsetKind } from './common/Menu.vue'
 import { TableLayoutConf, TableStyleConf, initConf } from './conf'
 import ResizeComp from './function/resize/Resize.vue'
 import ThemeComp from './function/theme/Theme.vue'
-import * as List from './layout/list/conf'
 import ListComp from './layout/list/List.vue'
+import * as List from './layout/list/conf'
 import { OperatorKind, SizeKind, TableProps } from './props'
 
 const props = defineProps<TableProps>()
@@ -155,19 +155,10 @@ async function deleteData(deletedPks: any[], reFilter?: boolean, reSort?: boolea
     }
     if (Array.isArray(layout.data)) {
       layout.data.forEach((d) => {
-        d.records.forEach((item, idx) => {
-          if (deletedPks.includes(item[tableBasicConf.pkColumnName])) {
-            d.records.splice(idx, 1)
-          }
-        })
+        d.records = d.records.filter((item) => !deletedPks.includes(item[tableBasicConf.pkColumnName]))
       })
     } else if (layout.data && !Array.isArray(layout.data)) {
-      layout.data.records.forEach((item, idx) => {
-        if (deletedPks.includes(item[tableBasicConf.pkColumnName])) {
-          // @ts-ignore
-          layout.data.records.splice(idx, 1)
-        }
-      })
+      layout.data.records = layout.data.records.filter((item) => !deletedPks.includes(item[tableBasicConf.pkColumnName]))
     } else {
       // Empty,unreachable
     }

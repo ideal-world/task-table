@@ -3,7 +3,7 @@ import { provide, ref } from 'vue'
 import { FN_CLOSE_CONTEXT_MENU } from '../../constant'
 import { IwUtils } from '../../utils';
 
-const contextmenu = ref<HTMLElement | null>(null)
+const contextmenuRef = ref<HTMLElement | null>(null)
 const isShow = ref<boolean>(false)
 
 function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: MenuOffsetKind = MenuOffsetKind.LEFT_BOTTOM, size: MenuSizeKind = MenuSizeKind.MEDIUM) {
@@ -72,7 +72,7 @@ function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: MenuOffset
       break
     }
   }
-  const contextMenuEle = contextmenu.value as HTMLElement
+  const contextMenuEle = contextmenuRef.value as HTMLElement
   contextMenuEle.style.minHeight = minHeight + 'px'
   contextMenuEle.style.minWidth = minWidth + 'px'
   contextMenuEle.style.left = left + 'px'
@@ -128,8 +128,8 @@ export enum MenuSizeKind {
 </script>
 
 <template>
-  <div ref="contextmenu" class="iw-contextmenu flex flex-col items-start fixed z-[3000] shadow bg-base-100 p-1 rounded-md"
-    v-show="isShow">
+  <div ref="contextmenuRef"
+    class="iw-contextmenu flex flex-col items-start fixed z-[3000] shadow bg-base-100 p-1 rounded-md" v-show="isShow">
     <slot></slot>
   </div>
 </template>

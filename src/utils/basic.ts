@@ -5,11 +5,19 @@ export const groupBy = <T>(array: T[], predicate: (value: T, index: number, arra
   }, {} as { [key: string]: T[] })
 
 export const hasParentWithClass = (element: HTMLElement | null, className: string): boolean => {
+  return getParentWithClass(element, className) != null
+}
+
+export const getParentWithClass = (element: HTMLElement | null, className: string): HTMLElement | null => {
   while (element) {
     if (element.classList && element.classList.contains(className)) {
-      return true
+      return element
     }
-    element = element.parentElement;
+    element = element.parentElement
   }
-  return false
+  return null
+}
+
+export const getChildIndex = (parent: HTMLElement, child: HTMLElement): number => {
+  return Array.prototype.indexOf.call(parent.children, child)
 }

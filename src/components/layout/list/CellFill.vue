@@ -12,14 +12,13 @@ const props = defineProps<{
 
 let updateDataFun = inject(FN_UPDATE_DATA)
 
-let startColumnName = ''
-let startRowIdx = 0
-let movedRowIdx = 0
-let startCellFixedX = 0
-let startCellEle: HTMLElement
-let isDragging = false
-
 onMounted(() => {
+  let startColumnName = ''
+  let startRowIdx = 0
+  let movedRowIdx = 0
+  let startCellFixedX = 0
+  let startCellEle: HTMLElement
+  let isDragging = false
   const listEle = document.getElementsByClassName('iw-list')[0] as HTMLElement
   const selectDiv = document.createElement('div')
   selectDiv.classList.add('iw-list-fill--select')
@@ -45,7 +44,7 @@ onMounted(() => {
     selectDiv.style.display = 'none'
 
     let records
-    // TODO
+    // TODO 判断dom idx @see row select
     const groupValue = 'Name1'
     if (!groupValue) {
       const data = props.data as TableDataResp
