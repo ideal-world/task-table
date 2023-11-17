@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import { inject, onMounted } from 'vue'
-import { ListColumnConf } from './conf'
-import { TableColumnProps } from '../../props';
+import { inject, onMounted } from 'vue';
 import { FN_MODIFY_COLUMN } from '../../../constant';
+import { CachedColumnConf } from '../../conf';
 
 const props = defineProps<{
-  columnsConf: ListColumnConf[]
+  columnsConf: CachedColumnConf[]
 }>()
-let modifyColumnFun = inject(FN_MODIFY_COLUMN)
+const modifyColumnFun = inject(FN_MODIFY_COLUMN)
 
 let currColumnName = ''
 let currCellRect: DOMRect
@@ -43,14 +42,9 @@ onMounted(() => {
 
     const curColumnConf = props.columnsConf.find((item) => item.name == currColumnName)
     if (curColumnConf) {
-      let columnProps: TableColumnProps = {
-        name: curColumnConf.name,
-        width: curColumnConf.width
-      }
+      curColumnConf.width = curColumnConf.width
       // @ts-ignore
-      if (await modifyColumnFun(columnProps)) {
-        curColumnConf.width = curColumnConf.width
-      }
+      await modifyColumnFun(null, curColumnConf)
     }
   })
 
@@ -60,7 +54,7 @@ onMounted(() => {
     }
     dragDiv.style.left = (event as MouseEvent).clientX - 12 + 'px'
     const newWidth = (event as MouseEvent).clientX - currCellRect.left
-    let columnConf = props.columnsConf.find((col) => col.name == currColumnName)
+    const columnConf = props.columnsConf.find((col) => col.name == currColumnName)
     if (columnConf) {
       columnConf.width = newWidth
     }

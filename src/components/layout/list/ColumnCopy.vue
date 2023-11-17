@@ -2,40 +2,33 @@
 import { inject } from 'vue'
 import * as iconSvg from '../../../assets/icon'
 import { FN_CLOSE_CONTEXT_MENU, FN_NEW_COLUMN } from '../../../constant'
-import { ListColumnConf } from './conf'
 import { getRandomString } from '../../../utils/basic'
-import { TableColumnProps } from '../../props'
+import { CachedColumnConf, TableColumnConf, TableLayoutColumnConf } from '../../conf'
 
 const props = defineProps<{
   curColumnName: string
-  columnsConf: ListColumnConf[]
+  columnsConf: CachedColumnConf[]
 }>()
-let newColumnFun = inject(FN_NEW_COLUMN)
-let closeContextMenuFun = inject(FN_CLOSE_CONTEXT_MENU)
+const newColumnFun = inject(FN_NEW_COLUMN)
+const closeContextMenuFun = inject(FN_CLOSE_CONTEXT_MENU)
 
 const copyColumn = async () => {
-  let columnIdx = props.columnsConf.findIndex((item) => item.name == props.curColumnName)
-  let columnConf = props.columnsConf[columnIdx]
-  let newColumnConf = {
-    ...columnConf,
-    name: columnConf.name + '_' + getRandomString(5),
+  const columnIdx = props.columnsConf.findIndex((item) => item.name == props.curColumnName)
+  const columnConf = props.columnsConf[columnIdx]
+  const newColumnName: string = columnConf.name + '_' + getRandomString(5)
+  const newColumnConf: TableColumnConf = {
+    name: newColumnName,
     title: columnConf.title + '_copy',
+    icon: columnConf.icon,
+    dataKind: columnConf.dataKind,
+    dataEditable: columnConf.dataEditable
   }
-  let columnProps: TableColumnProps = {
-    pk: false,
-    name: newColumnConf.name,
-    icon: newColumnConf.icon,
-    title: newColumnConf.title,
-    dataKind: newColumnConf.dataKind,
-    editable: newColumnConf.editable,
-    fillable: newColumnConf.fillable,
-    wrap: newColumnConf.wrap,
-    width: newColumnConf.width
+  const newLayoutColumnConf: TableLayoutColumnConf = {
+    ...columnConf,
+    name: newColumnName,
   }
   // @ts-ignore
-  if (await newColumnFun(columnProps, columnConf.name)) {
-    props.columnsConf.splice(columnIdx + 1, 0, newColumnConf)
-  }
+  await newColumnFun(newColumnConf, newLayoutColumnConf, columnConf.name)
   // @ts-ignore
   closeContextMenuFun()
 }

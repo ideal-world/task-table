@@ -40,11 +40,11 @@ function onRowSelect(event: PointerEvent) {
   if (!(targetEle instanceof HTMLElement) || targetEle instanceof HTMLElement && !targetEle.classList.contains('iw-list-data-cell')) {
     return
   }
-  let parentListEle = getParentWithClass(targetEle, 'iw-list')
+  const parentListEle = getParentWithClass(targetEle, 'iw-list')
   if (parentListEle == null) {
     return
   }
-  let selectCellEle = getParentWithClass(targetEle, 'iw-list-cell')
+  const selectCellEle = getParentWithClass(targetEle, 'iw-list-cell')
   if (selectCellEle == null) {
     return
   }
@@ -53,19 +53,19 @@ function onRowSelect(event: PointerEvent) {
     cleanSelect(parentListEle)
     return
   }
-  let selectRowEle = getParentWithClass(targetEle, 'iw-list-data-row')
+  const selectRowEle = getParentWithClass(targetEle, 'iw-list-data-row')
   if (selectRowEle == null) {
     return
   }
 
   if (event.shiftKey && selectStartRowEle != null) {
-    let endIdx = getChildIndex(parentListEle, selectRowEle)
+    const endIdx = getChildIndex(parentListEle, selectRowEle)
     if (endIdx == -1) {
       selectStartRowEle = null
       return
     }
-    let startIdx = getChildIndex(parentListEle, selectStartRowEle)
-    let selectedEles = []
+    const startIdx = getChildIndex(parentListEle, selectStartRowEle)
+    const selectedEles = []
     if (startIdx < endIdx) {
       for (let i = startIdx + 1; i <= endIdx; i++) {
         selectedEles.push(parentListEle.children[i] as HTMLElement)

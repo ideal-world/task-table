@@ -1,18 +1,31 @@
 <template>
   <div style="height: 400px">
-    <!-- <iw-task-table :columns="columns" :events="events" :layouts="layouts"></iw-task-table> -->
-    <iw-task-table :columns="columns" :events="events" :layouts="layouts" :group="group"></iw-task-table>
+    <!-- <iw-task-table  pk-column-name="no" :columns="columns" :events="events" :layouts="layouts"></iw-task-table> -->
+    <iw-task-table pk-column-name="no" :columns="columns" :events="events" :layouts="layouts"
+      :group="group"></iw-task-table>
   </div>
 </template>
 
 <script setup lang="ts">
-import { DataKind, LayoutKind, AggregateKind, TableColumnProps } from '../src/components/props'
+import { AggregateKind, DataKind, LayoutKind, TableColumnProps, TableLayoutModifyReq, TableLayoutProps, TableStyleProps } from '../src/components/props';
 
-const columns = [{ name: 'no', pk: true, fillable: false, dataKind: DataKind.NUMBER }, { name: 'name' }, { name: 'phone' }, { name: 'addr' }, { name: 'time' }]
+const columns = [{ name: 'no', dataKind: DataKind.NUMBER }, { name: 'name' }, { name: 'phone' }, { name: 'addr' }, { name: 'time' }]
+
 const layouts = [{
   id: "hi",
   title: "HI",
   layoutKind: LayoutKind.LIST,
+  columns: [{
+    name: 'no',
+  }, {
+    name: 'name',
+  }, {
+    name: 'phone',
+  }, {
+    name: 'addr',
+  }, {
+    name: 'time',
+  }],
   aggs: { name: AggregateKind.MIN }
 }]
 const group = {
@@ -45,14 +58,28 @@ const events = {
       }, 1000)
     })
   },
-  newColumn: async (newColumnConf: TableColumnProps, fromColumnName?: string) => {
+  loadCellOptions: async (columnName: string, cellValue: any) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve([{ title: 'opt1', value: '选项一' }])
+      }, 1000)
+    })
+  },
+  modifyStyles: async (changedStyleProps: TableStyleProps) => {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve(true)
       }, 1000)
     })
   },
-  modifyColumn: async (changedColumnConf: TableColumnProps) => {
+  newColumn: async (newColumnProps: TableColumnProps, fromColumnName?: string) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(true)
+      }, 1000)
+    })
+  },
+  modifyColumn: async (changedColumnProps: TableColumnProps) => {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve(true)
@@ -60,6 +87,34 @@ const events = {
     })
   },
   deleteColumn: async (deletedColumnName: string) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(true)
+      }, 1000)
+    })
+  },
+  newLayout: async (newLayoutProps: TableLayoutProps, fromLayoutId?: string) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(true)
+      }, 1000)
+    })
+  },
+  modifyLayout: async (changedLayoutProps: TableLayoutModifyReq) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(true)
+      }, 1000)
+    })
+  },
+  deleteLayout: async (deletedLayoutId: string) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(true)
+      }, 1000)
+    })
+  },
+  sortLayouts: async (leftLayoutId: string, rightLayoutId: string) => {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve(true)

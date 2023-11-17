@@ -1,33 +1,27 @@
 <script setup lang="ts">
 import { inject, ref } from 'vue'
 import { FN_CLOSE_CONTEXT_MENU, FN_MODIFY_COLUMN } from '../../../constant'
-import { ListColumnConf } from './conf'
-import { TableColumnProps } from '../../props'
-import * as iconSvg from '../../../assets/icon'
 import IconPickerComp from '../../common/IconPicker.vue'
 import { MenuOffsetKind } from '../../common/Menu.vue'
+import { CachedColumnConf } from '../../conf'
+import { TableColumnProps } from '../../props'
 
 const props = defineProps<{
   curColumnName: string
   pkColumnName: string
-  columnsConf: ListColumnConf[]
+  columnsConf: CachedColumnConf[]
 }>()
-let modifyColumnFun = inject(FN_MODIFY_COLUMN)
-let closeContextMenuFun = inject(FN_CLOSE_CONTEXT_MENU)
+const modifyColumnFun = inject(FN_MODIFY_COLUMN)
+const closeContextMenuFun = inject(FN_CLOSE_CONTEXT_MENU)
 const iconPickerCompRef = ref()
 
 const renameColumn = async (event: Event) => {
   const curColumnConf = props.columnsConf.find((item) => item.name == props.curColumnName)
   const target = event.target as HTMLInputElement
   if (curColumnConf) {
-    let columnProps: TableColumnProps = {
-      name: curColumnConf.name,
-      title: target.value,
-    }
+    curColumnConf.title = target.value
     // @ts-ignore
-    if (await modifyColumnFun(columnProps)) {
-      curColumnConf.title = target.value
-    }
+    await modifyColumnFun(curColumnConf)
   }
   // @ts-ignore
   closeContextMenuFun()
@@ -40,14 +34,9 @@ const openIconContainer = async (event: Event) => {
 const selectIcon = async (icon: string) => {
   const curColumnConf = props.columnsConf.find((item) => item.name == props.curColumnName)
   if (curColumnConf) {
-    let columnProps: TableColumnProps = {
-      name: curColumnConf.name,
-      icon: icon,
-    }
+    curColumnConf.icon = icon
     // @ts-ignore
-    if (await modifyColumnFun(columnProps)) {
-      curColumnConf.icon = icon
-    }
+    await modifyColumnFun(curColumnConf)
   }
 }
 

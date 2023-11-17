@@ -2,22 +2,22 @@
 import { inject, ref } from 'vue'
 import { FN_LOAD_DATA } from '../../../constant'
 import MenuComp, { MenuOffsetKind, MenuSizeKind } from '../../common/Menu.vue'
+import { CachedColumnConf, TableStyleConf } from '../../conf'
 import { showGroupAggMappingByDataKind, translateGroupAgg } from '../../function/group/Group'
 import { AggregateKind, TableDataResp } from '../../props'
-import { ListColumnConf, ListStyleConf } from './conf'
 
 const props = defineProps<{
   layoutAggs: { [key: string]: AggregateKind }
   dataBasic: TableDataResp
   pkColumnName: string
-  columnsConf: ListColumnConf[]
-  stylesConf: ListStyleConf
+  columnsConf: CachedColumnConf[]
+  stylesConf: TableStyleConf
   groupValue?: string
   setColumnStyles: (colIdx: number) => any
 }>()
 
 const aggsMenuCompRefs = ref()
-let loadDataFun = inject(FN_LOAD_DATA)
+const loadDataFun = inject(FN_LOAD_DATA)
 
 const showAggsContextMenu = (event: MouseEvent, colIdx: number) => {
   const targetEle = event.target as HTMLElement

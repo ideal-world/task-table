@@ -1,24 +1,21 @@
 <script setup lang="ts">
-import { inject, ref } from 'vue'
-import { FN_CLOSE_CONTEXT_MENU } from '../../../constant'
-import { TableLayoutConf } from '../../conf'
-import { ListColumnConf } from './conf'
+import { inject } from 'vue'
+import { FN_CLOSE_CONTEXT_MENU, FN_MODIFY_COLUMN } from '../../../constant'
+import { CachedColumnConf } from '../../conf'
 
 const props = defineProps<{
   curColumnName: string
-  columnsConf: ListColumnConf[]
-  layout: TableLayoutConf
+  columnsConf: CachedColumnConf[]
 }>()
+const modifyColumnFun = inject(FN_MODIFY_COLUMN)
+const closeContextMenuFun = inject(FN_CLOSE_CONTEXT_MENU)
 
-
-let closeContextMenuFun = inject(FN_CLOSE_CONTEXT_MENU)
-
-const setFixedColumn = () => {
-  const colIdx = props.columnsConf.findIndex((col) => col.name == props.curColumnName)
-  if (colIdx == props.layout.fixedColumnIdx) {
-    props.layout.fixedColumnIdx = -1
-  } else {
-    props.layout.fixedColumnIdx = colIdx
+const setFixedColumn = async () => {
+  const curColumnConf = props.columnsConf.find((col) => col.name == props.curColumnName)
+  if (curColumnConf) {
+    curColumnConf.fixed = !curColumnConf.fixed
+    // @ts-ignore
+    await modifyColumnFun(null, curColumnConf)
   }
   // @ts-ignore
   closeContextMenuFun()
@@ -26,7 +23,8 @@ const setFixedColumn = () => {
 </script>
 
 <script lang="ts">
-export function setFixedColumnStyles(styles: any, colIdx: number, fixedColumnIdx: number, columnsConf: ListColumnConf[]) {
+export function setFixedColumnStyles(styles: any, colIdx: number, columnsConf: CachedColumnConf[]) {
+  const fixedColumnIdx = columnsConf.findIndex((col) => col.fixed)
   if (fixedColumnIdx >= colIdx) {
     styles.position = 'sticky'
     styles.zIndex = 1099
@@ -46,8 +44,7 @@ export function setFixedColumnStyles(styles: any, colIdx: number, fixedColumnIdx
   <div class="iw-contextmenu__item flex justify-between content-center w-full">
     {{ $t('list.columnFixed.title') }}
     <input type="checkbox" class="toggle toggle-sm"
-      :checked="props.columnsConf.findIndex((col) => col.name == props.curColumnName) == layout.fixedColumnIdx"
-      @click="setFixedColumn" />
+      :checked="props.columnsConf.find((col) => col.name == props.curColumnName)?.fixed" @click="setFixedColumn" />
   </div>
 </template>
 

@@ -1,15 +1,25 @@
 <script setup lang="ts">
-import * as iconSvg from '../../../assets/icon'
-import { SizeKind } from '../../props'
+import { inject } from 'vue';
+import * as iconSvg from '../../../assets/icon';
+import { FN_MODIFY_STYLES } from '../../../constant';
+import { TableStyleConf } from '../../conf';
+import { SizeKind } from '../../props';
 
 const props = defineProps<{
+  styles: TableStyleConf
   size: SizeKind
 }>()
-const emit = defineEmits(['size'])
+let modifyStyleFun = inject(FN_MODIFY_STYLES)
 
-function setSize(size: SizeKind) {
-  emit('size', size)
+const setSize = async (newSize: SizeKind) => {
+  const tableStyleConf: TableStyleConf = {
+    ...props.styles,
+    size: newSize
+  }
+  // @ts-ignore
+  await modifyStyleFun(tableStyleConf)
 }
+
 </script>
 
 <template>

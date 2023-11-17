@@ -1,20 +1,19 @@
 <script setup lang="ts">
 import { inject, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { FN_UPDATE_DATA } from '../../../constant'
-import { ListColumnConf } from './conf'
-import { DataKind, TableDataGroupResp, TableDataResp } from '../../props'
 import { getChildIndex, getParentWithClass } from '../../../utils/basic'
 import { AlertKind, showAlert } from '../../common/Alert'
-import { useI18n } from 'vue-i18n'
+import { CachedColumnConf } from '../../conf'
+import { DataKind, TableDataGroupResp, TableDataResp } from '../../props'
 const { t } = useI18n()
 
 const props = defineProps<{
-  columnsConf: ListColumnConf[]
+  columnsConf: CachedColumnConf[]
   data: TableDataResp | TableDataGroupResp[]
   pkColumnName: string
 }>()
-
-let updateDataFun = inject(FN_UPDATE_DATA)
+const updateDataFun = inject(FN_UPDATE_DATA)
 
 onMounted(() => {
   let startColumnName = ''
@@ -49,13 +48,13 @@ onMounted(() => {
     if (startRowIdx == movedRowIdx) {
       return
     }
-    let parentListEle = getParentWithClass(startCellEle, 'iw-list')
+    const parentListEle = getParentWithClass(startCellEle, 'iw-list')
     if (parentListEle == null) {
       return
     }
 
     const pkKindIsNumber = props.columnsConf.find((col) => col.name == props.pkColumnName)?.dataKind == DataKind.NUMBER
-    let selectedPks: string[] | number[] = []
+    const selectedPks: string[] | number[] = []
     if (startRowIdx < movedRowIdx) {
       for (let i = startRowIdx; i <= movedRowIdx; i++) {
         if (pkKindIsNumber) {
@@ -78,9 +77,9 @@ onMounted(() => {
       }
     }
 
-    let changedData: any[] = []
+    const changedData: any[] = []
     if (!Array.isArray(props.data)) {
-      let targetData = props.data.records.find((item) => item[props.pkColumnName] == selectedPks[0])?.[startColumnName]
+      const targetData = props.data.records.find((item) => item[props.pkColumnName] == selectedPks[0])?.[startColumnName]
       props.data.records.forEach((item) => {
         // @ts-ignore
         if (selectedPks.includes(item[props.pkColumnName])) {
@@ -94,7 +93,7 @@ onMounted(() => {
       })
     } else {
       props.data.forEach((groupData) => {
-        let targetData = groupData.records.find((item) => item[props.pkColumnName] == selectedPks[0])?.[startColumnName]
+        const targetData = groupData.records.find((item) => item[props.pkColumnName] == selectedPks[0])?.[startColumnName]
         groupData.records.forEach((item) => {
           // @ts-ignore
           if (selectedPks.includes(item[props.pkColumnName])) {
@@ -121,12 +120,12 @@ onMounted(() => {
       showAlert(t("list.cellFill.acrossGroupError"), 2, AlertKind.WARNING)
       return
     }
-    let movedEle = movedEleOpt as HTMLElement
-    let parentListEle = getParentWithClass(movedEle, 'iw-list')
+    const movedEle = movedEleOpt as HTMLElement
+    const parentListEle = getParentWithClass(movedEle, 'iw-list')
     if (parentListEle == null) {
       return
     }
-    let selectRowEle = getParentWithClass(movedEle, 'iw-list-data-row')
+    const selectRowEle = getParentWithClass(movedEle, 'iw-list-data-row')
     if (selectRowEle == null) {
       return
     }
@@ -147,16 +146,16 @@ onMounted(() => {
     if (!targetEle.classList.contains('iw-list-data-cell')) {
       return
     }
-    let parentListEle = getParentWithClass(targetEle, 'iw-list')
+    const parentListEle = getParentWithClass(targetEle, 'iw-list')
     if (parentListEle == null) {
       return
     }
-    let selectRowEle = getParentWithClass(targetEle, 'iw-list-data-row')
+    const selectRowEle = getParentWithClass(targetEle, 'iw-list-data-row')
     if (selectRowEle == null) {
       return
     }
     const currColumnName = targetEle.dataset.columnName ?? ''
-    if (props.columnsConf.find((item) => item.name == currColumnName)?.fillable == false) {
+    if (props.columnsConf.find((item) => item.name == currColumnName && (currColumnName == props.pkColumnName || !item.dataEditable))) {
       return
     }
     selectDiv.style.display = 'flex'

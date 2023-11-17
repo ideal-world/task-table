@@ -68,9 +68,9 @@ export enum LayoutKind {
 
 export interface TableProps {
     tableId?: string
+    pkColumnName: string
     columns: TableColumnProps[]
     layouts?: TableLayoutProps[]
-    edit?: TableEditProps
     events: TableEventProps
     styles?: TableStyleProps
 }
@@ -80,20 +80,15 @@ export interface TableColumnProps {
     icon?: string
     title?: string
     dataKind?: DataKind
-    pk?: boolean
-    editable?: boolean
-    fillable?: boolean
-    wrap?: boolean
-    width?: number
+    dataEditable?: boolean
 }
 
 export interface TableLayoutProps {
-    id: string,
-    title: string,
-    default: boolean,
-    layoutKind: LayoutKind,
-    dateColumn?: { start: string, end: string }
-    fixedColumn?: string,
+    id: string
+    title: string
+    layoutKind: LayoutKind
+    icon?: string
+    columns: TableLayoutColumnProps[]
     // And relationship between groups
     filters?: TableDataFilterReq[]
     sorts?: TableDataSortReq[]
@@ -101,14 +96,19 @@ export interface TableLayoutProps {
     aggs?: { [key: string]: AggregateKind }
 }
 
-export interface TableEditProps {
-    fillable: boolean
-    addable: boolean
-    editable: boolean
+export interface TableLayoutColumnProps {
+    name: string
+    wrap?: boolean
+    fixed?: boolean
+    width?: number
+    hide?: boolean
+    dateStart?: boolean
+    dateEnd?: boolean
 }
 
 export interface TableStyleProps {
     size?: SizeKind
+    theme?: string
     tableClass?: string
     headerClass?: string
     rowClass?: string
@@ -123,11 +123,34 @@ export interface TableEventProps {
         aggs?: { [key: string]: AggregateKind },
         slice?: TableDataSliceReq) => Promise<TableDataResp | TableDataGroupResp[]>
     saveData?: (changedRecords: { [key: string]: any }[]) => Promise<boolean>
-    newColumn?: (newColumnConf: TableColumnProps, fromColumnName?: string) => Promise<boolean>
-    modifyColumn?: (changedColumnConf: TableColumnProps) => Promise<boolean>
-    deleteColumn?: (deletedColumnName: string) => Promise<boolean>
     deleteData?: (deletedPks: any[]) => Promise<boolean>
+
+    newColumn?: (newColumnProps: TableColumnProps, fromColumnName?: string) => Promise<boolean>
+    modifyColumn?: (changedColumnProps: TableColumnProps) => Promise<boolean>
+    deleteColumn?: (deletedColumnName: string) => Promise<boolean>
+
     loadCellOptions?: (columnName: string, cellValue: any) => Promise<{ title: string, value: any }[]>
+
+    modifyStyles?: (changedStyleProps: TableStyleProps) => Promise<boolean>
+
+    newLayout?: (newLayoutProps: TableLayoutProps, fromLayoutId?: string) => Promise<boolean>
+    modifyLayout?: (changedLayoutProps: TableLayoutModifyReq) => Promise<boolean>
+    deleteLayout?: (deletedLayoutId: string) => Promise<boolean>
+    sortLayouts?: (leftLayoutId: string, rightLayoutId:string) => Promise<boolean>
+}
+
+export interface TableLayoutModifyReq {
+    id?: string
+    title?: string
+    icon?: string
+    filters?: TableDataFilterReq[]
+    sorts?: TableDataSortReq[]
+    group?: TableDataGroupReq
+    aggs?: { [key: string]: AggregateKind }
+    columnSortedNames?: [string, string]
+    newColumn?: TableLayoutColumnProps
+    changedColumn?: TableLayoutColumnProps
+    deletedColumnName?: string
 }
 
 export interface TableDataSortReq {

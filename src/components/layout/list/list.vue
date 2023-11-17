@@ -1,37 +1,42 @@
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { computed, ref } from 'vue'
 import MenuComp from '../../common/Menu.vue'
-import { TableLayoutConf, TableStyleConf } from '../../conf'
+import { CachedColumnConf, TableBasicConf, TableLayoutConf } from '../../conf'
 import { TableDataResp } from '../../props'
-import ColumnAggsComp from './ColumnAggs.vue'
-import { ListBasicConf, ListColumnConf, ListConf, ListStyleConf } from './conf'
 import CellFillComp from './CellFill.vue'
-import ColumnFixedComp, { setFixedColumnStyles } from './ColumnFixed.vue'
-import ColumnResizeComp from './ColumnResize.vue'
-import RowsComp from './Rows.vue'
-import ColumnSortComp from './ColumnSort.vue'
 import CellWrapComp from './CellWrap.vue'
+import ColumnAggsComp from './ColumnAggs.vue'
 import ColumnCopyComp from './ColumnCopy.vue'
-import ColumnRenameComp from './ColumnRename.vue'
 import ColumnDeleteComp from './ColumnDelete.vue'
+import ColumnFixedComp, { setFixedColumnStyles } from './ColumnFixed.vue'
+import ColumnRenameComp from './ColumnRename.vue'
+import ColumnResizeComp from './ColumnResize.vue'
+import ColumnSortComp from './ColumnSort.vue'
+import RowsComp from './Rows.vue'
 
 const listConf = defineProps<
-  ListConf & {
+  {
     layout: TableLayoutConf
-    globalStyles: TableStyleConf
+    basic: TableBasicConf
   }
 >()
 
-const basicConf = reactive<ListBasicConf>(listConf.basic)
-const columnsConf = reactive<ListColumnConf[]>(listConf.columns)
-const stylesConf = reactive<ListStyleConf>(listConf.styles)
+const columnsConf = computed<CachedColumnConf[]>(() => {
+  return listConf.layout.columns.map(column => {
+    return {
+      ...column,
+      ...listConf.basic.columns.find(col => col.name == column.name)!
+    }
+  })
+})
+
 const headerMenuCompRef = ref()
 const selectedColumnName = ref<string>('')
 
 const setColumnStyles = (colIdx: number) => {
   const styles: any = {}
-  styles.width = columnsConf[colIdx].width + 'px'
-  setFixedColumnStyles(styles, colIdx, listConf.layout.fixedColumnIdx, columnsConf)
+  styles.width = columnsConf.value[colIdx].width + 'px'
+  setFixedColumnStyles(styles, colIdx, columnsConf.value)
   return styles
 }
 
@@ -44,47 +49,45 @@ const showHeaderContextMenu = (event: MouseEvent, columName: string) => {
 </script>
 
 <template>
-  <div :class="'iw-list relative iw-list--size-' + listConf.globalStyles.size"
-    :style="{ width: columnsConf.reduce((count, col) => count + col.width, 0) + 'px' }">
+  <div :class="'iw-list relative iw-list--size-' + listConf.basic.styles.size"
+    :style="{ width: Object.values(layout.columns).reduce((count, col) => count + col.width, 0) + 'px' }">
     <div
-      :class="stylesConf.headerClass + ' iw-list-header flex items-center sticky top-0 z-[1100] bg-base-100 border-solid border-t border-t-base-300 border-r border-r-base-300'">
+      :class="listConf.basic.styles.headerClass + ' iw-list-header flex items-center sticky top-0 z-[1100] bg-base-100 border-solid border-t border-t-base-300 border-r border-r-base-300'">
       <div v-for="(column, colIdx) in columnsConf" :key="column.name"
-        :class="stylesConf.cellClass + ' iw-list-cell iw-list-header-cell flex items-center border-solid border-b border-b-base-300 border-l  border-l-base-300 hover:cursor-pointer hover:bg-base-200'"
+        :class="listConf.basic.styles.cellClass + ' iw-list-cell iw-list-header-cell flex items-center border-solid border-b border-b-base-300 border-l  border-l-base-300 hover:cursor-pointer hover:bg-base-200'"
         :data-column-name="column.name" :style="setColumnStyles(colIdx)"
         @click="(event: MouseEvent) => showHeaderContextMenu(event, column.name)">
-        <i :class="column.icon+ ' mr-1'"></i> {{ column.title }}
+        <i :class="column.icon + ' mr-1'"></i> {{ column.title }}
       </div>
     </div>
     <template v-if="listConf.layout.data && !Array.isArray(listConf.layout.data)">
-      <rows-comp :records="listConf.layout.data.records" :pk-column-name="basicConf.pkColumnName"
-        :columns-conf="columnsConf" :styles-conf="stylesConf" :editable="basicConf.editable"
-        :set-column-styles="setColumnStyles"></rows-comp>
+      <rows-comp :records="listConf.layout.data.records" :pk-column-name="listConf.basic.pkColumnName"
+        :columns-conf="columnsConf" :styles-conf="listConf.basic.styles" :set-column-styles="setColumnStyles"></rows-comp>
       <column-aggs-comp :layout-aggs="layout.aggs!" :data-basic="(layout.data as TableDataResp)"
-        :pk-column-name="listConf.basic.pkColumnName" :columns-conf="columnsConf" :styles-conf="stylesConf"
+        :pk-column-name="listConf.basic.pkColumnName" :columns-conf="columnsConf" :styles-conf="listConf.basic.styles"
         :set-column-styles="setColumnStyles"></column-aggs-comp>
     </template>
     <template v-else-if="listConf.layout.data && Array.isArray(listConf.layout.data)">
       <template v-for="groupData in listConf.layout.data">
         <column-aggs-comp :layout-aggs="layout.aggs!" :data-basic="groupData"
-          :pk-column-name="listConf.basic.pkColumnName" :columns-conf="columnsConf" :styles-conf="stylesConf"
+          :pk-column-name="listConf.basic.pkColumnName" :columns-conf="columnsConf" :styles-conf="listConf.basic.styles"
           :group-value="groupData.groupValue" :set-column-styles="setColumnStyles"></column-aggs-comp>
-        <rows-comp :records="groupData.records" :pk-column-name="basicConf.pkColumnName" :columns-conf="columnsConf"
-          :styles-conf="stylesConf" :editable="basicConf.editable" :set-column-styles="setColumnStyles"></rows-comp>
+        <rows-comp :records="groupData.records" :pk-column-name="listConf.basic.pkColumnName" :columns-conf="columnsConf"
+          :styles-conf="listConf.basic.styles" :set-column-styles="setColumnStyles"></rows-comp>
       </template>
     </template>
   </div>
   <column-sort-comp :columns-conf="columnsConf"></column-sort-comp>
   <column-resize-comp :columns-conf="columnsConf"></column-resize-comp>
-  <cell-fill-comp :columns-conf="columnsConf" :data="listConf.layout.data!" :pk-column-name="listConf.basic.pkColumnName"
-    v-if="basic.fillable"></cell-fill-comp>
+  <cell-fill-comp :columns-conf="columnsConf" :data="listConf.layout.data!"
+    :pk-column-name="listConf.basic.pkColumnName"></cell-fill-comp>
   <menu-comp ref="headerMenuCompRef">
     <column-rename-comp :cur-column-name="selectedColumnName" :columns-conf="columnsConf"
       :pk-column-name="listConf.basic.pkColumnName"></column-rename-comp>
     <column-copy-comp :cur-column-name="selectedColumnName" :columns-conf="columnsConf"></column-copy-comp>
     <column-delete-comp :cur-column-name="selectedColumnName" :columns-conf="columnsConf"
       :pk-column-name="listConf.basic.pkColumnName"></column-delete-comp>
-    <column-fixed-comp :cur-column-name="selectedColumnName" :columns-conf="columnsConf"
-      :layout="listConf.layout"></column-fixed-comp>
+    <column-fixed-comp :cur-column-name="selectedColumnName" :columns-conf="columnsConf"></column-fixed-comp>
     <cell-wrap-comp :cur-column-name="selectedColumnName" :columns-conf="columnsConf"></cell-wrap-comp>
   </menu-comp>
 </template>

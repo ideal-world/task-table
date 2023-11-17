@@ -1,28 +1,21 @@
 <script setup lang="ts">
-import { inject } from 'vue'
-import { FN_CLOSE_CONTEXT_MENU, FN_MODIFY_COLUMN } from '../../../constant'
-import { ListColumnConf } from './conf'
-import { TableColumnProps } from '../../props';
+import { inject } from 'vue';
+import { FN_CLOSE_CONTEXT_MENU, FN_MODIFY_COLUMN } from '../../../constant';
+import { CachedColumnConf } from '../../conf';
 
 const props = defineProps<{
   curColumnName: string
-  columnsConf: ListColumnConf[]
+  columnsConf: CachedColumnConf[]
 }>()
-let modifyColumnFun = inject(FN_MODIFY_COLUMN)
-
-let closeContextMenuFun = inject(FN_CLOSE_CONTEXT_MENU)
+const modifyColumnFun = inject(FN_MODIFY_COLUMN)
+const closeContextMenuFun = inject(FN_CLOSE_CONTEXT_MENU)
 
 const setWrapColumn = async () => {
-  let curColumnConf = props.columnsConf.find((col) => col.name == props.curColumnName)
+  const curColumnConf = props.columnsConf.find((col) => col.name == props.curColumnName)
   if (curColumnConf) {
-    let columnProps: TableColumnProps = {
-      name: curColumnConf.name,
-      wrap: !curColumnConf.wrap
-    }
+    curColumnConf.wrap = !curColumnConf.wrap
     // @ts-ignore
-    if (await modifyColumnFun(columnProps)) {
-      curColumnConf.wrap = !curColumnConf.wrap
-    }
+    await modifyColumnFun(null, curColumnConf)
   }
   // @ts-ignore
   closeContextMenuFun()

@@ -7,11 +7,16 @@ const { t } = locales.global
 export interface TableBasicConf {
     tableId: string
     pkColumnName: string
+    columns: TableColumnConf[]
+    styles: TableStyleConf
 }
 
-export interface TableStyleConf {
-    tableClass: string
-    size: SizeKind
+export interface TableColumnConf {
+    name: string
+    title: string
+    icon: string
+    dataKind: DataKind
+    dataEditable: boolean
 }
 
 export interface TableLayoutConf {
@@ -19,15 +24,38 @@ export interface TableLayoutConf {
     title: string
     layoutKind: LayoutKind
     icon: string
-    sort: number
-    dateColumn?: { start: string, end: string }
-    fixedColumnIdx: number,
+    columns: TableLayoutColumnConf[]
     filters?: TableDataFilterReq[]
     sorts?: TableDataSortReq[]
     group?: TableDataGroupReq
     aggs?: { [key: string]: AggregateKind }
     slice?: TableDataSliceReq
     data?: TableDataResp | TableDataGroupResp[]
+}
+
+export interface TableLayoutColumnConf {
+    name: string
+    wrap: boolean
+    fixed: boolean
+    width: number
+    hide: boolean
+    dateStart: boolean
+    dateEnd: boolean
+}
+
+export interface CachedColumnConf extends TableColumnConf, TableLayoutColumnConf {
+    name: string
+}
+
+
+export interface TableStyleConf {
+    size: SizeKind
+    theme: string
+    tableClass: string
+    headerClass: string
+    rowClass: string
+    cellClass: string
+    aggClass: string
 }
 
 export function getDefaultValueByDataKind(dataKind: DataKind): any {
@@ -90,61 +118,90 @@ export function getDefaultIconByDataKind(dataKind: DataKind): string {
     }
 }
 
-export function initConf(props: TableProps): [TableBasicConf, { [key: string]: TableLayoutConf }, TableStyleConf] {
-    let layouts: { [key: string]: TableLayoutConf } = {}
-    let sort = 0
+
+export function getDefaultIconByLayoutKind(layoutKind: LayoutKind): string {
+    switch (layoutKind) {
+        case LayoutKind.CHART:
+            return iconSvg.CHART
+        case LayoutKind.CALENDAR:
+            return iconSvg.CALENDAR
+        case LayoutKind.BOARD:
+            return iconSvg.BOARD
+        case LayoutKind.GANTT:
+            return iconSvg.GANTT
+        default:
+            return iconSvg.TEXT
+    }
+}
+
+export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]] {
+    const basicConf = {
+        tableId: props.tableId ?? 'iw-table' + Math.floor(Math.random() * 1000000),
+        pkColumnName: props.pkColumnName,
+        columns: props.columns.map(column => {
+            return {
+                name: column.name,
+                title: column.title ?? column.name,
+                dataKind: column.dataKind ?? DataKind.TEXT,
+                icon: column.icon ?? getDefaultIconByDataKind(column.dataKind ?? DataKind.TEXT),
+                dataEditable: column.dataEditable ?? true,
+            }
+        }),
+        styles: {
+            tableClass: props.styles?.tableClass ?? '',
+            headerClass: props.styles?.headerClass ?? '',
+            rowClass: props.styles?.rowClass ?? '',
+            cellClass: props.styles?.cellClass ?? '',
+            aggClass: props.styles?.aggClass ?? '',
+            size: props.styles?.size ?? SizeKind.MEDIUM,
+            theme: ''
+        }
+    }
+    const layoutsConf: TableLayoutConf[] = []
     if (props.layouts) {
         props.layouts.forEach(layout => {
-            let icon = ''
-            switch (layout.layoutKind) {
-                case LayoutKind.CHART:
-                    icon = iconSvg.CHART
-                    break
-                case LayoutKind.CALENDAR:
-                    icon = iconSvg.CALENDAR
-                    break
-                case LayoutKind.BOARD:
-                    icon = iconSvg.BOARD
-                    break
-                case LayoutKind.GANTT:
-                    icon = iconSvg.GANTT
-                    break
-                default:
-                    icon = iconSvg.TEXT
-            }
-            layouts[layout.id] = {
+            layoutsConf.push({
                 id: layout.id,
                 title: layout.title,
                 layoutKind: layout.layoutKind,
-                icon: icon,
-                sort: sort++,
-                dateColumn: layout.dateColumn,
-                fixedColumnIdx: props.columns.findIndex(column => column.name === layout.fixedColumn) ?? -1,
+                icon: layout.icon ?? getDefaultIconByLayoutKind(layout.layoutKind),
+                columns: layout.columns.map(column => {
+                    return {
+                        name: column.name,
+                        wrap: column.wrap ?? true,
+                        fixed: column.fixed ?? false,
+                        width: column.width ?? 200,
+                        hide: column.hide ?? false,
+                        dateStart: column.dateStart ?? false,
+                        dateEnd: column.dateEnd ?? false,
+                    }
+                }),
                 filters: layout.filters,
                 sorts: layout.sorts,
                 group: layout.group,
                 aggs: layout.aggs
-            }
+            })
         })
     } else {
-        layouts['default'] = {
+        layoutsConf.push({
             id: 'default',
             title: t('layout.title.default'),
             layoutKind: LayoutKind.LIST,
             icon: iconSvg.TEXT,
-            sort: sort++,
-            fixedColumnIdx: -1,
+            columns: props.columns.map(column => {
+                return {
+                    name: column.name,
+                    wrap: true,
+                    fixed: false,
+                    width: 200,
+                    hide: false,
+                    dateStart: false,
+                    dateEnd: false,
+                }
+            }),
             filters: [],
             sorts: [],
-        }
+        })
     }
-    return [
-        {
-            tableId: props.tableId ?? 'iw-table' + Math.floor(Math.random() * 1000000),
-            pkColumnName: props.columns.find(column => column.pk)?.name ?? 'id'
-        }, layouts, {
-            tableClass: '',
-            size: SizeKind.MEDIUM
-        }
-    ]
+    return [basicConf, layoutsConf]
 }

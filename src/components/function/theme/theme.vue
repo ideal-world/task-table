@@ -1,26 +1,46 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import { themeChange } from 'theme-change'
+import { themeChange } from 'theme-change';
+import { inject, onMounted } from 'vue';
+import { FN_MODIFY_STYLES } from '../../../constant';
+import { TableStyleConf } from '../../conf';
+
+const props = defineProps<{
+  styles: TableStyleConf
+}>()
+let modifyStyleFun = inject(FN_MODIFY_STYLES)
 
 onMounted(() => {
   themeChange(false)
 })
 
+const changeTheme = async (event: Event) => {
+  const targetEle = event.target as HTMLElement
+  const theme = targetEle.dataset.setTheme
+  if (theme != undefined) {
+    const tableStyleConf: TableStyleConf = {
+      ...props.styles,
+      theme: theme
+    }
+    // @ts-ignore
+    await modifyStyleFun(tableStyleConf)
+  }
+}
+
 </script>
 
 <template>
   <div class="iw-contextmenu__item w-full pl-1 pr-1  bg-base-200  rounded-md">
-    <div class="flex justify-between items-center">
+    <div class="flex justify-between items-center" @click="changeTheme">
       <button class="badge badge-md" data-set-theme=""
         style="border-width: 1px; border-style: solid; border-color: rgb(87, 13, 248);"></button>
       <button class="badge badge-md" data-set-theme="cupcake"
-        style="border-width: 1px; border-style: solid;border-color: rgb(101, 195, 200);"></button>
+        style="border-width: 1px; border-style: solid; border-color: rgb(101, 195, 200);"></button>
       <button class="badge badge-md" data-set-theme="lofi"
-        style="border-width: 1px; border-style: solid;border-color: rgb(13, 13, 13);"></button>
+        style="border-width: 1px; border-style: solid; border-color: rgb(13, 13, 13);"></button>
       <button class="badge badge-md" data-set-theme="acid"
-        style="border-width: 1px; border-style: solid;border-color: rgb(255, 0, 242);"></button>
+        style="border-width: 1px; border-style: solid; border-color: rgb(255, 0, 242);"></button>
       <button class="badge badge-md" data-set-theme="lemonade"
-        style="border-width: 1px; border-style: solid;border-color: rgb(82, 155, 3);"></button>
+        style="border-width: 1px; border-style: solid; border-color: rgb(82, 155, 3);"></button>
     </div>
     <div class="flex justify-between items-center pt-1">
       <button class="badge badge-md" data-set-theme="dark" style="background-color: black;"></button>
