@@ -174,7 +174,7 @@ onMounted(() => {
 
 <style lang="css">
 .iw-list-fill--select {
-  @apply absolute hidden z-[1000] border-solid border-2 border-primary;
+  @apply absolute hidden z-[1200] border-solid border-2 border-primary;
 
   &>div {
     @apply absolute flex w-[28px] h-[28px] p-[10px] right-[-15px] bottom-[-15px] cursor-crosshair;

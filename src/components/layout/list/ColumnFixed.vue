@@ -13,6 +13,11 @@ const closeContextMenuFun = inject(FUN_CLOSE_CONTEXT_MENU_TYPE)!
 
 const setFixedColumn = async () => {
   const curColumnConf = props.columnsConf.find((col) => col.name == props.curColumnName)
+  const oldFixedColumnConf = props.columnsConf.find((col) => col.fixed)
+  if (oldFixedColumnConf && oldFixedColumnConf.name != curColumnConf?.name) {
+    oldFixedColumnConf.fixed = false
+    await modifyColumnFun(undefined, oldFixedColumnConf)
+  }
   if (curColumnConf) {
     curColumnConf.fixed = !curColumnConf.fixed
     await modifyColumnFun(undefined, curColumnConf)

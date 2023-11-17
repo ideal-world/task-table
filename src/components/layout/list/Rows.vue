@@ -26,10 +26,10 @@ const showRowContextMenu = (event: MouseEvent) => {
 
 <template>
   <div v-for="(row) in props.records" :key="row[props.pkColumnName]" :data-pk="row[props.pkColumnName]"
-    :class="props.stylesConf.rowClass + ' iw-list-row iw-list-data-row flex border-r border-r-base-300 iw-list-data-row--unselected'">
+    :class="props.stylesConf.rowClass + ' iw-list-row iw-list-data-row flex border-r border-r-base-300'">
     <template v-for="(column,colIdx) in props.columnsConf" :key="column.name">
       <div
-        :class="props.stylesConf.cellClass + ' iw-list-cell iw-list-data-cell flex items-center border-solid border-b border-b-base-300 border-l border-l-base-300 ' + (column.wrap ? 'break-words' : 'whitespace-nowrap overflow-hidden text-ellipsis')"
+        :class="props.stylesConf.cellClass + ' iw-list-cell iw-list-data-cell flex items-center iw-list-data-row--unselected border-solid border-b border-b-base-300 border-l border-l-base-300 ' + (column.wrap ? 'break-words' : 'whitespace-nowrap overflow-hidden text-ellipsis')"
         :data-column-name="column.name" :style="props.setColumnStyles(colIdx)" @contextmenu.prevent="showRowContextMenu">
         {{ row[column.name] }}
       </div>

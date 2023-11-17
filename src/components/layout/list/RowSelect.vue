@@ -95,8 +95,10 @@ function cleanSelect(parentEle: HTMLElement) {
   props.selectedPks.splice(0, props.selectedPks.length)
   Array.prototype.forEach.call(parentEle.children, function (rowEle) {
     if (rowEle as HTMLElement && rowEle.classList.contains('iw-list-data-row')) {
-      rowEle.classList.remove('iw-list-data-row--selected')
-      rowEle.classList.add('iw-list-data-row--unselected')
+      Array.prototype.forEach.call(rowEle.children, function (cellEle) {
+        cellEle.classList.remove('iw-list-data-row--selected')
+        cellEle.classList.add('iw-list-data-row--unselected')
+      })
     }
   })
 }
@@ -109,8 +111,10 @@ function addSelect(selectedEle: HTMLElement) {
     // @ts-ignore
     props.selectedPks.push(selectedEle.dataset.pk as string)
   }
-  selectedEle.classList.add('iw-list-data-row--selected')
-  selectedEle.classList.remove('iw-list-data-row--unselected')
+  Array.prototype.forEach.call(selectedEle.children, function (cellEle) {
+    cellEle.classList.remove('iw-list-data-row--unselected')
+    cellEle.classList.add('iw-list-data-row--selected')
+  })
 }
 
 </script>
