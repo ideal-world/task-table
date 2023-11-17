@@ -6,7 +6,6 @@
     "build": "rimraf dist && vue-tsc && vite build",
     "docs:dev": "vitepress dev docs --host 0.0.0.0",
     "docs:build": "npm run publish-typedoc && vitepress build docs",
-    "docs:serve": "vitepress serve docs",
     "test": "vitest --run",
     "coverage": "vitest run --coverage",
     "publish-typedoc": "typedoc --options typedoc.json"
@@ -38,15 +37,15 @@
     "octicons-css": "^19.8.0",
     "sortablejs": "^1.15.0",
     "theme-change": "^2.5.0",
-    "vue-i18n": "^9.6.5"
+    "vue-i18n": "^9.7.0"
   },
   "peerDependencies": {
     "vue": "^3.3.4"
   },
   "devDependencies": {
-    "@types/node": "^20.9.0",
+    "@types/node": "^20.9.1",
     "@types/sortablejs": "^1.15.5",
-    "@vitejs/plugin-vue": "^4.4.1",
+    "@vitejs/plugin-vue": "^4.5.0",
     "@vitest/ui": "^0.34.6",
     "autoprefixer": "^10.4.16",
     "daisyui": "^3.9.4",
