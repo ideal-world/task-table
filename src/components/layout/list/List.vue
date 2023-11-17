@@ -9,6 +9,7 @@ import ColumnAggsComp from './ColumnAggs.vue'
 import ColumnCopyComp from './ColumnCopy.vue'
 import ColumnDeleteComp from './ColumnDelete.vue'
 import ColumnFixedComp, { setFixedColumnStyles } from './ColumnFixed.vue'
+import ColumnHideComp from './ColumnHide.vue'
 import ColumnRenameComp from './ColumnRename.vue'
 import ColumnResizeComp from './ColumnResize.vue'
 import ColumnSortComp from './ColumnSort.vue'
@@ -22,7 +23,7 @@ const listConf = defineProps<
 >()
 
 const columnsConf = computed<CachedColumnConf[]>(() => {
-  return listConf.layout.columns.map(column => {
+  return listConf.layout.columns.filter(column => !column.hide).map(column => {
     return {
       ...column,
       ...listConf.basic.columns.find(col => col.name == column.name)!
@@ -85,6 +86,7 @@ const showHeaderContextMenu = (event: MouseEvent, columName: string) => {
     <column-rename-comp :cur-column-name="selectedColumnName" :columns-conf="columnsConf"
       :pk-column-name="listConf.basic.pkColumnName"></column-rename-comp>
     <column-copy-comp :cur-column-name="selectedColumnName" :columns-conf="columnsConf"></column-copy-comp>
+    <column-hide-comp :cur-column-name="selectedColumnName" :columns-conf="columnsConf"></column-hide-comp>
     <column-delete-comp :cur-column-name="selectedColumnName" :columns-conf="columnsConf"
       :pk-column-name="listConf.basic.pkColumnName"></column-delete-comp>
     <column-fixed-comp :cur-column-name="selectedColumnName" :columns-conf="columnsConf"></column-fixed-comp>
