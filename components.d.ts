@@ -16,6 +16,8 @@ declare module 'vue' {
     ColumnRename: typeof import('./src/components/layout/list/ColumnRename.vue')['default']
     ColumnResize: typeof import('./src/components/layout/list/ColumnResize.vue')['default']
     ColumnSort: typeof import('./src/components/layout/list/ColumnSort.vue')['default']
+    copy: typeof import('./src/components/Skeleton copy.vue')['default']
+    Events: typeof import('./src/components/Events.vue')['default']
     Group: typeof import('./src/components/function/group/Group.vue')['default']
     IconPicker: typeof import('./src/components/common/IconPicker.vue')['default']
     List: typeof import('./src/components/layout/list/List.vue')['default']

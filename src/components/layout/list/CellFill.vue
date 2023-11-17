@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { inject, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { FN_UPDATE_DATA } from '../../../constant'
 import { getChildIndex, getParentWithClass } from '../../../utils/basic'
 import { AlertKind, showAlert } from '../../common/Alert'
 import { CachedColumnConf } from '../../conf'
+import { FUN_UPDATE_DATA_TYPE } from '../../events'
 import { DataKind, TableDataGroupResp, TableDataResp } from '../../props'
 const { t } = useI18n()
 
@@ -13,7 +13,7 @@ const props = defineProps<{
   data: TableDataResp | TableDataGroupResp[]
   pkColumnName: string
 }>()
-const updateDataFun = inject(FN_UPDATE_DATA)
+const updateDataFun = inject(FUN_UPDATE_DATA_TYPE)!
 
 onMounted(() => {
   let startColumnName = ''
@@ -107,7 +107,6 @@ onMounted(() => {
         })
       })
     }
-    // @ts-ignore
     updateDataFun(changedData)
   })
 

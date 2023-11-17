@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { inject, ref } from 'vue'
-import { FN_LOAD_DATA } from '../../../constant'
 import MenuComp, { MenuOffsetKind, MenuSizeKind } from '../../common/Menu.vue'
 import { CachedColumnConf, TableStyleConf } from '../../conf'
+import { FUN_LOAD_DATA_TYPE } from '../../events'
 import { showGroupAggMappingByDataKind, translateGroupAgg } from '../../function/group/Group'
 import { AggregateKind, TableDataResp } from '../../props'
 
@@ -17,7 +17,7 @@ const props = defineProps<{
 }>()
 
 const aggsMenuCompRefs = ref()
-const loadDataFun = inject(FN_LOAD_DATA)
+const loadDataFun = inject(FUN_LOAD_DATA_TYPE)!
 
 const showAggsContextMenu = (event: MouseEvent, colIdx: number) => {
   const targetEle = event.target as HTMLElement
@@ -26,9 +26,7 @@ const showAggsContextMenu = (event: MouseEvent, colIdx: number) => {
 
 function changeColumnAggs(aggKind: AggregateKind, colIdx: number) {
   props.layoutAggs[props.columnsConf[colIdx].name] = aggKind
-  // @ts-ignore
   aggsMenuCompRefs.value[colIdx].close()
-  // @ts-ignore
   loadDataFun()
 }
 </script>

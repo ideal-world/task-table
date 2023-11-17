@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { themeChange } from 'theme-change';
 import { inject, onMounted } from 'vue';
-import { FN_MODIFY_STYLES } from '../../../constant';
 import { TableStyleConf } from '../../conf';
+import { FUN_MODIFY_STYLES_TYPE } from '../../events';
 
 const props = defineProps<{
   styles: TableStyleConf
 }>()
-let modifyStyleFun = inject(FN_MODIFY_STYLES)
+let modifyStyleFun = inject(FUN_MODIFY_STYLES_TYPE)!
 
 onMounted(() => {
   themeChange(false)
@@ -21,7 +21,6 @@ const changeTheme = async (event: Event) => {
       ...props.styles,
       theme: theme
     }
-    // @ts-ignore
     await modifyStyleFun(tableStyleConf)
   }
 }

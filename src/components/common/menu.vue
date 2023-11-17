@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { provide, ref } from 'vue'
-import { FN_CLOSE_CONTEXT_MENU } from '../../constant'
-import { IwUtils } from '../../utils'
+import { InjectionKey, provide, ref } from 'vue';
+import { IwUtils } from '../../utils';
 
 const contextmenuRef = ref<HTMLElement | null>(null)
 const isShow = ref<boolean>(false)
@@ -120,7 +119,7 @@ defineExpose({
   close: hideContextMenu,
 })
 
-provide(FN_CLOSE_CONTEXT_MENU, hideContextMenu)
+provide(FUN_CLOSE_CONTEXT_MENU_TYPE, hideContextMenu)
 </script>
 
 <script lang="ts">
@@ -136,6 +135,8 @@ export enum MenuSizeKind {
   MEDIUM,
   LARGE,
 }
+
+export const FUN_CLOSE_CONTEXT_MENU_TYPE = Symbol() as InjectionKey<() => void>
 </script>
 
 <template>

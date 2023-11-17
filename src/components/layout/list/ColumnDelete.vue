@@ -1,21 +1,20 @@
 <script setup lang="ts">
 import { inject } from 'vue';
 import * as iconSvg from '../../../assets/icon';
-import { FN_CLOSE_CONTEXT_MENU, FN_DELETE_COLUMN } from '../../../constant';
+import { FUN_CLOSE_CONTEXT_MENU_TYPE } from '../../common/Menu.vue';
 import { CachedColumnConf } from '../../conf';
+import { FUN_DELETE_COLUMN_TYPE } from '../../events';
 
 const props = defineProps<{
   curColumnName: string
   pkColumnName: string
   columnsConf: CachedColumnConf[]
 }>()
-let deleteColumnFun = inject(FN_DELETE_COLUMN)
-let closeContextMenuFun = inject(FN_CLOSE_CONTEXT_MENU)
+let deleteColumnFun = inject(FUN_DELETE_COLUMN_TYPE)!
+let closeContextMenuFun = inject(FUN_CLOSE_CONTEXT_MENU_TYPE)!
 
 const deleteColumn = async () => {
-  // @ts-ignore
   await deleteColumnFun(props.curColumnName)
-  // @ts-ignore
   closeContextMenuFun()
 }
 </script>

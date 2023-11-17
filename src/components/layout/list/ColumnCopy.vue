@@ -1,16 +1,17 @@
 <script setup lang="ts">
-import { inject } from 'vue'
-import * as iconSvg from '../../../assets/icon'
-import { FN_CLOSE_CONTEXT_MENU, FN_NEW_COLUMN } from '../../../constant'
-import { getRandomString } from '../../../utils/basic'
-import { CachedColumnConf, TableColumnConf, TableLayoutColumnConf } from '../../conf'
+import { inject } from 'vue';
+import * as iconSvg from '../../../assets/icon';
+import { getRandomString } from '../../../utils/basic';
+import { FUN_CLOSE_CONTEXT_MENU_TYPE } from '../../common/Menu.vue';
+import { CachedColumnConf, TableColumnConf, TableLayoutColumnConf } from '../../conf';
+import { FUN_NEW_COLUMN_TYPE } from '../../events';
 
 const props = defineProps<{
   curColumnName: string
   columnsConf: CachedColumnConf[]
 }>()
-const newColumnFun = inject(FN_NEW_COLUMN)
-const closeContextMenuFun = inject(FN_CLOSE_CONTEXT_MENU)
+const newColumnFun = inject(FUN_NEW_COLUMN_TYPE)!
+const closeContextMenuFun = inject(FUN_CLOSE_CONTEXT_MENU_TYPE)!
 
 const copyColumn = async () => {
   const columnIdx = props.columnsConf.findIndex((item) => item.name == props.curColumnName)
@@ -27,9 +28,7 @@ const copyColumn = async () => {
     ...columnConf,
     name: newColumnName,
   }
-  // @ts-ignore
   await newColumnFun(newColumnConf, newLayoutColumnConf, columnConf.name)
-  // @ts-ignore
   closeContextMenuFun()
 }
 </script>

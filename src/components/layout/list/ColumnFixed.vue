@@ -1,23 +1,22 @@
 <script setup lang="ts">
 import { inject } from 'vue'
-import { FN_CLOSE_CONTEXT_MENU, FN_MODIFY_COLUMN } from '../../../constant'
+import { FUN_CLOSE_CONTEXT_MENU_TYPE } from '../../common/Menu.vue'
 import { CachedColumnConf } from '../../conf'
+import { FUN_MODIFY_COLUMN_TYPE } from '../../events'
 
 const props = defineProps<{
   curColumnName: string
   columnsConf: CachedColumnConf[]
 }>()
-const modifyColumnFun = inject(FN_MODIFY_COLUMN)
-const closeContextMenuFun = inject(FN_CLOSE_CONTEXT_MENU)
+const modifyColumnFun = inject(FUN_MODIFY_COLUMN_TYPE)!
+const closeContextMenuFun = inject(FUN_CLOSE_CONTEXT_MENU_TYPE)!
 
 const setFixedColumn = async () => {
   const curColumnConf = props.columnsConf.find((col) => col.name == props.curColumnName)
   if (curColumnConf) {
     curColumnConf.fixed = !curColumnConf.fixed
-    // @ts-ignore
-    await modifyColumnFun(null, curColumnConf)
+    await modifyColumnFun(undefined, curColumnConf)
   }
-  // @ts-ignore
   closeContextMenuFun()
 }
 </script>

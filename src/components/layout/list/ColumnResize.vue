@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { inject, onMounted } from 'vue';
-import { FN_MODIFY_COLUMN } from '../../../constant';
 import { CachedColumnConf } from '../../conf';
+import { FUN_MODIFY_COLUMN_TYPE } from '../../events';
 
 const props = defineProps<{
   columnsConf: CachedColumnConf[]
 }>()
-const modifyColumnFun = inject(FN_MODIFY_COLUMN)
+const modifyColumnFun = inject(FUN_MODIFY_COLUMN_TYPE)!
 
 let currColumnName = ''
 let currCellRect: DOMRect
@@ -43,8 +43,7 @@ onMounted(() => {
     const curColumnConf = props.columnsConf.find((item) => item.name == currColumnName)
     if (curColumnConf) {
       curColumnConf.width = curColumnConf.width
-      // @ts-ignore
-      await modifyColumnFun(null, curColumnConf)
+      await modifyColumnFun(undefined, curColumnConf)
     }
   })
 
