@@ -5,8 +5,8 @@ import { IwUtils } from '../../utils';
 const contextmenuRef = ref<HTMLElement | null>(null)
 const isShow = ref<boolean>(false)
 
-function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: MenuOffsetKind = MenuOffsetKind.LEFT_BOTTOM, size: MenuSizeKind = MenuSizeKind.MEDIUM) {
-  if (attachObj instanceof HTMLElement && IwUtils.hasParentWithClass(attachObj, 'iw-contextmenu__item')) {
+function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: MenuOffsetKind = MenuOffsetKind.LEFT_BOTTOM, size: MenuSizeKind = MenuSizeKind.MEDIUM, force: boolean = false) {
+  if (!force && attachObj instanceof HTMLElement && IwUtils.hasParentWithClass(attachObj, 'iw-contextmenu__item')) {
     // Prevent accidental triggering from items
     return
   }

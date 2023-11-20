@@ -39,7 +39,7 @@ function changeColumnAggs(aggKind: AggregateKind, colIdx: number) {
         :data-column-name="column.name" :style="props.setColumnStyles(colIdx)"
         @click="(event: MouseEvent) => showAggsContextMenu(event, colIdx)" v-if="column.name == props.pkColumnName">
         <span class="iw-list-agg-cell__group font-bold flex-grow pl-1">{{ props.groupValue }}</span>
-        <span class="iw-list-agg-cell__agg text-xs pr-1 self-center">{{ $t('function.group.agg.count')
+        <span class="iw-list-agg-cell__agg text-xs pr-1 self-center">{{ $t('_.agg.count')
         }}</span>
         <span class="iw-list-agg-cell__value text-info self-center">{{ props.dataBasic.totalNumber }}</span>
       </div>

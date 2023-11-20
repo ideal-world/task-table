@@ -28,6 +28,9 @@
       "url": "网址",
       "phone": "电话",
       "password": "密码"
+    },
+    "state": {
+      "selectPlaceholder": "请选择"
     }
   },
   "layout": {

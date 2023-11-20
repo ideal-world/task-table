@@ -24,8 +24,8 @@ const renameColumn = async (event: Event) => {
   closeContextMenuFun()
 }
 
-const openIconContainer = async (event: Event) => {
-  iconPickerCompRef.value.show(event, MenuOffsetKind.MEDIUM_BOTTOM)
+const showIconContainer = async (event: Event) => {
+  iconPickerCompRef.value.show(event, MenuOffsetKind.MEDIUM_BOTTOM, undefined, true)
 }
 
 const selectIcon = async (icon: string) => {
@@ -35,15 +35,13 @@ const selectIcon = async (icon: string) => {
     await modifyColumnFun(curColumnConf)
   }
 }
-
-
 </script>
 
 <template>
-  <div class="iw-contextmenu__item cursor-pointer">
-    <i :class="props.columnsConf.find((item) => item.name == props.curColumnName)?.icon + ' mr-1'"
-      @click="openIconContainer"></i>
-    <input class="input input-bordered input-sm" type="text"
+  <div class="iw-contextmenu__item flex justify-between items-center w-full">
+    <i :class="props.columnsConf.find((item) => item.name == props.curColumnName)?.icon + ' cursor-pointer mr-1'"
+      @click="showIconContainer"></i>
+    <input class="input input-bordered input-sx" type="text"
       :value="props.columnsConf.find((item) => item.name == props.curColumnName)?.title" @change="renameColumn" />
   </div>
   <icon-picker-comp ref="iconPickerCompRef" @select-icon="selectIcon"></icon-picker-comp>

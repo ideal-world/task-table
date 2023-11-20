@@ -189,15 +189,7 @@ export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]]
             layoutKind: LayoutKind.LIST,
             icon: iconSvg.TEXT,
             columns: props.columns.map(column => {
-                return {
-                    name: column.name,
-                    wrap: true,
-                    fixed: false,
-                    width: 200,
-                    hide: false,
-                    dateStart: false,
-                    dateEnd: false,
-                }
+                return getDefaultLayoutColumnConf(column.name)
             }),
             filters: [],
             sorts: [],
@@ -209,11 +201,11 @@ export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]]
 export function getDefaultLayoutColumnConf(columnName: string): TableLayoutColumnConf {
     return {
         name: columnName,
-                    wrap: true,
-                    fixed: false,
-                    width: 200,
-                    hide: false,
-                    dateStart: false,
-                    dateEnd: false,
+        wrap: true,
+        fixed: false,
+        width: 200,
+        hide: false,
+        dateStart: false,
+        dateEnd: false,
     }
 }

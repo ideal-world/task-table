@@ -28,6 +28,9 @@
       "url": "URL",
       "phone": "Phone",
       "password": "Password"
+    },
+    "state": {
+      "selectPlaceholder": "Please Select"
     }
   },
   "layout": {
