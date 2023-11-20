@@ -12,7 +12,7 @@ const props = defineProps<{
 const modifyColumnFun = inject(FUN_MODIFY_COLUMN_TYPE)!
 const closeContextMenuFun = inject(FUN_CLOSE_CONTEXT_MENU_TYPE)!
 
-const setFixedColumn = async () => {
+const setHidedColumn = async () => {
   const curColumnConf = props.columnsConf.find((col) => col.name == props.curColumnName)
   if (curColumnConf) {
     curColumnConf.hide = !curColumnConf.fixed
@@ -23,7 +23,7 @@ const setFixedColumn = async () => {
 </script>
 
 <template>
-  <div class="iw-contextmenu__item cursor-pointer" @click="setFixedColumn">
+  <div class="iw-contextmenu__item cursor-pointer" @click="setHidedColumn">
     <i :class="iconSvg.HIDE"></i>
     {{ $t('list.columnHide.title') }}
   </div>

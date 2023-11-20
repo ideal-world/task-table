@@ -13,7 +13,11 @@ import ColumnHideComp from './ColumnHide.vue'
 import ColumnRenameComp from './ColumnRename.vue'
 import ColumnResizeComp from './ColumnResize.vue'
 import ColumnSortComp from './ColumnSort.vue'
+import ColumnMoreComp from './ColumnMore.vue'
 import RowsComp from './Rows.vue'
+import * as iconSvg from '../../../assets/icon'
+
+const NEW_COLUMN_WIDTH = 80
 
 const listConf = defineProps<
   {
@@ -32,12 +36,17 @@ const columnsConf = computed<CachedColumnConf[]>(() => {
 })
 
 const headerMenuCompRef = ref()
+const headerColumnMoreCompRef = ref()
 const selectedColumnName = ref<string>('')
 
 const setColumnStyles = (colIdx: number) => {
   const styles: any = {}
-  styles.width = columnsConf.value[colIdx].width + 'px'
-  setFixedColumnStyles(styles, colIdx, columnsConf.value)
+  if (colIdx == -1) {
+    styles.width = NEW_COLUMN_WIDTH + 'px'
+  } else {
+    styles.width = columnsConf.value[colIdx].width + 'px'
+    setFixedColumnStyles(styles, colIdx, columnsConf.value)
+  }
   return styles
 }
 
@@ -47,18 +56,28 @@ const showHeaderContextMenu = (event: MouseEvent, columName: string) => {
   headerMenuCompRef.value.show(targetEle)
 }
 
+const showColumnMoreContextMenu = (event: MouseEvent) => {
+  const targetEle = event.target as HTMLElement
+  headerColumnMoreCompRef.value.show(targetEle)
+}
+
 </script>
 
 <template>
   <div :class="'iw-list relative iw-list--size-' + listConf.basic.styles.size"
-    :style="{ width: Object.values(layout.columns).reduce((count, col) => count + col.width, 0) + 'px' }">
+    :style="{ width: Object.values(columnsConf).reduce((count, col) => count + col.width, 0) + 'px' }">
     <div
       :class="listConf.basic.styles.headerClass + ' iw-list-header flex items-center sticky top-0 z-[1500] border-solid border-t border-t-base-300 border-r border-r-base-300'">
       <div v-for="(column, colIdx) in columnsConf" :key="column.name"
-        :class="listConf.basic.styles.cellClass + ' iw-list-cell iw-list-header-cell flex items-center bg-base-100 border-solid border-b border-b-base-300 border-l  border-l-base-300 hover:cursor-pointer hover:bg-base-200'"
+        :class="listConf.basic.styles.cellClass + ' iw-list-cell iw-list-header-cell flex items-center bg-base-100 border-solid border-b border-b-base-300 border-l border-l-base-300 hover:cursor-pointer hover:bg-base-200'"
         :data-column-name="column.name" :style="setColumnStyles(colIdx)"
         @click="(event: MouseEvent) => showHeaderContextMenu(event, column.name)">
         <i :class="column.icon + ' mr-1'"></i> {{ column.title }}
+      </div>
+      <div
+        :class="listConf.basic.styles.cellClass + ' iw-list-cell flex justify-end items-center bg-base-100 border-solid border-b border-b-base-300 border-l border-l-base-300 hover:cursor-pointer hover:bg-base-200'"
+        :style="setColumnStyles(-1)">
+        <i :class="iconSvg.MORE" @click="showColumnMoreContextMenu"></i>
       </div>
     </div>
     <template v-if="listConf.layout.data && !Array.isArray(listConf.layout.data)">
@@ -92,6 +111,8 @@ const showHeaderContextMenu = (event: MouseEvent, columName: string) => {
     <column-fixed-comp :cur-column-name="selectedColumnName" :columns-conf="columnsConf"></column-fixed-comp>
     <cell-wrap-comp :cur-column-name="selectedColumnName" :columns-conf="columnsConf"></cell-wrap-comp>
   </menu-comp>
+  <column-more-comp ref="headerColumnMoreCompRef" :basic-columns-conf="listConf.basic.columns"
+    :layout-columns-conf="listConf.layout.columns"></column-more-comp>
 </template>
 
 <style lang="css" scoped>

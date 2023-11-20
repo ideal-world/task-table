@@ -34,6 +34,11 @@ const showRowContextMenu = (event: MouseEvent) => {
         {{ row[column.name] }}
       </div>
     </template>
+    <div
+        :class="props.stylesConf.cellClass + ' iw-list-cell iw-list-data-cell flex items-center iw-list-data-row--unselected border-solid border-b border-b-base-300 border-l border-l-base-300 '"
+        :style="props.setColumnStyles(-1)"
+      >
+      </div>
   </div>
   <menu-comp ref="rowMenuCompRef">
     <row-delete-comp :selected-pks="selectedDataPks" v-show="selectedDataPks.length > 0"></row-delete-comp>

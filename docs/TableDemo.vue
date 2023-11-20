@@ -20,8 +20,6 @@ const layouts = [{
   }, {
     name: 'name',
   }, {
-    name: 'phone',
-  }, {
     name: 'addr',
   }, {
     name: 'time',

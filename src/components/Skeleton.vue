@@ -4,8 +4,8 @@ import * as iconSvg from '../assets/icon'
 import MenuComp, { MenuOffsetKind } from './common/Menu.vue'
 import { TableBasicConf, TableLayoutConf, initConf } from './conf'
 import * as Event from './events'
-import ResizeComp from './function/resize/Resize.vue'
-import ThemeComp from './function/theme/Theme.vue'
+import ResizeComp from './function/Resize.vue'
+import ThemeComp from './function/Theme.vue'
 import ListComp from './layout/list/List.vue'
 import { TableProps } from './props'
 
@@ -83,11 +83,8 @@ const showMoreMenu = (event: MouseEvent) => {
     </div>
     <div class="iw-tt-main">
       <template v-for="layout in tableLayoutsConf">
-        <div class="iw-tt-toolbar flex items-center justify-between h-10" v-if="currentLayoutId == layout.id">
-          <div class="iw-tt-toolbar-main flex ">main</div>
-          <div class="iw-tt-toolbars-more flex">
-            more...
-          </div>
+        <div class="iw-tt-toolbar flex items-center h-10" v-if="currentLayoutId == layout.id">
+          main
         </div>
         <div class="iw-tt-table overflow-auto w-full" v-if="currentLayoutId == layout.id">
           <list-comp :key="layout.id" :layout="layout" :basic="tableBasicConf" />

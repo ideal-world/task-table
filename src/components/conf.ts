@@ -205,3 +205,15 @@ export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]]
     }
     return [basicConf, layoutsConf]
 }
+
+export function getDefaultLayoutColumnConf(columnName: string): TableLayoutColumnConf {
+    return {
+        name: columnName,
+                    wrap: true,
+                    fixed: false,
+                    width: 200,
+                    hide: false,
+                    dateStart: false,
+                    dateEnd: false,
+    }
+}

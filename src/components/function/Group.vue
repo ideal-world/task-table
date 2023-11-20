@@ -1,24 +1,12 @@
-import { AggregateKind, DataKind } from "../../props"
-import locales from '../../../locales'
-const { t } = locales.global
+<script setup lang="ts">
+</script>
+
+<script lang="ts">
+import { AggregateKind, DataKind, translateGroupAgg } from "../props"
 
 export interface GroupAggItem {
     kind: AggregateKind
     title: string
-}
-
-export function translateGroupAgg(aggKind: AggregateKind): string {
-    switch (aggKind) {
-        case AggregateKind.SUM:
-            return t('function.group.agg.sum')
-        case AggregateKind.COUNT: return t('function.group.agg.count')
-        case AggregateKind.MIN: return t('function.group.agg.min')
-        case AggregateKind.MAX: return t('function.group.agg.max')
-        case AggregateKind.AVG: return t('function.group.agg.avg')
-        case AggregateKind.MEDIAN: return t('function.group.agg.median')
-        case AggregateKind.STDDEV: return t('function.group.agg.stddev')
-        case AggregateKind.DISTINCT: return t('function.group.agg.distinct')
-    }
 }
 
 export function showGroupAggMappingByDataKind(dataKind: DataKind): GroupAggItem[] {
@@ -57,6 +45,7 @@ export function showGroupAggMappingByDataKind(dataKind: DataKind): GroupAggItem[
             break
     }
     return items
-
-
 }
+</script>
+
+<template></template>

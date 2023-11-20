@@ -3,8 +3,8 @@ import { inject, ref } from 'vue'
 import MenuComp, { MenuOffsetKind, MenuSizeKind } from '../../common/Menu.vue'
 import { CachedColumnConf, TableStyleConf } from '../../conf'
 import { FUN_LOAD_DATA_TYPE } from '../../events'
-import { showGroupAggMappingByDataKind, translateGroupAgg } from '../../function/group/Group'
-import { AggregateKind, TableDataResp } from '../../props'
+import { showGroupAggMappingByDataKind } from '../../function/Group.vue'
+import { AggregateKind, TableDataResp, translateGroupAgg } from '../../props'
 
 const props = defineProps<{
   layoutAggs: { [key: string]: AggregateKind }
@@ -60,5 +60,9 @@ function changeColumnAggs(aggKind: AggregateKind, colIdx: number) {
         </div>
       </menu-comp>
     </template>
+    <div
+      :class="props.stylesConf.cellClass + ' iw-list-cell iw-list-agg-cell cursor-pointer flex items-center justify-end pr-1 bg-base-100 border-solid border-b border-b-base-300 border-l  border-l-base-300 hover:bg-base-200'"
+      :style="props.setColumnStyles(-1)">
+    </div>
   </div>
 </template>

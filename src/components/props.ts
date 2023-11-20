@@ -1,3 +1,6 @@
+import locales from '../locales'
+const { t } = locales.global
+
 export enum DataKind {
     TEXT = 'TEXT',
     TEXTAREA = 'TEXTAREA',
@@ -16,6 +19,28 @@ export enum DataKind {
     URL = 'URL',
     PHONE = 'PHONE',
     PASSWORD = 'PASSWORD',
+}
+
+export function translateDataKind(dataKind: DataKind): string {
+    switch (dataKind) {
+        case DataKind.TEXT:return t('_.datakind.text')
+        case DataKind.TEXTAREA:return t('_.datakind.textarea')
+        case DataKind.NUMBER:return t('_.datakind.number')
+        case DataKind.BOOLEAN:return t('_.datakind.boolean')
+        case DataKind.FILE:return t('_.datakind.file')
+        case DataKind.IMAGE:return t('_.datakind.image')
+        case DataKind.AMOUNT:return t('_.datakind.amount')
+        case DataKind.SELECT:return t('_.datakind.select')
+        case DataKind.MULTISELECT:return t('_.datakind.multiselect')
+        case DataKind.CHECKBOX:return t('_.datakind.checkbox')
+        case DataKind.DATE:return t('_.datakind.date')
+        case DataKind.DATETIME:return t('_.datakind.datetime')
+        case DataKind.TIME:return t('_.datakind.time')
+        case DataKind.EMAIL:return t('_.datakind.email')
+        case DataKind.URL:return t('_.datakind.url')
+        case DataKind.PHONE:return t('_.datakind.phone')
+        case DataKind.PASSWORD:return t('_.datakind.password')
+    }
 }
 
 export enum OperatorKind {
@@ -49,6 +74,20 @@ export enum AggregateKind {
     STDDEV = 'STDDEV',
     DISTINCT = 'DISTINCT',
     // TODO
+}
+
+export function translateGroupAgg(aggKind: AggregateKind): string {
+    switch (aggKind) {
+        case AggregateKind.SUM:
+            return t('_.agg.sum')
+        case AggregateKind.COUNT: return t('_.agg.count')
+        case AggregateKind.MIN: return t('_.agg.min')
+        case AggregateKind.MAX: return t('_.agg.max')
+        case AggregateKind.AVG: return t('_.agg.avg')
+        case AggregateKind.MEDIAN: return t('_.agg.median')
+        case AggregateKind.STDDEV: return t('_.agg.stddev')
+        case AggregateKind.DISTINCT: return t('_.agg.distinct')
+    }
 }
 
 export enum SizeKind {

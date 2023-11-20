@@ -1,5 +1,35 @@
 {
-  "_": {},
+  "_": {
+    "agg": {
+      "count": "合计",
+      "sum": "求和",
+      "max": "最大值",
+      "min": "最小值",
+      "distinct": "去重合计",
+      "avg": "平均值",
+      "median": "中值",
+      "stddev": "标准差值"
+    },
+    "datakind": {
+      "text": "文本",
+      "textarea": "多行文本",
+      "number": "数字",
+      "boolean": "布尔",
+      "file": "文件",
+      "image": "图像",
+      "amount": "金额",
+      "select": "下拉单选",
+      "multiselect": "下拉多选",
+      "checkbox": "多选",
+      "date": "日期",
+      "datetime": "日期时间",
+      "time": "时间",
+      "email": "邮箱",
+      "url": "网址",
+      "phone": "电话",
+      "password": "密码"
+    }
+  },
   "layout": {
     "title": {
       "default": "默认",
@@ -9,18 +39,6 @@
   "function": {
     "resize": {
       "title": "调整大小"
-    },
-    "group": {
-      "agg": {
-        "count": "合计",
-        "sum": "求和",
-        "max": "最大值",
-        "min": "最小值",
-        "distinct": "去重合计",
-        "avg": "平均值",
-        "median": "中值",
-        "stddev": "标准差值"
-      }
     }
   },
   "list": {
@@ -47,6 +65,11 @@
     },
     "columnHide": {
       "title": "隐藏列"
+    },
+    "columnNew": {
+      "title": "新增列",
+      "dataKind": "数据类型",
+      "submit": "添加"
     }
   }
 }

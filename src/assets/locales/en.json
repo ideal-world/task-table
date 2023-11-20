@@ -1,5 +1,35 @@
 {
-  "_": {},
+  "_": {
+    "agg": {
+      "count": "COUNT",
+      "sum": "SUM",
+      "max": "MAX VALUE",
+      "min": "MIN VALUE",
+      "distinct": "DISTINCT COUNT",
+      "avg": "AVERAGE",
+      "median": "MEDIAN VALUE",
+      "stddev": "STDDEV VALUE"
+    },
+    "datakind": {
+      "text": "Text",
+      "textarea": "Multi-line text",
+      "number": "Number",
+      "boolean": "Boolean",
+      "file": "File",
+      "image": "Image",
+      "amount": "Amount",
+      "select": "Dropdown single selection",
+      "multiselect": "Dropdown multiple selection",
+      "checkbox": "Multiple selection",
+      "date": "Date",
+      "datetime": "Date time",
+      "time": "Time",
+      "email": "Email",
+      "url": "URL",
+      "phone": "Phone",
+      "password": "Password"
+    }
+  },
   "layout": {
     "title": {
       "default": "Default",
@@ -9,18 +39,6 @@
   "function": {
     "resize": {
       "title": "Resize"
-    },
-    "group": {
-      "agg": {
-        "count": "COUNT",
-        "sum": "SUM",
-        "max": "MAX VALUE",
-        "min": "MIN VALUE",
-        "distinct": "DISTINCT COUNT",
-        "avg": "AVERAGE",
-        "median": "MEDIAN VALUE",
-        "stddev": "STDDEV VALUE"
-      }
     }
   },
   "list": {
@@ -47,6 +65,11 @@
     },
     "columnHide": {
       "title": "Hide"
+    },
+    "columnNew": {
+      "title": "New Column",
+      "dataKind": "Data Kind",
+      "submit": "ADD"
     }
   }
 }
