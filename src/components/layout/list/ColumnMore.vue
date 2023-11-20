@@ -96,7 +96,7 @@ defineExpose({
     <div class="iw-contextmenu__item flex justify-between items-center w-full">
       <i :class="(newColumnInfo.icon ? newColumnInfo.icon : getDefaultIconByDataKind(DataKind.TEXT)) + ' mr-1'"
         class="cursor-pointer" @click="showNewColumnIconContainer"></i>
-      <input class="input input-bordered input-sx" type="text" v-model="newColumnInfo.title" />
+      <input class="input input-bordered input-xs w-28" type="text" v-model="newColumnInfo.title" />
     </div>
     <div class="iw-contextmenu__item flex justify-end w-full">
       <button class="btn btn-outline btn-primary btn-xs" @click="submitNewColumn"

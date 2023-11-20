@@ -41,7 +41,7 @@ const selectIcon = async (icon: string) => {
   <div class="iw-contextmenu__item flex justify-between items-center w-full">
     <i :class="props.columnsConf.find((item) => item.name == props.curColumnName)?.icon + ' cursor-pointer mr-1'"
       @click="showIconContainer"></i>
-    <input class="input input-bordered input-sx" type="text"
+    <input class="input input-bordered input-xs w-28" type="text"
       :value="props.columnsConf.find((item) => item.name == props.curColumnName)?.title" @change="renameColumn" />
   </div>
   <icon-picker-comp ref="iconPickerCompRef" @select-icon="selectIcon"></icon-picker-comp>

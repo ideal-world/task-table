@@ -1,11 +1,29 @@
-<script setup lang="ts">
-import { DataKind, LayoutKind, AggregateKind } from 'task-table'
+<template>
+  <div style="height: 400px">
+    <!-- <iw-task-table  pk-column-name="no" :columns="columns" :events="events" :layouts="layouts"></iw-task-table> -->
+    <iw-task-table pk-column-name="no" :columns="columns" :events="events" :layouts="layouts"
+      :group="group"></iw-task-table>
+  </div>
+</template>
 
-const columns = [{ name: 'no', pk: true, fillable: false, dataKind: DataKind.NUMBER }, { name: 'name' }, { name: 'phone' }, { name: 'addr' }, { name: 'time' }]
+<script setup lang="ts">
+import { AggregateKind, DataKind, LayoutKind, TableColumnProps, TableLayoutModifyReq, TableLayoutProps, TableStyleProps } from 'task-table'
+
+const columns = [{ name: 'no', dataKind: DataKind.NUMBER }, { name: 'name' }, { name: 'phone' }, { name: 'addr' }, { name: 'time' }]
+
 const layouts = [{
   id: "hi",
   title: "HI",
   layoutKind: LayoutKind.LIST,
+  columns: [{
+    name: 'no',
+  }, {
+    name: 'name',
+  }, {
+    name: 'addr',
+  }, {
+    name: 'time',
+  }],
   aggs: { name: AggregateKind.MIN }
 }]
 const group = {
@@ -16,7 +34,7 @@ const group = {
 }
 
 const events = {
-  loadData: () => {
+  loadData: async () => {
     return new Promise((resolve) => {
       setTimeout(() => {
         // resolve(resp1)
@@ -24,25 +42,88 @@ const events = {
       }, 1000)
     })
   },
-  saveData: (data: { [key: string]: any }[]) => {
+  saveData: async (data: { [key: string]: any }[]) => {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve(true)
       }, 1000)
     })
   },
-  deleteData: (deletedPks: string[]) => {
+  deleteData: async (deletedPks: string[]) => {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve(true)
       }, 1000)
     })
   },
+  loadCellOptions: async (columnName: string, cellValue: any) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve([{ title: 'opt1', value: '选项一' }])
+      }, 1000)
+    })
+  },
+  modifyStyles: async (changedStyleProps: TableStyleProps) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(true)
+      }, 1000)
+    })
+  },
+  newColumn: async (newColumnProps: TableColumnProps, fromColumnName?: string) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(true)
+      }, 1000)
+    })
+  },
+  modifyColumn: async (changedColumnProps: TableColumnProps) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(true)
+      }, 1000)
+    })
+  },
+  deleteColumn: async (deletedColumnName: string) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(true)
+      }, 1000)
+    })
+  },
+  newLayout: async (newLayoutProps: TableLayoutProps, fromLayoutId?: string) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(true)
+      }, 1000)
+    })
+  },
+  modifyLayout: async (changedLayoutProps: TableLayoutModifyReq) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(true)
+      }, 1000)
+    })
+  },
+  deleteLayout: async (deletedLayoutId: string) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(true)
+      }, 1000)
+    })
+  },
+  sortLayouts: async (leftLayoutId: string, rightLayoutId: string) => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(true)
+      }, 1000)
+    })
+  }
 }
 
 
 const data1 = [
-  { no: 1, name: 'Name1', phone: 'Phone1', addr: 'Addr1', time: '2023-10-23' },
+  { no: 1, name: 'Name1', phone: 'Phone1', addr: 'Addr1 Addr1 Addr1 Addr1 Addr1 Addr1', time: '2023-10-23' },
   { no: 2, name: 'Name2', phone: 'Phone2', addr: 'Addr2', time: '2023-10-24' },
   { no: 3, name: 'Name3', phone: 'Phone3', addr: 'Addr3', time: '2023-10-25' },
   { no: 4, name: 'Name4', phone: 'Phone4', addr: 'Addr4', time: '2023-10-26' },
@@ -80,7 +161,7 @@ const resp1 = {
 }
 
 const data2 = [
-  { no: 1, name: 'Name1', phone: 'Phone1', addr: 'Addr1', time: '2023-10-23' },
+  { no: 1, name: 'Name1', phone: 'Phone1', addr: 'Addr1 Addr1 Addr1 Addr1 Addr1 Addr1', time: '2023-10-23' },
   { no: 2, name: 'Name1', phone: 'Phone2', addr: 'Addr2', time: '2023-10-24' },
   { no: 3, name: 'Name1', phone: 'Phone3', addr: 'Addr3', time: '2023-10-25' },
   { no: 4, name: 'Name1', phone: 'Phone4', addr: 'Addr4', time: '2023-10-26' },
@@ -177,10 +258,3 @@ const resp2 = [
 ]
 
 </script>
-
-<template>
-  <div style="height: 400px; width: 600px;">
-    <!-- <iw-task-table :columns="columns" :events="events" :layouts="layouts"></iw-task-table> -->
-    <iw-task-table :columns="columns" :events="events" :layouts="layouts" :group="group"></iw-task-table>
-  </div>
-</template>
