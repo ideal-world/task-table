@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { inject, onMounted } from 'vue';
-import { CachedColumnConf } from '../../conf';
-import { FUN_MODIFY_COLUMN_TYPE } from '../../events';
+import { inject, onMounted } from 'vue'
+import { CachedColumnConf } from '../../conf'
+import { FUN_MODIFY_COLUMN_TYPE } from '../../events'
 
 const props = defineProps<{
   columnsConf: CachedColumnConf[]

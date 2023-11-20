@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { InjectionKey, provide, ref } from 'vue';
-import { IwUtils } from '../../utils';
+import { InjectionKey, provide, ref } from 'vue'
+import { IwUtils } from '../../utils'
 
 const contextmenuRef = ref<HTMLElement | null>(null)
 const isShow = ref<boolean>(false)

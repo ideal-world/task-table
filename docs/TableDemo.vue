@@ -7,7 +7,7 @@
 </template>
 
 <script setup lang="ts">
-import { AggregateKind, DataKind, LayoutKind, TableColumnProps, TableLayoutModifyReq, TableLayoutProps, TableStyleProps } from '../src/components/props';
+import { AggregateKind, DataKind, LayoutKind, TableColumnProps, TableLayoutModifyReq, TableLayoutProps, TableStyleProps } from '../src/components/props'
 
 const columns = [{ name: 'no', dataKind: DataKind.NUMBER }, { name: 'name' }, { name: 'phone' }, { name: 'addr' }, { name: 'time' }]
 

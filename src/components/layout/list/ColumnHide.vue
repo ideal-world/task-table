@@ -3,7 +3,7 @@ import { inject } from 'vue'
 import { FUN_CLOSE_CONTEXT_MENU_TYPE } from '../../common/Menu.vue'
 import { CachedColumnConf } from '../../conf'
 import { FUN_MODIFY_COLUMN_TYPE } from '../../events'
-import * as iconSvg from '../../../assets/icon';
+import * as iconSvg from '../../../assets/icon'
 
 const props = defineProps<{
   curColumnName: string

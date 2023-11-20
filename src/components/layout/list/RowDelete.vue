@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { inject } from 'vue';
-import * as iconSvg from '../../../assets/icon';
-import { FUN_CLOSE_CONTEXT_MENU_TYPE } from '../../common/Menu.vue';
-import { FUN_DELETE_DATA_TYPE } from '../../events';
+import { inject } from 'vue'
+import * as iconSvg from '../../../assets/icon'
+import { FUN_CLOSE_CONTEXT_MENU_TYPE } from '../../common/Menu.vue'
+import { FUN_DELETE_DATA_TYPE } from '../../events'
 
 const props = defineProps<{
   selectedPks: string[] | number[]

@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { inject } from 'vue';
-import * as iconSvg from '../../../assets/icon';
-import { getRandomString } from '../../../utils/basic';
-import { FUN_CLOSE_CONTEXT_MENU_TYPE } from '../../common/Menu.vue';
-import { CachedColumnConf, TableColumnConf, TableLayoutColumnConf } from '../../conf';
-import { FUN_NEW_COLUMN_TYPE } from '../../events';
+import { inject } from 'vue'
+import * as iconSvg from '../../../assets/icon'
+import { getRandomString } from '../../../utils/basic'
+import { FUN_CLOSE_CONTEXT_MENU_TYPE } from '../../common/Menu.vue'
+import { CachedColumnConf, TableColumnConf, TableLayoutColumnConf } from '../../conf'
+import { FUN_NEW_COLUMN_TYPE } from '../../events'
 
 const props = defineProps<{
   curColumnName: string

@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { inject } from 'vue';
-import * as iconSvg from '../../../assets/icon';
-import { FUN_CLOSE_CONTEXT_MENU_TYPE } from '../../common/Menu.vue';
-import { CachedColumnConf } from '../../conf';
-import { FUN_DELETE_COLUMN_TYPE } from '../../events';
+import { inject } from 'vue'
+import * as iconSvg from '../../../assets/icon'
+import { FUN_CLOSE_CONTEXT_MENU_TYPE } from '../../common/Menu.vue'
+import { CachedColumnConf } from '../../conf'
+import { FUN_DELETE_COLUMN_TYPE } from '../../events'
 
 const props = defineProps<{
   curColumnName: string

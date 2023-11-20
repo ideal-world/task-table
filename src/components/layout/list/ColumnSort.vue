@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import Sortable from 'sortablejs';
-import { inject, onMounted } from 'vue';
-import { CachedColumnConf } from '../../conf';
-import { FUN_MODIFY_LAYOUT_TYPE } from '../../events';
-import { TableLayoutModifyReq } from '../../props';
+import Sortable from 'sortablejs'
+import { inject, onMounted } from 'vue'
+import { CachedColumnConf } from '../../conf'
+import { FUN_MODIFY_LAYOUT_TYPE } from '../../events'
+import { TableLayoutModifyReq } from '../../props'
 
 const props = defineProps<{
   columnsConf: CachedColumnConf[]

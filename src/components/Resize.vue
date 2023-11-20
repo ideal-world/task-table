@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { inject } from 'vue';
-import * as iconSvg from '../assets/icon';
-import { TableStyleConf } from './conf';
-import { FUN_MODIFY_STYLES_TYPE } from './events';
-import { SizeKind } from './props';
+import { inject } from 'vue'
+import * as iconSvg from '../assets/icon'
+import { TableStyleConf } from './conf'
+import { FUN_MODIFY_STYLES_TYPE } from './events'
+import { SizeKind } from './props'
 
 const props = defineProps<{
   styles: TableStyleConf

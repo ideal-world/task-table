@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { inject, ref } from 'vue';
-import { getRandomString } from '../../../utils/basic';
-import IconPickerComp from '../../common/IconPicker.vue';
-import MenuComp, { MenuOffsetKind } from '../../common/Menu.vue';
-import { TableColumnConf, TableLayoutColumnConf, getDefaultIconByDataKind, getDefaultLayoutColumnConf } from '../../conf';
-import { FUN_MODIFY_COLUMN_TYPE, FUN_MODIFY_LAYOUT_TYPE, FUN_NEW_COLUMN_TYPE } from '../../events';
-import { DataKind, TableLayoutModifyReq, translateDataKind } from '../../props';
+import { inject, ref } from 'vue'
+import { getRandomString } from '../../../utils/basic'
+import IconPickerComp from '../../common/IconPicker.vue'
+import MenuComp, { MenuOffsetKind } from '../../common/Menu.vue'
+import { TableColumnConf, TableLayoutColumnConf, getDefaultIconByDataKind, getDefaultLayoutColumnConf } from '../../conf'
+import { FUN_MODIFY_COLUMN_TYPE, FUN_MODIFY_LAYOUT_TYPE, FUN_NEW_COLUMN_TYPE } from '../../events'
+import { DataKind, TableLayoutModifyReq, translateDataKind } from '../../props'
 
 const props = defineProps<{
   basicColumnsConf: TableColumnConf[]

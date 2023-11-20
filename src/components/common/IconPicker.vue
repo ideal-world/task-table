@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import MenuComp, { MenuOffsetKind } from './Menu.vue';
+import { ref } from 'vue'
+import MenuComp, { MenuOffsetKind } from './Menu.vue'
 
 const emit = defineEmits(['selectIcon'])
 const iconCompRef = ref()

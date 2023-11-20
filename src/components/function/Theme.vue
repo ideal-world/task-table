@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { themeChange } from 'theme-change';
-import { inject, onMounted } from 'vue';
-import { TableStyleConf } from '../conf';
-import { FUN_MODIFY_STYLES_TYPE } from '../events';
+import { themeChange } from 'theme-change'
+import { inject, onMounted } from 'vue'
+import { TableStyleConf } from '../conf'
+import { FUN_MODIFY_STYLES_TYPE } from '../events'
 
 const props = defineProps<{
   styles: TableStyleConf
