@@ -36,7 +36,7 @@ export function setFixedColumnStyles(styles: any, colIdx: number, columnsConf: C
     styles.left = columnsConf.slice(0, colIdx).reduce((count, col) => count + col.width, 0) + 'px'
     if (fixedColumnIdx == colIdx) {
       // class: base-300
-      styles.borderRight = '3px solid hsl(var(--b3))'
+      styles.borderRight = '3px solid oklch(var(--b3))'
     }
   } else {
     styles.position = 'static'

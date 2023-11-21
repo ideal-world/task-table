@@ -23,8 +23,7 @@ onMounted(() => {
   dragDiv.style.cursor = 'ew-resize'
   const subDragDiv = document.createElement('div')
   subDragDiv.style.flex = '1'
-  // class: base-300
-  subDragDiv.style.backgroundColor = 'hsl(var(--b3))'
+  subDragDiv.classList.add('bg-base-300')
   dragDiv.appendChild(subDragDiv)
   listHeaderEle.appendChild(dragDiv)
 
