@@ -153,8 +153,8 @@ onMounted(() => {
     if (selectRowEle == null) {
       return
     }
-    const currColumnName = targetEle.dataset.columnName ?? ''
-    if (props.columnsConf.find((item) => item.name == currColumnName && (currColumnName == props.pkColumnName || !item.dataEditable))) {
+    const curColumnName = targetEle.dataset.columnName ?? ''
+    if (props.columnsConf.find((item) => item.name == curColumnName && (curColumnName == props.pkColumnName || !item.dataEditable))) {
       return
     }
     selectDiv.style.display = 'flex'
@@ -162,7 +162,7 @@ onMounted(() => {
     selectDiv.style.top = targetEle.offsetTop - 1 + 'px'
     selectDiv.style.width = targetEle.offsetWidth + 2 + 'px'
     selectDiv.style.height = targetEle.offsetHeight + 2 + 'px'
-    startColumnName = currColumnName
+    startColumnName = curColumnName
     startRowIdx = getChildIndex(parentListEle, selectRowEle)
     startCellEle = targetEle
     startCellFixedX = targetEle.getBoundingClientRect().left

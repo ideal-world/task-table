@@ -42,6 +42,14 @@
   "function": {
     "resize": {
       "title": "Resize"
+    },
+    "rowSort": {
+      "singleTitle": "Sort",
+      "multiTitle": "Sorts",
+      "desc": "Descending",
+      "asc": "Ascending",
+      "selectColumnPlaceholder": "New Column",
+      "selectAscPlaceholder": "New Sort"
     }
   },
   "list": {

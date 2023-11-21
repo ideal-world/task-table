@@ -15,7 +15,7 @@ const modifyColumnFun = inject(FUN_MODIFY_COLUMN_TYPE)!
 const modifyLayoutFun = inject(FUN_MODIFY_LAYOUT_TYPE)!
 const newColumnFun = inject(FUN_NEW_COLUMN_TYPE)!
 const columnMoreCompRef = ref()
-const columnDataKindCompRefs = ref()
+const columnDataKindCompRef = ref()
 const iconPickerCompRef = ref()
 const newColumnInfo = ref<{
   title?: string
@@ -26,7 +26,7 @@ const newColumnInfo = ref<{
 
 const showNewColumnDatKindContextMenu = (event: MouseEvent) => {
   const targetEle = event.target as HTMLElement
-  columnDataKindCompRefs.value.show(targetEle, MenuOffsetKind.RIGHT_BOTTOM, undefined, true)
+  columnDataKindCompRef.value.show(targetEle, MenuOffsetKind.RIGHT_BOTTOM, undefined, true)
 }
 
 const setNewColumnDataKind = (dataKind: DataKind) => {
@@ -34,7 +34,7 @@ const setNewColumnDataKind = (dataKind: DataKind) => {
   if (!newColumnInfo.value.icon) {
     newColumnInfo.value.icon = getDefaultIconByDataKind(dataKind)
   }
-  columnDataKindCompRefs.value.close()
+  columnDataKindCompRef.value.close()
 }
 
 const showNewColumnIconContainer = (event: Event) => {
@@ -104,7 +104,7 @@ defineExpose({
         {{ $t('list.columnNew.submit') }}
       </button>
     </div>
-    <menu-comp ref="columnDataKindCompRefs">
+    <menu-comp ref="columnDataKindCompRef">
       <div v-for="dataKind of Object.values(DataKind)" class="iw-contextmenu__item flex justify-between w-full"
         @click="setNewColumnDataKind(dataKind)" style="cursor: pointer">
         <i :class="getDefaultIconByDataKind(dataKind)"></i>
@@ -113,7 +113,7 @@ defineExpose({
     </menu-comp>
     <icon-picker-comp ref="iconPickerCompRef" @select-icon="setNewColumnIcon"></icon-picker-comp>
     <div class="divider"> {{ $t('list.columnHide.title') }}</div>
-    <div v-for="column in basicColumnsConf" class="iw-contextmenu__item flex justify-between w-full">
+    <div v-for="column in props.basicColumnsConf" class="iw-contextmenu__item flex justify-between w-full">
       {{ column.title }}
       <input type="checkbox" class="toggle toggle-sm"
         :checked="props.layoutColumnsConf.find(col => col.name == column.name)?.hide ?? true"

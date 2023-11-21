@@ -42,6 +42,14 @@
   "function": {
     "resize": {
       "title": "调整大小"
+    },
+    "rowSort": {
+      "singleTitle": "排序",
+      "multiTitle": "排序",
+      "desc": "倒序",
+      "asc": "正序",
+      "selectColumnPlaceholder": "新增列",
+      "selectAscPlaceholder": "排序方式"
     }
   },
   "list": {

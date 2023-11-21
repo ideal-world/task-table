@@ -22,10 +22,11 @@ declare module 'vue' {
     IconPicker: typeof import('./src/components/common/IconPicker.vue')['default']
     List: typeof import('./src/components/layout/list/List.vue')['default']
     Menu: typeof import('./src/components/common/Menu.vue')['default']
-    Resize: typeof import('./src/components/Resize.vue')['default']
+    Resize: typeof import('./src/components/function/Resize.vue')['default']
     RowDelete: typeof import('./src/components/layout/list/RowDelete.vue')['default']
     Rows: typeof import('./src/components/layout/list/Rows.vue')['default']
     RowSelect: typeof import('./src/components/layout/list/RowSelect.vue')['default']
+    RowSort: typeof import('./src/components/function/RowSort.vue')['default']
     Skeleton: typeof import('./src/components/Skeleton.vue')['default']
     Theme: typeof import('./src/components/function/Theme.vue')['default']
   }

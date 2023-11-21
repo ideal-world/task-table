@@ -5,6 +5,7 @@ import MenuComp, { MenuOffsetKind } from './common/Menu.vue'
 import { TableBasicConf, TableLayoutConf, initConf } from './conf'
 import * as Event from './events'
 import ResizeComp from './function/Resize.vue'
+import RowSortComp from './function/RowSort.vue'
 import ThemeComp from './function/Theme.vue'
 import ListComp from './layout/list/List.vue'
 import { TableProps } from './props'
@@ -83,8 +84,10 @@ const showMoreMenu = (event: MouseEvent) => {
     </div>
     <div class="iw-tt-main">
       <template v-for="layout in tableLayoutsConf">
-        <div class="iw-tt-toolbar flex items-center h-10" v-if="currentLayoutId == layout.id">
-          main
+        <div class="iw-tt-toolbar flex items-center h-7 p-0.5" v-if="currentLayoutId == layout.id">
+          <row-sort-comp ref="rowSortCompRef" :sorts="layout.sorts"
+            :columns-conf="tableBasicConf.columns"></row-sort-comp>
+          <div class="divider divider-horizontal m-0.5"></div>
         </div>
         <div class="iw-tt-table overflow-auto w-full" v-if="currentLayoutId == layout.id">
           <list-comp :key="layout.id" :layout="layout" :basic="tableBasicConf" />
@@ -96,8 +99,8 @@ const showMoreMenu = (event: MouseEvent) => {
     <div class="iw-contextmenu__item">
       <!-- TODO 抽取 -->
       <!-- <i :class="iconSvg.RENAME"></i>
-                                                <input class="input input-bordered input-sm" type="text"
-                                                  v-model="tableLayoutsConf.find(layout => layout.id == currentLayoutId)?.title" /> -->
+                                                            <input class="input input-bordered input-sm" type="text"
+                                                              v-model="tableLayoutsConf.find(layout => layout.id == currentLayoutId)?.title" /> -->
     </div>
   </menu-comp>
 </template>
