@@ -2,7 +2,7 @@
 import { inject, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { getChildIndex, getParentWithClass } from '../../../utils/basic'
-import { AlertKind, showAlert } from '../../common/Alert'
+import { AlertKind, showAlert } from '../../common/Alert.vue'
 import { CachedColumnConf } from '../../conf'
 import { FUN_UPDATE_DATA_TYPE } from '../../events'
 import { DataKind, TableDataGroupResp, TableDataResp } from '../../props'
@@ -116,7 +116,7 @@ onMounted(() => {
     }
     const movedEleOpt = document.elementsFromPoint(startCellFixedX + 4, (event as MouseEvent).clientY).find((ele) => ele.classList.contains('iw-list-data-cell'))
     if (!movedEleOpt) {
-      showAlert(t("list.cellFill.acrossGroupError"), 2, AlertKind.WARNING)
+      showAlert(t("list.cellFill.acrossGroupError"), 2, AlertKind.WARNING, getParentWithClass(listEle, 'iw-tt')!)
       return
     }
     const movedEle = movedEleOpt as HTMLElement

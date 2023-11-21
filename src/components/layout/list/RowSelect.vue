@@ -5,7 +5,7 @@ let hasInit = false
 import { onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { getChildIndex, getParentWithClass } from '../../../utils/basic'
-import { AlertKind, showAlert } from '../../common/Alert'
+import { AlertKind, showAlert } from '../../common/Alert.vue'
 const { t } = useI18n()
 
 const props = defineProps<{
@@ -76,7 +76,7 @@ function onRowSelect(event: PointerEvent) {
       }
     }
     if (selectedEles.find(ele => !ele.classList.contains('iw-list-data-row'))) {
-      showAlert(t("list.rowSelect.acrossGroupError"), 2, AlertKind.WARNING)
+      showAlert(t("list.rowSelect.acrossGroupError"), 2, AlertKind.WARNING, getParentWithClass(targetEle, 'iw-tt')!)
       cleanSelect(parentListEle)
       return
     }
