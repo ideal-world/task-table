@@ -20,7 +20,7 @@ export default defineConfig({
             fileName: (format) => `task-table.${format}.js`
         },
         rollupOptions: {
-            external: ['vue', 'vue-i18n', 'octicons-css', 'theme-change', 'sortablejs'],
+            external: ['vue', 'vue-i18n', 'octicons-css', 'sortablejs'],
             output: {
                 exports: 'named',
                 globals: {

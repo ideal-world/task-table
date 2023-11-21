@@ -36,7 +36,6 @@
   "dependencies": {
     "octicons-css": "^19.8.0",
     "sortablejs": "^1.15.0",
-    "theme-change": "^2.5.0",
     "vue-i18n": "^9.7.0"
   },
   "peerDependencies": {

@@ -11,9 +11,6 @@ dependencies:
   sortablejs:
     specifier: ^1.15.0
     version: 1.15.0
-  theme-change:
-    specifier: ^2.5.0
-    version: 2.5.0
   vue:
     specifier: ^3.3.4
     version: 3.3.8(typescript@5.2.2)
@@ -2117,10 +2114,6 @@ packages:
     transitivePeerDependencies:
       - ts-node
     dev: true
-
-  /theme-change@2.5.0:
-    resolution: {integrity: sha512-B/UdsgdHAGhSKHTAQnxg/etN0RaMDpehuJmZIjLMDVJ6DGIliRHGD6pODi1CXLQAN9GV0GSyB3G6yCuK05PkPQ==}
-    dev: false
 
   /thenify-all@1.6.0:
     resolution: {integrity: sha512-RNxQH/qI8/t3thXJDwcstUO4zeqo64+Uy/+sNVRBx4Xn2OX+OZ9oP+iJnNFqplFra2ZUVeKCSa2oVWi3T4uVmA==}
