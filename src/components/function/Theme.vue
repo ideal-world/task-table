@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { inject } from 'vue';
-import { TableStyleConf } from '../conf';
-import { FUN_MODIFY_STYLES_TYPE } from '../events';
+import { inject } from 'vue'
+import { TableStyleConf } from '../conf'
+import { FUN_MODIFY_STYLES_TYPE } from '../events'
 
 const props = defineProps<{
   styles: TableStyleConf

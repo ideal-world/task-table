@@ -22,7 +22,9 @@ const copyColumn = async () => {
     title: columnConf.title + '_copy',
     icon: columnConf.icon,
     dataKind: columnConf.dataKind,
-    dataEditable: columnConf.dataEditable
+    dataEditable: columnConf.dataEditable,
+    useDict: columnConf.useDict,
+    dictEditable: columnConf.dictEditable,
   }
   const newLayoutColumnConf: TableLayoutColumnConf = {
     ...columnConf,

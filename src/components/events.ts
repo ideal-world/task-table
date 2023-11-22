@@ -178,10 +178,10 @@ export async function deleteData(deletedPks: any[], reFilter?: boolean, reSort?:
   // TODO agg清空，重新计算
 }
 
-export const FUN_LOAD_CELL_OPTIONS_TYPE = Symbol() as InjectionKey<(columnName: string, cellValue: any) => Promise<{ title: string; value: any }[]>>
-export async function loadCellOptions(columnName: string, cellValue: any): Promise<{ title: string; value: any }[]> {
-  if (events.loadCellOptions) {
-    return await events.loadCellOptions(columnName, cellValue)
+export const FUN_LOAD_CELL_OPTIONS_TYPE = Symbol() as InjectionKey<(columnName: string, filterValue?: any) => Promise<{ title: string; value: any }[]>>
+export async function loadCellDictValues(columnName: string, filterValue?: any): Promise<{ title: string; value: any }[]> {
+  if (events.loadCellDictValues) {
+    return await events.loadCellDictValues(columnName, filterValue)
   } else {
     return []
   }

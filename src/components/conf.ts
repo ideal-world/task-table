@@ -1,6 +1,6 @@
 import * as iconSvg from "../assets/icon"
 import locales from '../locales'
-import { AggregateKind, DataKind, LayoutKind, SizeKind, TableDataFilterReq, TableDataGroupReq, TableDataGroupResp, TableDataResp, TableDataSliceReq, TableDataSortReq, TableProps } from "./props"
+import { AggregateKind, DataKind, LayoutKind, OperatorKind, SizeKind, TableDataFilterReq, TableDataGroupReq, TableDataGroupResp, TableDataResp, TableDataSliceReq, TableDataSortReq, TableProps } from "./props"
 
 const { t } = locales.global
 
@@ -17,6 +17,8 @@ export interface TableColumnConf {
     icon: string
     dataKind: DataKind
     dataEditable: boolean
+    useDict: boolean
+    dictEditable?: boolean
 }
 
 export interface TableLayoutConf {
@@ -118,7 +120,6 @@ export function getDefaultIconByDataKind(dataKind: DataKind): string {
     }
 }
 
-
 export function getDefaultIconByLayoutKind(layoutKind: LayoutKind): string {
     switch (layoutKind) {
         case LayoutKind.CHART:
@@ -134,6 +135,55 @@ export function getDefaultIconByLayoutKind(layoutKind: LayoutKind): string {
     }
 }
 
+export function getOperatorKindsByDataKind(dataKind?: DataKind): OperatorKind[] {
+    switch (dataKind) {
+        case undefined:
+            return []
+        case DataKind.NUMBER:
+        case DataKind.AMOUNT:
+            return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.LT, OperatorKind.LE, OperatorKind.GT, OperatorKind.GE, OperatorKind.IN, OperatorKind.NIN, OperatorKind.ISEMPTY, OperatorKind.NOTEMPTY]
+        case DataKind.BOOLEAN:
+            return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.ISEMPTY, OperatorKind.NOTEMPTY]
+        case DataKind.FILE:
+        case DataKind.IMAGE:
+            return [OperatorKind.ISEMPTY, OperatorKind.NOTEMPTY]
+        case DataKind.DATE:
+        case DataKind.DATETIME:
+        case DataKind.TIME:
+            return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.LT, OperatorKind.LE, OperatorKind.GT, OperatorKind.GE, OperatorKind.IN, OperatorKind.NIN, OperatorKind.ISEMPTY, OperatorKind.NOTEMPTY]
+        default:
+            return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.LT, OperatorKind.LE, OperatorKind.GT, OperatorKind.GE, OperatorKind.IN, OperatorKind.NIN, OperatorKind.CONTAINS, OperatorKind.CONTAINS, OperatorKind.STARTWITH, OperatorKind.NSTARTWITH, OperatorKind.ENDWITH, OperatorKind.NENDWITH, OperatorKind.ISEMPTY, OperatorKind.NOTEMPTY]
+    }
+}
+
+export function getInputTypeByDataKind(dataKind?: DataKind): string {
+    switch (dataKind) {
+        case DataKind.NUMBER:
+        case DataKind.AMOUNT:
+            return 'number'
+        case DataKind.BOOLEAN:
+            return 'radio'
+        case DataKind.FILE:
+            return 'file'
+        case DataKind.IMAGE:
+            return 'image'
+        case DataKind.DATE:
+            return 'date'
+        case DataKind.DATETIME:
+            return 'datetime-local'
+        case DataKind.TIME:
+            return 'time'
+        case DataKind.EMAIL:
+            return 'email'
+        case DataKind.URL:
+            return 'url'
+        case DataKind.PASSWORD:
+            return 'password'
+        default:
+            return 'text'
+    }
+}
+
 export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]] {
     const basicConf = {
         tableId: props.tableId ?? 'iw-table' + Math.floor(Math.random() * 1000000),
@@ -145,6 +195,8 @@ export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]]
                 dataKind: column.dataKind ?? DataKind.TEXT,
                 icon: column.icon ?? getDefaultIconByDataKind(column.dataKind ?? DataKind.TEXT),
                 dataEditable: column.dataEditable ?? true,
+                useDict: column.useDict ?? false,
+                dictEditable: column.dictEditable ?? false,
             }
         }),
         styles: {

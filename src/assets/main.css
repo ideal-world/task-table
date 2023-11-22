@@ -4,6 +4,18 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Eliminating the effects of vitepress */
 a {
   text-decoration: none !important;
+}
+
+.iw-tt {
+  button,
+  input,
+  optgroup,
+  select,
+  textarea {
+    border-width: 1px;
+    border-style: solid;
+  }
 }

@@ -21,6 +21,8 @@ const newColumnInfo = ref<{
   title?: string
   icon?: string
   dataKind?: DataKind
+  useDict?: boolean
+  dictEditable?: boolean
 }>({
 })
 
@@ -53,7 +55,9 @@ const submitNewColumn = async () => {
       title: newColumnInfo.value.title,
       icon: newColumnInfo.value.icon!,
       dataKind: newColumnInfo.value.dataKind,
-      dataEditable: true
+      dataEditable: true,
+      useDict: newColumnInfo.value.useDict ?? false,
+      dictEditable: newColumnInfo.value.useDict ?? false,
     }, getDefaultLayoutColumnConf(name))
     newColumnInfo.value = {}
     columnMoreCompRef.value.close()

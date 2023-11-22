@@ -56,7 +56,7 @@ const events = {
       }, 1000)
     })
   },
-  loadCellOptions: async (columnName: string, cellValue: any) => {
+  loadCellDictValues: async (columnName: string, filterValue?: any) => {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve([{ title: 'opt1', value: '选项一' }])

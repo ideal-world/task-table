@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import Sortable from 'sortablejs';
-import { inject, onMounted, ref } from 'vue';
-import * as iconSvg from '../../assets/icon';
-import MenuComp from '../common/Menu.vue';
-import { TableColumnConf } from '../conf';
-import { FUN_MODIFY_LAYOUT_TYPE } from '../events';
-import { TableDataSortReq } from '../props';
+import Sortable from 'sortablejs'
+import { inject, onMounted, ref } from 'vue'
+import * as iconSvg from '../../assets/icon'
+import MenuComp from '../common/Menu.vue'
+import { TableColumnConf } from '../conf'
+import { FUN_MODIFY_LAYOUT_TYPE } from '../events'
+import { TableDataSortReq } from '../props'
 
 const props = defineProps<{
   sorts?: TableDataSortReq[],
@@ -45,9 +45,9 @@ const setSortColumn = async (event: MouseEvent) => {
     return
   }
   if (curModifyColumnName.value && props.sorts) {
-    modifySort(curModifyColumnName.value, selectedColumnName, props.sorts.find(sort => sort.columnName == curModifyColumnName.value)?.orderDesc ?? false)
+    await modifySort(curModifyColumnName.value, selectedColumnName, props.sorts.find(sort => sort.columnName == curModifyColumnName.value)?.orderDesc ?? false)
   } else if (tmpNewSortOrderDesc.value) {
-    addSort(selectedColumnName, tmpNewSortOrderDesc.value)
+    await addSort(selectedColumnName, tmpNewSortOrderDesc.value)
   } else {
     tmpNewSortColumnName.value = selectedColumnName
   }
@@ -58,9 +58,9 @@ const setSortAscDesc = async (event: MouseEvent) => {
   const selectedDesc = targetEle.dataset.desc != undefined
   sortAscDescCompRef.value.close()
   if (curModifyColumnName.value) {
-    modifySort(curModifyColumnName.value, curModifyColumnName.value, selectedDesc)
+    await modifySort(curModifyColumnName.value, curModifyColumnName.value, selectedDesc)
   } else if (tmpNewSortColumnName.value) {
-    addSort(tmpNewSortColumnName.value, selectedDesc)
+    await addSort(tmpNewSortColumnName.value, selectedDesc)
   } else {
     tmpNewSortOrderDesc.value = selectedDesc
   }
@@ -141,11 +141,13 @@ onMounted(() => {
           <i :class="iconSvg.CHEVRON_DOWN + ' ml-0.5'"></i>
         </button>
       </span>
-      <span> <button class="btn btn-outline btn-xs" @click="event => showSortAscDesc(event, sort.columnName)">
+      <span class="ml-1">
+        <button class="btn btn-outline btn-xs" @click="event => showSortAscDesc(event, sort.columnName)">
           {{ $t(sort.orderDesc ? 'function.rowSort.desc' : 'function.rowSort.asc') }}
           <i :class="iconSvg.CHEVRON_DOWN + ' ml-0.5'"></i>
         </button>
-        <i :class="iconSvg.DELETE + '  cursor-pointer'" @click="deleteSort(sort.columnName)"></i></span>
+        <i :class="iconSvg.DELETE + '  cursor-pointer'" @click="deleteSort(sort.columnName)"></i>
+      </span>
     </div>
     <div class="iw-contextmenu__item flex justify-center w-full">
       <button class="btn btn-outline btn-xs" @click="showSortColumns">
@@ -154,7 +156,7 @@ onMounted(() => {
           $t('function.rowSort.selectColumnPlaceholder') }}</span>
         <i :class="iconSvg.CHEVRON_DOWN + ' ml-0.5'"></i>
       </button>
-      <button class="btn btn-outline btn-xs" @click="showSortAscDesc">
+      <button class="btn btn-outline btn-xs ml-1" @click="showSortAscDesc">
         {{ tmpNewSortOrderDesc != undefined ? $t(tmpNewSortOrderDesc ? 'function.rowSort.desc' : 'function.rowSort.asc') :
           $t('function.rowSort.selectAscPlaceholder') }}
         <i :class="iconSvg.CHEVRON_DOWN + ' ml-0.5'"></i>

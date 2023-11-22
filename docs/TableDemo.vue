@@ -7,9 +7,9 @@
 </template>
 
 <script setup lang="ts">
-import { AggregateKind, DataKind, LayoutKind, TableColumnProps, TableLayoutModifyReq, TableLayoutProps, TableStyleProps } from '../src/components/props'
+import { AggregateKind, DataKind, LayoutKind, TableColumnProps, TableLayoutModifyReq, TableLayoutProps, TableStyleProps } from '../src/components/props';
 
-const columns = [{ name: 'no', dataKind: DataKind.NUMBER }, { name: 'name' }, { name: 'phone' }, { name: 'addr' }, { name: 'time' }]
+const columns = [{ name: 'no', dataKind: DataKind.NUMBER }, { name: 'name', useDict: true }, { name: 'phone' }, { name: 'addr' }, { name: 'time', dataKind: DataKind.DATETIME }]
 
 const layouts = [{
   id: "hi",
@@ -56,10 +56,10 @@ const events = {
       }, 1000)
     })
   },
-  loadCellOptions: async (columnName: string, cellValue: any) => {
+  loadCellDictValues: async (columnName: string, filterValue?: any) => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        resolve([{ title: 'opt1', value: '选项一' }])
+        resolve([{ title: '星航', value: 'xh' }, { title: '星杨', value: 'xy' }])
       }, 1000)
     })
   },

@@ -23,45 +23,66 @@ export enum DataKind {
 
 export function translateDataKind(dataKind: DataKind): string {
     switch (dataKind) {
-        case DataKind.TEXT:return t('_.datakind.text')
-        case DataKind.TEXTAREA:return t('_.datakind.textarea')
-        case DataKind.NUMBER:return t('_.datakind.number')
-        case DataKind.BOOLEAN:return t('_.datakind.boolean')
-        case DataKind.FILE:return t('_.datakind.file')
-        case DataKind.IMAGE:return t('_.datakind.image')
-        case DataKind.AMOUNT:return t('_.datakind.amount')
-        case DataKind.SELECT:return t('_.datakind.select')
-        case DataKind.MULTISELECT:return t('_.datakind.multiselect')
-        case DataKind.CHECKBOX:return t('_.datakind.checkbox')
-        case DataKind.DATE:return t('_.datakind.date')
-        case DataKind.DATETIME:return t('_.datakind.datetime')
-        case DataKind.TIME:return t('_.datakind.time')
-        case DataKind.EMAIL:return t('_.datakind.email')
-        case DataKind.URL:return t('_.datakind.url')
-        case DataKind.PHONE:return t('_.datakind.phone')
-        case DataKind.PASSWORD:return t('_.datakind.password')
+        case DataKind.TEXT: return t('_.datakind.text')
+        case DataKind.TEXTAREA: return t('_.datakind.textarea')
+        case DataKind.NUMBER: return t('_.datakind.number')
+        case DataKind.BOOLEAN: return t('_.datakind.boolean')
+        case DataKind.FILE: return t('_.datakind.file')
+        case DataKind.IMAGE: return t('_.datakind.image')
+        case DataKind.AMOUNT: return t('_.datakind.amount')
+        case DataKind.SELECT: return t('_.datakind.select')
+        case DataKind.MULTISELECT: return t('_.datakind.multiselect')
+        case DataKind.CHECKBOX: return t('_.datakind.checkbox')
+        case DataKind.DATE: return t('_.datakind.date')
+        case DataKind.DATETIME: return t('_.datakind.datetime')
+        case DataKind.TIME: return t('_.datakind.time')
+        case DataKind.EMAIL: return t('_.datakind.email')
+        case DataKind.URL: return t('_.datakind.url')
+        case DataKind.PHONE: return t('_.datakind.phone')
+        case DataKind.PASSWORD: return t('_.datakind.password')
     }
 }
 
 export enum OperatorKind {
-    EQ = 'EQ',
-    NEQ = 'NEQ',
-    LT = 'LT',
-    LTE = 'LTE',
-    GT = 'GT',
-    GTE = 'GTE',
+    EQ = '=',
+    NE = '!=',
+    LT = '<',
+    LE = '<=',
+    GT = '>',
+    GE = '>=',
     IN = 'IN',
-    NIN = 'NIN',
+    NIN = 'NOT IN',
     CONTAINS = 'CONTAINS',
     NCONTAINS = 'NCONTAINS',
-    STARTSWITH = 'STARTSWITH',
-    NSTARTSWITH = 'NSTARTSWITH',
-    ENDSWITH = 'ENDSWITH',
-    NENDSWITH = 'NENDSWITH',
-    BETWEEN = 'BETWEEN',
-    NBETWEEN = 'NBETWEEN',
+    STARTWITH = 'STARTWITH',
+    NSTARTWITH = 'NSTARTWITH',
+    ENDWITH = 'ENDWITH',
+    NENDWITH = 'NENDWITH',
     ISEMPTY = 'ISEMPTY',
     NOTEMPTY = 'NOTEMPTY',
+    // TODO Add between
+}
+
+export function translateOperatorKind(operatorKind?: OperatorKind): string {
+    switch (operatorKind) {
+        case undefined: return ''
+        case OperatorKind.EQ: return t('_.operatorkind.eq')
+        case OperatorKind.NE: return t('_.operatorkind.ne')
+        case OperatorKind.LT: return t('_.operatorkind.lt')
+        case OperatorKind.LE: return t('_.operatorkind.le')
+        case OperatorKind.GT: return t('_.operatorkind.gt')
+        case OperatorKind.GE: return t('_.operatorkind.ge')
+        case OperatorKind.IN: return t('_.operatorkind.in')
+        case OperatorKind.NIN: return t('_.operatorkind.nin')
+        case OperatorKind.CONTAINS: return t('_.operatorkind.contains')
+        case OperatorKind.NCONTAINS: return t('_.operatorkind.ncontains')
+        case OperatorKind.STARTWITH: return t('_.operatorkind.startwith')
+        case OperatorKind.NSTARTWITH: return t('_.operatorkind.nstartwith')
+        case OperatorKind.ENDWITH: return t('_.operatorkind.endwith')
+        case OperatorKind.NENDWITH: return t('_.operatorkind.nendwith')
+        case OperatorKind.ISEMPTY: return t('_.operatorkind.isempty')
+        case OperatorKind.NOTEMPTY: return t('_.operatorkind.notempty')
+    }
 }
 
 export enum AggregateKind {
@@ -120,6 +141,8 @@ export interface TableColumnProps {
     title?: string
     dataKind?: DataKind
     dataEditable?: boolean
+    useDict?: boolean
+    dictEditable?: boolean
 }
 
 export interface TableLayoutProps {
@@ -168,14 +191,15 @@ export interface TableEventProps {
     modifyColumn?: (changedColumnProps: TableColumnProps) => Promise<boolean>
     deleteColumn?: (deletedColumnName: string) => Promise<boolean>
 
-    loadCellOptions?: (columnName: string, cellValue: any) => Promise<{ title: string, value: any }[]>
+    // TODO pagination
+    loadCellDictValues?: (columnName: string, filterValue?: any) => Promise<{ title: string, value: any }[]>
 
     modifyStyles?: (changedStyleProps: TableStyleProps) => Promise<boolean>
 
     newLayout?: (newLayoutProps: TableLayoutProps, fromLayoutId?: string) => Promise<boolean>
     modifyLayout?: (changedLayoutProps: TableLayoutModifyReq) => Promise<boolean>
     deleteLayout?: (deletedLayoutId: string) => Promise<boolean>
-    sortLayouts?: (leftLayoutId: string, rightLayoutId:string) => Promise<boolean>
+    sortLayouts?: (leftLayoutId: string, rightLayoutId: string) => Promise<boolean>
 }
 
 export interface TableLayoutModifyReq {
@@ -205,8 +229,7 @@ export interface TableDataFilterReq {
 export interface TableDataFilterItemReq {
     columnName: string
     operator: OperatorKind
-    value: any
-    value2?: any
+    value?: any
 }
 
 export interface TableDataGroupReq {
