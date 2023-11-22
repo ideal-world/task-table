@@ -3,9 +3,10 @@ import { inject, ref } from 'vue'
 import { getRandomString } from '../../../utils/basic'
 import IconPickerComp from '../../common/IconPicker.vue'
 import MenuComp, { MenuOffsetKind } from '../../common/Menu.vue'
-import { TableColumnConf, TableLayoutColumnConf, getDefaultIconByDataKind, getDefaultLayoutColumnConf } from '../../conf'
+import { TableColumnConf, TableLayoutColumnConf, getDefaultIconByDataKind, getDefaultLayoutColumnConf, dictEnableByDataKind } from '../../conf'
 import { FUN_MODIFY_COLUMN_TYPE, FUN_MODIFY_LAYOUT_TYPE, FUN_NEW_COLUMN_TYPE } from '../../events'
 import { DataKind, TableLayoutModifyReq, translateDataKind } from '../../props'
+import * as iconSvg from '../../../assets/icon'
 
 const props = defineProps<{
   basicColumnsConf: TableColumnConf[]
@@ -100,7 +101,23 @@ defineExpose({
     <div class="iw-contextmenu__item flex justify-between items-center w-full">
       <i :class="(newColumnInfo.icon ? newColumnInfo.icon : getDefaultIconByDataKind(DataKind.TEXT)) + ' mr-1'"
         class="cursor-pointer" @click="showNewColumnIconContainer"></i>
-      <input class="input input-bordered input-xs w-28" type="text" v-model="newColumnInfo.title" />
+      <input class="input input-bordered input-xs w-28" type="text" v-model="newColumnInfo.title"
+        :placeholder="$t('list.columnNew.columnNamePlaceholder')" />
+    </div>
+    <div class="iw-contextmenu__item flex justify-between items-center w-full"
+      v-show="newColumnInfo.dataKind && dictEnableByDataKind(newColumnInfo.dataKind)">
+      <span>
+        <i :class="iconSvg.DICT"></i>
+        {{ $t('list.columnNew.useDict') }}
+      </span>
+      <input type="checkbox" class="toggle toggle-sm" v-model="newColumnInfo.useDict" />
+    </div>
+    <div class="iw-contextmenu__item flex justify-between items-center w-full" v-show="newColumnInfo.useDict">
+      <span>
+        <i :class="iconSvg.EDIT"></i>
+        {{ $t('list.columnNew.dictEditable') }}
+      </span>
+      <input type="checkbox" class="toggle toggle-sm" v-model="newColumnInfo.dictEditable" />
     </div>
     <div class="iw-contextmenu__item flex justify-end w-full">
       <button class="btn btn-outline btn-primary btn-xs" @click="submitNewColumn"
@@ -118,7 +135,10 @@ defineExpose({
     <icon-picker-comp ref="iconPickerCompRef" @select-icon="setNewColumnIcon"></icon-picker-comp>
     <div class="divider"> {{ $t('list.columnHide.title') }}</div>
     <div v-for="column in props.basicColumnsConf" class="iw-contextmenu__item flex justify-between w-full">
-      {{ column.title }}
+      <span>
+        <i :class="column.icon"></i>
+        {{ column.title }}
+      </span>
       <input type="checkbox" class="toggle toggle-sm"
         :checked="props.layoutColumnsConf.find(col => col.name == column.name)?.hide ?? true"
         @click="setShowToggleColumn(column)" />

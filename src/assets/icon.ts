@@ -40,4 +40,7 @@ export const FILTER = 'octicon-filter-24'
 export const CHEVRON_DOWN = 'octicon-chevron-down-24'
 export const GRABBER = 'octicon-grabber-24'
 export const TRASH = 'octicon-trash-24'
+export const DICT = 'octicon-book-24'
+export const PIN = 'octicon-pin-24'
+export const WRAP = 'octicon-move-to-end-24'
 

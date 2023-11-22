@@ -156,13 +156,28 @@ export function getOperatorKindsByDataKind(dataKind?: DataKind): OperatorKind[] 
     }
 }
 
+export function dictEnableByDataKind(dataKind: DataKind): boolean {
+    switch (dataKind) {
+        case DataKind.BOOLEAN:
+        case DataKind.FILE:
+        case DataKind.IMAGE:
+        case DataKind.DATE:
+        case DataKind.DATETIME:
+        case DataKind.TIME:
+        case DataKind.PASSWORD:
+            return false
+        default:
+            return true
+    }
+}
+
 export function getInputTypeByDataKind(dataKind?: DataKind): string {
     switch (dataKind) {
         case DataKind.NUMBER:
         case DataKind.AMOUNT:
             return 'number'
         case DataKind.BOOLEAN:
-            return 'radio'
+            return 'checkbox'
         case DataKind.FILE:
             return 'file'
         case DataKind.IMAGE:

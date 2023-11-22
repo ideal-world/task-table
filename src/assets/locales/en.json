@@ -40,15 +40,15 @@
       "nin": "Not in",
       "contains": "Contains",
       "ncontains": "Not contains",
-      "startwith": "Start With",
-      "nstartwith": "Not start With",
-      "endwith": "End With",
-      "nendwith": "Not end With",
+      "startwith": "Start with",
+      "nstartwith": "Not start with",
+      "endwith": "End with",
+      "nendwith": "Not end with",
       "isempty": "Is empty",
       "notempty": "Not empty"
     },
     "state": {
-      "selectPlaceholder": "Please Select"
+      "selectPlaceholder": "Please select"
     }
   },
   "layout": {
@@ -66,8 +66,8 @@
       "multiTitle": "Sorts",
       "desc": "Descending",
       "asc": "Ascending",
-      "selectColumnPlaceholder": "New Column",
-      "selectAscPlaceholder": "New Sort"
+      "selectColumnPlaceholder": "New column",
+      "selectAscPlaceholder": "New sort"
     },
     "filter": {
       "new": "New Filter",
@@ -92,18 +92,21 @@
       "title": "Break words"
     },
     "columnCopy": {
-      "title": "Copy Column"
+      "title": "Copy column"
     },
     "columnDelete": {
-      "title": "Delete Column"
+      "title": "Delete column"
     },
     "columnHide": {
       "title": "Hide"
     },
     "columnNew": {
-      "title": "New Column",
-      "dataKind": "Data Kind",
-      "submit": "ADD"
+      "title": "New column",
+      "dataKind": "Data kind",
+      "submit": "Add",
+      "useDict": "Using dictionaries",
+      "dictEditable": "Dictionary editable",
+      "columnNamePlaceholder": "New column name"
     }
   }
 }

@@ -3,6 +3,7 @@ import { inject } from 'vue'
 import { FUN_CLOSE_CONTEXT_MENU_TYPE } from '../../common/Menu.vue'
 import { CachedColumnConf } from '../../conf'
 import { FUN_MODIFY_COLUMN_TYPE } from '../../events'
+import * as iconSvg from '../../../assets/icon'
 
 const props = defineProps<{
   curColumnName: string
@@ -46,7 +47,10 @@ export function setFixedColumnStyles(styles: any, colIdx: number, columnsConf: C
 
 <template>
   <div class="iw-contextmenu__item flex justify-between content-center w-full">
-    {{ $t('list.columnFixed.title') }}
+    <span>
+      <i :class="iconSvg.PIN"></i>
+      {{ $t('list.columnFixed.title') }}
+    </span>
     <input type="checkbox" class="toggle toggle-sm"
       :checked="props.columnsConf.find((col) => col.name == props.curColumnName)?.fixed" @click="setFixedColumn" />
   </div>

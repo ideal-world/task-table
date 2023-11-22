@@ -3,6 +3,7 @@ import { inject } from 'vue'
 import { FUN_CLOSE_CONTEXT_MENU_TYPE } from '../../common/Menu.vue'
 import { CachedColumnConf } from '../../conf'
 import { FUN_MODIFY_COLUMN_TYPE } from '../../events'
+import * as iconSvg from '../../../assets/icon'
 
 const props = defineProps<{
   curColumnName: string
@@ -23,7 +24,10 @@ const setWrapColumn = async () => {
 
 <template>
   <div class="iw-contextmenu__item flex justify-between content-center w-full">
-    <span> {{ $t('list.cellWrap.title') }}</span>
+    <span>
+      <i :class="iconSvg.WRAP"></i>
+      <span> {{ $t('list.cellWrap.title') }}</span>
+    </span>
     <input type="checkbox" class="toggle toggle-sm"
       :checked="props.columnsConf.find((col) => col.name == props.curColumnName)?.wrap" @click="setWrapColumn" />
   </div>
