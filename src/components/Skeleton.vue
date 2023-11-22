@@ -4,6 +4,7 @@ import * as iconSvg from '../assets/icon'
 import MenuComp, { MenuOffsetKind } from './common/Menu.vue'
 import { TableBasicConf, TableLayoutConf, initConf } from './conf'
 import * as Event from './events'
+import FilterComp from './function/Filter.vue'
 import ResizeComp from './function/Resize.vue'
 import RowSortComp from './function/RowSort.vue'
 import ThemeComp from './function/Theme.vue'
@@ -39,7 +40,7 @@ provide(Event.FUN_LOAD_DATA_TYPE, Event.loadData)
 provide(Event.FUN_ADD_DATA_TYPE, Event.addData)
 provide(Event.FUN_UPDATE_DATA_TYPE, Event.updateData)
 provide(Event.FUN_DELETE_DATA_TYPE, Event.deleteData)
-provide(Event.FUN_LOAD_CELL_OPTIONS_TYPE, Event.loadCellOptions)
+provide(Event.FUN_LOAD_CELL_OPTIONS_TYPE, Event.loadCellDictValues)
 provide(Event.FUN_MODIFY_STYLES_TYPE, Event.modifyStyles)
 provide(Event.FUN_NEW_COLUMN_TYPE, Event.newColumn)
 provide(Event.FUN_MODIFY_COLUMN_TYPE, Event.modifyColumn)
@@ -63,7 +64,7 @@ const showMoreMenu = (event: MouseEvent) => {
 </script>
 
 <template>
-  <div :class="tableBasicConf.styles.tableClass + ' iw-tt w-full text-base text-base-content bg-base-100'"
+  <div :class="tableBasicConf.styles.tableClass + ' iw-tt w-full text-sm text-base-content bg-base-100 relative'"
     :id="tableBasicConf.tableId">
     <div class=" iw-tt-header navbar p-0 min-h-0">
       <div class="flex-1">
@@ -84,10 +85,11 @@ const showMoreMenu = (event: MouseEvent) => {
     </div>
     <div class="iw-tt-main">
       <template v-for="layout in tableLayoutsConf">
-        <div class="iw-tt-toolbar flex items-center h-7 p-0.5" v-if="currentLayoutId == layout.id">
-          <row-sort-comp ref="rowSortCompRef" :sorts="layout.sorts"
-            :columns-conf="tableBasicConf.columns"></row-sort-comp>
+        <div class="iw-tt-toolbar flex items-center h-8 p-0.5" v-if="currentLayoutId == layout.id">
+          <row-sort-comp :sorts="layout.sorts" :columns-conf="tableBasicConf.columns"></row-sort-comp>
           <div class="divider divider-horizontal m-0.5"></div>
+          <filter-comp :filters="layout.filters" :columns-conf="tableBasicConf.columns"
+            :events="props.events"></filter-comp>
         </div>
         <div class="iw-tt-table overflow-auto w-full" v-if="currentLayoutId == layout.id">
           <list-comp :key="layout.id" :layout="layout" :basic="tableBasicConf" />
@@ -99,8 +101,8 @@ const showMoreMenu = (event: MouseEvent) => {
     <div class="iw-contextmenu__item">
       <!-- TODO 抽取 -->
       <!-- <i :class="iconSvg.RENAME"></i>
-                                                            <input class="input input-bordered input-sm" type="text"
-                                                              v-model="tableLayoutsConf.find(layout => layout.id == currentLayoutId)?.title" /> -->
+                                                                            <input class="input input-bordered input-sm" type="text"
+                                                                              v-model="tableLayoutsConf.find(layout => layout.id == currentLayoutId)?.title" /> -->
     </div>
   </menu-comp>
 </template>

@@ -29,6 +29,24 @@
       "phone": "电话",
       "password": "密码"
     },
+    "operatorkind": {
+      "eq": "=",
+      "ne": "!=",
+      "lt": "<",
+      "le": "<=",
+      "gt": ">",
+      "ge": ">=",
+      "in": "存在",
+      "nin": "不存在",
+      "contains": "包含",
+      "ncontains": "不包含",
+      "startwith": "开始于",
+      "nstartwith": "不开始于",
+      "endwith": "结束于",
+      "nendwith": "不结束于",
+      "isempty": "为空",
+      "notempty": "不为空"
+    },
     "state": {
       "selectPlaceholder": "请选择"
     }
@@ -50,6 +68,11 @@
       "asc": "正序",
       "selectColumnPlaceholder": "新增列",
       "selectAscPlaceholder": "排序方式"
+    },
+    "filter": {
+      "new": "新的过滤",
+      "selectColumnPlaceholder": "新增列",
+      "dictTitle": "可用字典值"
     }
   },
   "list": {

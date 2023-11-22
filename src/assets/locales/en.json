@@ -29,6 +29,24 @@
       "phone": "Phone",
       "password": "Password"
     },
+    "operatorkind": {
+      "eq": "=",
+      "ne": "!=",
+      "lt": "<",
+      "le": "<=",
+      "gt": ">",
+      "ge": ">=",
+      "in": "In",
+      "nin": "Not in",
+      "contains": "Contains",
+      "ncontains": "Not contains",
+      "startwith": "Start With",
+      "nstartwith": "Not start With",
+      "endwith": "End With",
+      "nendwith": "Not end With",
+      "isempty": "Is empty",
+      "notempty": "Not empty"
+    },
     "state": {
       "selectPlaceholder": "Please Select"
     }
@@ -50,6 +68,11 @@
       "asc": "Ascending",
       "selectColumnPlaceholder": "New Column",
       "selectAscPlaceholder": "New Sort"
+    },
+    "filter": {
+      "new": "New Filter",
+      "selectColumnPlaceholder": "新增列",
+      "dictTitle": "Available dictionary values"
     }
   },
   "list": {

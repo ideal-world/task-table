@@ -7,6 +7,7 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
+    Alert: typeof import('./src/components/common/Alert.vue')['default']
     CellFill: typeof import('./src/components/layout/list/CellFill.vue')['default']
     CellWrap: typeof import('./src/components/layout/list/CellWrap.vue')['default']
     ColumnAggs: typeof import('./src/components/layout/list/ColumnAggs.vue')['default']
@@ -18,6 +19,7 @@ declare module 'vue' {
     ColumnRename: typeof import('./src/components/layout/list/ColumnRename.vue')['default']
     ColumnResize: typeof import('./src/components/layout/list/ColumnResize.vue')['default']
     ColumnSort: typeof import('./src/components/layout/list/ColumnSort.vue')['default']
+    Filter: typeof import('./src/components/function/Filter.vue')['default']
     Group: typeof import('./src/components/function/Group.vue')['default']
     IconPicker: typeof import('./src/components/common/IconPicker.vue')['default']
     List: typeof import('./src/components/layout/list/List.vue')['default']
