@@ -24,7 +24,6 @@ export const CALENDAR = 'octicon-calendar-24'
 export const BOARD = 'octicon-project-24'
 export const GANTT = 'octicon-workflow-24'
 
-
 export const ADD = 'octicon-plus-24'
 export const EDIT = 'octicon-pencil-24'
 export const DELETE = 'octicon-x-24'
@@ -43,4 +42,3 @@ export const TRASH = 'octicon-trash-24'
 export const DICT = 'octicon-book-24'
 export const PIN = 'octicon-pin-24'
 export const WRAP = 'octicon-move-to-end-24'
-

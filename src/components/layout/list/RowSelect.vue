@@ -1,17 +1,19 @@
 <script  lang="ts">
 </script>
+
 <script setup lang="ts">
-import { onMounted } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { getChildIndex, getParentWithClass } from '../../../utils/basic';
-import { AlertKind, showAlert } from '../../common/Alert.vue';
-const { t } = useI18n()
+import { onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
+import { getChildIndex, getParentWithClass } from '../../../utils/basic'
+import { AlertKind, showAlert } from '../../common/Alert.vue'
 
 const props = defineProps<{
-  selectedPks: string[] | number[],
+  selectedPks: string[] | number[]
   pkColumnName: string
   pkKindIsNumber: boolean
 }>()
+
+const { t } = useI18n()
 
 let startRowIdx = 0
 let movedRowIdx = 0
@@ -19,7 +21,7 @@ let startCellFixedX = 0
 let listEle: HTMLElement | undefined
 
 onMounted(() => {
-  document.querySelectorAll('.iw-list').forEach(listEle => {
+  document.querySelectorAll('.iw-list').forEach((listEle) => {
     listEle.addEventListener('pointerdown', onSelectDragging as EventListener)
     listEle.addEventListener('pointermove', onRowSelectMove as EventListener)
     listEle.addEventListener('pointerup', onRowSelectDraped as EventListener)
@@ -28,28 +30,28 @@ onMounted(() => {
 
 function onSelectDragging(event: PointerEvent) {
   // Disable right-click to avoid right-click menu and selection conflicts
-  if (event.button == 2) {
+  if (event.button === 2)
     return
-  }
+
   const targetEle = event.target
-  if (!(targetEle instanceof HTMLElement)) {
+  if (!(targetEle instanceof HTMLElement))
     return
-  }
+
   const parentListEle = getParentWithClass(targetEle, 'iw-list')
-  if (parentListEle == null) {
+  if (parentListEle == null)
     return
-  }
-  if (!targetEle.classList.contains('iw-list-data-cell')) {
+
+  if (!targetEle.classList.contains('iw-list-data-cell'))
     return
-  }
+
   cleanSelects(parentListEle)
-  if (getParentWithClass(targetEle, 'iw-list-cell')?.dataset.columnName != props.pkColumnName) {
+  if (getParentWithClass(targetEle, 'iw-list-cell')?.dataset.columnName != props.pkColumnName)
     return
-  }
+
   const selectRowEle = getParentWithClass(targetEle, 'iw-list-data-row')
-  if (selectRowEle == null) {
+  if (selectRowEle == null)
     return
-  }
+
   startRowIdx = getChildIndex(parentListEle, selectRowEle)
   startCellFixedX = targetEle.getBoundingClientRect().left
   listEle = parentListEle
@@ -64,13 +66,11 @@ function onRowSelectDraped(event: PointerEvent) {
 }
 
 function onRowSelectMove(event: PointerEvent) {
-  event.preventDefault()
-  if (!listEle) {
+  if (!listEle)
     return
-  }
-  const movedEleOpt = document.elementsFromPoint(startCellFixedX + 4, (event as MouseEvent).clientY).find((ele) => ele.classList.contains('iw-list-data-cell'))
+  const movedEleOpt = document.elementsFromPoint(startCellFixedX + 4, (event as MouseEvent).clientY).find(ele => ele.classList.contains('iw-list-data-cell'))
   if (!movedEleOpt) {
-    showAlert(t("list.rowSelect.acrossGroupError"), 2, AlertKind.WARNING, getParentWithClass(listEle, 'iw-tt')!)
+    showAlert(t('list.rowSelect.acrossGroupError'), 2, AlertKind.WARNING, getParentWithClass(listEle, 'iw-tt')!)
     cleanSelects(listEle)
     startCellFixedX = 0
     listEle = undefined
@@ -80,32 +80,32 @@ function onRowSelectMove(event: PointerEvent) {
   }
   const movedEle = movedEleOpt as HTMLElement
   const parentListEle = getParentWithClass(movedEle, 'iw-list')
-  if (parentListEle == null) {
+  if (parentListEle == null)
     return
-  }
+
   const selectRowEle = getParentWithClass(movedEle, 'iw-list-data-row')
-  if (selectRowEle == null) {
+  if (selectRowEle == null)
     return
-  }
+
+  event.preventDefault()
   movedRowIdx = getChildIndex(parentListEle, selectRowEle)
-  if (startRowIdx == movedRowIdx) {
+  if (startRowIdx === movedRowIdx)
     return
-  }
+
   cleanSelects(parentListEle)
   if (startRowIdx < movedRowIdx) {
-    for (let i = startRowIdx; i <= movedRowIdx; i++) {
+    for (let i = startRowIdx; i <= movedRowIdx; i++)
       addSelect(parentListEle.children[i] as HTMLElement)
-    }
-  } else {
-    for (let i = movedRowIdx; i <= startRowIdx; i++) {
+  }
+  else {
+    for (let i = movedRowIdx; i <= startRowIdx; i++)
       addSelect(parentListEle.children[i] as HTMLElement)
-    }
   }
 }
 
 function cleanSelects(listEle: HTMLElement) {
   props.selectedPks.splice(0, props.selectedPks.length)
-  listEle.querySelectorAll('.iw-list-data-row--selected').forEach(cellEle => {
+  listEle.querySelectorAll('.iw-list-data-row--selected').forEach((cellEle) => {
     cellEle.classList.remove('iw-list-data-row--selected')
     cellEle.classList.add('iw-list-data-row--unselected')
   })
@@ -113,25 +113,26 @@ function cleanSelects(listEle: HTMLElement) {
 
 function addSelect(selectedRowEle: HTMLElement) {
   if (props.pkKindIsNumber) {
-    // @ts-ignore
-    props.selectedPks.push(parseInt(selectedRowEle.dataset.pk as string))
-  } else {
-    // @ts-ignore
+    // @ts-expect-error
+    props.selectedPks.push(Number.parseInt(selectedRowEle.dataset.pk as string))
+  }
+  else {
+    // @ts-expect-error
     props.selectedPks.push(selectedRowEle.dataset.pk as string)
   }
-  Array.prototype.forEach.call(selectedRowEle.children, function (cellEle) {
+  Array.prototype.forEach.call(selectedRowEle.children, (cellEle) => {
     cellEle.classList.remove('iw-list-data-row--unselected')
     cellEle.classList.add('iw-list-data-row--selected')
   })
 }
-
 </script>
 
-<template></template>
+<template>
+  <div />
+</template>
 
 <style lang="css">
 .iw-list-data-row--selected {
   @apply bg-base-200;
 }
 </style>
-

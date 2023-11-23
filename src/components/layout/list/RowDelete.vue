@@ -8,10 +8,10 @@ const props = defineProps<{
   selectedPks: string[] | number[]
 }>()
 
-let deleteDataFun = inject(FUN_DELETE_DATA_TYPE)!
-let closeContextMenuFun = inject(FUN_CLOSE_CONTEXT_MENU_TYPE)!
+const deleteDataFun = inject(FUN_DELETE_DATA_TYPE)!
+const closeContextMenuFun = inject(FUN_CLOSE_CONTEXT_MENU_TYPE)!
 
-const deleteData = () => {
+function deleteData() {
   closeContextMenuFun()
   deleteDataFun(props.selectedPks)
 }
@@ -19,6 +19,6 @@ const deleteData = () => {
 
 <template>
   <div class="iw-contextmenu__item cursor-pointer text-sm" @click="deleteData">
-    <i :class="iconSvg.DELETE"></i> {{ $t('list.rowDelete.title') }}
+    <i :class="iconSvg.DELETE" /> {{ $t('list.rowDelete.title') }}
   </div>
 </template>

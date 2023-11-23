@@ -3,5 +3,5 @@ import * as IwProps from './props'
 
 export {
   IwTaskTable,
-  IwProps
+  IwProps,
 }

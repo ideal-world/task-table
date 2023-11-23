@@ -1,7 +1,3 @@
-<script setup lang="ts">
-const todo = ''
-</script>
-
 <script lang ="ts">
 export enum AlertKind {
   ERROR,
@@ -12,7 +8,7 @@ export enum AlertKind {
 
 export function showAlert(message: string, showTimeSec: number, kind: AlertKind = AlertKind.WARNING, attachEle: HTMLElement = document.body) {
   let alertDiv = ``
-  let messageDiv = `<span>` + message + `</span>`
+  const messageDiv = `<span>${message}</span>`
   switch (kind) {
     case AlertKind.ERROR: {
       alertDiv = `  <div role="alert" class="iw-alert iw-alert--error">
@@ -20,7 +16,7 @@ export function showAlert(message: string, showTimeSec: number, kind: AlertKind 
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
         d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
-   `+ messageDiv + `
+   ${messageDiv}
   </div>`
       break
     }
@@ -30,7 +26,7 @@ export function showAlert(message: string, showTimeSec: number, kind: AlertKind 
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
         d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
     </svg>
-   `+ messageDiv + `
+   ${messageDiv}
   </div>`
       break
     }
@@ -40,7 +36,7 @@ export function showAlert(message: string, showTimeSec: number, kind: AlertKind 
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
         d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
     </svg>
-   `+ messageDiv + `
+   ${messageDiv}
   </div>`
       break
     }
@@ -50,7 +46,7 @@ export function showAlert(message: string, showTimeSec: number, kind: AlertKind 
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
         d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
-   `+ messageDiv + `
+   ${messageDiv}
   </div>`
       break
     }
@@ -60,19 +56,18 @@ export function showAlert(message: string, showTimeSec: number, kind: AlertKind 
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
         d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
     </svg>
-   `+ messageDiv + `
+   ${messageDiv}
   </div>`
       break
     }
   }
-  let alertEle = document.createElement('div')
+  const alertEle = document.createElement('div')
   alertEle.innerHTML = alertDiv
   attachEle.append(alertEle)
   setTimeout(() => {
     alertEle.remove()
   }, showTimeSec * 1000)
 }
-
 </script>
 
 <style lang="css">
@@ -96,3 +91,7 @@ export function showAlert(message: string, showTimeSec: number, kind: AlertKind 
   @apply alert-error;
 }
 </style>
+
+<script setup lang="ts">
+// "default" is not exported
+</script>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { InjectionKey, provide, ref } from 'vue'
+import type { InjectionKey } from 'vue'
+import { provide, ref } from 'vue'
 import { IwUtils } from '../../utils'
 
 const contextmenuRef = ref<HTMLElement | null>(null)
@@ -23,7 +24,8 @@ function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: MenuOffset
     top = targetOffset.top
     attachObjHeight = targetOffset.height + 5
     attachObjWidth = targetOffset.width
-  } else {
+  }
+  else {
     left = attachObj.x
     top = attachObj.y
     attachObjHeight = 0
@@ -72,40 +74,40 @@ function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: MenuOffset
     }
   }
   const contextMenuEle = contextmenuRef.value as HTMLElement
-  contextMenuEle.style.minHeight = minHeight + 'px'
-  contextMenuEle.style.minWidth = minWidth + 'px'
-  contextMenuEle.style.left = left + 'px'
-  contextMenuEle.style.top = top + 'px'
+  contextMenuEle.style.minHeight = `${minHeight}px`
+  contextMenuEle.style.minWidth = `${minWidth}px`
+  contextMenuEle.style.left = `${left}px`
+  contextMenuEle.style.top = `${top}px`
   contextMenuEle.querySelectorAll('.iw-contextmenu__item').forEach((node) => {
     const nodeEle = node as HTMLElement
-    nodeEle.style.padding = padding + 'px'
+    nodeEle.style.padding = `${padding}px`
   })
 
   isShow.value = true
   document.addEventListener('pointerdown', (event: MouseEvent) => {
     if (event.target == null) {
       isShow.value = false
-    } else {
+    }
+    else {
       let optInMenu = false
-      let contextmenuEles = document.querySelectorAll('.iw-contextmenu')
-      for (let i in contextmenuEles) {
-        if (!(contextmenuEles[i] instanceof HTMLElement) || (contextmenuEles[i] as HTMLElement).style.display == 'none') {
+      const contextmenuEles = document.querySelectorAll('.iw-contextmenu')
+      for (const i in contextmenuEles) {
+        if (!(contextmenuEles[i] instanceof HTMLElement) || (contextmenuEles[i] as HTMLElement).style.display == 'none')
           continue
-        }
+
         const contextMenuRect = contextmenuEles[i].getBoundingClientRect()
         if (
-          event.x >= contextMenuRect.left &&
-          event.y >= contextMenuRect.top &&
-          event.x <= contextMenuRect.left + contextMenuRect.width &&
-          event.y <= contextMenuRect.top + contextMenuRect.height
+          event.x >= contextMenuRect.left
+          && event.y >= contextMenuRect.top
+          && event.x <= contextMenuRect.left + contextMenuRect.width
+          && event.y <= contextMenuRect.top + contextMenuRect.height
         ) {
           optInMenu = true
           break
         }
       }
-      if (!optInMenu) {
+      if (!optInMenu)
         isShow.value = false
-      }
     }
   })
 }
@@ -136,12 +138,14 @@ export enum MenuSizeKind {
   LARGE,
 }
 
-export const FUN_CLOSE_CONTEXT_MENU_TYPE = Symbol() as InjectionKey<() => void>
+export const FUN_CLOSE_CONTEXT_MENU_TYPE = Symbol("FUN_CLOSE_CONTEXT_MENU_TYPE") as InjectionKey<() => void>
 </script>
 
 <template>
-  <div ref="contextmenuRef"
-    class="iw-contextmenu flex flex-col items-start fixed z-[3000] shadow bg-base-100 p-1 rounded-md" v-show="isShow">
-    <slot></slot>
+  <div
+    v-show="isShow"
+    ref="contextmenuRef" class="iw-contextmenu flex flex-col items-start fixed z-[3000] shadow bg-base-100 p-1 rounded-md"
+  >
+    <slot />
   </div>
 </template>

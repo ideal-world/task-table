@@ -3,9 +3,11 @@ import { inject, ref } from 'vue'
 import { getRandomString } from '../../../utils/basic'
 import IconPickerComp from '../../common/IconPicker.vue'
 import MenuComp, { MenuOffsetKind } from '../../common/Menu.vue'
-import { TableColumnConf, TableLayoutColumnConf, getDefaultIconByDataKind, getDefaultLayoutColumnConf, dictEnableByDataKind } from '../../conf'
+import type { TableColumnConf, TableLayoutColumnConf } from '../../conf'
+import { dictEnableByDataKind, getDefaultIconByDataKind, getDefaultLayoutColumnConf } from '../../conf'
 import { FUN_MODIFY_COLUMN_TYPE, FUN_MODIFY_LAYOUT_TYPE, FUN_NEW_COLUMN_TYPE } from '../../events'
-import { DataKind, TableLayoutModifyReq, translateDataKind } from '../../props'
+import type { TableLayoutModifyReq } from '../../props'
+import { DataKind, translateDataKind } from '../../props'
 import * as iconSvg from '../../../assets/icon'
 
 const props = defineProps<{
@@ -27,32 +29,32 @@ const newColumnInfo = ref<{
 }>({
 })
 
-const showNewColumnDatKindContextMenu = (event: MouseEvent) => {
+function showNewColumnDatKindContextMenu(event: MouseEvent) {
   const targetEle = event.target as HTMLElement
   columnDataKindCompRef.value.show(targetEle, MenuOffsetKind.RIGHT_BOTTOM, undefined, true)
 }
 
-const setNewColumnDataKind = (dataKind: DataKind) => {
+function setNewColumnDataKind(dataKind: DataKind) {
   newColumnInfo.value.dataKind = dataKind
-  if (!newColumnInfo.value.icon) {
+  if (!newColumnInfo.value.icon)
     newColumnInfo.value.icon = getDefaultIconByDataKind(dataKind)
-  }
+
   columnDataKindCompRef.value.close()
 }
 
-const showNewColumnIconContainer = (event: Event) => {
+function showNewColumnIconContainer(event: Event) {
   iconPickerCompRef.value.show(event, MenuOffsetKind.MEDIUM_BOTTOM, undefined, true)
 }
 
-const setNewColumnIcon = (icon: string) => {
+function setNewColumnIcon(icon: string) {
   newColumnInfo.value.icon = icon
 }
 
-const submitNewColumn = async () => {
+async function submitNewColumn() {
   if (newColumnInfo.value.title && newColumnInfo.value.dataKind) {
     const name = getRandomString(10)
     await newColumnFun({
-      name: name,
+      name,
       title: newColumnInfo.value.title,
       icon: newColumnInfo.value.icon!,
       dataKind: newColumnInfo.value.dataKind,
@@ -65,17 +67,18 @@ const submitNewColumn = async () => {
   }
 }
 
-const setShowToggleColumn = async (columnConf: TableColumnConf) => {
-  const layoutColumnsConf = props.layoutColumnsConf.find(col => col.name == columnConf.name)
+async function setShowToggleColumn(columnConf: TableColumnConf) {
+  const layoutColumnsConf = props.layoutColumnsConf.find(col => col.name === columnConf.name)
   if (layoutColumnsConf) {
     layoutColumnsConf.hide = !layoutColumnsConf.hide
     await modifyColumnFun(undefined, layoutColumnsConf)
-  } else {
+  }
+  else {
     const changedLayoutReq: TableLayoutModifyReq = {
       newColumn: {
         name: columnConf.name,
-        hide: false
-      }
+        hide: false,
+      },
     }
     await modifyLayoutFun(changedLayoutReq)
   }
@@ -86,63 +89,79 @@ function showContainer(event: Event, offsetKind: MenuOffsetKind = MenuOffsetKind
 }
 
 defineExpose({
-  show: showContainer
+  show: showContainer,
 })
 </script>
 
 <template>
-  <menu-comp ref="columnMoreCompRef">
-    <div class="divider"> {{ $t('list.columnNew.title') }}</div>
+  <MenuComp ref="columnMoreCompRef">
+    <div class="divider">
+      {{ $t('list.columnNew.title') }}
+    </div>
     <div class="iw-contextmenu__item flex justify-between w-full cursor-pointer" @click="showNewColumnDatKindContextMenu">
       <span>{{ $t('list.columnNew.dataKind') }}</span>
-      <span>{{ newColumnInfo.dataKind != undefined ? translateDataKind(newColumnInfo.dataKind) :
-        $t('_.state.selectPlaceholder') }}</span>
+      <span>{{ newColumnInfo.dataKind !== undefined ? translateDataKind(newColumnInfo.dataKind)
+        : $t('_.state.selectPlaceholder') }}</span>
     </div>
     <div class="iw-contextmenu__item flex justify-between items-center w-full">
-      <i :class="(newColumnInfo.icon ? newColumnInfo.icon : getDefaultIconByDataKind(DataKind.TEXT)) + ' mr-1'"
-        class="cursor-pointer" @click="showNewColumnIconContainer"></i>
-      <input class="input input-bordered input-xs w-28" type="text" v-model="newColumnInfo.title"
-        :placeholder="$t('list.columnNew.columnNamePlaceholder')" />
+      <i
+        :class="`${newColumnInfo.icon ? newColumnInfo.icon : getDefaultIconByDataKind(DataKind.TEXT)} mr-1`"
+        class="cursor-pointer" @click="showNewColumnIconContainer"
+      />
+      <input
+        v-model="newColumnInfo.title" class="input input-bordered input-xs w-28" type="text"
+        :placeholder="$t('list.columnNew.columnNamePlaceholder')"
+      >
     </div>
-    <div class="iw-contextmenu__item flex justify-between items-center w-full"
-      v-show="newColumnInfo.dataKind && dictEnableByDataKind(newColumnInfo.dataKind)">
+    <div
+      v-show="newColumnInfo.dataKind && dictEnableByDataKind(newColumnInfo.dataKind)"
+      class="iw-contextmenu__item flex justify-between items-center w-full"
+    >
       <span>
-        <i :class="iconSvg.DICT"></i>
+        <i :class="iconSvg.DICT" />
         {{ $t('list.columnNew.useDict') }}
       </span>
-      <input type="checkbox" class="toggle toggle-sm" v-model="newColumnInfo.useDict" />
+      <input v-model="newColumnInfo.useDict" type="checkbox" class="toggle toggle-sm">
     </div>
-    <div class="iw-contextmenu__item flex justify-between items-center w-full" v-show="newColumnInfo.useDict">
+    <div v-show="newColumnInfo.useDict" class="iw-contextmenu__item flex justify-between items-center w-full">
       <span>
-        <i :class="iconSvg.EDIT"></i>
+        <i :class="iconSvg.EDIT" />
         {{ $t('list.columnNew.dictEditable') }}
       </span>
-      <input type="checkbox" class="toggle toggle-sm" v-model="newColumnInfo.dictEditable" />
+      <input v-model="newColumnInfo.dictEditable" type="checkbox" class="toggle toggle-sm">
     </div>
     <div class="iw-contextmenu__item flex justify-end w-full">
-      <button class="btn btn-outline btn-primary btn-xs" @click="submitNewColumn"
-        v-show="newColumnInfo.title && newColumnInfo.dataKind">
+      <button
+        v-show="newColumnInfo.title && newColumnInfo.dataKind" class="btn btn-outline btn-primary btn-xs"
+        @click="submitNewColumn"
+      >
         {{ $t('list.columnNew.submit') }}
       </button>
     </div>
-    <menu-comp ref="columnDataKindCompRef">
-      <div v-for="dataKind of Object.values(DataKind)" class="iw-contextmenu__item flex justify-between w-full"
-        @click="setNewColumnDataKind(dataKind)" style="cursor: pointer">
-        <i :class="getDefaultIconByDataKind(dataKind)"></i>
+    <MenuComp ref="columnDataKindCompRef">
+      <div
+        v-for="dataKind of Object.values(DataKind)" :key="dataKind"
+        class="iw-contextmenu__item flex justify-between w-full"
+        style="cursor: pointer" @click="setNewColumnDataKind(dataKind)"
+      >
+        <i :class="getDefaultIconByDataKind(dataKind)" />
         <span>{{ translateDataKind(dataKind) }}</span>
       </div>
-    </menu-comp>
-    <icon-picker-comp ref="iconPickerCompRef" @select-icon="setNewColumnIcon"></icon-picker-comp>
-    <div class="divider"> {{ $t('list.columnHide.title') }}</div>
-    <div v-for="column in props.basicColumnsConf" class="iw-contextmenu__item flex justify-between w-full">
+    </MenuComp>
+    <IconPickerComp ref="iconPickerCompRef" @select-icon="setNewColumnIcon" />
+    <div class="divider">
+      {{ $t('list.columnHide.title') }}
+    </div>
+    <div v-for="column in props.basicColumnsConf" :key="column.name" class="iw-contextmenu__item flex justify-between w-full">
       <span>
-        <i :class="column.icon"></i>
+        <i :class="column.icon" />
         {{ column.title }}
       </span>
-      <input type="checkbox" class="toggle toggle-sm"
-        :checked="props.layoutColumnsConf.find(col => col.name == column.name)?.hide ?? true"
-        @click="setShowToggleColumn(column)" />
+      <input
+        type="checkbox" class="toggle toggle-sm"
+        :checked="props.layoutColumnsConf.find(col => col.name === column.name)?.hide ?? true"
+        @click="setShowToggleColumn(column)"
+      >
     </div>
-  </menu-comp>
+  </MenuComp>
 </template>
-

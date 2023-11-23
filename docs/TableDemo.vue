@@ -1,19 +1,12 @@
-<template>
-  <div style="height: 400px">
-    <!-- <iw-task-table  pk-column-name="no" :columns="columns" :events="events" :layouts="layouts"></iw-task-table> -->
-    <iw-task-table pk-column-name="no" :columns="columns" :events="events" :layouts="layouts"
-      :group="group"></iw-task-table>
-  </div>
-</template>
-
 <script setup lang="ts">
-import { AggregateKind, DataKind, LayoutKind, TableColumnProps, TableLayoutModifyReq, TableLayoutProps, TableStyleProps } from '../src/components/props';
+import type { TableColumnProps, TableLayoutModifyReq, TableLayoutProps, TableStyleProps } from '../src/components/props'
+import { AggregateKind, DataKind, LayoutKind } from '../src/components/props'
 
 const columns = [{ name: 'no', dataKind: DataKind.NUMBER }, { name: 'name', useDict: true }, { name: 'phone' }, { name: 'addr' }, { name: 'time', dataKind: DataKind.DATETIME }]
 
 const layouts = [{
-  id: "hi",
-  title: "HI",
+  id: 'hi',
+  title: 'HI',
   layoutKind: LayoutKind.LIST,
   columns: [{
     name: 'no',
@@ -24,13 +17,13 @@ const layouts = [{
   }, {
     name: 'time',
   }],
-  aggs: { name: AggregateKind.MIN }
+  aggs: { name: AggregateKind.MIN },
 }]
 const group = {
   columnName: 'name',
   groupOrderDesc: true,
   useDictValue: false,
-  hideEmptyRecord: false
+  hideEmptyRecord: false,
 }
 
 const events = {
@@ -118,9 +111,8 @@ const events = {
         resolve(true)
       }, 1000)
     })
-  }
+  },
 }
-
 
 const data1 = [
   { no: 1, name: 'Name1', phone: 'Phone1', addr: 'Addr1 Addr1 Addr1 Addr1 Addr1 Addr1', time: '2023-10-23' },
@@ -157,7 +149,7 @@ const data1 = [
 const resp1 = {
   records: data1,
   totalNumber: data1.length,
-  aggs: { "name": "Name1" }
+  aggs: { name: 'Name1' },
 }
 
 const data2 = [
@@ -234,27 +226,36 @@ const resp2 = [
   {
     records: data2,
     totalNumber: data2.length,
-    aggs: { "name": "Name1" },
+    aggs: { name: 'Name1' },
     groupValue: 'Name1',
     offsetNumber: 0,
-    fetchNumber: 10
+    fetchNumber: 10,
   },
   {
     records: data3,
     totalNumber: data3.length,
-    aggs: { "name": "Name3" },
+    aggs: { name: 'Name3' },
     groupValue: 'Name3',
     offsetNumber: 0,
-    fetchNumber: 10
+    fetchNumber: 10,
   },
   {
     records: data4,
     totalNumber: data4.length,
-    aggs: { "name": "Name4" },
+    aggs: { name: 'Name4' },
     groupValue: 'Name4',
     offsetNumber: 0,
-    fetchNumber: 10
-  }
+    fetchNumber: 10,
+  },
 ]
-
 </script>
+
+<template>
+  <div style="height: 400px">
+    <!-- <iw-task-table  pk-column-name="no" :columns="columns" :events="events" :layouts="layouts"></iw-task-table> -->
+    <iw-task-table
+      pk-column-name="no" :columns="columns" :events="events" :layouts="layouts"
+      :group="group"
+    />
+  </div>
+</template>

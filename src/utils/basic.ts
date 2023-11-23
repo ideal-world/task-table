@@ -11,9 +11,9 @@ export function hasParentWithClass(element: HTMLElement | null, className: strin
 
 export function getParentWithClass(element: HTMLElement | null, className: string): HTMLElement | null {
   while (element) {
-    if (element.classList && element.classList.contains(className)) {
+    if (element.classList && element.classList.contains(className))
       return element
-    }
+
     element = element.parentElement
   }
   return null
@@ -31,9 +31,9 @@ export function getRandomInt(min: number, max: number) {
 
 export function getRandomString(length: number) {
   let result = ''
-  let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-  for (let i = 0; i < length; i++) {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
+  for (let i = 0; i < length; i++)
     result += characters.charAt(Math.floor(Math.random() * characters.length))
-  }
+
   return result
 }

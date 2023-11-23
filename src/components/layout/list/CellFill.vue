@@ -3,16 +3,19 @@ import { inject, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { getChildIndex, getParentWithClass } from '../../../utils/basic'
 import { AlertKind, showAlert } from '../../common/Alert.vue'
-import { CachedColumnConf } from '../../conf'
+import type { CachedColumnConf } from '../../conf'
 import { FUN_UPDATE_DATA_TYPE } from '../../events'
-import { DataKind, TableDataGroupResp, TableDataResp } from '../../props'
-const { t } = useI18n()
+import type { TableDataGroupResp, TableDataResp } from '../../props'
+import { DataKind } from '../../props'
 
 const props = defineProps<{
   columnsConf: CachedColumnConf[]
   data: TableDataResp | TableDataGroupResp[]
   pkColumnName: string
 }>()
+
+const { t } = useI18n()
+
 const updateDataFun = inject(FUN_UPDATE_DATA_TYPE)!
 
 onMounted(() => {
@@ -38,40 +41,42 @@ onMounted(() => {
   })
 
   dragDiv.addEventListener('pointerup', (event: PointerEvent) => {
-    if (!isDragging) {
+    if (!isDragging)
       return
-    }
+
     isDragging = false
     const targetEle = event.target as HTMLElement
     targetEle.releasePointerCapture(event.pointerId)
     selectDiv.style.display = 'none'
-    if (startRowIdx == movedRowIdx) {
+    if (startRowIdx === movedRowIdx)
       return
-    }
-    const parentListEle = getParentWithClass(startCellEle, 'iw-list')
-    if (parentListEle == null) {
-      return
-    }
 
-    const pkKindIsNumber = props.columnsConf.find((col) => col.name == props.pkColumnName)?.dataKind == DataKind.NUMBER
+    const parentListEle = getParentWithClass(startCellEle, 'iw-list')
+    if (parentListEle == null)
+      return
+
+    const pkKindIsNumber = props.columnsConf.find(col => col.name === props.pkColumnName)?.dataKind === DataKind.NUMBER
     const selectedPks: string[] | number[] = []
     if (startRowIdx < movedRowIdx) {
       for (let i = startRowIdx; i <= movedRowIdx; i++) {
         if (pkKindIsNumber) {
-          // @ts-ignore
-          selectedPks.push(parseInt((parentListEle.children[i] as HTMLElement).dataset.pk ?? ''))
-        } else {
-          // @ts-ignore
+          // @ts-expect-error
+          selectedPks.push(Number.parseInt((parentListEle.children[i] as HTMLElement).dataset.pk ?? ''))
+        }
+        else {
+          // @ts-expect-error
           selectedPks.push((parentListEle.children[i] as HTMLElement).dataset.pk ?? '')
         }
       }
-    } else {
+    }
+    else {
       for (let i = startRowIdx; i >= movedRowIdx; i--) {
         if (pkKindIsNumber) {
-          // @ts-ignore
-          selectedPks.push(parseInt((parentListEle.children[i] as HTMLElement).dataset.pk ?? ''))
-        } else {
-          // @ts-ignore
+          // @ts-expect-error
+          selectedPks.push(Number.parseInt((parentListEle.children[i] as HTMLElement).dataset.pk ?? ''))
+        }
+        else {
+          // @ts-expect-error
           selectedPks.push((parentListEle.children[i] as HTMLElement).dataset.pk ?? '')
         }
       }
@@ -79,29 +84,30 @@ onMounted(() => {
 
     const changedData: any[] = []
     if (!Array.isArray(props.data)) {
-      const targetData = props.data.records.find((item) => item[props.pkColumnName] == selectedPks[0])?.[startColumnName]
+      const targetData = props.data.records.find(item => item[props.pkColumnName] === selectedPks[0])?.[startColumnName]
       props.data.records.forEach((item) => {
-        // @ts-ignore
+        // @ts-expect-error
         if (selectedPks.includes(item[props.pkColumnName])) {
           changedData.push(
             {
               [props.pkColumnName]: item[props.pkColumnName],
               [startColumnName]: targetData,
-            }
+            },
           )
         }
       })
-    } else {
+    }
+    else {
       props.data.forEach((groupData) => {
-        const targetData = groupData.records.find((item) => item[props.pkColumnName] == selectedPks[0])?.[startColumnName]
+        const targetData = groupData.records.find(item => item[props.pkColumnName] === selectedPks[0])?.[startColumnName]
         groupData.records.forEach((item) => {
-          // @ts-ignore
+          // @ts-expect-error
           if (selectedPks.includes(item[props.pkColumnName])) {
             changedData.push(
               {
                 [props.pkColumnName]: item[props.pkColumnName],
                 [startColumnName]: targetData,
-              }
+              },
             )
           }
         })
@@ -111,30 +117,31 @@ onMounted(() => {
   })
 
   dragDiv.addEventListener('pointermove', (event) => {
-    if (!isDragging) {
+    if (!isDragging)
       return
-    }
-    const movedEleOpt = document.elementsFromPoint(startCellFixedX + 4, (event as MouseEvent).clientY).find((ele) => ele.classList.contains('iw-list-data-cell'))
+
+    const movedEleOpt = document.elementsFromPoint(startCellFixedX + 4, (event as MouseEvent).clientY).find(ele => ele.classList.contains('iw-list-data-cell'))
     if (!movedEleOpt) {
-      showAlert(t("list.cellFill.acrossGroupError"), 2, AlertKind.WARNING, getParentWithClass(listEle, 'iw-tt')!)
+      showAlert(t('list.cellFill.acrossGroupError'), 2, AlertKind.WARNING, getParentWithClass(listEle, 'iw-tt')!)
       return
     }
     const movedEle = movedEleOpt as HTMLElement
     const parentListEle = getParentWithClass(movedEle, 'iw-list')
-    if (parentListEle == null) {
+    if (parentListEle == null)
       return
-    }
+
     const selectRowEle = getParentWithClass(movedEle, 'iw-list-data-row')
-    if (selectRowEle == null) {
+    if (selectRowEle == null)
       return
-    }
+
     movedRowIdx = getChildIndex(parentListEle, selectRowEle)
     if (startRowIdx <= movedRowIdx) {
-      selectDiv.style.top = startCellEle.offsetTop - 1 + 'px'
-      selectDiv.style.height = movedEle.offsetTop + movedEle.offsetHeight - startCellEle.offsetTop + 'px'
-    } else {
-      selectDiv.style.top = movedEle.offsetTop - 1 + 'px'
-      selectDiv.style.height = startCellEle.offsetTop + startCellEle.offsetHeight - movedEle.offsetTop + 'px'
+      selectDiv.style.top = `${startCellEle.offsetTop - 1}px`
+      selectDiv.style.height = `${movedEle.offsetTop + movedEle.offsetHeight - startCellEle.offsetTop}px`
+    }
+    else {
+      selectDiv.style.top = `${movedEle.offsetTop - 1}px`
+      selectDiv.style.height = `${startCellEle.offsetTop + startCellEle.offsetHeight - movedEle.offsetTop}px`
     }
   })
 
@@ -142,26 +149,26 @@ onMounted(() => {
     isDragging = false
     selectDiv.style.display = 'none'
     const targetEle = event.target as HTMLElement
-    if (!targetEle.classList.contains('iw-list-data-cell')) {
+    if (!targetEle.classList.contains('iw-list-data-cell'))
       return
-    }
+
     const parentListEle = getParentWithClass(targetEle, 'iw-list')
-    if (parentListEle == null) {
+    if (parentListEle == null)
       return
-    }
+
     const selectRowEle = getParentWithClass(targetEle, 'iw-list-data-row')
-    if (selectRowEle == null) {
+    if (selectRowEle == null)
       return
-    }
+
     const curColumnName = targetEle.dataset.columnName ?? ''
-    if (props.columnsConf.find((item) => item.name == curColumnName && (curColumnName == props.pkColumnName || !item.dataEditable))) {
+    if (props.columnsConf.find(item => item.name === curColumnName && (curColumnName === props.pkColumnName || !item.dataEditable)))
       return
-    }
+
     selectDiv.style.display = 'flex'
-    selectDiv.style.left = targetEle.offsetLeft - 1 + 'px'
-    selectDiv.style.top = targetEle.offsetTop - 1 + 'px'
-    selectDiv.style.width = targetEle.offsetWidth + 2 + 'px'
-    selectDiv.style.height = targetEle.offsetHeight + 2 + 'px'
+    selectDiv.style.left = `${targetEle.offsetLeft - 1}px`
+    selectDiv.style.top = `${targetEle.offsetTop - 1}px`
+    selectDiv.style.width = `${targetEle.offsetWidth + 2}px`
+    selectDiv.style.height = `${targetEle.offsetHeight + 2}px`
     startColumnName = curColumnName
     startRowIdx = getChildIndex(parentListEle, selectRowEle)
     startCellEle = targetEle
@@ -170,7 +177,7 @@ onMounted(() => {
 })
 </script>
 
-<template></template>
+<template><div/></template>
 
 <style lang="css">
 .iw-list-fill--select {

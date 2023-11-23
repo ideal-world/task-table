@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { inject } from 'vue'
 import { FUN_CLOSE_CONTEXT_MENU_TYPE } from '../../common/Menu.vue'
-import { CachedColumnConf } from '../../conf'
+import type { CachedColumnConf } from '../../conf'
 import { FUN_MODIFY_COLUMN_TYPE } from '../../events'
 import * as iconSvg from '../../../assets/icon'
 
@@ -12,8 +12,8 @@ const props = defineProps<{
 const modifyColumnFun = inject(FUN_MODIFY_COLUMN_TYPE)!
 const closeContextMenuFun = inject(FUN_CLOSE_CONTEXT_MENU_TYPE)!
 
-const setHidedColumn = async () => {
-  const curColumnConf = props.columnsConf.find((col) => col.name == props.curColumnName)
+async function setHidedColumn() {
+  const curColumnConf = props.columnsConf.find(col => col.name === props.curColumnName)
   if (curColumnConf) {
     curColumnConf.hide = !curColumnConf.fixed
     await modifyColumnFun(undefined, curColumnConf)
@@ -24,8 +24,7 @@ const setHidedColumn = async () => {
 
 <template>
   <div class="iw-contextmenu__item cursor-pointer" @click="setHidedColumn">
-    <i :class="iconSvg.HIDE"></i>
+    <i :class="iconSvg.HIDE" />
     {{ $t('list.columnHide.title') }}
   </div>
 </template>
-

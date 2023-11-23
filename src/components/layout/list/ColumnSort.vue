@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import Sortable from 'sortablejs'
 import { inject, onMounted } from 'vue'
-import { CachedColumnConf } from '../../conf'
+import type { CachedColumnConf } from '../../conf'
 import { FUN_MODIFY_LAYOUT_TYPE } from '../../events'
-import { TableLayoutModifyReq } from '../../props'
+import type { TableLayoutModifyReq } from '../../props'
 
 const props = defineProps<{
   columnsConf: CachedColumnConf[]
@@ -25,4 +25,4 @@ onMounted(() => {
 })
 </script>
 
-<template></template>
+<template><div/></template>

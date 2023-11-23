@@ -7,7 +7,8 @@ const locales = createI18n({
   locale: (typeof localStorage !== 'undefined' ? localStorage.getItem('locale') : undefined) || (typeof navigator !== 'undefined' ? navigator.language.slice(0, 2) : undefined),
   fallbackLocale: 'en',
   messages: {
-    zh, en
+    zh,
+    en,
   },
 })
 

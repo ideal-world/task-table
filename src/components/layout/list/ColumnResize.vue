@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { inject, onMounted } from 'vue'
-import { CachedColumnConf } from '../../conf'
+import { inject, onMounted, toRaw } from 'vue'
+import type { CachedColumnConf } from '../../conf'
 import { FUN_MODIFY_COLUMN_TYPE } from '../../events'
 
 const props = defineProps<{
@@ -39,38 +39,35 @@ onMounted(() => {
     const targetEle = event.target as HTMLElement
     targetEle.releasePointerCapture(event.pointerId)
 
-    const curColumnConf = props.columnsConf.find((item) => item.name == currColumnName)
-    if (curColumnConf) {
-      curColumnConf.width = curColumnConf.width
+    const curColumnConf = props.columnsConf.find(item => item.name === currColumnName)
+    if (curColumnConf)
       await modifyColumnFun(undefined, curColumnConf)
-    }
   })
 
   dragDiv.addEventListener('pointermove', (event) => {
-    if (!isDragging) {
+    if (!isDragging)
       return
-    }
-    dragDiv.style.left = (event as MouseEvent).clientX - 12 + 'px'
+
+    dragDiv.style.left = `${(event as MouseEvent).clientX - 12}px`
     const newWidth = (event as MouseEvent).clientX - currCellRect.left
-    const columnConf = props.columnsConf.find((col) => col.name == currColumnName)
-    if (columnConf) {
+    const columnConf = props.columnsConf.find(col => col.name === currColumnName)
+    if (columnConf)
       columnConf.width = newWidth
-    }
   })
 
   listHeaderEle.addEventListener('pointermove', (event) => {
     const targetEle = event.target as HTMLElement
-    if (!targetEle.classList.contains('iw-list-header-cell')) {
+    if (!targetEle.classList.contains('iw-list-header-cell'))
       return
-    }
+
     isDragging = false
     dragDiv.style.display = 'none'
     const targetEleRect = targetEle.getBoundingClientRect()
     if (targetEleRect.right - (event as MouseEvent).clientX < 5) {
       dragDiv.style.display = 'flex'
-      dragDiv.style.height = targetEleRect.height + 6 + 'px'
-      dragDiv.style.left = targetEleRect.right - 12 + 'px'
-      dragDiv.style.top = targetEleRect.top - 4 + 'px'
+      dragDiv.style.height = `${targetEleRect.height + 6}px`
+      dragDiv.style.left = `${targetEleRect.right - 12}px`
+      dragDiv.style.top = `${targetEleRect.top - 4}px`
       currColumnName = targetEle.dataset.columnName ?? ''
       currCellRect = targetEleRect
     }
@@ -78,4 +75,4 @@ onMounted(() => {
 })
 </script>
 
-<template></template>
+<template><div/></template>
