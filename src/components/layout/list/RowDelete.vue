@@ -18,7 +18,7 @@ const deleteData = () => {
 </script>
 
 <template>
-  <div class="iw-contextmenu__item cursor-pointer  text-sm" @click="deleteData">
+  <div class="iw-contextmenu__item cursor-pointer text-sm" @click="deleteData">
     <i :class="iconSvg.DELETE"></i> {{ $t('list.rowDelete.title') }}
   </div>
 </template>
