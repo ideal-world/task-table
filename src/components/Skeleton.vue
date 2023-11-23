@@ -43,6 +43,7 @@ provide(Event.FUN_DELETE_DATA_TYPE, Event.deleteData)
 provide(Event.FUN_LOAD_CELL_OPTIONS_TYPE, Event.loadCellDictValues)
 provide(Event.FUN_MODIFY_STYLES_TYPE, Event.modifyStyles)
 provide(Event.FUN_NEW_COLUMN_TYPE, Event.newColumn)
+provide(Event.FUN_DELETE_COLUMN_TYPE, Event.deleteColumn)
 provide(Event.FUN_MODIFY_COLUMN_TYPE, Event.modifyColumn)
 provide(Event.FUN_NEW_LAYOUT_TYPE, Event.newLayout)
 provide(Event.FUN_MODIFY_LAYOUT_TYPE, Event.modifyLayout)
@@ -101,8 +102,8 @@ const showMoreMenu = (event: MouseEvent) => {
     <div class="iw-contextmenu__item">
       <!-- TODO 抽取 -->
       <!-- <i :class="iconSvg.RENAME"></i>
-                                                                            <input class="input input-bordered input-sm" type="text"
-                                                                              v-model="tableLayoutsConf.find(layout => layout.id == currentLayoutId)?.title" /> -->
+                                                                              <input class="input input-bordered input-sm" type="text"
+                                                                                v-model="tableLayoutsConf.find(layout => layout.id == currentLayoutId)?.title" /> -->
     </div>
   </menu-comp>
 </template>
