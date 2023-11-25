@@ -8,7 +8,7 @@ import { getChildIndex, getParentWithClass } from '../../../utils/basic'
 import { AlertKind, showAlert } from '../../common/Alert.vue'
 
 const props = defineProps<{
-  selectedPks: string[] | number[]
+  selectedPks: any[]
   pkColumnName: string
   pkKindIsNumber: boolean
 }>()
@@ -45,7 +45,7 @@ function onSelectDragging(event: PointerEvent) {
     return
 
   cleanSelects(parentListEle)
-  if (getParentWithClass(targetEle, 'iw-list-cell')?.dataset.columnName != props.pkColumnName)
+  if (getParentWithClass(targetEle, 'iw-list-cell')?.dataset.columnName !== props.pkColumnName)
     return
 
   const selectRowEle = getParentWithClass(targetEle, 'iw-list-data-row')
@@ -94,10 +94,12 @@ function onRowSelectMove(event: PointerEvent) {
 
   cleanSelects(parentListEle)
   if (startRowIdx < movedRowIdx) {
+    // eslint-disable-next-line no-unmodified-loop-condition
     for (let i = startRowIdx; i <= movedRowIdx; i++)
       addSelect(parentListEle.children[i] as HTMLElement)
   }
   else {
+    // eslint-disable-next-line no-unmodified-loop-condition
     for (let i = movedRowIdx; i <= startRowIdx; i++)
       addSelect(parentListEle.children[i] as HTMLElement)
   }
@@ -112,14 +114,10 @@ function cleanSelects(listEle: HTMLElement) {
 }
 
 function addSelect(selectedRowEle: HTMLElement) {
-  if (props.pkKindIsNumber) {
-    // @ts-expect-error
+  if (props.pkKindIsNumber)
     props.selectedPks.push(Number.parseInt(selectedRowEle.dataset.pk as string))
-  }
-  else {
-    // @ts-expect-error
+  else
     props.selectedPks.push(selectedRowEle.dataset.pk as string)
-  }
   Array.prototype.forEach.call(selectedRowEle.children, (cellEle) => {
     cellEle.classList.remove('iw-list-data-row--unselected')
     cellEle.classList.add('iw-list-data-row--selected')

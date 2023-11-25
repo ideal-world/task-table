@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, onMounted, toRaw } from 'vue'
+import { inject, onMounted } from 'vue'
 import type { CachedColumnConf } from '../../conf'
 import { FUN_MODIFY_COLUMN_TYPE } from '../../events'
 
@@ -75,4 +75,6 @@ onMounted(() => {
 })
 </script>
 
-<template><div/></template>
+<template>
+  <div />
+</template>

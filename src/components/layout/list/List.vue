@@ -72,12 +72,18 @@ function showColumnMoreContextMenu(event: MouseEvent) {
   const targetEle = event.target as HTMLElement
   headerColumnMoreCompRef.value.show(targetEle)
 }
+
+function setTableWidth() {
+  const styles: any = {}
+  styles.width = `${listConf.layout.columns.filter(column => !column.hide).reduce((count, col) => count + col.width, NEW_COLUMN_WIDTH)}px`
+  return styles
+}
 </script>
 
 <template>
   <div
     :class="`iw-list relative iw-list--size-${listConf.basic.styles.size}`"
-    :style="{ width: `${Object.values(columnsConf).reduce((count, col) => count + col.width, 0)}px` }"
+    :style="setTableWidth()"
   >
     <div
       :class="`${listConf.basic.styles.headerClass} iw-list-header flex items-center sticky top-0 z-[1500] border-solid border-t border-t-base-300 border-r border-r-base-300`"
@@ -85,7 +91,8 @@ function showColumnMoreContextMenu(event: MouseEvent) {
       <div
         v-for="(column, colIdx) in columnsConf" :key="column.name"
         :class="`${listConf.basic.styles.cellClass} iw-list-cell iw-list-header-cell flex items-center bg-base-100 border-solid border-b border-b-base-300 border-l border-l-base-300 hover:cursor-pointer hover:bg-base-200`"
-        :data-column-name="column.name" :style="setColumnStyles(colIdx)"
+        :data-column-name="column.name"
+        :style="setColumnStyles(colIdx)"
         @click="(event: MouseEvent) => showHeaderContextMenu(event, column.name)"
       >
         <i :class="`${column.icon} mr-1`" /> {{ column.title }}

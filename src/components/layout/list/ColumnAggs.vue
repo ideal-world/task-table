@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, ref, toRaw } from 'vue'
+import { inject, ref } from 'vue'
 import MenuComp, { MenuOffsetKind, MenuSizeKind } from '../../common/Menu.vue'
 import type { CachedColumnConf, TableStyleConf } from '../../conf'
 import { FUN_LOAD_DATA_TYPE } from '../../events'
@@ -58,8 +58,8 @@ function changeColumnAggs(aggKind: AggregateKind, colIdx: number) {
       </div>
       <MenuComp ref="aggsMenuCompRefs" class="iw-list-agg-row-contextmenu">
         <div
-          v-for="aggItem in showGroupAggMappingByDataKind(column.dataKind)" class="iw-contextmenu__item"
-          :key="aggItem.kind"
+          v-for="aggItem in showGroupAggMappingByDataKind(column.dataKind)" :key="aggItem.kind"
+          class="iw-contextmenu__item"
           style="cursor: pointer" @click="() => changeColumnAggs(aggItem.kind, colIdx)"
         >
           {{ aggItem.title }}

@@ -70,6 +70,10 @@ export function showAlert(message: string, showTimeSec: number, kind: AlertKind 
 }
 </script>
 
+<script setup lang="ts">
+// "default" is not exported
+</script>
+
 <style lang="css">
 .iw-alert {
   @apply alert alert-error absolute z-[10000] bottom-2 right-2 p-1 w-1/2 rounded-lg;
@@ -91,7 +95,3 @@ export function showAlert(message: string, showTimeSec: number, kind: AlertKind 
   @apply alert-error;
 }
 </style>
-
-<script setup lang="ts">
-// "default" is not exported
-</script>

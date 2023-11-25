@@ -56,29 +56,21 @@ onMounted(() => {
       return
 
     const pkKindIsNumber = props.columnsConf.find(col => col.name === props.pkColumnName)?.dataKind === DataKind.NUMBER
-    const selectedPks: string[] | number[] = []
+    const selectedPks: any[] = []
     if (startRowIdx < movedRowIdx) {
       for (let i = startRowIdx; i <= movedRowIdx; i++) {
-        if (pkKindIsNumber) {
-          // @ts-expect-error
+        if (pkKindIsNumber)
           selectedPks.push(Number.parseInt((parentListEle.children[i] as HTMLElement).dataset.pk ?? ''))
-        }
-        else {
-          // @ts-expect-error
+        else
           selectedPks.push((parentListEle.children[i] as HTMLElement).dataset.pk ?? '')
-        }
       }
     }
     else {
       for (let i = startRowIdx; i >= movedRowIdx; i--) {
-        if (pkKindIsNumber) {
-          // @ts-expect-error
+        if (pkKindIsNumber)
           selectedPks.push(Number.parseInt((parentListEle.children[i] as HTMLElement).dataset.pk ?? ''))
-        }
-        else {
-          // @ts-expect-error
+        else
           selectedPks.push((parentListEle.children[i] as HTMLElement).dataset.pk ?? '')
-        }
       }
     }
 
@@ -86,7 +78,6 @@ onMounted(() => {
     if (!Array.isArray(props.data)) {
       const targetData = props.data.records.find(item => item[props.pkColumnName] === selectedPks[0])?.[startColumnName]
       props.data.records.forEach((item) => {
-        // @ts-expect-error
         if (selectedPks.includes(item[props.pkColumnName])) {
           changedData.push(
             {
@@ -101,7 +92,6 @@ onMounted(() => {
       props.data.forEach((groupData) => {
         const targetData = groupData.records.find(item => item[props.pkColumnName] === selectedPks[0])?.[startColumnName]
         groupData.records.forEach((item) => {
-          // @ts-expect-error
           if (selectedPks.includes(item[props.pkColumnName])) {
             changedData.push(
               {
@@ -177,7 +167,9 @@ onMounted(() => {
 })
 </script>
 
-<template><div/></template>
+<template>
+  <div />
+</template>
 
 <style lang="css">
 .iw-list-fill--select {

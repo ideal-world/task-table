@@ -13,10 +13,10 @@ const modifyLayoutFun = inject(FUN_MODIFY_LAYOUT_TYPE)!
 onMounted(() => {
   Sortable.create(document.getElementsByClassName('iw-list-header')[0] as HTMLElement, {
     draggable: '.iw-list-header-cell',
-    onEnd: async function (evt) {
-      if (evt.oldIndex != evt.newIndex) {
+    async onEnd(evt) {
+      if (evt.oldIndex !== evt.newIndex) {
         const changedLayoutReq: TableLayoutModifyReq = {
-          columnSortedNames: [props.columnsConf[evt.oldIndex!].name, props.columnsConf[evt.newIndex!].name]
+          columnSortedNames: [props.columnsConf[evt.oldIndex!].name, props.columnsConf[evt.newIndex!].name],
         }
         await modifyLayoutFun(changedLayoutReq)
       }
@@ -25,4 +25,6 @@ onMounted(() => {
 })
 </script>
 
-<template><div/></template>
+<template>
+  <div />
+</template>

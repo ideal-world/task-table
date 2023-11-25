@@ -92,9 +92,8 @@ function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: MenuOffset
       let optInMenu = false
       const contextmenuEles = document.querySelectorAll('.iw-contextmenu')
       for (const i in contextmenuEles) {
-        if (!(contextmenuEles[i] instanceof HTMLElement) || (contextmenuEles[i] as HTMLElement).style.display == 'none')
+        if (!(contextmenuEles[i] instanceof HTMLElement) || (contextmenuEles[i] as HTMLElement).style.display === 'none')
           continue
-
         const contextMenuRect = contextmenuEles[i].getBoundingClientRect()
         if (
           event.x >= contextMenuRect.left
@@ -121,6 +120,7 @@ defineExpose({
   close: hideContextMenu,
 })
 
+// eslint-disable-next-line ts/no-use-before-define
 provide(FUN_CLOSE_CONTEXT_MENU_TYPE, hideContextMenu)
 </script>
 
@@ -138,7 +138,7 @@ export enum MenuSizeKind {
   LARGE,
 }
 
-export const FUN_CLOSE_CONTEXT_MENU_TYPE = Symbol("FUN_CLOSE_CONTEXT_MENU_TYPE") as InjectionKey<() => void>
+export const FUN_CLOSE_CONTEXT_MENU_TYPE = Symbol('FUN_CLOSE_CONTEXT_MENU_TYPE') as InjectionKey<() => void>
 </script>
 
 <template>
