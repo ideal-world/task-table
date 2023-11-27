@@ -46,13 +46,13 @@ export function setFixedColumnStyles(styles: any, colIdx: number, columnsConf: C
 </script>
 
 <template>
-  <div class="iw-contextmenu__item flex justify-between content-center w-full">
+  <div class="flex justify-between items-center w-full mr-2">
     <span>
       <i :class="iconSvg.PIN" />
       {{ $t('list.columnFixed.title') }}
     </span>
     <input
-      type="checkbox" class="toggle toggle-sm"
+      type="checkbox" class="toggle toggle-xs"
       :checked="props.curColumnConf?.fixed" @click="setFixedColumn"
     >
   </div>

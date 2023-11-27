@@ -20,7 +20,7 @@ async function deleteColumn() {
 
 <template>
   <div
-    v-if="props.curColumnConf?.name !== props.pkColumnName" class="iw-contextmenu__item cursor-pointer"
+    v-if="props.curColumnConf?.name !== props.pkColumnName" class="cursor-pointer"
     @click="deleteColumn"
   >
     <i :class="iconSvg.DELETE" />

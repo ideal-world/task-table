@@ -120,7 +120,7 @@ defineExpose({
         <i :class="iconSvg.MULTISELECT" />
         {{ $t('list.columnNew.multiValue') }}
       </span>
-      <input v-model="newColumnInfo.multiValue" type="checkbox" class="toggle toggle-sm">
+      <input v-model="newColumnInfo.multiValue" type="checkbox" class="toggle toggle-xs">
     </div>
     <div
       v-show="newColumnInfo.dataKind && dictEnableByDataKind(newColumnInfo.dataKind)"
@@ -130,14 +130,14 @@ defineExpose({
         <i :class="iconSvg.DICT" />
         {{ $t('list.columnNew.useDict') }}
       </span>
-      <input v-model="newColumnInfo.useDict" type="checkbox" class="toggle toggle-sm">
+      <input v-model="newColumnInfo.useDict" type="checkbox" class="toggle toggle-xs">
     </div>
     <div v-show="newColumnInfo.useDict" class="iw-contextmenu__item flex justify-between items-center w-full">
       <span>
         <i :class="iconSvg.EDIT" />
         {{ $t('list.columnNew.dictEditable') }}
       </span>
-      <input v-model="newColumnInfo.dictEditable" type="checkbox" class="toggle toggle-sm">
+      <input v-model="newColumnInfo.dictEditable" type="checkbox" class="toggle toggle-xs">
     </div>
     <div class="iw-contextmenu__item flex justify-end w-full">
       <button
@@ -167,7 +167,7 @@ defineExpose({
         {{ column.title }}
       </span>
       <input
-        type="checkbox" class="toggle toggle-sm"
+        type="checkbox" class="toggle toggle-xs"
         :checked="props.layoutColumnsConf.find(col => col.name === column.name)?.hide ?? true"
         @click="setShowToggleColumn(column)"
       >

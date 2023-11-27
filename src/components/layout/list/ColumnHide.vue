@@ -22,7 +22,7 @@ async function setHidedColumn() {
 </script>
 
 <template>
-  <div class="iw-contextmenu__item cursor-pointer" @click="setHidedColumn">
+  <div class="cursor-pointer" @click="setHidedColumn">
     <i :class="iconSvg.HIDE" />
     {{ $t('list.columnHide.title') }}
   </div>

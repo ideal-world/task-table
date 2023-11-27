@@ -36,7 +36,7 @@ async function copyColumn() {
 </script>
 
 <template>
-  <div class="iw-contextmenu__item cursor-pointer" @click="copyColumn">
+  <div class="cursor-pointer" @click="copyColumn">
     <i :class="iconSvg.COPY" />
     {{ $t('list.columnCopy.title') }}
   </div>

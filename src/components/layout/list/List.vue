@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import * as iconSvg from '../../../assets/icon'
-import MenuComp from '../../common/Menu.vue'
+import MenuComp, { MenuSizeKind } from '../../common/Menu.vue'
 import type { CachedColumnConf, TableBasicConf, TableLayoutConf } from '../../conf'
 import type { TableDataResp } from '../../props'
 import { DataKind } from '../../props'
@@ -66,12 +66,12 @@ function setColumnStyles(colIdx: number) {
 function showHeaderContextMenu(event: MouseEvent, columName: string) {
   selectedColumnConf.value = columnsConf.value.find(col => col.name === columName)
   const targetEle = event.target as HTMLElement
-  headerMenuCompRef.value.show(targetEle)
+  headerMenuCompRef.value.show(targetEle, undefined, MenuSizeKind.LARGE)
 }
 
-function showColumnMoreContextMenu(event: MouseEvent) {
+async function showColumnMoreContextMenu(event: MouseEvent) {
   const targetEle = event.target as HTMLElement
-  headerColumnMoreCompRef.value.show(targetEle)
+  await headerColumnMoreCompRef.value.show(targetEle)
 }
 
 function setTableWidth() {
@@ -143,14 +143,22 @@ function setTableWidth() {
       :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf"
       :pk-column-name="listConf.basic.pkColumnName"
     />
-    <ColumnCopyComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
-    <ColumnHideComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
-    <ColumnDeleteComp
-      :cur-column-conf="selectedColumnConf"
-      :pk-column-name="listConf.basic.pkColumnName"
-    />
-    <ColumnFixedComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
-    <CellWrapComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
+    <div
+      class="iw-contextmenu__item flex justify-between w-full p-1"
+    >
+      <ColumnCopyComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
+      <ColumnHideComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
+      <ColumnDeleteComp
+        :cur-column-conf="selectedColumnConf"
+        :pk-column-name="listConf.basic.pkColumnName"
+      />
+    </div>
+    <div
+      class="iw-contextmenu__item flex justify-between w-full p-1"
+    >
+      <ColumnFixedComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
+      <CellWrapComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
+    </div>
     <ColumnDictComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
   </MenuComp>
   <ColumnMoreComp

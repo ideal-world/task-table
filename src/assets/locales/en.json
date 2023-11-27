@@ -113,7 +113,9 @@
     "columnDict": {
       "dictTitle": "Dictionary configuration",
       "searchPlaceholder": "Search...",
-      "addTitle": "Add"
+      "addTitle": "Add",
+      "titlePlaceholder": "New name",
+      "submit": "Add"
     }
   }
 }

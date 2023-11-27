@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { TableCellDictValueItem, TableColumnProps, TableDataSliceReq, TableLayoutModifyReq, TableLayoutProps, TableStyleProps } from '../src/components/props'
-import { AggregateKind, DATA_DICT_POSTFIX, DataKind, LayoutKind } from '../src/components/props'
+import type { TableCellDictValueItem, TableColumnProps, TableDataSliceReq, TableLayoutModifyReq, TableLayoutProps, TableStyleProps } from '../src/components/props';
+import { AggregateKind, DATA_DICT_POSTFIX, DataKind, LayoutKind } from '../src/components/props';
 
-const columns = [{ name: 'no', dataKind: DataKind.NUMBER }, { name: 'name', useDict: true }, { name: 'phone' }, { name: 'stats', useDict: true, multiValue: true }, { name: 'addr' }, { name: 'time', dataKind: DataKind.DATETIME }]
+const columns = [{ name: 'no', dataKind: DataKind.NUMBER }, { name: 'name', useDict: true, dictEditable: true }, { name: 'phone' }, { name: 'stats', useDict: true, dictEditable: true, multiValue: true }, { name: 'addr' }, { name: 'time', dataKind: DataKind.DATETIME }]
 
 const layouts = [{
   id: 'hi',

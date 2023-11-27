@@ -22,13 +22,13 @@ async function setWrapColumn() {
 </script>
 
 <template>
-  <div class="iw-contextmenu__item flex justify-between content-center w-full">
+  <div class="flex justify-between items-center w-full  ml-2">
     <span>
       <i :class="iconSvg.WRAP" />
       <span> {{ $t('list.cellWrap.title') }}</span>
     </span>
     <input
-      type="checkbox" class="toggle toggle-sm"
+      type="checkbox" class="toggle toggle-xs"
       :checked="props.curColumnConf?.wrap" @click="setWrapColumn"
     >
   </div>

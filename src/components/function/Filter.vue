@@ -5,8 +5,9 @@ import MenuComp, { MenuSizeKind } from '../common/Menu.vue'
 import type { TableColumnConf } from '../conf'
 import { getInputTypeByDataKind, getOperatorKindsByDataKind } from '../conf'
 import { FUN_LOAD_CELL_DICT_ITEMS_TYPE, FUN_MODIFY_LAYOUT_TYPE } from '../events'
-import type { TableCellDictItemResp, TableDataFilterItemReq, TableDataFilterReq } from '../props'
+import type { TableCellDictItem, TableCellDictItemResp, TableDataFilterItemReq, TableDataFilterReq } from '../props'
 import { DataKind, OperatorKind, translateOperatorKind } from '../props'
+import { getParentWithClass } from '../../utils/basic'
 
 const props = defineProps<{
   filters?: TableDataFilterReq[]
@@ -33,24 +34,24 @@ function parseDictTitle(columnName: string, value?: any): any {
     return usedDictValues.value[`${columnName}-${value}`] ?? value
 }
 
-const selectedDictValues = computed<{ title: string, value: any }[]>(() => {
+const selectedDictItems = computed<TableCellDictItem[]>(() => {
   if (!selectedDictItemResp.value)
     return []
 
-  let dictValues = []
+  let dictItems = []
   if (selectedFilterItem.value) {
     if (Array.isArray(selectedFilterItem.value.value))
-      dictValues = selectedDictItemResp.value.records.filter(val => selectedFilterItem.value?.value.indexOf(val.value) === -1)
+      dictItems = selectedDictItemResp.value.records.filter(val => selectedFilterItem.value?.value.indexOf(val.value) === -1)
     else
-      dictValues = selectedDictItemResp.value.records.filter(val => selectedFilterItem.value?.value !== val.value)
+      dictItems = selectedDictItemResp.value.records.filter(val => selectedFilterItem.value?.value !== val.value)
   }
   else {
-    dictValues = selectedDictItemResp.value.records
+    dictItems = selectedDictItemResp.value.records
   }
   if (searchDictValue.value)
-    dictValues = dictValues.filter(val => val.title.includes(searchDictValue.value) || val.value.includes(searchDictValue.value))
+    dictItems = dictItems.filter(val => val.title.includes(searchDictValue.value) || val.value.includes(searchDictValue.value))
 
-  return dictValues
+  return dictItems
 })
 
 const simpleFilterItems = computed<TableDataFilterItemReq[]>(() => {
@@ -159,7 +160,10 @@ async function setFilterValue(value: any) {
 }
 
 async function setFilterDictItem(event: Event) {
-  const targetEle = event.target as HTMLElement
+  const targetEle = getParentWithClass(event.target as HTMLElement, 'iw-contextmenu__item')
+  if (!targetEle)
+    return
+
   if (!targetEle.dataset.value || !targetEle.dataset.title)
     return
   const value = targetEle.dataset.value
@@ -260,7 +264,7 @@ async function deleteSimpleFilterItem(idx: number) {
     >
       <div v-if="selectedFilterItem?.dataKind === DataKind.BOOLEAN" class="iw-contextmenu__item w-full">
         <input
-          class="toggle toggle-sm" type="checkbox" :checked="selectedFilterItem.value"
+          class="toggle toggle-xs" type="checkbox" :checked="selectedFilterItem.value"
           @click="event => setFilterValue((event.target as HTMLInputElement).checked)"
         >
       </div>
@@ -284,11 +288,17 @@ async function deleteSimpleFilterItem(idx: number) {
         >
       </div>
       <div
-        v-for="dictValue in selectedDictValues" :key="dictValue.value"
-        class="iw-contextmenu__item flex w-full cursor-pointer hover:bg-base-200" :data-value="dictValue.value"
-        :data-title="dictValue.title"
+        v-for="dictItem in selectedDictItems" :key="dictItem.value"
+        :style="`background-color: ${dictItem.color}`"
+        class="iw-contextmenu__item flex cursor-pointer badge badge-outline m-1.5 pl-0.5" :data-value="dictItem.value"
+        :data-title="dictItem.title"
       >
-        {{ `${dictValue.title}(${dictValue.value})` }}
+        <div v-if="dictItem.avatar !== undefined" class="avatar">
+          <div class="w-4 rounded-full">
+            <img :src="dictItem.avatar">
+          </div>
+        </div>
+        <span class="ml-1">{{ `${dictItem.title}(${dictItem.value})` }}</span>
       </div>
     </div>
   </MenuComp>
