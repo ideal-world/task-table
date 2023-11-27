@@ -41,7 +41,10 @@ provide(Event.FUN_LOAD_DATA_TYPE, Event.loadData)
 provide(Event.FUN_ADD_DATA_TYPE, Event.addData)
 provide(Event.FUN_UPDATE_DATA_TYPE, Event.updateData)
 provide(Event.FUN_DELETE_DATA_TYPE, Event.deleteData)
-provide(Event.FUN_LOAD_CELL_OPTIONS_TYPE, Event.loadCellDictValues)
+provide(Event.FUN_LOAD_CELL_DICT_ITEMS_TYPE, Event.loadCellDictItems)
+provide(Event.FUN_SAVE_CELL_DICT_ITEM_TYPE, Event.saveCellDictItem)
+provide(Event.FUN_DELETE_CELL_DICT_ITEM_TYPE, Event.deleteCellDictItem)
+provide(Event.FUN_SORT_CELL_DICT_ITEM_TYPE, Event.sortCellDictItem)
 provide(Event.FUN_MODIFY_STYLES_TYPE, Event.modifyStyles)
 provide(Event.FUN_NEW_COLUMN_TYPE, Event.newColumn)
 provide(Event.FUN_DELETE_COLUMN_TYPE, Event.deleteColumn)
@@ -93,7 +96,7 @@ function showMoreMenu(event: MouseEvent) {
         <div v-if="currentLayoutId === layout.id" class="iw-tt-toolbar flex items-center h-8 p-0.5">
           <RowSortComp :sorts="layout.sorts" :columns-conf="tableBasicConf.columns" />
           <div class="divider divider-horizontal m-0.5" />
-          <FilterComp :filters="layout.filters" :columns-conf="tableBasicConf.columns" :events="props.events" />
+          <FilterComp :filters="layout.filters" :columns-conf="tableBasicConf.columns" />
         </div>
         <div v-if="currentLayoutId === layout.id" class="iw-tt-table overflow-auto w-full">
           <ListComp :key="layout.id" :layout="layout" :basic="tableBasicConf" />

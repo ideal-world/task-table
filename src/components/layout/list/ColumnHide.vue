@@ -6,17 +6,16 @@ import { FUN_MODIFY_COLUMN_TYPE } from '../../events'
 import * as iconSvg from '../../../assets/icon'
 
 const props = defineProps<{
-  curColumnName: string
+  curColumnConf: CachedColumnConf | undefined
   columnsConf: CachedColumnConf[]
 }>()
 const modifyColumnFun = inject(FUN_MODIFY_COLUMN_TYPE)!
 const closeContextMenuFun = inject(FUN_CLOSE_CONTEXT_MENU_TYPE)!
 
 async function setHidedColumn() {
-  const curColumnConf = props.columnsConf.find(col => col.name === props.curColumnName)
-  if (curColumnConf) {
-    curColumnConf.hide = !curColumnConf.fixed
-    await modifyColumnFun(undefined, curColumnConf)
+  if (props.curColumnConf) {
+    props.curColumnConf.hide = !props.curColumnConf.fixed
+    await modifyColumnFun(undefined, props.curColumnConf)
   }
   closeContextMenuFun()
 }

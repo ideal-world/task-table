@@ -4,23 +4,23 @@ import * as iconSvg from '../../assets/icon'
 import MenuComp, { MenuSizeKind } from '../common/Menu.vue'
 import type { TableColumnConf } from '../conf'
 import { getInputTypeByDataKind, getOperatorKindsByDataKind } from '../conf'
-import { FUN_MODIFY_LAYOUT_TYPE } from '../events'
-import type { TableCellDictValueResp, TableDataFilterItemReq, TableDataFilterReq, TableEventProps } from '../props'
+import { FUN_LOAD_CELL_DICT_ITEMS_TYPE, FUN_MODIFY_LAYOUT_TYPE } from '../events'
+import type { TableCellDictItemResp, TableDataFilterItemReq, TableDataFilterReq } from '../props'
 import { DataKind, OperatorKind, translateOperatorKind } from '../props'
 
 const props = defineProps<{
   filters?: TableDataFilterReq[]
   columnsConf: TableColumnConf[]
-  events: TableEventProps
 }>()
 const modifyLayoutFun = inject(FUN_MODIFY_LAYOUT_TYPE)!
+const loadCellDictItemsFun = inject(FUN_LOAD_CELL_DICT_ITEMS_TYPE)!
 const simpleFilterCompRef = ref()
 const filterColumnCompRef = ref()
 const filterOpCompRef = ref()
 
 const selectedFilterItem = ref<TableDataFilterItemReq & TableColumnConf & { idx: number, values: any[] } | undefined>()
 const usedDictValues = ref<{ [key: string | number]: string }>({})
-const selectedDictValueResp = ref<TableCellDictValueResp | undefined>()
+const selectedDictItemResp = ref<TableCellDictItemResp | undefined>()
 const searchDictValue = ref<any | undefined>()
 
 function parseDictTitle(columnName: string, value?: any): any {
@@ -34,18 +34,18 @@ function parseDictTitle(columnName: string, value?: any): any {
 }
 
 const selectedDictValues = computed<{ title: string, value: any }[]>(() => {
-  if (!selectedDictValueResp.value)
+  if (!selectedDictItemResp.value)
     return []
 
   let dictValues = []
   if (selectedFilterItem.value) {
     if (Array.isArray(selectedFilterItem.value.value))
-      dictValues = selectedDictValueResp.value.records.filter(val => selectedFilterItem.value?.value.indexOf(val.value) === -1)
+      dictValues = selectedDictItemResp.value.records.filter(val => selectedFilterItem.value?.value.indexOf(val.value) === -1)
     else
-      dictValues = selectedDictValueResp.value.records.filter(val => selectedFilterItem.value?.value !== val.value)
+      dictValues = selectedDictItemResp.value.records.filter(val => selectedFilterItem.value?.value !== val.value)
   }
   else {
-    dictValues = selectedDictValueResp.value.records
+    dictValues = selectedDictItemResp.value.records
   }
   if (searchDictValue.value)
     dictValues = dictValues.filter(val => val.title.includes(searchDictValue.value) || val.value.includes(searchDictValue.value))
@@ -119,12 +119,12 @@ async function setFilterColumn(event: MouseEvent) {
   if (selectedFilterItem.value.value !== undefined || selectedFilterItem.value.operator === OperatorKind.ISEMPTY || selectedFilterItem.value.operator === OperatorKind.NOTEMPTY)
     await addOrModifySimpleFilterItem(selectedFilterItem.value)
 
-  if (props.events.loadCellDictValues && selectedFilterItem.value && selectedFilterItem.value.useDict) {
-    const values = await props.events.loadCellDictValues(selectedFilterItem.value.columnName)
-    selectedDictValueResp.value = values
+  if (selectedFilterItem.value && selectedFilterItem.value.useDict) {
+    const values = await loadCellDictItemsFun(selectedFilterItem.value.columnName)
+    selectedDictItemResp.value = values
   }
   else {
-    selectedDictValueResp.value = undefined
+    selectedDictItemResp.value = undefined
   }
   searchDictValue.value = undefined
 }
@@ -158,7 +158,7 @@ async function setFilterValue(value: any) {
   await addOrModifySimpleFilterItem(selectedFilterItem.value!)
 }
 
-async function setFilterDictValue(event: Event) {
+async function setFilterDictItem(event: Event) {
   const targetEle = event.target as HTMLElement
   if (!targetEle.dataset.value || !targetEle.dataset.title)
     return
@@ -271,7 +271,7 @@ async function deleteSimpleFilterItem(idx: number) {
         >
       </div>
     </template>
-    <div v-show="selectedFilterItem?.useDict" class="iw-contextmenu__item w-full" @click="setFilterDictValue">
+    <div v-show="selectedFilterItem?.useDict" class="iw-contextmenu__item w-full" @click="setFilterDictItem">
       <div class="divider">
         {{ $t('function.filter.dictTitle') }}
       </div>

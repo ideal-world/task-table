@@ -2,7 +2,7 @@ import type { InjectionKey, Ref } from 'vue'
 import { toRaw } from 'vue'
 import type { TableBasicConf, TableColumnConf, TableLayoutColumnConf, TableLayoutConf, TableStyleConf } from './conf'
 import { getDefaultValueByDataKind } from './conf'
-import type { TableCellDictValueResp, TableDataSliceReq, TableEventProps, TableLayoutModifyReq } from './props'
+import type { TableCellDictItem, TableCellDictItemResp, TableDataSliceReq, TableEventProps, TableLayoutModifyReq } from './props'
 import { OperatorKind } from './props'
 
 let events: TableEventProps
@@ -188,15 +188,39 @@ export async function deleteData(deletedPks: any[], reFilter?: boolean, reSort?:
   // TODO agg清空，重新计算
 }
 
-export const FUN_LOAD_CELL_OPTIONS_TYPE = Symbol('FUN_LOAD_CELL_OPTIONS_TYPE') as InjectionKey<(columnName: string, filterValue?: any, slice?: TableDataSliceReq) => Promise<TableCellDictValueResp>>
-export async function loadCellDictValues(columnName: string, filterValue?: any, slice?: TableDataSliceReq): Promise<TableCellDictValueResp> {
-  if (events.loadCellDictValues) { return await events.loadCellDictValues(columnName, filterValue, slice) }
+export const FUN_LOAD_CELL_DICT_ITEMS_TYPE = Symbol('FUN_LOAD_CELL_DICT_ITEMS_TYPE') as InjectionKey<(columnName: string, filterValue?: any, slice?: TableDataSliceReq) => Promise<TableCellDictItemResp>>
+export async function loadCellDictItems(columnName: string, filterValue?: any, slice?: TableDataSliceReq): Promise<TableCellDictItemResp> {
+  if (events.loadCellDictItems) { return await events.loadCellDictItems(columnName, filterValue, slice) }
   else {
     return {
       records: [],
       totalNumber: 0,
     }
   }
+}
+
+export const FUN_SAVE_CELL_DICT_ITEM_TYPE = Symbol('FUN_SAVE_CELL_DICT_ITEM_TYPE') as InjectionKey<(columnName: string, changedItem: TableCellDictItem) => Promise<boolean>>
+export async function saveCellDictItem(columnName: string, changedItem: TableCellDictItem): Promise<boolean> {
+  if (events.saveCellDictItem)
+    return await events.saveCellDictItem(columnName, changedItem)
+  else
+    return false
+}
+
+export const FUN_DELETE_CELL_DICT_ITEM_TYPE = Symbol('FUN_DELETE_CELL_DICT_ITEM_TYPE') as InjectionKey<(columnName: string, value: any) => Promise<boolean>>
+export async function deleteCellDictItem(columnName: string, value: any): Promise<boolean> {
+  if (events.deleteCellDictItem)
+    return await events.deleteCellDictItem(columnName, value)
+  else
+    return false
+}
+
+export const FUN_SORT_CELL_DICT_ITEM_TYPE = Symbol('FUN_SORT_CELL_DICT_ITEM_TYPE') as InjectionKey<(columnName: string, leftItemValue: any, rightItemValue: any) => Promise<boolean>>
+export async function sortCellDictItem(columnName: string, leftItemValue: any, rightItemValue: any): Promise<boolean> {
+  if (events.sortCellDictItem)
+    return await events.sortCellDictItem(columnName, leftItemValue, rightItemValue)
+  else
+    return false
 }
 
 export const FUN_MODIFY_STYLES_TYPE = Symbol('FUN_MODIFY_STYLES_TYPE') as InjectionKey<(changedStyles: TableStyleConf, reFilter?: boolean, reSort?: boolean, reLoad?: boolean) => Promise<boolean>>
@@ -232,6 +256,9 @@ export async function newColumn(newColumnConf: TableColumnConf, newLayoutColumnC
       icon: newColumnConf.icon,
       dataKind: newColumnConf.dataKind,
       dataEditable: newColumnConf.dataEditable,
+      useDict: newColumnConf.useDict,
+      dictEditable: newColumnConf.dictEditable,
+      multiValue: newColumnConf.multiValue,
     }, fromColumnName)
     && await events.modifyLayout({
       id: currentLayoutId.value,

@@ -6,22 +6,21 @@ import { FUN_MODIFY_COLUMN_TYPE } from '../../events'
 import * as iconSvg from '../../../assets/icon'
 
 const props = defineProps<{
-  curColumnName: string
+  curColumnConf: CachedColumnConf | undefined
   columnsConf: CachedColumnConf[]
 }>()
 const modifyColumnFun = inject(FUN_MODIFY_COLUMN_TYPE)!
 const closeContextMenuFun = inject(FUN_CLOSE_CONTEXT_MENU_TYPE)!
 
 async function setFixedColumn() {
-  const curColumnConf = props.columnsConf.find(col => col.name === props.curColumnName)
   const oldFixedColumnConf = props.columnsConf.find(col => col.fixed)
-  if (oldFixedColumnConf && oldFixedColumnConf.name !== curColumnConf?.name) {
+  if (oldFixedColumnConf && oldFixedColumnConf.name !== props.curColumnConf?.name) {
     oldFixedColumnConf.fixed = false
     await modifyColumnFun(undefined, oldFixedColumnConf)
   }
-  if (curColumnConf) {
-    curColumnConf.fixed = !curColumnConf.fixed
-    await modifyColumnFun(undefined, curColumnConf)
+  if (props.curColumnConf) {
+    props.curColumnConf.fixed = !props.curColumnConf.fixed
+    await modifyColumnFun(undefined, props.curColumnConf)
   }
   closeContextMenuFun()
 }
@@ -54,7 +53,7 @@ export function setFixedColumnStyles(styles: any, colIdx: number, columnsConf: C
     </span>
     <input
       type="checkbox" class="toggle toggle-sm"
-      :checked="props.columnsConf.find((col) => col.name === props.curColumnName)?.fixed" @click="setFixedColumn"
+      :checked="props.curColumnConf?.fixed" @click="setFixedColumn"
     >
   </div>
 </template>

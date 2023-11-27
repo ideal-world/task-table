@@ -1,21 +1,22 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import * as iconSvg from '../../../assets/icon'
 import MenuComp from '../../common/Menu.vue'
 import type { CachedColumnConf, TableBasicConf, TableLayoutConf } from '../../conf'
 import type { TableDataResp } from '../../props'
 import { DataKind } from '../../props'
-import * as iconSvg from '../../../assets/icon'
 import CellFillComp from './CellFill.vue'
 import CellWrapComp from './CellWrap.vue'
 import ColumnAggsComp from './ColumnAggs.vue'
 import ColumnCopyComp from './ColumnCopy.vue'
 import ColumnDeleteComp from './ColumnDelete.vue'
+import ColumnDictComp from './ColumnDict.vue'
 import ColumnFixedComp, { setFixedColumnStyles } from './ColumnFixed.vue'
 import ColumnHideComp from './ColumnHide.vue'
+import ColumnMoreComp from './ColumnMore.vue'
 import ColumnRenameComp from './ColumnRename.vue'
 import ColumnResizeComp from './ColumnResize.vue'
 import ColumnSortComp from './ColumnSort.vue'
-import ColumnMoreComp from './ColumnMore.vue'
 import RowDeleteComp from './RowDelete.vue'
 import RowSelectComp from './RowSelect.vue'
 import RowsComp from './Rows.vue'
@@ -30,7 +31,7 @@ const listConf = defineProps<
 const NEW_COLUMN_WIDTH = 80
 
 const selectedDataPks = ref<string[] | number[]>([])
-const selectedColumnName = ref<string>('')
+const selectedColumnConf = ref<CachedColumnConf | undefined>()
 const pkKindIsNumber = listConf.basic.columns.find(col => col.name === listConf.basic.pkColumnName)?.dataKind === DataKind.NUMBER
 
 const columnsConf = computed<CachedColumnConf[]>(() => {
@@ -63,7 +64,7 @@ function setColumnStyles(colIdx: number) {
 }
 
 function showHeaderContextMenu(event: MouseEvent, columName: string) {
-  selectedColumnName.value = columName
+  selectedColumnConf.value = columnsConf.value.find(col => col.name === columName)
   const targetEle = event.target as HTMLElement
   headerMenuCompRef.value.show(targetEle)
 }
@@ -139,24 +140,25 @@ function setTableWidth() {
   />
   <MenuComp ref="headerMenuCompRef">
     <ColumnRenameComp
-      :cur-column-name="selectedColumnName" :columns-conf="columnsConf"
+      :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf"
       :pk-column-name="listConf.basic.pkColumnName"
     />
-    <ColumnCopyComp :cur-column-name="selectedColumnName" :columns-conf="columnsConf" />
-    <ColumnHideComp :cur-column-name="selectedColumnName" :columns-conf="columnsConf" />
+    <ColumnCopyComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
+    <ColumnHideComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
     <ColumnDeleteComp
-      :cur-column-name="selectedColumnName"
+      :cur-column-conf="selectedColumnConf"
       :pk-column-name="listConf.basic.pkColumnName"
     />
-    <ColumnFixedComp :cur-column-name="selectedColumnName" :columns-conf="columnsConf" />
-    <CellWrapComp :cur-column-name="selectedColumnName" :columns-conf="columnsConf" />
+    <ColumnFixedComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
+    <CellWrapComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
+    <ColumnDictComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
   </MenuComp>
   <ColumnMoreComp
     ref="headerColumnMoreCompRef" :basic-columns-conf="listConf.basic.columns"
     :layout-columns-conf="listConf.layout.columns"
   />
   <MenuComp ref="rowMenuCompRef">
-    <RowDeleteComp v-show="selectedDataPks.length > 0" :selected-pks="selectedDataPks" />
+    <RowDeleteComp v-if="selectedDataPks.length > 0" :selected-pks="selectedDataPks" />
   </MenuComp>
   <RowSelectComp
     :selected-pks="selectedDataPks" :pk-column-name="listConf.basic.pkColumnName"

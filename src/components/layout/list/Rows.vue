@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { CachedColumnConf, TableStyleConf } from '../../conf'
+import { DATA_DICT_POSTFIX } from '../../props'
 
 const props = defineProps<{
   records: { [key: string]: any }[]
@@ -21,7 +22,23 @@ const props = defineProps<{
         :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-data-cell flex items-center iw-list-data-row--unselected border-solid border-b border-b-base-300 border-l border-l-base-300 ${column.wrap ? 'break-words' : 'whitespace-nowrap overflow-hidden text-ellipsis'}`"
         :data-column-name="column.name" :style="props.setColumnStyles(colIdx)" @contextmenu.prevent="openContextMenuFun"
       >
-        {{ row[column.name] }}
+        <template v-if="!column.useDict">
+          {{ row[column.name] }}
+        </template>
+        <template v-else>
+          <div
+            v-for="dictItem in row[column.name + DATA_DICT_POSTFIX]" :key="dictItem.value" :data-value="dictItem.value"
+            class="badge badge-outline mr-0.5 pl-0.5"
+            :style="`background-color: ${dictItem.color}`"
+          >
+            <div v-if="dictItem.avatar !== undefined" class="avatar">
+              <div class="w-4 rounded-full">
+                <img :src="dictItem.avatar">
+              </div>
+            </div>
+            <span class="ml-1">{{ dictItem.title }}</span>
+          </div>
+        </template>
       </div>
     </template>
     <div

@@ -22,7 +22,7 @@ const layouts = [{
 const group = {
   columnName: 'name',
   groupOrderDesc: true,
-  useDictValue: false,
+  useDict: false,
   hideEmptyRecord: false,
 }
 
@@ -49,7 +49,7 @@ const events = {
       }, 1000)
     })
   },
-  loadCellDictValues: async (columnName: string, filterValue?: any, slice?: TableDataSliceReq) => {
+  loadCellDictItems: async (columnName: string, filterValue?: any, slice?: TableDataSliceReq) => {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve({

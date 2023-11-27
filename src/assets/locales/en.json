@@ -107,7 +107,13 @@
       "submit": "Add",
       "useDict": "Using dictionaries",
       "dictEditable": "Dictionary editable",
-      "columnNamePlaceholder": "New column name"
+      "columnNamePlaceholder": "New column name",
+      "multiValue": "Support multi-value"
+    },
+    "columnDict": {
+      "dictTitle": "Dictionary configuration",
+      "searchPlaceholder": "Search...",
+      "addTitle": "Add"
     }
   }
 }

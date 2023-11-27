@@ -6,17 +6,16 @@ import { FUN_MODIFY_COLUMN_TYPE } from '../../events'
 import * as iconSvg from '../../../assets/icon'
 
 const props = defineProps<{
-  curColumnName: string
+  curColumnConf: CachedColumnConf | undefined
   columnsConf: CachedColumnConf[]
 }>()
 const modifyColumnFun = inject(FUN_MODIFY_COLUMN_TYPE)!
 const closeContextMenuFun = inject(FUN_CLOSE_CONTEXT_MENU_TYPE)!
 
 async function setWrapColumn() {
-  const curColumnConf = props.columnsConf.find(col => col.name === props.curColumnName)
-  if (curColumnConf) {
-    curColumnConf.wrap = !curColumnConf.wrap
-    await modifyColumnFun(undefined, curColumnConf)
+  if (props.curColumnConf) {
+    props.curColumnConf.wrap = !props.curColumnConf.wrap
+    await modifyColumnFun(undefined, props.curColumnConf)
   }
   closeContextMenuFun()
 }
@@ -30,7 +29,7 @@ async function setWrapColumn() {
     </span>
     <input
       type="checkbox" class="toggle toggle-sm"
-      :checked="props.columnsConf.find((col) => col.name === props.curColumnName)?.wrap" @click="setWrapColumn"
+      :checked="props.curColumnConf?.wrap" @click="setWrapColumn"
     >
   </div>
 </template>

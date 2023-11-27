@@ -19,7 +19,8 @@ export interface TableColumnConf {
   dataKind: DataKind
   dataEditable: boolean
   useDict: boolean
-  dictEditable?: boolean
+  dictEditable: boolean
+  multiValue: boolean
 }
 
 export interface TableLayoutConf {
@@ -212,6 +213,7 @@ export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]]
         dataEditable: column.dataEditable ?? true,
         useDict: column.useDict ?? false,
         dictEditable: column.dictEditable ?? false,
+        multiValue: column.multiValue ?? false,
       }
     }),
     styles: {

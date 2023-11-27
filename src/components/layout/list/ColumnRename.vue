@@ -6,7 +6,7 @@ import type { CachedColumnConf } from '../../conf'
 import { FUN_MODIFY_COLUMN_TYPE } from '../../events'
 
 const props = defineProps<{
-  curColumnName: string
+  curColumnConf: CachedColumnConf | undefined
   pkColumnName: string
   columnsConf: CachedColumnConf[]
 }>()
@@ -15,11 +15,10 @@ const closeContextMenuFun = inject(FUN_CLOSE_CONTEXT_MENU_TYPE)!
 const iconPickerCompRef = ref()
 
 async function renameColumn(event: Event) {
-  const curColumnConf = props.columnsConf.find(item => item.name === props.curColumnName)
   const target = event.target as HTMLInputElement
-  if (curColumnConf) {
-    curColumnConf.title = target.value
-    await modifyColumnFun(curColumnConf)
+  if (props.curColumnConf) {
+    props.curColumnConf.title = target.value
+    await modifyColumnFun(props.curColumnConf)
   }
   closeContextMenuFun()
 }
@@ -29,10 +28,9 @@ async function showIconContainer(event: Event) {
 }
 
 async function selectIcon(icon: string) {
-  const curColumnConf = props.columnsConf.find(item => item.name === props.curColumnName)
-  if (curColumnConf) {
-    curColumnConf.icon = icon
-    await modifyColumnFun(curColumnConf)
+  if (props.curColumnConf) {
+    props.curColumnConf.icon = icon
+    await modifyColumnFun(props.curColumnConf)
   }
 }
 </script>
@@ -40,12 +38,12 @@ async function selectIcon(icon: string) {
 <template>
   <div class="iw-contextmenu__item flex justify-between items-center w-full">
     <i
-      :class="`${props.columnsConf.find((item) => item.name === props.curColumnName)?.icon} cursor-pointer mr-1`"
+      :class="`${props.curColumnConf?.icon} cursor-pointer mr-1`"
       @click="showIconContainer"
     />
     <input
       class="input input-bordered input-xs w-28" type="text"
-      :value="props.columnsConf.find((item) => item.name === props.curColumnName)?.title" @change="renameColumn"
+      :value="props.curColumnConf?.title" @change="renameColumn"
     >
   </div>
   <IconPickerComp ref="iconPickerCompRef" @select-icon="selectIcon" />

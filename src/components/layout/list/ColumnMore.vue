@@ -26,6 +26,7 @@ const newColumnInfo = ref<{
   dataKind?: DataKind
   useDict?: boolean
   dictEditable?: boolean
+  multiValue?: boolean
 }>({
 })
 
@@ -61,6 +62,7 @@ async function submitNewColumn() {
       dataEditable: true,
       useDict: newColumnInfo.value.useDict ?? false,
       dictEditable: newColumnInfo.value.useDict ?? false,
+      multiValue: newColumnInfo.value.multiValue ?? false,
     }, getDefaultLayoutColumnConf(name))
     newColumnInfo.value = {}
     columnMoreCompRef.value.close()
@@ -112,6 +114,13 @@ defineExpose({
         v-model="newColumnInfo.title" class="input input-bordered input-xs w-28" type="text"
         :placeholder="$t('list.columnNew.columnNamePlaceholder')"
       >
+    </div>
+    <div class="iw-contextmenu__item flex justify-between items-center w-full">
+      <span>
+        <i :class="iconSvg.MULTISELECT" />
+        {{ $t('list.columnNew.multiValue') }}
+      </span>
+      <input v-model="newColumnInfo.multiValue" type="checkbox" class="toggle toggle-sm">
     </div>
     <div
       v-show="newColumnInfo.dataKind && dictEnableByDataKind(newColumnInfo.dataKind)"

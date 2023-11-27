@@ -2,6 +2,8 @@ import locales from '../locales'
 
 const { t } = locales.global
 
+export const DATA_DICT_POSTFIX = '__dict'
+
 export enum DataKind {
   TEXT = 'TEXT',
   TEXTAREA = 'TEXTAREA',
@@ -144,6 +146,7 @@ export interface TableColumnProps {
   dataEditable?: boolean
   useDict?: boolean
   dictEditable?: boolean
+  multiValue?: boolean
 }
 
 export interface TableLayoutProps {
@@ -192,7 +195,10 @@ export interface TableEventProps {
   modifyColumn?: (changedColumnProps: TableColumnProps) => Promise<boolean>
   deleteColumn?: (deletedColumnName: string) => Promise<boolean>
 
-  loadCellDictValues?: (columnName: string, filterValue?: any, slice?: TableDataSliceReq) => Promise<TableCellDictValueResp>
+  loadCellDictItems?: (columnName: string, filterValue?: any, slice?: TableDataSliceReq) => Promise<TableCellDictItemResp>
+  saveCellDictItem?: (columnName: string, changedItem: TableCellDictItem) => Promise<boolean>
+  deleteCellDictItem?: (columnName: string, value: any) => Promise<boolean>
+  sortCellDictItem?: (columnName: string, leftItemValue: any, rightItemValue: any) => Promise<boolean>
 
   modifyStyles?: (changedStyleProps: TableStyleProps) => Promise<boolean>
 
@@ -235,7 +241,7 @@ export interface TableDataFilterItemReq {
 export interface TableDataGroupReq {
   columnName: string
   groupOrderDesc: boolean
-  useDictValue: boolean
+  useDict: boolean
   hideEmptyRecord: boolean
 }
 
@@ -256,7 +262,14 @@ export interface TableDataGroupResp extends TableDataResp {
   fetchNumber: number
 }
 
-export interface TableCellDictValueResp {
-  records: { title: string, value: any }[]
+export interface TableCellDictItem {
+  title: string
+  value: any
+  color?: string
+  avatar?: string
+}
+
+export interface TableCellDictItemResp {
+  records: TableCellDictItem[]
   totalNumber: number
 }
