@@ -49,10 +49,13 @@ const events = {
       }, 1000)
     })
   },
-  loadCellDictValues: async (columnName: string, filterValue?: any) => {
+  loadCellDictValues: async (columnName: string, filterValue?: any, slice?: TableDataSliceReq) => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        resolve([{ title: 'opt1', value: '选项一' }])
+        resolve({
+          records: [{ title: '星航', value: 'xh' }, { title: '星杨', value: 'xy' }],
+          totalNumber: 2,
+        })
       }, 1000)
     })
   },

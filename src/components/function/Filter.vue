@@ -5,7 +5,7 @@ import MenuComp, { MenuSizeKind } from '../common/Menu.vue'
 import type { TableColumnConf } from '../conf'
 import { getInputTypeByDataKind, getOperatorKindsByDataKind } from '../conf'
 import { FUN_MODIFY_LAYOUT_TYPE } from '../events'
-import type { TableDataFilterItemReq, TableDataFilterReq, TableEventProps } from '../props'
+import type { TableCellDictValueResp, TableDataFilterItemReq, TableDataFilterReq, TableEventProps } from '../props'
 import { DataKind, OperatorKind, translateOperatorKind } from '../props'
 
 const props = defineProps<{
@@ -20,7 +20,8 @@ const filterOpCompRef = ref()
 
 const selectedFilterItem = ref<TableDataFilterItemReq & TableColumnConf & { idx: number, values: any[] } | undefined>()
 const usedDictValues = ref<{ [key: string | number]: string }>({})
-const _selectedDictValues = ref<{ title: string, value: any }[]>()
+const selectedDictValueResp = ref<TableCellDictValueResp | undefined>()
+const searchDictValue = ref<any | undefined>()
 
 function parseDictTitle(columnName: string, value?: any): any {
   if (value === undefined)
@@ -33,18 +34,23 @@ function parseDictTitle(columnName: string, value?: any): any {
 }
 
 const selectedDictValues = computed<{ title: string, value: any }[]>(() => {
-  if (!_selectedDictValues.value)
+  if (!selectedDictValueResp.value)
     return []
 
+  let dictValues = []
   if (selectedFilterItem.value) {
     if (Array.isArray(selectedFilterItem.value.value))
-      return _selectedDictValues.value.filter(val => selectedFilterItem.value?.value.indexOf(val.value) === -1)
+      dictValues = selectedDictValueResp.value.records.filter(val => selectedFilterItem.value?.value.indexOf(val.value) === -1)
     else
-      return _selectedDictValues.value.filter(val => selectedFilterItem.value?.value !== val.value)
+      dictValues = selectedDictValueResp.value.records.filter(val => selectedFilterItem.value?.value !== val.value)
   }
   else {
-    return _selectedDictValues.value
+    dictValues = selectedDictValueResp.value.records
   }
+  if (searchDictValue.value)
+    dictValues = dictValues.filter(val => val.title.includes(searchDictValue.value) || val.value.includes(searchDictValue.value))
+
+  return dictValues
 })
 
 const simpleFilterItems = computed<TableDataFilterItemReq[]>(() => {
@@ -115,11 +121,12 @@ async function setFilterColumn(event: MouseEvent) {
 
   if (props.events.loadCellDictValues && selectedFilterItem.value && selectedFilterItem.value.useDict) {
     const values = await props.events.loadCellDictValues(selectedFilterItem.value.columnName)
-    _selectedDictValues.value = values
+    selectedDictValueResp.value = values
   }
   else {
-    _selectedDictValues.value = []
+    selectedDictValueResp.value = undefined
   }
+  searchDictValue.value = undefined
 }
 
 async function setFilterOp(event: MouseEvent) {
@@ -267,6 +274,14 @@ async function deleteSimpleFilterItem(idx: number) {
     <div v-show="selectedFilterItem?.useDict" class="iw-contextmenu__item w-full" @click="setFilterDictValue">
       <div class="divider">
         {{ $t('function.filter.dictTitle') }}
+      </div>
+      <div>
+        <input
+          v-model="searchDictValue"
+          type="search"
+          :placeholder="$t('function.filter.searchPlaceholder') "
+          class="input input-bordered input-xs w-full max-w-xs"
+        >
       </div>
       <div
         v-for="dictValue in selectedDictValues" :key="dictValue.value"

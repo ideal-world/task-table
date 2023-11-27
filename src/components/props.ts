@@ -192,8 +192,7 @@ export interface TableEventProps {
   modifyColumn?: (changedColumnProps: TableColumnProps) => Promise<boolean>
   deleteColumn?: (deletedColumnName: string) => Promise<boolean>
 
-  // TODO pagination
-  loadCellDictValues?: (columnName: string, filterValue?: any) => Promise<{ title: string, value: any }[]>
+  loadCellDictValues?: (columnName: string, filterValue?: any, slice?: TableDataSliceReq) => Promise<TableCellDictValueResp>
 
   modifyStyles?: (changedStyleProps: TableStyleProps) => Promise<boolean>
 
@@ -255,4 +254,9 @@ export interface TableDataGroupResp extends TableDataResp {
   groupValue: string
   offsetNumber: number
   fetchNumber: number
+}
+
+export interface TableCellDictValueResp {
+  records: { title: string, value: any }[]
+  totalNumber: number
 }

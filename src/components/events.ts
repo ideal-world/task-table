@@ -2,7 +2,7 @@ import type { InjectionKey, Ref } from 'vue'
 import { toRaw } from 'vue'
 import type { TableBasicConf, TableColumnConf, TableLayoutColumnConf, TableLayoutConf, TableStyleConf } from './conf'
 import { getDefaultValueByDataKind } from './conf'
-import type { TableEventProps, TableLayoutModifyReq } from './props'
+import type { TableCellDictValueResp, TableDataSliceReq, TableEventProps, TableLayoutModifyReq } from './props'
 import { OperatorKind } from './props'
 
 let events: TableEventProps
@@ -188,12 +188,15 @@ export async function deleteData(deletedPks: any[], reFilter?: boolean, reSort?:
   // TODO agg清空，重新计算
 }
 
-export const FUN_LOAD_CELL_OPTIONS_TYPE = Symbol('FUN_LOAD_CELL_OPTIONS_TYPE') as InjectionKey<(columnName: string, filterValue?: any) => Promise<{ title: string, value: any }[]>>
-export async function loadCellDictValues(columnName: string, filterValue?: any): Promise<{ title: string, value: any }[]> {
-  if (events.loadCellDictValues)
-    return await events.loadCellDictValues(columnName, filterValue)
-  else
-    return []
+export const FUN_LOAD_CELL_OPTIONS_TYPE = Symbol('FUN_LOAD_CELL_OPTIONS_TYPE') as InjectionKey<(columnName: string, filterValue?: any, slice?: TableDataSliceReq) => Promise<TableCellDictValueResp>>
+export async function loadCellDictValues(columnName: string, filterValue?: any, slice?: TableDataSliceReq): Promise<TableCellDictValueResp> {
+  if (events.loadCellDictValues) { return await events.loadCellDictValues(columnName, filterValue, slice) }
+  else {
+    return {
+      records: [],
+      totalNumber: 0,
+    }
+  }
 }
 
 export const FUN_MODIFY_STYLES_TYPE = Symbol('FUN_MODIFY_STYLES_TYPE') as InjectionKey<(changedStyles: TableStyleConf, reFilter?: boolean, reSort?: boolean, reLoad?: boolean) => Promise<boolean>>

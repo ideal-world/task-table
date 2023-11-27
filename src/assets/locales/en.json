@@ -72,7 +72,8 @@
     "filter": {
       "new": "New Filter",
       "selectColumnPlaceholder": "新增列",
-      "dictTitle": "Available dictionary values"
+      "dictTitle": "Available dictionary values",
+      "searchPlaceholder": "Search..."
     }
   },
   "list": {

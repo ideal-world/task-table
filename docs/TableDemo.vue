@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { TableColumnProps, TableLayoutModifyReq, TableLayoutProps, TableStyleProps } from '../src/components/props'
+import type { TableColumnProps, TableDataSliceReq, TableLayoutModifyReq, TableLayoutProps, TableStyleProps } from '../src/components/props'
 import { AggregateKind, DataKind, LayoutKind } from '../src/components/props'
 
 const columns = [{ name: 'no', dataKind: DataKind.NUMBER }, { name: 'name', useDict: true }, { name: 'phone' }, { name: 'addr' }, { name: 'time', dataKind: DataKind.DATETIME }]
@@ -49,10 +49,13 @@ const events = {
       }, 1000)
     })
   },
-  loadCellDictValues: async (columnName: string, filterValue?: any) => {
+  loadCellDictValues: async (columnName: string, filterValue?: any, slice?: TableDataSliceReq) => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        resolve([{ title: '星航', value: 'xh' }, { title: '星杨', value: 'xy' }])
+        resolve({
+          records: [{ title: '星航', value: 'xh' }, { title: '星杨', value: 'xy' }],
+          totalNumber: 2,
+        })
       }, 1000)
     })
   },

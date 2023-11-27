@@ -72,7 +72,8 @@
     "filter": {
       "new": "新的过滤",
       "selectColumnPlaceholder": "新增列",
-      "dictTitle": "可用字典值"
+      "dictTitle": "可用字典值",
+      "searchPlaceholder": "搜索字典项"
     }
   },
   "list": {
