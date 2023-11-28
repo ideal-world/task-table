@@ -1,22 +1,13 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import * as iconSvg from '../../../assets/icon'
-import MenuComp, { MenuSizeKind } from '../../common/Menu.vue'
+import MenuComp from '../../common/Menu.vue'
 import type { CachedColumnConf, TableBasicConf, TableLayoutConf } from '../../conf'
 import type { TableDataResp } from '../../props'
 import { DataKind } from '../../props'
 import CellFillComp from './CellFill.vue'
-import CellWrapComp from './CellWrap.vue'
 import ColumnAggsComp from './ColumnAggs.vue'
-import ColumnCopyComp from './ColumnCopy.vue'
-import ColumnDeleteComp from './ColumnDelete.vue'
-import ColumnDictComp from './ColumnDict.vue'
-import ColumnFixedComp, { setFixedColumnStyles } from './ColumnFixed.vue'
-import ColumnHideComp from './ColumnHide.vue'
-import ColumnMoreComp from './ColumnMore.vue'
-import ColumnRenameComp from './ColumnRename.vue'
-import ColumnResizeComp from './ColumnResize.vue'
-import ColumnSortComp from './ColumnSort.vue'
+import { setFixedColumnStyles } from './ColumnFixed.vue'
+import HeaderComp from './Header.vue'
 import RowDeleteComp from './RowDelete.vue'
 import RowSelectComp from './RowSelect.vue'
 import RowsComp from './Rows.vue'
@@ -31,7 +22,6 @@ const listConf = defineProps<
 const NEW_COLUMN_WIDTH = 80
 
 const selectedDataPks = ref<string[] | number[]>([])
-const selectedColumnConf = ref<CachedColumnConf | undefined>()
 const pkKindIsNumber = listConf.basic.columns.find(col => col.name === listConf.basic.pkColumnName)?.dataKind === DataKind.NUMBER
 
 const columnsConf = computed<CachedColumnConf[]>(() => {
@@ -43,8 +33,6 @@ const columnsConf = computed<CachedColumnConf[]>(() => {
   })
 })
 
-const headerMenuCompRef = ref()
-const headerColumnMoreCompRef = ref()
 const rowMenuCompRef = ref()
 
 function showRowContextMenu(event: MouseEvent) {
@@ -63,17 +51,6 @@ function setColumnStyles(colIdx: number) {
   return styles
 }
 
-function showHeaderContextMenu(event: MouseEvent, columName: string) {
-  selectedColumnConf.value = columnsConf.value.find(col => col.name === columName)
-  const targetEle = event.target as HTMLElement
-  headerMenuCompRef.value.show(targetEle, undefined, MenuSizeKind.LARGE)
-}
-
-async function showColumnMoreContextMenu(event: MouseEvent) {
-  const targetEle = event.target as HTMLElement
-  await headerColumnMoreCompRef.value.show(targetEle)
-}
-
 function setTableWidth() {
   const styles: any = {}
   styles.width = `${listConf.layout.columns.filter(column => !column.hide).reduce((count, col) => count + col.width, NEW_COLUMN_WIDTH)}px`
@@ -86,25 +63,7 @@ function setTableWidth() {
     :class="`iw-list relative iw-list--size-${listConf.basic.styles.size}`"
     :style="setTableWidth()"
   >
-    <div
-      :class="`${listConf.basic.styles.headerClass} iw-list-header flex items-center sticky top-0 z-[1500] border-solid border-t border-t-base-300 border-r border-r-base-300`"
-    >
-      <div
-        v-for="(column, colIdx) in columnsConf" :key="column.name"
-        :class="`${listConf.basic.styles.cellClass} iw-list-cell iw-list-header-cell flex items-center bg-base-100 border-solid border-b border-b-base-300 border-l border-l-base-300 hover:cursor-pointer hover:bg-base-200`"
-        :data-column-name="column.name"
-        :style="setColumnStyles(colIdx)"
-        @click="(event: MouseEvent) => showHeaderContextMenu(event, column.name)"
-      >
-        <i :class="`${column.icon} mr-1`" /> {{ column.title }}
-      </div>
-      <div
-        :class="`${listConf.basic.styles.cellClass} iw-list-cell flex justify-end items-center bg-base-100 border-solid border-b border-b-base-300 border-l border-l-base-300 hover:cursor-pointer hover:bg-base-200`"
-        :style="setColumnStyles(-1)"
-      >
-        <i :class="iconSvg.MORE" @click="showColumnMoreContextMenu" />
-      </div>
-    </div>
+    <HeaderComp :columns-conf="columnsConf" :layout="listConf.layout" :basic="listConf.basic" :set-column-styles="setColumnStyles" />
     <template v-if="listConf.layout.data && !Array.isArray(listConf.layout.data)">
       <RowsComp
         :records="listConf.layout.data.records" :pk-column-name="listConf.basic.pkColumnName"
@@ -132,38 +91,9 @@ function setTableWidth() {
       </template>
     </template>
   </div>
-  <ColumnSortComp :columns-conf="columnsConf" />
-  <ColumnResizeComp :columns-conf="columnsConf" />
   <CellFillComp
     :columns-conf="columnsConf" :data="listConf.layout.data!"
     :pk-column-name="listConf.basic.pkColumnName"
-  />
-  <MenuComp ref="headerMenuCompRef">
-    <ColumnRenameComp
-      :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf"
-      :pk-column-name="listConf.basic.pkColumnName"
-    />
-    <div
-      class="iw-contextmenu__item flex justify-between w-full p-1 mb-1 mt-1"
-    >
-      <ColumnCopyComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
-      <ColumnHideComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
-      <ColumnDeleteComp
-        :cur-column-conf="selectedColumnConf"
-        :pk-column-name="listConf.basic.pkColumnName"
-      />
-    </div>
-    <div
-      class="iw-contextmenu__item flex justify-between w-full p-1"
-    >
-      <ColumnFixedComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
-      <CellWrapComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
-    </div>
-    <ColumnDictComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
-  </MenuComp>
-  <ColumnMoreComp
-    ref="headerColumnMoreCompRef" :basic-columns-conf="listConf.basic.columns"
-    :layout-columns-conf="listConf.layout.columns"
   />
   <MenuComp ref="rowMenuCompRef">
     <RowDeleteComp v-if="selectedDataPks.length > 0" :selected-pks="selectedDataPks" />
@@ -174,7 +104,7 @@ function setTableWidth() {
   />
 </template>
 
-<style lang="css" scoped>
+<style lang="css">
 .iw-list--size-mini {
   @apply text-xs;
 
@@ -187,7 +117,7 @@ function setTableWidth() {
   @apply text-sm;
 
   .iw-list-cell {
-    @apply p-0.5
+    @apply p-[1px]
   }
 }
 
@@ -195,7 +125,7 @@ function setTableWidth() {
   @apply text-base;
 
   .iw-list-cell {
-    @apply p-1
+    @apply p-[2px]
   }
 }
 
@@ -203,7 +133,7 @@ function setTableWidth() {
   @apply text-lg;
 
   .iw-list-cell {
-    @apply p-2
+    @apply p-1.5
   }
 }
 </style>
