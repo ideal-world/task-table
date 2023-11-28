@@ -77,6 +77,7 @@ onMounted(() => {
     const changedData: any[] = []
     if (!Array.isArray(props.data)) {
       const targetData = props.data.records.find(item => item[props.pkColumnName] === selectedPks[0])?.[startColumnName]
+      selectedPks.shift()
       props.data.records.forEach((item) => {
         if (selectedPks.includes(item[props.pkColumnName])) {
           changedData.push(
@@ -91,6 +92,9 @@ onMounted(() => {
     else {
       props.data.forEach((groupData) => {
         const targetData = groupData.records.find(item => item[props.pkColumnName] === selectedPks[0])?.[startColumnName]
+        if (!targetData)
+          return
+        selectedPks.shift()
         groupData.records.forEach((item) => {
           if (selectedPks.includes(item[props.pkColumnName])) {
             changedData.push(
@@ -138,33 +142,44 @@ onMounted(() => {
   document.addEventListener('click', (event) => {
     isDragging = false
     selectDiv.style.display = 'none'
-    const targetEle = event.target as HTMLElement
+    if (!(event.target instanceof HTMLElement))
+      return
+
+    const targetEle = event.target
     if (!targetEle.classList.contains('iw-list-data-cell'))
       return
 
-    const parentListEle = getParentWithClass(targetEle, 'iw-list')
-    if (parentListEle == null)
-      return
+    clearTimeout(CELL_CLICK_TIMER)
+    CELL_CLICK_TIMER = setTimeout(() => {
+      const parentListEle = getParentWithClass(targetEle, 'iw-list')
+      if (parentListEle == null)
+        return
 
-    const selectRowEle = getParentWithClass(targetEle, 'iw-list-data-row')
-    if (selectRowEle == null)
-      return
+      const selectRowEle = getParentWithClass(targetEle, 'iw-list-data-row')
+      if (selectRowEle == null)
+        return
 
-    const curColumnName = targetEle.dataset.columnName ?? ''
-    if (props.columnsConf.find(item => item.name === curColumnName && (curColumnName === props.pkColumnName || !item.dataEditable)))
-      return
+      const curColumnName = targetEle.dataset.columnName ?? ''
+      if (props.columnsConf.find(item => item.name === curColumnName && (curColumnName === props.pkColumnName || !item.dataEditable)))
+        return
 
-    selectDiv.style.display = 'flex'
-    selectDiv.style.left = `${targetEle.offsetLeft - 1}px`
-    selectDiv.style.top = `${targetEle.offsetTop - 1}px`
-    selectDiv.style.width = `${targetEle.offsetWidth + 2}px`
-    selectDiv.style.height = `${targetEle.offsetHeight + 2}px`
-    startColumnName = curColumnName
-    startRowIdx = getChildIndex(parentListEle, selectRowEle)
-    startCellEle = targetEle
-    startCellFixedX = targetEle.getBoundingClientRect().left
+      selectDiv.style.display = 'flex'
+      selectDiv.style.left = `${targetEle.offsetLeft - 1}px`
+      selectDiv.style.top = `${targetEle.offsetTop - 1}px`
+      selectDiv.style.width = `${targetEle.offsetWidth + 2}px`
+      selectDiv.style.height = `${targetEle.offsetHeight + 2}px`
+      startColumnName = curColumnName
+      startRowIdx = getChildIndex(parentListEle, selectRowEle)
+      startCellEle = targetEle
+      startCellFixedX = targetEle.getBoundingClientRect().left
+    }, 250)
   })
 })
+</script>
+
+<script lang="ts">
+// eslint-disable-next-line import/no-mutable-exports
+export let CELL_CLICK_TIMER: number
 </script>
 
 <template>

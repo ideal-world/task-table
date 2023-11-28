@@ -2,7 +2,7 @@ import type { InjectionKey, Ref } from 'vue'
 import { toRaw } from 'vue'
 import type { TableBasicConf, TableColumnConf, TableLayoutColumnConf, TableLayoutConf, TableStyleConf } from './conf'
 import { getDefaultValueByDataKind } from './conf'
-import type { TableCellDictItem, TableCellDictItemResp, TableDataSliceReq, TableEventProps, TableLayoutModifyReq } from './props'
+import type { TableCellDictItem, TableCellDictItemResp, TableDataResp, TableDataSliceReq, TableEventProps, TableLayoutModifyReq } from './props'
 import { DATA_DICT_POSTFIX, OperatorKind } from './props'
 
 let events: TableEventProps
@@ -134,13 +134,22 @@ export async function updateData(changedRecords: { [key: string]: any }[], reFil
   else {
     return false
   }
+  const useDictColumnNames = tableBasicConf.columns.filter(column => column.useDict).map(column => column.name)
   if (Array.isArray(layout.data)) {
     layout.data.forEach((groupData) => {
       groupData.records.forEach((needChangeRecord) => {
         const changedRecord = changedRecords.find(r => r[tableBasicConf.pkColumnName] === needChangeRecord[tableBasicConf.pkColumnName])
         if (changedRecord) {
-          for (const key in changedRecord)
-            needChangeRecord[key] = changedRecord[key]
+          for (const columnName in changedRecord) {
+            if (columnName === tableBasicConf.pkColumnName)
+              continue
+            if (useDictColumnNames.includes(columnName)) {
+              const matchedDictRow = groupData.records.find(r => r[columnName] === changedRecord[columnName])
+              if (matchedDictRow)
+                needChangeRecord[columnName + DATA_DICT_POSTFIX] = matchedDictRow[columnName + DATA_DICT_POSTFIX]
+            }
+            needChangeRecord[columnName] = changedRecord[columnName]
+          }
         }
       })
     })
@@ -149,8 +158,13 @@ export async function updateData(changedRecords: { [key: string]: any }[], reFil
     layout.data.records.forEach((needChangeRecord) => {
       const changedRecord = changedRecords.find(r => r[tableBasicConf.pkColumnName] === needChangeRecord[tableBasicConf.pkColumnName])
       if (changedRecord) {
-        for (const key in changedRecord)
-          needChangeRecord[key] = changedRecord[key]
+        for (const columnName in changedRecord) {
+          if (columnName === tableBasicConf.pkColumnName)
+            continue
+          if (useDictColumnNames.includes(columnName))
+            needChangeRecord[columnName + DATA_DICT_POSTFIX] = (layout.data as TableDataResp).records.find(r => r[columnName] === changedRecord[columnName])![columnName + DATA_DICT_POSTFIX]
+          needChangeRecord[columnName] = changedRecord[columnName]
+        }
       }
     })
   }
@@ -289,8 +303,8 @@ export async function newColumn(newColumnConf: TableColumnConf, newLayoutColumnC
     layout.columns.push(newLayoutColumnConf)
   }
   if (Array.isArray(layout.data)) {
-    layout.data.forEach((d) => {
-      d.records.forEach((record) => {
+    layout.data.forEach((group) => {
+      group.records.forEach((record) => {
         if (fromColumnName) {
           record[newColumnConf.name] = record[fromColumnName]
           if (newColumnConf.useDict)
