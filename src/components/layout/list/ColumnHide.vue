@@ -22,7 +22,7 @@ async function setHidedColumn() {
 </script>
 
 <template>
-  <div class="cursor-pointer" @click="setHidedColumn">
+  <div class="cursor-pointer ml-1 mr-1" @click="setHidedColumn">
     <i :class="iconSvg.HIDE" />
     {{ $t('list.columnHide.title') }}
   </div>

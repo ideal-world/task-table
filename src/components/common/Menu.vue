@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { InjectionKey } from 'vue'
-import { onMounted, provide, ref } from 'vue'
-import { IwUtils } from '../../utils'
+import type { InjectionKey } from 'vue';
+import { onMounted, provide, ref } from 'vue';
+import { IwUtils } from '../../utils';
 
 const contextmenuRef = ref<HTMLElement | null>(null)
 
@@ -83,8 +83,8 @@ function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: MenuOffset
   })
   contextMenuEle.style.display = `block`
 
-  if (attachObj instanceof HTMLElement) {
-    const parentMenuEle = IwUtils.getParentWithClass(attachObj, 'iw-contextmenu')
+  if (attachObj instanceof HTMLElement || attachObj.target instanceof HTMLElement) {
+    const parentMenuEle = IwUtils.getParentWithClass(attachObj instanceof HTMLElement ? attachObj as HTMLElement : attachObj.target as HTMLElement, 'iw-contextmenu')
     if (parentMenuEle)
       contextMenuEle.dataset.level = `${Number.parseInt(parentMenuEle.dataset.level!) + 1}`
     else

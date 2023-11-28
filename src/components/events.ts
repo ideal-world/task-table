@@ -3,7 +3,7 @@ import { toRaw } from 'vue'
 import type { TableBasicConf, TableColumnConf, TableLayoutColumnConf, TableLayoutConf, TableStyleConf } from './conf'
 import { getDefaultValueByDataKind } from './conf'
 import type { TableCellDictItem, TableCellDictItemResp, TableDataSliceReq, TableEventProps, TableLayoutModifyReq } from './props'
-import { OperatorKind } from './props'
+import { DATA_DICT_POSTFIX, OperatorKind } from './props'
 
 let events: TableEventProps
 let tableBasicConf: TableBasicConf
@@ -291,19 +291,27 @@ export async function newColumn(newColumnConf: TableColumnConf, newLayoutColumnC
   if (Array.isArray(layout.data)) {
     layout.data.forEach((d) => {
       d.records.forEach((record) => {
-        if (fromColumnName)
+        if (fromColumnName) {
           record[newColumnConf.name] = record[fromColumnName]
-        else
+          if (newColumnConf.useDict)
+            record[newColumnConf.name + DATA_DICT_POSTFIX] = record[fromColumnName + DATA_DICT_POSTFIX]
+        }
+        else {
           record[newColumnConf.name] = getDefaultValueByDataKind(newColumnConf.dataKind!)
+        }
       })
     })
   }
   else {
     layout.data?.records.forEach((record) => {
-      if (fromColumnName)
+      if (fromColumnName) {
         record[newColumnConf.name] = record[fromColumnName]
-      else
+        if (newColumnConf.useDict)
+          record[newColumnConf.name + DATA_DICT_POSTFIX] = record[fromColumnName + DATA_DICT_POSTFIX]
+      }
+      else {
         record[newColumnConf.name] = getDefaultValueByDataKind(newColumnConf.dataKind!)
+      }
     })
   }
   return true
