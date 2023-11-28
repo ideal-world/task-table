@@ -19,7 +19,7 @@ const props = defineProps<{
   >
     <template v-for="(column, colIdx) in props.columnsConf" :key="column.name">
       <div
-        :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-data-cell flex items-center iw-list-data-row--unselected border-solid border-b border-b-base-300 border-l border-l-base-300 ${column.wrap ? 'break-words' : 'whitespace-nowrap overflow-hidden text-ellipsis'}`"
+        :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-data-cell flex items-center iw-list-data-row--unselected border-solid border-b border-b-base-300 border-l border-l-base-300 ${column.wrap ? 'break-words flex-wrap' : 'whitespace-nowrap overflow-hidden text-ellipsis flex-nowrap'}`"
         :data-column-name="column.name" :style="props.setColumnStyles(colIdx)" @contextmenu.prevent="openContextMenuFun"
       >
         <template v-if="!column.useDict">
@@ -28,7 +28,7 @@ const props = defineProps<{
         <template v-else>
           <div
             v-for="dictItem in row[column.name + DATA_DICT_POSTFIX]" :key="dictItem.value" :data-value="dictItem.value"
-            class="badge badge-outline mr-0.5 pl-0.5"
+            class="badge badge-outline pl-0.5 m-0.5"
             :style="`background-color: ${dictItem.color}`"
           >
             <div v-if="dictItem.avatar !== undefined" class="avatar">
@@ -36,7 +36,7 @@ const props = defineProps<{
                 <img :src="dictItem.avatar">
               </div>
             </div>
-            <span class="ml-1">{{ dictItem.title }}</span>
+            <span class="ml-1 whitespace-nowrap">{{ dictItem.title }}{{ dictItem.title !== dictItem.value ? `(${dictItem.value})` : '' }}</span>
           </div>
         </template>
       </div>

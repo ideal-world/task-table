@@ -144,7 +144,7 @@ function setTableWidth() {
       :pk-column-name="listConf.basic.pkColumnName"
     />
     <div
-      class="iw-contextmenu__item flex justify-between w-full p-1"
+      class="iw-contextmenu__item flex justify-between w-full p-1 mb-1 mt-1"
     >
       <ColumnCopyComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
       <ColumnHideComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />

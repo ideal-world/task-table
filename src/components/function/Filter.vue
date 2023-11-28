@@ -298,7 +298,7 @@ async function deleteSimpleFilterItem(idx: number) {
             <img :src="dictItem.avatar">
           </div>
         </div>
-        <span class="ml-1">{{ `${dictItem.title}(${dictItem.value})` }}</span>
+        <span class="ml-1 whitespace-nowrap">{{ dictItem.title }}{{ dictItem.title !== dictItem.value ? `(${dictItem.value})` : '' }}</span>
       </div>
     </div>
   </MenuComp>

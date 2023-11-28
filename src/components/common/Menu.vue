@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import type { InjectionKey } from 'vue'
-import { provide, ref } from 'vue'
+import { onMounted, provide, ref } from 'vue'
 import { IwUtils } from '../../utils'
 
 const contextmenuRef = ref<HTMLElement | null>(null)
-const isShow = ref<boolean>(false)
 
 function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: MenuOffsetKind = MenuOffsetKind.LEFT_BOTTOM, size: MenuSizeKind = MenuSizeKind.MEDIUM, force: boolean = false) {
-  if (!force && attachObj instanceof HTMLElement && IwUtils.hasParentWithClass(attachObj, 'iw-contextmenu__item')) {
+  if (!force && attachObj instanceof HTMLElement && IwUtils.hasParentWithClass(attachObj, 'iw-contextmenu')) {
     // Prevent accidental triggering from items
     return
   }
@@ -82,46 +81,68 @@ function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: MenuOffset
     const nodeEle = node as HTMLElement
     nodeEle.style.padding = `${padding}px`
   })
+  contextMenuEle.style.display = `block`
 
-  isShow.value = true
-  document.addEventListener('pointerdown', (event: MouseEvent) => {
-    if (event.target == null) {
-      isShow.value = false
+  if (attachObj instanceof HTMLElement) {
+    const parentMenuEle = IwUtils.getParentWithClass(attachObj, 'iw-contextmenu')
+    if (parentMenuEle)
+      contextMenuEle.dataset.level = `${Number.parseInt(parentMenuEle.dataset.level!) + 1}`
+    else
+      contextMenuEle.dataset.level = '0'
+  }
+  else {
+    contextMenuEle.dataset.level = '0'
+  }
+}
+
+function hideUnActiveContextMenus(event: MouseEvent) {
+  const contextmenuEles = Array.from(document.querySelectorAll('.iw-contextmenu'))
+    .filter(ele => ele instanceof HTMLElement && (ele as HTMLElement).style.display !== 'none')
+    .sort((a, b) => Number.parseInt((b as HTMLElement).dataset.level!) - Number.parseInt((a as HTMLElement).dataset.level!))
+  for (const i in contextmenuEles) {
+    const contextMenuEle = contextmenuEles[i] as HTMLElement
+    const contextMenuRect = contextMenuEle.getBoundingClientRect()
+    if (
+      event.x < contextMenuRect.left
+      || event.y < contextMenuRect.top
+      || event.x > contextMenuRect.left + contextMenuRect.width
+      || event.y > contextMenuRect.top + contextMenuRect.height
+    ) {
+      if (i === '0' || (contextmenuEles[Number(i) - 1] as HTMLElement).style.display === 'none')
+        contextMenuEle.style.display = `none`
     }
-    else {
-      let optInMenu = false
-      const contextmenuEles = document.querySelectorAll('.iw-contextmenu')
-      for (const i in contextmenuEles) {
-        if (!(contextmenuEles[i] instanceof HTMLElement) || (contextmenuEles[i] as HTMLElement).style.display === 'none')
-          continue
-        const contextMenuRect = contextmenuEles[i].getBoundingClientRect()
-        if (
-          event.x >= contextMenuRect.left
-          && event.y >= contextMenuRect.top
-          && event.x <= contextMenuRect.left + contextMenuRect.width
-          && event.y <= contextMenuRect.top + contextMenuRect.height
-        ) {
-          optInMenu = true
-          break
-        }
-      }
-      if (!optInMenu)
-        isShow.value = false
+  }
+}
+
+function hideCurrentContextMenu() {
+  const contextMenuEle = contextmenuRef.value as HTMLElement
+  contextMenuEle.style.display = `none`
+}
+
+onMounted(() => {
+  document.addEventListener('pointerdown', (event: MouseEvent) => {
+    if (event.target == null)
+      return
+    hideUnActiveContextMenus(event)
+  })
+  window.addEventListener('scroll', (event) => {
+    const contextmenuEles = document.querySelectorAll('.iw-contextmenu')
+    for (const i in contextmenuEles) {
+      if (!(contextmenuEles[i] instanceof HTMLElement) || (contextmenuEles[i] as HTMLElement).style.display === 'none')
+        continue
+      const contextMenuEle = contextmenuEles[i] as HTMLElement
+      contextMenuEle.style.display = `none`
     }
   })
-}
-
-function hideContextMenu() {
-  isShow.value = false
-}
+})
 
 defineExpose({
   show: showContextMenu,
-  close: hideContextMenu,
+  close: hideCurrentContextMenu,
 })
 
 // eslint-disable-next-line ts/no-use-before-define
-provide(FUN_CLOSE_CONTEXT_MENU_TYPE, hideContextMenu)
+provide(FUN_CLOSE_CONTEXT_MENU_TYPE, hideCurrentContextMenu)
 </script>
 
 <script lang="ts">
@@ -143,8 +164,8 @@ export const FUN_CLOSE_CONTEXT_MENU_TYPE = Symbol('FUN_CLOSE_CONTEXT_MENU_TYPE')
 
 <template>
   <div
-    v-show="isShow"
     ref="contextmenuRef" class="iw-contextmenu flex flex-col items-start fixed z-[3000] shadow bg-base-100 p-1 rounded-md"
+    style="display: none;"
   >
     <slot />
   </div>

@@ -9,13 +9,12 @@ a {
   text-decoration: none !important;
 }
 
-.iw-tt {
-  button,
-  input,
-  optgroup,
-  select,
-  textarea {
-    border-width: 1px;
-    border-style: solid;
-  }
+
+button,
+input,
+optgroup,
+select,
+textarea {
+  border-width: 1px;
+  border-style: solid;
 }
