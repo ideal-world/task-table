@@ -29,14 +29,13 @@ const selectedDictItem = ref< {
 
 watch(props, async () => {
   if (props.curColumnConf?.useDict) {
-    const items = (await loadCellDictItemsFun(props.curColumnConf!.name)).records
-    curAllDictItems.value = items
+    curAllDictItems.value = (await loadCellDictItemsFun(props.curColumnConf!.name)).records
     curDictItems.value = curAllDictItems.value
   }
 })
 
 function searchDictItems(value: string) {
-  curDictItems.value = curAllDictItems.value.filter(val => val.title.includes(value) || val.value.includes(value))
+  curDictItems.value = curAllDictItems.value.filter(item => item.title.includes(value) || item.value.includes(value))
 }
 
 onMounted(async () => {

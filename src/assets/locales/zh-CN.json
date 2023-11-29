@@ -72,7 +72,7 @@
     "filter": {
       "new": "新的过滤",
       "selectColumnPlaceholder": "新增列",
-      "dictTitle": "可用字典值",
+      "dictTitle": "可用字典项",
       "searchPlaceholder": "搜索字典项"
     }
   },
@@ -82,6 +82,10 @@
     },
     "cellFill": {
       "acrossGroupError": "不能跨分组填充"
+    },
+    "cellEdit": {
+      "dictTitle": "可用字典项",
+      "searchPlaceholder": "搜索字典项"
     },
     "columnFixed": {
       "title": "固定列"

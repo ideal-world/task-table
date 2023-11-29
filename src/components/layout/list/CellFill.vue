@@ -140,46 +140,43 @@ onMounted(() => {
   })
 
   document.addEventListener('click', (event) => {
-    isDragging = false
-    selectDiv.style.display = 'none'
     if (!(event.target instanceof HTMLElement))
       return
-
     const targetEle = event.target
+    if (targetEle.classList.contains('iw-list-fill--select'))
+      return
+
+    isDragging = false
+    selectDiv.style.display = 'none'
+
     if (!targetEle.classList.contains('iw-list-data-cell'))
       return
 
-    clearTimeout(CELL_CLICK_TIMER)
-    CELL_CLICK_TIMER = setTimeout(() => {
-      const parentListEle = getParentWithClass(targetEle, 'iw-list')
-      if (parentListEle == null)
-        return
+    const parentListEle = getParentWithClass(targetEle, 'iw-list')
+    if (parentListEle == null)
+      return
 
-      const selectRowEle = getParentWithClass(targetEle, 'iw-list-data-row')
-      if (selectRowEle == null)
-        return
+    const selectRowEle = getParentWithClass(targetEle, 'iw-list-data-row')
+    if (selectRowEle == null)
+      return
 
-      const curColumnName = targetEle.dataset.columnName ?? ''
-      if (props.columnsConf.find(item => item.name === curColumnName && (curColumnName === props.pkColumnName || !item.dataEditable)))
-        return
+    const curColumnName = targetEle.dataset.columnName ?? ''
+    if (props.columnsConf.find(item => item.name === curColumnName && (curColumnName === props.pkColumnName || !item.dataEditable)))
+      return
 
-      selectDiv.style.display = 'flex'
-      selectDiv.style.left = `${targetEle.offsetLeft - 1}px`
-      selectDiv.style.top = `${targetEle.offsetTop - 1}px`
-      selectDiv.style.width = `${targetEle.offsetWidth + 2}px`
-      selectDiv.style.height = `${targetEle.offsetHeight + 2}px`
-      startColumnName = curColumnName
-      startRowIdx = getChildIndex(parentListEle, selectRowEle)
-      startCellEle = targetEle
-      startCellFixedX = targetEle.getBoundingClientRect().left
-    }, 250)
+    selectDiv.style.display = 'flex'
+    selectDiv.style.left = `${targetEle.offsetLeft - 1}px`
+    selectDiv.style.top = `${targetEle.offsetTop - 1}px`
+    selectDiv.style.width = `${targetEle.offsetWidth + 2}px`
+    selectDiv.style.height = `${targetEle.offsetHeight + 2}px`
+    selectDiv.dataset.targetColumnName = curColumnName
+    selectDiv.dataset.targetRowPk = selectRowEle.dataset.pk!
+    startColumnName = curColumnName
+    startRowIdx = getChildIndex(parentListEle, selectRowEle)
+    startCellEle = targetEle
+    startCellFixedX = targetEle.getBoundingClientRect().left
   })
 })
-</script>
-
-<script lang="ts">
-// eslint-disable-next-line import/no-mutable-exports
-export let CELL_CLICK_TIMER: number
 </script>
 
 <template>

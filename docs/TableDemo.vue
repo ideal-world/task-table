@@ -10,6 +10,7 @@ const layouts = [{
   layoutKind: LayoutKind.LIST,
   columns: [{
     name: 'no',
+    width: 80,
   }, {
     name: 'name',
   }, {

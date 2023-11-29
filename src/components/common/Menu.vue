@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { InjectionKey } from 'vue';
-import { onMounted, provide, ref } from 'vue';
-import { IwUtils } from '../../utils';
+import type { InjectionKey } from 'vue'
+import { onMounted, provide, ref } from 'vue'
+import { IwUtils } from '../../utils'
 
 const contextmenuRef = ref<HTMLElement | null>(null)
 
@@ -57,6 +57,17 @@ function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: MenuOffset
     }
   }
   switch (offset) {
+    case MenuOffsetKind.LEFT_TOP: {
+      break
+    }
+    case MenuOffsetKind.MEDIUM_TOP: {
+      left = left + attachObjWidth - minWidth / 2
+      break
+    }
+    case MenuOffsetKind.RIGHT_TOP: {
+      left = left + attachObjWidth - minWidth
+      break
+    }
     case MenuOffsetKind.LEFT_BOTTOM: {
       top = top + attachObjHeight
       break
@@ -147,6 +158,9 @@ provide(FUN_CLOSE_CONTEXT_MENU_TYPE, hideCurrentContextMenu)
 
 <script lang="ts">
 export enum MenuOffsetKind {
+  LEFT_TOP,
+  MEDIUM_TOP,
+  RIGHT_TOP,
   LEFT_BOTTOM,
   MEDIUM_BOTTOM,
   RIGHT_BOTTOM,

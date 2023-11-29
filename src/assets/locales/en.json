@@ -71,7 +71,7 @@
     },
     "filter": {
       "new": "New Filter",
-      "selectColumnPlaceholder": "新增列",
+      "selectColumnPlaceholder": "New column",
       "dictTitle": "Available dictionary values",
       "searchPlaceholder": "Search..."
     }
@@ -82,6 +82,10 @@
     },
     "cellFill": {
       "acrossGroupError": "Cannot fill across groups"
+    },
+    "cellEdit": {
+      "dictTitle": "Available dictionary values",
+      "searchPlaceholder": "Search..."
     },
     "columnFixed": {
       "title": "Fixed"

@@ -4,6 +4,7 @@ import MenuComp from '../../common/Menu.vue'
 import type { CachedColumnConf, TableBasicConf, TableLayoutConf } from '../../conf'
 import type { TableDataResp } from '../../props'
 import { DataKind } from '../../props'
+import CellEditComp from './CellEdit.vue'
 import CellFillComp from './CellFill.vue'
 import ColumnAggsComp from './ColumnAggs.vue'
 import { setFixedColumnStyles } from './ColumnFixed.vue'
@@ -90,11 +91,15 @@ function setTableWidth() {
         />
       </template>
     </template>
+    <CellFillComp
+      :columns-conf="columnsConf" :data="listConf.layout.data!"
+      :pk-column-name="listConf.basic.pkColumnName"
+    />
+    <CellEditComp
+      :columns-conf="columnsConf" :data="listConf.layout.data!"
+      :pk-column-name="listConf.basic.pkColumnName"
+    />
   </div>
-  <CellFillComp
-    :columns-conf="columnsConf" :data="listConf.layout.data!"
-    :pk-column-name="listConf.basic.pkColumnName"
-  />
   <MenuComp ref="rowMenuCompRef">
     <RowDeleteComp v-if="selectedDataPks.length > 0" :selected-pks="selectedDataPks" />
   </MenuComp>

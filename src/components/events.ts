@@ -143,7 +143,7 @@ export async function updateData(changedRecords: { [key: string]: any }[], reFil
           for (const columnName in changedRecord) {
             if (columnName === tableBasicConf.pkColumnName)
               continue
-            if (useDictColumnNames.includes(columnName)) {
+            if (useDictColumnNames.includes(columnName) && changedRecord[columnName + DATA_DICT_POSTFIX] === undefined) {
               const matchedDictRow = groupData.records.find(r => r[columnName] === changedRecord[columnName])
               if (matchedDictRow)
                 needChangeRecord[columnName + DATA_DICT_POSTFIX] = matchedDictRow[columnName + DATA_DICT_POSTFIX]
@@ -161,7 +161,7 @@ export async function updateData(changedRecords: { [key: string]: any }[], reFil
         for (const columnName in changedRecord) {
           if (columnName === tableBasicConf.pkColumnName)
             continue
-          if (useDictColumnNames.includes(columnName))
+          if (useDictColumnNames.includes(columnName) && changedRecord[columnName + DATA_DICT_POSTFIX] === undefined)
             needChangeRecord[columnName + DATA_DICT_POSTFIX] = (layout.data as TableDataResp).records.find(r => r[columnName] === changedRecord[columnName])![columnName + DATA_DICT_POSTFIX]
           needChangeRecord[columnName] = changedRecord[columnName]
         }

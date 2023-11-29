@@ -28,7 +28,7 @@ const props = defineProps<{
         <template v-else>
           <div
             v-for="dictItem in row[column.name + DATA_DICT_POSTFIX]" :key="dictItem.value" :data-value="dictItem.value"
-            class="badge badge-outline pl-0.5 mb-0.5"
+            class="badge badge-outline pl-0.5 mb-0.5 mr-0.5"
             :style="`background-color: ${dictItem.color}`"
           >
             <div v-if="dictItem.avatar !== undefined" class="avatar">
