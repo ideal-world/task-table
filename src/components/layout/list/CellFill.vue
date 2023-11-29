@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, onMounted } from 'vue'
+import { inject, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { getChildIndex, getParentWithClass } from '../../../utils/basic'
 import { AlertKind, showAlert } from '../../common/Alert.vue'
@@ -7,26 +7,55 @@ import type { CachedColumnConf } from '../../conf'
 import { FUN_UPDATE_DATA_TYPE } from '../../events'
 import type { TableDataGroupResp, TableDataResp } from '../../props'
 import { DataKind } from '../../props'
+import type { CellSelectedInfo } from './CellSelect.vue'
 
 const props = defineProps<{
   columnsConf: CachedColumnConf[]
   data: TableDataResp | TableDataGroupResp[]
   pkColumnName: string
+  selectedCellInfo: CellSelectedInfo | undefined
 }>()
 
 const { t } = useI18n()
 
 const updateDataFun = inject(FUN_UPDATE_DATA_TYPE)!
 
+const selectDiv = document.createElement('div')
+let startColumnName = ''
+let startRowIdx = 0
+let movedRowIdx = 0
+let startCellFixedX = 0
+let startCellEle: HTMLElement
+let isDragging = false
+
+watch(props, () => {
+  isDragging = false
+  selectDiv.style.display = 'none'
+
+  if (props.selectedCellInfo === undefined)
+    return
+
+  const parentListEle = getParentWithClass(props.selectedCellInfo.ele, 'iw-list')
+  if (parentListEle == null)
+    return
+
+  const selectRowEle = getParentWithClass(props.selectedCellInfo.ele, 'iw-list-data-row')
+  if (selectRowEle == null)
+    return
+
+  selectDiv.style.display = 'flex'
+  selectDiv.style.left = `${props.selectedCellInfo.ele.offsetLeft - 1}px`
+  selectDiv.style.top = `${props.selectedCellInfo.ele.offsetTop - 1}px`
+  selectDiv.style.width = `${props.selectedCellInfo.ele.offsetWidth + 2}px`
+  selectDiv.style.height = `${props.selectedCellInfo.ele.offsetHeight + 2}px`
+  startColumnName = props.selectedCellInfo.columnName
+  startRowIdx = getChildIndex(parentListEle, selectRowEle)
+  startCellEle = props.selectedCellInfo.ele
+  startCellFixedX = props.selectedCellInfo.ele.getBoundingClientRect().left
+})
+
 onMounted(() => {
-  let startColumnName = ''
-  let startRowIdx = 0
-  let movedRowIdx = 0
-  let startCellFixedX = 0
-  let startCellEle: HTMLElement
-  let isDragging = false
   const listEle = document.getElementsByClassName('iw-list')[0] as HTMLElement
-  const selectDiv = document.createElement('div')
   selectDiv.classList.add('iw-list-fill--select')
   const dragDiv = document.createElement('div')
   const subDragDiv = document.createElement('div')
@@ -137,44 +166,6 @@ onMounted(() => {
       selectDiv.style.top = `${movedEle.offsetTop - 1}px`
       selectDiv.style.height = `${startCellEle.offsetTop + startCellEle.offsetHeight - movedEle.offsetTop}px`
     }
-  })
-
-  document.addEventListener('click', (event) => {
-    if (!(event.target instanceof HTMLElement))
-      return
-    const targetEle = event.target
-    if (targetEle.classList.contains('iw-list-fill--select'))
-      return
-
-    isDragging = false
-    selectDiv.style.display = 'none'
-
-    if (!targetEle.classList.contains('iw-list-data-cell'))
-      return
-
-    const parentListEle = getParentWithClass(targetEle, 'iw-list')
-    if (parentListEle == null)
-      return
-
-    const selectRowEle = getParentWithClass(targetEle, 'iw-list-data-row')
-    if (selectRowEle == null)
-      return
-
-    const curColumnName = targetEle.dataset.columnName ?? ''
-    if (props.columnsConf.find(item => item.name === curColumnName && (curColumnName === props.pkColumnName || !item.dataEditable)))
-      return
-
-    selectDiv.style.display = 'flex'
-    selectDiv.style.left = `${targetEle.offsetLeft - 1}px`
-    selectDiv.style.top = `${targetEle.offsetTop - 1}px`
-    selectDiv.style.width = `${targetEle.offsetWidth + 2}px`
-    selectDiv.style.height = `${targetEle.offsetHeight + 2}px`
-    selectDiv.dataset.targetColumnName = curColumnName
-    selectDiv.dataset.targetRowPk = selectRowEle.dataset.pk!
-    startColumnName = curColumnName
-    startRowIdx = getChildIndex(parentListEle, selectRowEle)
-    startCellEle = targetEle
-    startCellFixedX = targetEle.getBoundingClientRect().left
   })
 })
 </script>

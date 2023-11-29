@@ -1,6 +1,3 @@
-<script  lang="ts">
-</script>
-
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
@@ -58,7 +55,7 @@ function onSelectDragging(event: PointerEvent) {
   addSelect(selectRowEle)
 }
 
-function onRowSelectDraped(event: PointerEvent) {
+function onRowSelectDraped() {
   startCellFixedX = 0
   listEle = undefined
   startRowIdx = 0

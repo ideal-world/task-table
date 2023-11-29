@@ -6,6 +6,8 @@ import type { TableDataResp } from '../../props'
 import { DataKind } from '../../props'
 import CellEditComp from './CellEdit.vue'
 import CellFillComp from './CellFill.vue'
+import type { CellSelectedInfo } from './CellSelect.vue'
+import CellSelectComp from './CellSelect.vue'
 import ColumnAggsComp from './ColumnAggs.vue'
 import { setFixedColumnStyles } from './ColumnFixed.vue'
 import HeaderComp from './Header.vue'
@@ -23,6 +25,11 @@ const listConf = defineProps<
 const NEW_COLUMN_WIDTH = 80
 
 const selectedDataPks = ref<string[] | number[]>([])
+const selectedCellWrap = ref<{
+  cellSelectedInfo: CellSelectedInfo | undefined
+}>({
+  cellSelectedInfo: undefined,
+})
 const pkKindIsNumber = listConf.basic.columns.find(col => col.name === listConf.basic.pkColumnName)?.dataKind === DataKind.NUMBER
 
 const columnsConf = computed<CachedColumnConf[]>(() => {
@@ -91,13 +98,19 @@ function setTableWidth() {
         />
       </template>
     </template>
+    <CellSelectComp
+      :wrap="selectedCellWrap" :columns-conf="columnsConf"
+      :pk-column-name="listConf.basic.pkColumnName"
+    />
     <CellFillComp
       :columns-conf="columnsConf" :data="listConf.layout.data!"
       :pk-column-name="listConf.basic.pkColumnName"
+      :selected-cell-info="selectedCellWrap.cellSelectedInfo"
     />
     <CellEditComp
       :columns-conf="columnsConf" :data="listConf.layout.data!"
       :pk-column-name="listConf.basic.pkColumnName"
+      :selected-cell-info="selectedCellWrap.cellSelectedInfo"
     />
   </div>
   <MenuComp ref="rowMenuCompRef">

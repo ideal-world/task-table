@@ -8,11 +8,13 @@ import { getInputTypeByDataKind } from '../../conf'
 import { FUN_LOAD_CELL_DICT_ITEMS_TYPE, FUN_UPDATE_DATA_TYPE } from '../../events'
 import type { TableCellDictItem, TableDataGroupResp, TableDataResp } from '../../props'
 import { DATA_DICT_POSTFIX, DataKind } from '../../props'
+import type { CellSelectedInfo } from './CellSelect.vue'
 
 const props = defineProps<{
   columnsConf: CachedColumnConf[]
   data: TableDataResp | TableDataGroupResp[]
   pkColumnName: string
+  selectedCellInfo: CellSelectedInfo | undefined
 }>()
 
 const loadCellDictItemsFun = inject(FUN_LOAD_CELL_DICT_ITEMS_TYPE)!
@@ -30,17 +32,15 @@ const curDictItems = ref<TableCellDictItem[]>([])
 const selectedDictItems = ref<TableCellDictItem[]>([])
 const searchDictValue = ref()
 
-async function enterEditMode(curCellEle: HTMLElement) {
-  const columnName = curCellEle.dataset.targetColumnName!
-  const columnConf = props.columnsConf.find(col => col.name === columnName)!
+async function enterEditMode(selectedCellInfo: CellSelectedInfo, fillEle: HTMLElement) {
+  const columnConf = props.columnsConf.find(col => col.name === selectedCellInfo.columnName)!
   curColumnConf.value = columnConf
-  const rowPkStr = curCellEle.dataset.targetRowPk!
-  curRowPk.value = props.columnsConf.find(col => col.name === props.pkColumnName)?.dataKind === DataKind.NUMBER ? Number.parseInt(rowPkStr)! : rowPkStr
+  curRowPk.value = selectedCellInfo.rowPk
   if (Array.isArray(props.data)) {
     for (const group of props.data) {
       for (const record of group.records) {
         if (record[props.pkColumnName] === curRowPk.value) {
-          curCellValue.value = record[columnName]
+          curCellValue.value = record[selectedCellInfo.columnName]
           break
         }
       }
@@ -51,7 +51,7 @@ async function enterEditMode(curCellEle: HTMLElement) {
   else {
     for (const record of props.data.records) {
       if (record[props.pkColumnName] === curRowPk.value) {
-        curCellValue.value = record[columnName]
+        curCellValue.value = record[selectedCellInfo.columnName]
         break
       }
     }
@@ -67,19 +67,19 @@ async function enterEditMode(curCellEle: HTMLElement) {
       selectedDictItems.value.push(curAllDictItems.value.find(dictItem => dictItem.value === curCellValue.value)!)
     }
     filterCurDictItems()
-    cellEditDictContextMenuRef.value.show(curCellEle, MenuOffsetKind.LEFT_TOP)
+    cellEditDictContextMenuRef.value.show(selectedCellInfo.ele, MenuOffsetKind.LEFT_TOP)
   }
   else {
     const cellEditEle = cellEditSimpleRef.value as HTMLElement
-    cellEditEle.style.left = `${curCellEle.offsetLeft - 1}px`
-    cellEditEle.style.top = `${curCellEle.offsetTop - 1}px`
-    cellEditEle.style.width = `${curCellEle.offsetWidth + 2}px`
-    cellEditEle.style.height = `${curCellEle.offsetHeight + 2}px`
+    cellEditEle.style.left = `${selectedCellInfo.ele.offsetLeft - 1}px`
+    cellEditEle.style.top = `${selectedCellInfo.ele.offsetTop - 1}px`
+    cellEditEle.style.width = `${selectedCellInfo.ele.offsetWidth + 2}px`
+    cellEditEle.style.height = `${selectedCellInfo.ele.offsetHeight + 2}px`
     cellEditEle.style.display = `flex`
     const inputElement = cellEditEle.children[0] as HTMLElement
     inputElement.focus()
   }
-  curCellEle.style.display = `none`
+  fillEle.style.display = 'none'
 }
 
 function leaveEditMode() {
@@ -91,19 +91,26 @@ function leaveEditMode() {
 }
 
 onMounted(() => {
-  document.addEventListener('click', async (event) => {
-    if (!(event.target instanceof HTMLElement))
-      return
+  document.querySelectorAll('.iw-list').forEach((listEle) => {
+    listEle.addEventListener('click', async (event) => {
+      if (!(event.target instanceof HTMLElement))
+        return
 
-    const cellEle = getParentWithClass(event.target, 'iw-list-fill--select')
-    if (!cellEle)
-      return
+      if (props.selectedCellInfo === undefined)
+        return
 
-    leaveEditMode()
-    await enterEditMode(cellEle)
+      if (!event.target.classList.contains('iw-list-fill--select'))
+        return
+
+      leaveEditMode()
+      await enterEditMode(props.selectedCellInfo, event.target)
+    })
   })
   document.addEventListener('keydown', async (event: KeyboardEvent) => {
     if (event.key !== 'Enter')
+      return
+
+    if (props.selectedCellInfo === undefined)
       return
 
     if (!(event.target instanceof HTMLElement))
@@ -112,9 +119,9 @@ onMounted(() => {
     const cellEle = event.target.querySelector('.iw-list-fill--select')
     if (!cellEle || (cellEle as HTMLElement).style.display === 'none')
       return
-    
+
     leaveEditMode()
-    await enterEditMode(cellEle as HTMLElement)
+    await enterEditMode(props.selectedCellInfo, cellEle as HTMLElement)
   })
 })
 
@@ -143,7 +150,11 @@ async function updateDictItem() {
 async function selectDictItem(event: MouseEvent) {
   const dictItemEle = getParentWithClass(event.target as HTMLElement, 'iw-column-dict-list__item')!
   const dictItemValue = dictItemEle.dataset.value!
-  selectedDictItems.value.push(curAllDictItems.value.find(item => item.value === dictItemValue)!)
+  if (curColumnConf.value!.multiValue)
+    selectedDictItems.value.push(curAllDictItems.value.find(item => item.value === dictItemValue)!)
+  else
+    selectedDictItems.value = [curAllDictItems.value.find(item => item.value === dictItemValue)!]
+
   updateDictItem()
 }
 
@@ -179,7 +190,7 @@ async function setCellValue(value: any) {
     </template>
   </div>
   <MenuComp ref="cellEditDictContextMenuRef">
-    <div v-if="selectedDictItems.length > 0" class="iw-contextmenu__item flex flex-wrap w-48">
+    <div class="iw-contextmenu__item flex flex-wrap w-48">
       <div
         v-for="selectedDictItem in selectedDictItems" :key="selectedDictItem.value"
         class="iw-column-dict-list__item badge badge-outline m-1.5 pl-0.5 pr-0.5 flex items-center cursor-pointer"
