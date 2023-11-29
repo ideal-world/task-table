@@ -11,6 +11,7 @@ import CellSelectComp from './CellSelect.vue'
 import ColumnAggsComp from './ColumnAggs.vue'
 import { setFixedColumnStyles } from './ColumnFixed.vue'
 import HeaderComp from './Header.vue'
+import RowAddComp from './RowAdd.vue'
 import RowDeleteComp from './RowDelete.vue'
 import RowSelectComp from './RowSelect.vue'
 import RowsComp from './Rows.vue'
@@ -78,6 +79,7 @@ function setTableWidth() {
         :columns-conf="columnsConf" :styles-conf="listConf.basic.styles" :set-column-styles="setColumnStyles"
         :open-context-menu-fun="showRowContextMenu"
       />
+      <RowAddComp />
       <ColumnAggsComp
         :layout-aggs="layout.aggs!" :data-basic="layout.data as TableDataResp"
         :pk-column-name="listConf.basic.pkColumnName" :columns-conf="columnsConf" :styles-conf="listConf.basic.styles"
@@ -96,6 +98,7 @@ function setTableWidth() {
           :styles-conf="listConf.basic.styles" :set-column-styles="setColumnStyles"
           :open-context-menu-fun="showRowContextMenu"
         />
+        <RowAddComp :group-value="groupData.groupValue" />
       </template>
     </template>
     <CellSelectComp

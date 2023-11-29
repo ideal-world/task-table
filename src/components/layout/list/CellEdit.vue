@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, onMounted, ref, toRaw } from 'vue'
+import { inject, onMounted, ref } from 'vue'
 import * as iconSvg from '../../../assets/icon'
 import { getParentWithClass } from '../../../utils/basic'
 import MenuComp, { MenuOffsetKind } from '../../common/Menu.vue'
@@ -7,7 +7,7 @@ import type { CachedColumnConf } from '../../conf'
 import { getInputTypeByDataKind } from '../../conf'
 import { FUN_LOAD_CELL_DICT_ITEMS_TYPE, FUN_UPDATE_DATA_TYPE } from '../../events'
 import type { TableCellDictItem, TableDataGroupResp, TableDataResp } from '../../props'
-import { DATA_DICT_POSTFIX, DataKind } from '../../props'
+import { DataKind } from '../../props'
 import type { CellSelectedInfo } from './CellSelect.vue'
 
 const props = defineProps<{
@@ -143,7 +143,6 @@ async function updateDictItem() {
   await updateDataFun([{
     [props.pkColumnName]: curRowPk.value,
     [curColumnConf.value!.name]: newValue,
-    [curColumnConf.value!.name + DATA_DICT_POSTFIX]: toRaw(selectedDictItems.value),
   }])
 }
 

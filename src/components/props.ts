@@ -188,7 +188,7 @@ export interface TableEventProps {
     group?: TableDataGroupReq,
     aggs?: { [key: string]: AggregateKind },
     slice?: TableDataSliceReq) => Promise<TableDataResp | TableDataGroupResp[]>
-  saveData?: (changedRecords: { [key: string]: any }[]) => Promise<boolean>
+  saveData?: (changedRecords: { [key: string]: any }[]) => Promise<{ [key: string]: any }[]>
   deleteData?: (deletedPks: any[]) => Promise<boolean>
 
   newColumn?: (newColumnProps: TableColumnProps, fromColumnName?: string) => Promise<boolean>

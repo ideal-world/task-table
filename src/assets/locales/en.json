@@ -120,6 +120,9 @@
       "addTitle": "Add",
       "titlePlaceholder": "New name",
       "submit": "Add"
+    },
+    "rowAdd": {
+      "new": "New row"
     }
   }
 }

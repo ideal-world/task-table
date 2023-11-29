@@ -120,6 +120,9 @@
       "addTitle": "添加字典项",
       "titlePlaceholder": "新的字典项名称",
       "submit": "添加"
+    },
+    "rowAdd": {
+      "new": "新增行"
     }
   }
 }

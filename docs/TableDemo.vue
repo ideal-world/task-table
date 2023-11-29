@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { TableCellDictItem, TableColumnProps, TableDataSliceReq, TableLayoutModifyReq, TableLayoutProps, TableStyleProps } from '../src/components/props'
 import { AggregateKind, DATA_DICT_POSTFIX, DataKind, LayoutKind } from '../src/components/props'
+import { getRandomInt } from '../src/utils/basic'
 
 const columns = [{ name: 'no', dataKind: DataKind.NUMBER, dataEditable: false }, { name: 'name', useDict: true, dictEditable: true }, { name: 'phone' }, { name: 'stats', useDict: true, dictEditable: true, multiValue: true }, { name: 'addr' }, { name: 'time', dataKind: DataKind.DATETIME }]
 
@@ -45,7 +46,31 @@ const events = {
   saveData: async (data: { [key: string]: any }[]) => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        resolve(true)
+        if (data.length === 1 && data[0].no === undefined) {
+          // New
+          resolve(attachDict(data.map((d) => {
+            d.no = getRandomInt(1000, 2000)
+            d.name = 'xy'
+            d.stats = ['init']
+            d.phone = '！Phone2'
+            d.addr = '！Addr2'
+            d.time = '2023-10-24'
+            return d
+          })))
+        }
+        else {
+          // Update
+          resp2.forEach((resp) => {
+            let storageRecord = resp.records.find(record => record.no === data[0].no)
+            if (storageRecord) {
+              storageRecord = {
+                ...storageRecord,
+                ...data[0],
+              }
+              resolve(attachDict([storageRecord]))
+            }
+          })
+        }
       }, 100)
     })
   },

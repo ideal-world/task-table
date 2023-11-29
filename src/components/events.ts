@@ -93,15 +93,15 @@ export async function loadData(layoutId?: string, moreForGroupedValue?: any) {
 export const FUN_ADD_DATA_TYPE = Symbol('FUN_ADD_DATA_TYPE') as InjectionKey<(newRecords: { [key: string]: any }[], afterPkId?: number, groupValue?: any, reFilter?: boolean, reSort?: boolean, reLoad?: boolean) => Promise<boolean>>
 export async function addData(newRecords: { [key: string]: any }[], afterPkId?: number, groupValue?: any, reFilter?: boolean, reSort?: boolean, reLoad?: boolean): Promise<boolean> {
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
-  if (events.saveData && (await events.saveData(newRecords))) {
-    if (reLoad) {
-      await loadData()
-      return true
-    }
-  }
-  else {
+  if (!events.saveData)
     return false
+
+  const savedRecords = await events.saveData(newRecords)
+  if (reLoad) {
+    await loadData()
+    return true
   }
+
   let data
   if (groupValue && Array.isArray(layout.data)) {
     data = layout.data.find(d => d.groupValue === groupValue)
@@ -114,9 +114,9 @@ export async function addData(newRecords: { [key: string]: any }[], afterPkId?: 
   }
   if (data) {
     if (afterPkId)
-      data.records.splice(afterPkId, 0, ...newRecords)
+      data.records.splice(afterPkId, 0, ...savedRecords)
     else
-      data.records.splice(0, 0, ...newRecords)
+      data.records.splice(data.records.length, 0, ...savedRecords)
   }
   return true
   // TODO agg清空，重新计算
@@ -125,47 +125,29 @@ export async function addData(newRecords: { [key: string]: any }[], afterPkId?: 
 export const FUN_UPDATE_DATA_TYPE = Symbol('FUN_UPDATE_DATA_TYPE') as InjectionKey<(changedRecords: { [key: string]: any }[], reFilter?: boolean, reSort?: boolean, reLoad?: boolean) => Promise<boolean>>
 export async function updateData(changedRecords: { [key: string]: any }[], reFilter?: boolean, reSort?: boolean, reLoad?: boolean): Promise<boolean> {
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
-  if (events.saveData && (await events.saveData(changedRecords))) {
-    if (reLoad) {
-      await loadData()
-      return true
-    }
-  }
-  else {
+  if (!events.saveData)
     return false
+
+  const savedRecords = await events.saveData(changedRecords)
+  if (reLoad) {
+    await loadData()
+    return true
   }
-  const useDictColumnNames = tableBasicConf.columns.filter(column => column.useDict).map(column => column.name)
+
   if (Array.isArray(layout.data)) {
     layout.data.forEach((groupData) => {
-      groupData.records.forEach((needChangeRecord) => {
-        const changedRecord = changedRecords.find(r => r[tableBasicConf.pkColumnName] === needChangeRecord[tableBasicConf.pkColumnName])
-        if (changedRecord) {
-          for (const columnName in changedRecord) {
-            if (columnName === tableBasicConf.pkColumnName)
-              continue
-            if (useDictColumnNames.includes(columnName) && changedRecord[columnName + DATA_DICT_POSTFIX] === undefined) {
-              const matchedDictRow = groupData.records.find(r => r[columnName] === changedRecord[columnName])
-              if (matchedDictRow)
-                needChangeRecord[columnName + DATA_DICT_POSTFIX] = matchedDictRow[columnName + DATA_DICT_POSTFIX]
-            }
-            needChangeRecord[columnName] = changedRecord[columnName]
-          }
-        }
+      groupData.records.forEach((record, idx) => {
+        const changedRecord = savedRecords.find(r => r[tableBasicConf.pkColumnName] === record[tableBasicConf.pkColumnName])
+        if (changedRecord)
+          groupData.records.splice(idx, 1, changedRecord)
       })
     })
   }
   else if (layout.data && !Array.isArray(layout.data)) {
-    layout.data.records.forEach((needChangeRecord) => {
-      const changedRecord = changedRecords.find(r => r[tableBasicConf.pkColumnName] === needChangeRecord[tableBasicConf.pkColumnName])
-      if (changedRecord) {
-        for (const columnName in changedRecord) {
-          if (columnName === tableBasicConf.pkColumnName)
-            continue
-          if (useDictColumnNames.includes(columnName) && changedRecord[columnName + DATA_DICT_POSTFIX] === undefined)
-            needChangeRecord[columnName + DATA_DICT_POSTFIX] = (layout.data as TableDataResp).records.find(r => r[columnName] === changedRecord[columnName])![columnName + DATA_DICT_POSTFIX]
-          needChangeRecord[columnName] = changedRecord[columnName]
-        }
-      }
+    layout.data.records.forEach((record, idx) => {
+      const changedRecord = savedRecords.find(r => r[tableBasicConf.pkColumnName] === record[tableBasicConf.pkColumnName])
+      if (changedRecord)
+        (layout.data! as TableDataResp).records.splice(idx, 1, changedRecord)
     })
   }
   else {
