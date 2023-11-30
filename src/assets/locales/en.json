@@ -91,7 +91,7 @@
       "title": "Fixed"
     },
     "rowDelete": {
-      "title": "Delete"
+      "title": "Delete row(s)"
     },
     "cellWrap": {
       "title": "Break words"
@@ -123,6 +123,11 @@
     },
     "rowAdd": {
       "new": "New row"
+    },
+    "rowCopyPaste": {
+      "copyTitle": "Copy row(s)",
+      "pasteTitle": "Paste row(s)",
+      "copyAndPasteTitle": "Copy and Paste row(s)"
     }
   }
 }

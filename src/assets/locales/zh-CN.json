@@ -91,7 +91,7 @@
       "title": "固定列"
     },
     "rowDelete": {
-      "title": "删除"
+      "title": "删除行"
     },
     "cellWrap": {
       "title": "换行"
@@ -123,6 +123,11 @@
     },
     "rowAdd": {
       "new": "新增行"
+    },
+    "rowCopyPaste": {
+      "copyTitle": "复制行",
+      "pasteTitle": "粘贴行",
+      "copyAndPasteTitle": "复制并粘贴行"
     }
   }
 }

@@ -58,16 +58,32 @@ const events = {
             return d
           })))
         }
+        else if (Object.values(data[0]).length === 1) {
+          // Copy
+          resp2.forEach((resp) => {
+            const storageRecords = resp.records.filter(record => data.find(d => d.no === record.no))
+            if (storageRecords.length > 0) {
+              let newRecords = JSON.parse(JSON.stringify(storageRecords))
+              newRecords = newRecords
+                .map((record) => {
+                  record.no = getRandomInt(1000, 2000)
+                  return record
+                })
+              resolve(attachDict(newRecords))
+            }
+          })
+        }
         else {
           // Update
           resp2.forEach((resp) => {
-            let storageRecord = resp.records.find(record => record.no === data[0].no)
+            const storageRecord = resp.records.find(record => record.no === data[0].no)
             if (storageRecord) {
-              storageRecord = {
-                ...storageRecord,
+              let newRecords = JSON.parse(JSON.stringify(storageRecord))
+              newRecords = {
+                ...newRecords,
                 ...data[0],
               }
-              resolve(attachDict([storageRecord]))
+              resolve(attachDict([newRecords]))
             }
           })
         }

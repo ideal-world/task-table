@@ -12,6 +12,7 @@ import ColumnAggsComp from './ColumnAggs.vue'
 import { setFixedColumnStyles } from './ColumnFixed.vue'
 import HeaderComp from './Header.vue'
 import RowAddComp from './RowAdd.vue'
+import RowCopyPasteComp from './RowCopyPaste.vue'
 import RowDeleteComp from './RowDelete.vue'
 import RowSelectComp from './RowSelect.vue'
 import RowsComp from './Rows.vue'
@@ -116,8 +117,9 @@ function setTableWidth() {
       :selected-cell-info="selectedCellWrap.cellSelectedInfo"
     />
   </div>
-  <MenuComp ref="rowMenuCompRef">
-    <RowDeleteComp v-if="selectedDataPks.length > 0" :selected-pks="selectedDataPks" />
+  <MenuComp v-if="selectedDataPks.length > 0" ref="rowMenuCompRef">
+    <RowCopyPasteComp :selected-pks="selectedDataPks" :pk-column-name="listConf.basic.pkColumnName" />
+    <RowDeleteComp :selected-pks="selectedDataPks" />
   </MenuComp>
   <RowSelectComp
     :selected-pks="selectedDataPks" :pk-column-name="listConf.basic.pkColumnName"

@@ -90,9 +90,13 @@ export async function loadData(layoutId?: string, moreForGroupedValue?: any) {
   }
 }
 
-export const FUN_ADD_DATA_TYPE = Symbol('FUN_ADD_DATA_TYPE') as InjectionKey<(newRecords: { [key: string]: any }[], afterPkId?: number, groupValue?: any, reFilter?: boolean, reSort?: boolean, reLoad?: boolean) => Promise<boolean>>
-export async function addData(newRecords: { [key: string]: any }[], afterPkId?: number, groupValue?: any, reFilter?: boolean, reSort?: boolean, reLoad?: boolean): Promise<boolean> {
+export const FUN_ADD_DATA_TYPE = Symbol('FUN_ADD_DATA_TYPE') as InjectionKey<(newRecords: { [key: string]: any }[], afterPk?: any, groupValue?: any, reFilter?: boolean, reSort?: boolean, reLoad?: boolean) => Promise<boolean>>
+export async function addData(newRecords: { [key: string]: any }[], afterPk?: any, groupValue?: any, reFilter?: boolean, reSort?: boolean, reLoad?: boolean): Promise<boolean> {
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
+
+  if (Array.isArray(layout.data) && afterPk === undefined && groupValue === undefined)
+    return false
+
   if (!events.saveData)
     return false
 
@@ -102,21 +106,38 @@ export async function addData(newRecords: { [key: string]: any }[], afterPkId?: 
     return true
   }
 
-  let data
-  if (groupValue && Array.isArray(layout.data)) {
-    data = layout.data.find(d => d.groupValue === groupValue)
+  if (Array.isArray(layout.data)) {
+    if (groupValue) {
+      const data = layout.data.find(d => d.groupValue === groupValue)!
+      if (afterPk !== undefined) {
+        const idx = data.records.findIndex(r => r[tableBasicConf.pkColumnName] === afterPk)
+        data.records.splice(idx + 1, 0, ...savedRecords)
+      }
+      else {
+        data.records.splice(data.records.length, 0, ...savedRecords)
+      }
+    }
+    else {
+      layout.data.forEach((groupData) => {
+        if (afterPk !== undefined) {
+          const idx = groupData.records.findIndex(r => r[tableBasicConf.pkColumnName] === afterPk)
+          if (idx !== -1)
+            groupData.records.splice(idx + 1, 0, ...savedRecords)
+        }
+      })
+    }
   }
   else if (layout.data && !Array.isArray(layout.data)) {
-    data = layout.data
+    if (afterPk !== undefined) {
+      const idx = layout.data.records.findIndex(r => r[tableBasicConf.pkColumnName] === afterPk)
+      layout.data.records.splice(idx + 1, 0, ...savedRecords)
+    }
+    else {
+      layout.data.records.splice(layout.data.records.length, 0, ...savedRecords)
+    }
   }
   else {
     // Empty,unreachable
-  }
-  if (data) {
-    if (afterPkId)
-      data.records.splice(afterPkId, 0, ...savedRecords)
-    else
-      data.records.splice(data.records.length, 0, ...savedRecords)
   }
   return true
   // TODO agg清空，重新计算
