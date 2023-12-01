@@ -76,15 +76,16 @@ const events = {
         else {
           // Update
           resp2.forEach((resp) => {
-            const storageRecord = resp.records.find(record => record.no === data[0].no)
-            if (storageRecord) {
-              let newRecords = JSON.parse(JSON.stringify(storageRecord))
-              newRecords = {
-                ...newRecords,
-                ...data[0],
-              }
-              resolve(attachDict([newRecords]))
-            }
+            const newRecords = data.map(d => [d, resp.records.find(record => record.no === d.no)])
+              .filter(d => d[1] !== undefined)
+              .map((d) => {
+                return {
+                  ...JSON.parse(JSON.stringify(d[1])),
+                  ...d[0],
+                }
+              })
+            if (newRecords)
+              resolve(attachDict(newRecords))
           })
         }
       }, 100)
@@ -341,7 +342,7 @@ const resp2 = [
 </script>
 
 <template>
-  <div style="height: 400px">
+  <div style="height: 600px">
     <!-- <iw-task-table  pk-column-name="no" :columns="columns" :events="events" :layouts="layouts"></iw-task-table> -->
     <iw-task-table
       pk-column-name="no" :columns="columns" :events="events" :layouts="layouts"
