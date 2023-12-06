@@ -2,7 +2,7 @@ import type { InjectionKey, Ref } from 'vue'
 import { toRaw } from 'vue'
 import type { TableBasicConf, TableColumnConf, TableLayoutColumnConf, TableLayoutConf, TableStyleConf } from './conf'
 import { getDefaultValueByDataKind } from './conf'
-import { sortByTree } from './function/RowTree.vue'
+import { filterTreeDataPks, sortByTree } from './function/RowTree'
 import type { TableCellDictItem, TableCellDictItemResp, TableDataResp, TableDataSliceReq, TableEventProps, TableLayoutModifyReq } from './props'
 import { DATA_DICT_POSTFIX, OperatorKind } from './props'
 
@@ -153,7 +153,7 @@ export async function addData(newRecords: { [key: string]: any }[], afterPk: any
   else if (layout.data && !Array.isArray(layout.data)) {
     const idx = layout.data.records.findIndex(r => r[tableBasicConf.pkColumnName] === afterPk)
     layout.data.records.splice(idx + 1, 0, ...savedRecords)
-    layout.data.records = sortByTree(layout.data, tableBasicConf.pkColumnName, tableBasicConf.parentPkColumnName)
+    layout.data.records = sortByTree(layout.data.records, tableBasicConf.pkColumnName, tableBasicConf.parentPkColumnName)
   }
   else {
     // Empty,unreachable
@@ -211,12 +211,12 @@ export async function deleteData(deletedPks: any[], reFilter?: boolean, reSort?:
   }
   if (Array.isArray(layout.data)) {
     layout.data.forEach((d) => {
-      deletedPks = filterTreeDataPks(deletedPks, d.records)
+      deletedPks = filterTreeDataPks(deletedPks, d.records, tableBasicConf.pkColumnName, tableBasicConf.parentPkColumnName)
       d.records = d.records.filter(item => !deletedPks.includes(item[tableBasicConf.pkColumnName]))
     })
   }
   else if (layout.data && !Array.isArray(layout.data)) {
-    deletedPks = filterTreeDataPks(deletedPks, layout.data.records)
+    deletedPks = filterTreeDataPks(deletedPks, layout.data.records, tableBasicConf.pkColumnName, tableBasicConf.parentPkColumnName)
     layout.data.records = layout.data.records.filter(item => !deletedPks.includes(item[tableBasicConf.pkColumnName]))
   }
   else {
@@ -224,22 +224,6 @@ export async function deleteData(deletedPks: any[], reFilter?: boolean, reSort?:
   }
   return true
   // TODO agg清空，重新计算
-}
-
-function filterTreeDataPks(filterPks: any[], records: { [key: string]: any }[]): any[] {
-  if (tableBasicConf.parentPkColumnName === undefined)
-    return filterPks
-
-  const pksWithChildren: any[] = filterPks.slice()
-
-  pksWithChildren.forEach((pk) => {
-    const childrenPks = records.filter(record => record[tableBasicConf.parentPkColumnName!] === pk).map(record => record[tableBasicConf.pkColumnName])
-    if (childrenPks.length > 0) {
-      pksWithChildren.push(...childrenPks)
-      pksWithChildren.push(...filterTreeDataPks(childrenPks, records))
-    }
-  })
-  return pksWithChildren
 }
 
 export const FUN_LOAD_CELL_DICT_ITEMS_TYPE = Symbol('FUN_LOAD_CELL_DICT_ITEMS_TYPE') as InjectionKey<(columnName: string, filterValue?: any, slice?: TableDataSliceReq) => Promise<TableCellDictItemResp>>
@@ -516,11 +500,11 @@ export async function modifyLayout(changedLayoutReq: TableLayoutModifyReq, reFil
     let deleteExpandDataPks = []
     if (Array.isArray(layout.data)) {
       layout.data.forEach((groupData) => {
-        deleteExpandDataPks.push(...filterTreeDataPks([changedLayoutReq.deleteExpandDataPk], groupData.records))
+        deleteExpandDataPks.push(...filterTreeDataPks([changedLayoutReq.deleteExpandDataPk], groupData.records, tableBasicConf.pkColumnName, tableBasicConf.parentPkColumnName))
       })
     }
     else {
-      deleteExpandDataPks = filterTreeDataPks([changedLayoutReq.deleteExpandDataPk], (layout.data as TableDataResp).records)
+      deleteExpandDataPks = filterTreeDataPks([changedLayoutReq.deleteExpandDataPk], (layout.data as TableDataResp).records, tableBasicConf.pkColumnName, tableBasicConf.parentPkColumnName)
     }
     deleteExpandDataPks.forEach((deleteExpandDataPk) => {
       const idx = layout.expandDataPks.indexOf(deleteExpandDataPk)

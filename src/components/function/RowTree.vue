@@ -3,6 +3,7 @@ import { inject } from 'vue'
 import * as iconSvg from '../../assets/icon'
 import { getParentWithClass } from '../../utils/basic'
 import { FUN_MODIFY_LAYOUT_TYPE } from '../events'
+import { NODE_DEPTH_FLAG } from './RowTree'
 
 const props = defineProps<{
   curData: { [key: string]: any }
@@ -12,6 +13,9 @@ const props = defineProps<{
   pkKindIsNumber: boolean
   expandDataPks: any[]
 }>()
+
+let IS_INIT = false
+
 const modifyLayoutFun = inject(FUN_MODIFY_LAYOUT_TYPE)!
 
 async function expandNode(dataPk: any) {
@@ -45,35 +49,9 @@ function init() {
   })
 }
 
-// eslint-disable-next-line ts/no-use-before-define
 if (!IS_INIT) {
   IS_INIT = true
   init()
-}
-</script>
-
-<script lang="ts">
-const NODE_DEPTH_FLAG = '__node_depth'
-
-let IS_INIT = false
-export function sortByTree(data: any[], PkColumnName: string, parentPkColumnName?: string) {
-  if (parentPkColumnName === undefined)
-    return data
-
-  return getTreeData(data, undefined, PkColumnName, parentPkColumnName, 0)
-}
-
-function getTreeData(data: any[], parentPk: any, pkColumnName: string, parentPkColumnName: string, depth: number): any[] {
-  const treeData = []
-  const nodeData = data.filter(item => item[parentPkColumnName] === parentPk)
-  for (const node of nodeData) {
-    node[NODE_DEPTH_FLAG] = depth
-    treeData.push(node)
-    const children = getTreeData(data, node[pkColumnName], pkColumnName, parentPkColumnName, depth + 1)
-    if (children.length > 0)
-      treeData.push(...children)
-  }
-  return treeData
 }
 </script>
 

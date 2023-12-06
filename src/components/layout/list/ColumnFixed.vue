@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { inject } from 'vue'
+import * as iconSvg from '../../../assets/icon'
 import { FUN_CLOSE_CONTEXT_MENU_TYPE } from '../../common/Menu.vue'
 import type { CachedColumnConf } from '../../conf'
 import { FUN_MODIFY_COLUMN_TYPE } from '../../events'
-import * as iconSvg from '../../../assets/icon'
 
 const props = defineProps<{
   curColumnConf: CachedColumnConf | undefined
@@ -19,8 +19,15 @@ async function setFixedColumn() {
     await modifyColumnFun(undefined, oldFixedColumnConf)
   }
   if (props.curColumnConf) {
-    props.curColumnConf.fixed = !props.curColumnConf.fixed
-    await modifyColumnFun(undefined, props.curColumnConf)
+    await modifyColumnFun(undefined, {
+      name: props.curColumnConf.name,
+      wrap: props.curColumnConf.wrap,
+      fixed: !props.curColumnConf.fixed,
+      width: props.curColumnConf.width,
+      hide: props.curColumnConf.hide,
+      dateStart: props.curColumnConf.dateStart,
+      dateEnd: props.curColumnConf.dateEnd,
+    })
   }
   closeContextMenuFun()
 }

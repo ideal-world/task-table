@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { inject, onMounted } from 'vue'
-import type { CachedColumnConf } from '../../conf'
-import { FUN_MODIFY_COLUMN_TYPE } from '../../events'
+import { inject, onMounted } from 'vue';
+import type { CachedColumnConf } from '../../conf';
+import { FUN_MODIFY_COLUMN_TYPE } from '../../events';
 
 const props = defineProps<{
   columnsConf: CachedColumnConf[]
@@ -40,8 +40,17 @@ onMounted(() => {
     targetEle.releasePointerCapture(event.pointerId)
 
     const curColumnConf = props.columnsConf.find(item => item.name === currColumnName)
-    if (curColumnConf)
-      await modifyColumnFun(undefined, curColumnConf)
+    if (curColumnConf) {
+      await modifyColumnFun(undefined, {
+        name: curColumnConf.name,
+        wrap: curColumnConf.wrap,
+        fixed: curColumnConf.fixed,
+        width: curColumnConf.width,
+        hide: curColumnConf.hide,
+        dateStart: curColumnConf.dateStart,
+        dateEnd: curColumnConf.dateEnd,
+      })
+    }
   })
 
   dragDiv.addEventListener('pointermove', (event) => {

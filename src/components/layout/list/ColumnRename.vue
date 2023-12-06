@@ -17,8 +17,17 @@ const iconPickerCompRef = ref()
 async function renameColumn(event: Event) {
   const target = event.target as HTMLInputElement
   if (props.curColumnConf) {
-    props.curColumnConf.title = target.value
-    await modifyColumnFun(props.curColumnConf)
+    await modifyColumnFun({
+      name: props.curColumnConf.name,
+      title: target.value,
+      icon: props.curColumnConf.icon,
+      dataKind: props.curColumnConf.dataKind,
+      dataEditable: props.curColumnConf.dataEditable,
+      useDict: props.curColumnConf.useDict,
+      dictEditable: props.curColumnConf.dictEditable,
+      multiValue: props.curColumnConf.multiValue,
+      kindDateTimeFormat: props.curColumnConf.kindDateTimeFormat,
+    })
   }
   closeContextMenuFun()
 }

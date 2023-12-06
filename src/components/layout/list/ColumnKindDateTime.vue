@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { inject } from 'vue'
-import type { CachedColumnConf } from '../../conf'
-import { FUN_MODIFY_COLUMN_TYPE } from '../../events'
-import { DataKind } from '../../props'
+import { inject } from 'vue';
+import type { CachedColumnConf } from '../../conf';
+import { FUN_MODIFY_COLUMN_TYPE } from '../../events';
+import { DataKind } from '../../props';
 
 const props = defineProps<{
   curColumnConf: CachedColumnConf | undefined
@@ -12,8 +12,17 @@ const modifyColumnFun = inject(FUN_MODIFY_COLUMN_TYPE)!
 
 async function setDateTimeFormat(newFormat: string) {
   if (props.curColumnConf) {
-    props.curColumnConf.kindDateTimeFormat = newFormat
-    await modifyColumnFun(props.curColumnConf)
+    await modifyColumnFun({
+      name: props.curColumnConf.name,
+      title: props.curColumnConf.title,
+      icon: props.curColumnConf.icon,
+      dataKind: props.curColumnConf.dataKind,
+      dataEditable: props.curColumnConf.dataEditable,
+      useDict: props.curColumnConf.useDict,
+      dictEditable: props.curColumnConf.dictEditable,
+      multiValue: props.curColumnConf.multiValue,
+      kindDateTimeFormat: newFormat,
+    })
   }
 }
 </script>

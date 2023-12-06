@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { inject, ref } from 'vue'
+import * as iconSvg from '../../../assets/icon'
 import { getRandomString } from '../../../utils/basic'
 import IconPickerComp from '../../common/IconPicker.vue'
 import MenuComp, { MenuOffsetKind } from '../../common/Menu.vue'
@@ -8,7 +9,6 @@ import { dictEnableByDataKind, getDefaultIconByDataKind, getDefaultLayoutColumnC
 import { FUN_MODIFY_COLUMN_TYPE, FUN_MODIFY_LAYOUT_TYPE, FUN_NEW_COLUMN_TYPE } from '../../events'
 import type { TableLayoutModifyReq } from '../../props'
 import { DataKind, translateDataKind } from '../../props'
-import * as iconSvg from '../../../assets/icon'
 
 const props = defineProps<{
   basicColumnsConf: TableColumnConf[]
@@ -72,8 +72,15 @@ async function submitNewColumn() {
 async function setShowToggleColumn(columnConf: TableColumnConf) {
   const layoutColumnsConf = props.layoutColumnsConf.find(col => col.name === columnConf.name)
   if (layoutColumnsConf) {
-    layoutColumnsConf.hide = !layoutColumnsConf.hide
-    await modifyColumnFun(undefined, layoutColumnsConf)
+    await modifyColumnFun(undefined, {
+      name: layoutColumnsConf.name,
+      wrap: layoutColumnsConf.wrap,
+      fixed: layoutColumnsConf.fixed,
+      width: layoutColumnsConf.width,
+      hide: !layoutColumnsConf.hide,
+      dateStart: layoutColumnsConf.dateStart,
+      dateEnd: layoutColumnsConf.dateEnd,
+    })
   }
   else {
     const changedLayoutReq: TableLayoutModifyReq = {

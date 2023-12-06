@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import * as dayjs from 'dayjs'
+import dayjs from 'dayjs'
 import type { CachedColumnConf, TableStyleConf } from '../../conf'
 import RowTreeComp from '../../function/RowTree.vue'
 import { DATA_DICT_POSTFIX, DataKind } from '../../props'
