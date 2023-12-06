@@ -2,6 +2,7 @@ import type { InjectionKey, Ref } from 'vue'
 import { toRaw } from 'vue'
 import type { TableBasicConf, TableColumnConf, TableLayoutColumnConf, TableLayoutConf, TableStyleConf } from './conf'
 import { getDefaultValueByDataKind } from './conf'
+import { sortByTree } from './function/RowTree.vue'
 import type { TableCellDictItem, TableCellDictItemResp, TableDataResp, TableDataSliceReq, TableEventProps, TableLayoutModifyReq } from './props'
 import { DATA_DICT_POSTFIX, OperatorKind } from './props'
 
@@ -30,6 +31,10 @@ export async function loadData(layoutId?: string, moreForGroupedValue?: any) {
   if (layout.filters)
     filters = toRaw(layout.filters)
 
+  const slice = {
+    offsetNumber: 0,
+    fetchNumber: layout.fetchDataNumber,
+  }
   if (moreForGroupedValue) {
     const groupFilter = {
       items: [
@@ -45,6 +50,15 @@ export async function loadData(layoutId?: string, moreForGroupedValue?: any) {
       filters.push(groupFilter)
     else
       filters = [groupFilter]
+    if (layout.data && Array.isArray(layout.data)) {
+      const curGroupData = layout.data.find(d => d.groupValue === moreForGroupedValue)
+      if (curGroupData !== undefined)
+        slice.offsetNumber = curGroupData.records.length
+    }
+  }
+  else {
+    if (layout.data && !Array.isArray(layout.data))
+      slice.offsetNumber = layout.data.records.length
   }
   let sorts
   if (layout.sorts)
@@ -58,12 +72,11 @@ export async function loadData(layoutId?: string, moreForGroupedValue?: any) {
   if (layout.aggs)
     aggs = toRaw(layout.aggs)
 
-  let slice
-  if (layout.slice)
-    slice = toRaw(layout.slice)
-
   const resp = await events.loadData(filters, sorts, group, aggs, slice)
   if (Array.isArray(resp)) {
+    resp.forEach((groupData) => {
+      groupData.records = sortByTree(groupData.records, tableBasicConf.pkColumnName, tableBasicConf.parentPkColumnName)
+    })
     // (Re)group query
     if (layout.data && Array.isArray(layout.data))
       layout.data.splice(0, layout.data.length, ...resp)
@@ -76,29 +89,51 @@ export async function loadData(layoutId?: string, moreForGroupedValue?: any) {
       const groupData = layout.data.find(d => d.groupValue === moreForGroupedValue)
       if (groupData) {
         groupData.records.push(...resp.records)
+        groupData.records = sortByTree(groupData.records, tableBasicConf.pkColumnName, tableBasicConf.parentPkColumnName)
         groupData.aggs = resp.aggs
         groupData.totalNumber = resp.totalNumber
       }
     }
     else {
+      resp.records = sortByTree(resp.records, tableBasicConf.pkColumnName, tableBasicConf.parentPkColumnName)
       layout.data = resp
     }
   }
   else {
     // Query without grouping
+    resp.records = sortByTree(resp.records, tableBasicConf.pkColumnName, tableBasicConf.parentPkColumnName)
     layout.data = resp
   }
 }
 
-export const FUN_ADD_DATA_TYPE = Symbol('FUN_ADD_DATA_TYPE') as InjectionKey<(newRecords: { [key: string]: any }[], afterPk?: any, groupValue?: any, reFilter?: boolean, reSort?: boolean, reLoad?: boolean) => Promise<boolean>>
-export async function addData(newRecords: { [key: string]: any }[], afterPk?: any, groupValue?: any, reFilter?: boolean, reSort?: boolean, reLoad?: boolean): Promise<boolean> {
+export const FUN_ADD_DATA_TYPE = Symbol('FUN_ADD_DATA_TYPE') as InjectionKey<(newRecords: { [key: string]: any }[], afterPk: any, reFilter?: boolean, reSort?: boolean, reLoad?: boolean) => Promise<boolean>>
+export async function addData(newRecords: { [key: string]: any }[], afterPk: any, reFilter?: boolean, reSort?: boolean, reLoad?: boolean): Promise<boolean> {
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
-
-  if (Array.isArray(layout.data) && afterPk === undefined && groupValue === undefined)
-    return false
 
   if (!events.saveData)
     return false
+
+  if (tableBasicConf.parentPkColumnName) {
+    if (Array.isArray(layout.data)) {
+      for (const groupData of layout.data) {
+        const afterRecord = groupData.records.find(record => record[tableBasicConf.pkColumnName] === afterPk)
+        if (afterRecord) {
+          newRecords.forEach((record) => {
+            record[tableBasicConf.parentPkColumnName!] = afterRecord[tableBasicConf.parentPkColumnName!]
+          })
+          break
+        }
+      }
+    }
+    else if (layout.data && !Array.isArray(layout.data)) {
+      const afterRecord = layout.data.records.find(record => record[tableBasicConf.pkColumnName] === afterPk)
+      if (afterRecord) {
+        newRecords.forEach((record) => {
+          record[tableBasicConf.parentPkColumnName!] = afterRecord[tableBasicConf.parentPkColumnName!]
+        })
+      }
+    }
+  }
 
   const savedRecords = await events.saveData(newRecords)
   if (reLoad) {
@@ -107,34 +142,18 @@ export async function addData(newRecords: { [key: string]: any }[], afterPk?: an
   }
 
   if (Array.isArray(layout.data)) {
-    if (groupValue) {
-      const data = layout.data.find(d => d.groupValue === groupValue)!
-      if (afterPk !== undefined) {
-        const idx = data.records.findIndex(r => r[tableBasicConf.pkColumnName] === afterPk)
-        data.records.splice(idx + 1, 0, ...savedRecords)
+    layout.data.forEach((groupData) => {
+      const idx = groupData.records.findIndex(r => r[tableBasicConf.pkColumnName] === afterPk)
+      if (idx !== -1) {
+        groupData.records.splice(idx + 1, 0, ...savedRecords)
+        groupData.records = sortByTree(groupData.records, tableBasicConf.pkColumnName, tableBasicConf.parentPkColumnName)
       }
-      else {
-        data.records.splice(data.records.length, 0, ...savedRecords)
-      }
-    }
-    else {
-      layout.data.forEach((groupData) => {
-        if (afterPk !== undefined) {
-          const idx = groupData.records.findIndex(r => r[tableBasicConf.pkColumnName] === afterPk)
-          if (idx !== -1)
-            groupData.records.splice(idx + 1, 0, ...savedRecords)
-        }
-      })
-    }
+    })
   }
   else if (layout.data && !Array.isArray(layout.data)) {
-    if (afterPk !== undefined) {
-      const idx = layout.data.records.findIndex(r => r[tableBasicConf.pkColumnName] === afterPk)
-      layout.data.records.splice(idx + 1, 0, ...savedRecords)
-    }
-    else {
-      layout.data.records.splice(layout.data.records.length, 0, ...savedRecords)
-    }
+    const idx = layout.data.records.findIndex(r => r[tableBasicConf.pkColumnName] === afterPk)
+    layout.data.records.splice(idx + 1, 0, ...savedRecords)
+    layout.data.records = sortByTree(layout.data, tableBasicConf.pkColumnName, tableBasicConf.parentPkColumnName)
   }
   else {
     // Empty,unreachable
@@ -192,10 +211,12 @@ export async function deleteData(deletedPks: any[], reFilter?: boolean, reSort?:
   }
   if (Array.isArray(layout.data)) {
     layout.data.forEach((d) => {
+      deletedPks = filterTreeDataPks(deletedPks, d.records)
       d.records = d.records.filter(item => !deletedPks.includes(item[tableBasicConf.pkColumnName]))
     })
   }
   else if (layout.data && !Array.isArray(layout.data)) {
+    deletedPks = filterTreeDataPks(deletedPks, layout.data.records)
     layout.data.records = layout.data.records.filter(item => !deletedPks.includes(item[tableBasicConf.pkColumnName]))
   }
   else {
@@ -203,6 +224,22 @@ export async function deleteData(deletedPks: any[], reFilter?: boolean, reSort?:
   }
   return true
   // TODO agg清空，重新计算
+}
+
+function filterTreeDataPks(filterPks: any[], records: { [key: string]: any }[]): any[] {
+  if (tableBasicConf.parentPkColumnName === undefined)
+    return filterPks
+
+  const pksWithChildren: any[] = filterPks.slice()
+
+  pksWithChildren.forEach((pk) => {
+    const childrenPks = records.filter(record => record[tableBasicConf.parentPkColumnName!] === pk).map(record => record[tableBasicConf.pkColumnName])
+    if (childrenPks.length > 0) {
+      pksWithChildren.push(...childrenPks)
+      pksWithChildren.push(...filterTreeDataPks(childrenPks, records))
+    }
+  })
+  return pksWithChildren
 }
 
 export const FUN_LOAD_CELL_DICT_ITEMS_TYPE = Symbol('FUN_LOAD_CELL_DICT_ITEMS_TYPE') as InjectionKey<(columnName: string, filterValue?: any, slice?: TableDataSliceReq) => Promise<TableCellDictItemResp>>
@@ -434,6 +471,8 @@ export async function newLayout(newLayoutConf: TableLayoutConf, reFilter?: boole
     sorts: newLayoutConf.sorts,
     group: newLayoutConf.group,
     aggs: newLayoutConf.aggs,
+    expandDataPks: newLayoutConf.expandDataPks,
+    fetchDataNumber: newLayoutConf.fetchDataNumber,
   }))) {
     if (reLoad) {
       await loadData()
@@ -466,6 +505,28 @@ export async function modifyLayout(changedLayoutReq: TableLayoutModifyReq, reFil
   changedLayoutReq.sorts && (layout.sorts = changedLayoutReq.sorts)
   changedLayoutReq.group && (layout.group = changedLayoutReq.group)
   changedLayoutReq.aggs && (layout.aggs = changedLayoutReq.aggs)
+  if (changedLayoutReq.newExpandDataPk) {
+    const idx = layout.expandDataPks.indexOf(changedLayoutReq.newExpandDataPk)
+    if (idx === -1)
+      layout.expandDataPks.push(changedLayoutReq.newExpandDataPk)
+  }
+  if (changedLayoutReq.deleteExpandDataPk) {
+    let deleteExpandDataPks = []
+    if (Array.isArray(layout.data)) {
+      layout.data.forEach((groupData) => {
+        deleteExpandDataPks.push(...filterTreeDataPks([changedLayoutReq.deleteExpandDataPk], groupData.records))
+      })
+    }
+    else {
+      deleteExpandDataPks = filterTreeDataPks([changedLayoutReq.deleteExpandDataPk], (layout.data as TableDataResp).records)
+    }
+    deleteExpandDataPks.forEach((deleteExpandDataPk) => {
+      const idx = layout.expandDataPks.indexOf(deleteExpandDataPk)
+      if (idx !== -1)
+        layout.expandDataPks.splice(idx, 1)
+    })
+  }
+  changedLayoutReq.fetchDataNumber && (layout.fetchDataNumber = changedLayoutReq.fetchDataNumber)
   if (changedLayoutReq.deletedColumnName) {
     const oldLayoutColumnIdx = layout.columns.findIndex(column => column.name === changedLayoutReq.deletedColumnName)
     layout.columns.splice(oldLayoutColumnIdx, 1)

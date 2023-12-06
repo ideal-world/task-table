@@ -121,8 +121,8 @@
       "titlePlaceholder": "新的字典项名称",
       "submit": "添加"
     },
-    "rowAdd": {
-      "new": "新增行"
+    "rowNew": {
+      "newTitle": "新增行"
     },
     "rowCopyPaste": {
       "copyTitle": "复制行",

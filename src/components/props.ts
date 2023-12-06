@@ -132,6 +132,7 @@ export enum LayoutKind {
 export interface TableProps {
   tableId?: string
   pkColumnName: string
+  parentPkColumnName?: string
   columns: TableColumnProps[]
   layouts?: TableLayoutProps[]
   events: TableEventProps
@@ -160,6 +161,8 @@ export interface TableLayoutProps {
   sorts?: TableDataSortReq[]
   group?: TableDataGroupReq
   aggs?: { [key: string]: AggregateKind }
+  expandDataPks?: any[]
+  fetchDataNumber?: number
 }
 
 export interface TableLayoutColumnProps {
@@ -189,6 +192,7 @@ export interface TableEventProps {
     aggs?: { [key: string]: AggregateKind },
     slice?: TableDataSliceReq) => Promise<TableDataResp | TableDataGroupResp[]>
   saveData?: (changedRecords: { [key: string]: any }[]) => Promise<{ [key: string]: any }[]>
+  // Need to delete child node
   deleteData?: (deletedPks: any[]) => Promise<boolean>
 
   newColumn?: (newColumnProps: TableColumnProps, fromColumnName?: string) => Promise<boolean>
@@ -216,6 +220,9 @@ export interface TableLayoutModifyReq {
   sorts?: TableDataSortReq[]
   group?: TableDataGroupReq
   aggs?: { [key: string]: AggregateKind }
+  newExpandDataPk?: any
+  deleteExpandDataPk?: any
+  fetchDataNumber?: number
   columnSortedNames?: [string, string]
   newColumn?: TableLayoutColumnProps
   changedColumn?: TableLayoutColumnProps
@@ -258,8 +265,6 @@ export interface TableDataResp {
 
 export interface TableDataGroupResp extends TableDataResp {
   groupValue: string
-  offsetNumber: number
-  fetchNumber: number
 }
 
 export interface TableCellDictItem {

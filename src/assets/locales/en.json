@@ -121,8 +121,8 @@
       "titlePlaceholder": "New name",
       "submit": "Add"
     },
-    "rowAdd": {
-      "new": "New row"
+    "rowNew": {
+      "newTitle": "New row"
     },
     "rowCopyPaste": {
       "copyTitle": "Copy row(s)",

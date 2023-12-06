@@ -34,23 +34,24 @@ function onSelectDragging(event: PointerEvent) {
   if (!(targetEle instanceof HTMLElement))
     return
 
-  const parentListEle = getParentWithClass(targetEle, 'iw-list')
-  if (parentListEle == null)
+  const cellEle = getParentWithClass(targetEle, 'iw-list-data-cell')
+  if (cellEle === null)
     return
 
-  if (!targetEle.classList.contains('iw-list-data-cell'))
+  const parentListEle = getParentWithClass(cellEle, 'iw-list')
+  if (parentListEle === null)
     return
 
   cleanSelects(parentListEle)
-  if (getParentWithClass(targetEle, 'iw-list-cell')?.dataset.columnName !== props.pkColumnName)
+  if (getParentWithClass(cellEle, 'iw-list-cell')?.dataset.columnName !== props.pkColumnName)
     return
 
-  const selectRowEle = getParentWithClass(targetEle, 'iw-list-data-row')
+  const selectRowEle = getParentWithClass(cellEle, 'iw-list-data-row')
   if (selectRowEle == null)
     return
 
   startRowIdx = getChildIndex(parentListEle, selectRowEle)
-  startCellFixedX = targetEle.getBoundingClientRect().left
+  startCellFixedX = cellEle.getBoundingClientRect().left
   listEle = parentListEle
   addSelect(selectRowEle)
 }
@@ -91,12 +92,10 @@ function onRowSelectMove(event: PointerEvent) {
 
   cleanSelects(parentListEle)
   if (startRowIdx < movedRowIdx) {
-    // eslint-disable-next-line no-unmodified-loop-condition
     for (let i = startRowIdx; i <= movedRowIdx; i++)
       addSelect(parentListEle.children[i] as HTMLElement)
   }
   else {
-    // eslint-disable-next-line no-unmodified-loop-condition
     for (let i = movedRowIdx; i <= startRowIdx; i++)
       addSelect(parentListEle.children[i] as HTMLElement)
   }

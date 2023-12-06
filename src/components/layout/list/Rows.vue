@@ -8,6 +8,7 @@ const props = defineProps<{
   pkColumnName: string
   parentPkColumnName?: string
   expandDataPks: any[]
+  pkKindIsNumber: boolean
   columnsConf: CachedColumnConf[]
   stylesConf: TableStyleConf
   setColumnStyles: (colIdx: number) => any
@@ -18,49 +19,50 @@ const columnsConfWithoutPk = props.columnsConf.filter(column => column.name !== 
 </script>
 
 <template>
-  <div
-    v-for="(row, idx) in props.records" :key="row[props.pkColumnName]"
-    :data-pk="row[props.pkColumnName]"
-    :hidden="props.parentPkColumnName && row[props.parentPkColumnName] && props.expandDataPks.indexOf(row[props.parentPkColumnName]) === -1"
-    :class="`${props.stylesConf.rowClass} iw-list-row iw-list-data-row flex border-r border-r-base-300`"
-  >
-    <!-- TODO openContextMenuFun 改成代理 -->
+  <template v-for="(row, idx) in props.records" :key="row[props.pkColumnName]">
     <div
-      :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-data-cell flex items-center iw-list-data-row--unselected border-solid border-b border-b-base-300 border-l border-l-base-300 whitespace-nowrap flex-nowrap`"
-      :data-column-name="props.pkColumnName" :style="props.setColumnStyles(0)" @contextmenu.prevent="openContextMenuFun"
+      v-show="!props.parentPkColumnName || !row[props.parentPkColumnName] || props.expandDataPks.indexOf(row[props.parentPkColumnName]) !== -1"
+      :data-pk="row[props.pkColumnName]"
+      :class="`${props.stylesConf.rowClass} iw-list-row iw-list-data-row flex border-r border-r-base-300`"
     >
-      <!-- <RowTreeComp v-if="props.parentPkColumnName" :cur-data="row" :next-data="props.records[idx + 1]" :pk-column-name="props.pkColumnName" :parent-pk-column-name="props.parentPkColumnName!" :expand-data-pks="expandDataPks" /> -->
-      <div>{{ row[props.pkColumnName] }}</div>
-    </div>
-    <template v-for="(column, colIdx) in columnsConfWithoutPk" :key="column.name">
+      <!-- TODO openContextMenuFun 改成代理 -->
       <div
-        :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-data-cell flex items-center iw-list-data-row--unselected border-solid border-b border-b-base-300 border-l border-l-base-300 ${column.wrap ? 'break-words flex-wrap' : 'whitespace-nowrap overflow-hidden text-ellipsis flex-nowrap'}`"
-        :data-column-name="column.name" :style="props.setColumnStyles(colIdx + 1)"
+        :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-data-cell flex items-center iw-list-data-row--unselected border-solid border-b border-b-base-300 border-l border-l-base-300 whitespace-nowrap flex-nowrap`"
+        :data-column-name="props.pkColumnName" :style="props.setColumnStyles(0)" @contextmenu.prevent="openContextMenuFun"
       >
-        <template v-if="!column.useDict">
-          <div>{{ row[column.name] }}</div>
-        </template>
-        <template v-else>
-          <div
-            v-for="dictItem in row[column.name + DATA_DICT_POSTFIX]" :key="dictItem.value" :data-value="dictItem.value"
-            class="badge badge-outline pl-0.5 mb-0.5 mr-0.5"
-            :style="`background-color: ${dictItem.color}`"
-          >
-            <div v-if="dictItem.avatar !== undefined" class="avatar">
-              <div class="w-4 rounded-full">
-                <img :src="dictItem.avatar">
-              </div>
-            </div>
-            <span class="ml-1 whitespace-nowrap">{{ dictItem.title }}{{ dictItem.title !== dictItem.value ? `(${dictItem.value})` : '' }}</span>
-          </div>
-        </template>
+        <RowTreeComp v-if="props.parentPkColumnName" :cur-data="row" :next-data="props.records[idx + 1]" :pk-kind-is-number="pkKindIsNumber" :pk-column-name="props.pkColumnName" :parent-pk-column-name="props.parentPkColumnName!" :expand-data-pks="expandDataPks" />
+        <div>{{ row[props.pkColumnName] }}</div>
       </div>
-    </template>
-    <div
-      :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-data-cell flex items-center iw-list-data-row--unselected border-solid border-b border-b-base-300 border-l border-l-base-300 `"
-      :style="props.setColumnStyles(-1)"
-    />
-  </div>
+      <template v-for="(column, colIdx) in columnsConfWithoutPk" :key="column.name">
+        <div
+          :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-data-cell flex items-center iw-list-data-row--unselected border-solid border-b border-b-base-300 border-l border-l-base-300 ${column.wrap ? 'break-words flex-wrap' : 'whitespace-nowrap overflow-hidden text-ellipsis flex-nowrap'}`"
+          :data-column-name="column.name" :style="props.setColumnStyles(colIdx + 1)"
+        >
+          <template v-if="!column.useDict">
+            <div>{{ row[column.name] }}</div>
+          </template>
+          <template v-else>
+            <div
+              v-for="dictItem in row[column.name + DATA_DICT_POSTFIX]" :key="dictItem.value" :data-value="dictItem.value"
+              class="badge badge-outline pl-0.5 mb-0.5 mr-0.5"
+              :style="`background-color: ${dictItem.color}`"
+            >
+              <div v-if="dictItem.avatar !== undefined" class="avatar">
+                <div class="w-4 rounded-full">
+                  <img :src="dictItem.avatar">
+                </div>
+              </div>
+              <span class="ml-1 whitespace-nowrap">{{ dictItem.title }}{{ dictItem.title !== dictItem.value ? `(${dictItem.value})` : '' }}</span>
+            </div>
+          </template>
+        </div>
+      </template>
+      <div
+        :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-data-cell flex items-center iw-list-data-row--unselected border-solid border-b border-b-base-300 border-l border-l-base-300 `"
+        :style="props.setColumnStyles(-1)"
+      />
+    </div>
+  </template>
 </template>
 
 <style lang="css">

@@ -11,8 +11,8 @@ import CellSelectComp from './CellSelect.vue'
 import ColumnAggsComp from './ColumnAggs.vue'
 import { setFixedColumnStyles } from './ColumnFixed.vue'
 import HeaderComp from './Header.vue'
-import RowAddComp from './RowAdd.vue'
 import RowCopyPasteComp from './RowCopyPaste.vue'
+import RowNewComp from './RowNew.vue'
 import RowDeleteComp from './RowDelete.vue'
 import RowSelectComp from './RowSelect.vue'
 import RowsComp from './Rows.vue'
@@ -77,10 +77,11 @@ function setTableWidth() {
     <template v-if="listConf.layout.data && !Array.isArray(listConf.layout.data)">
       <RowsComp
         :records="listConf.layout.data.records" :pk-column-name="listConf.basic.pkColumnName"
+        :expand-data-pks="listConf.layout.expandDataPks"
+        :pk-kind-is-number="pkKindIsNumber"
         :columns-conf="columnsConf" :styles-conf="listConf.basic.styles" :set-column-styles="setColumnStyles"
         :open-context-menu-fun="showRowContextMenu"
       />
-      <RowAddComp />
       <ColumnAggsComp
         :layout-aggs="layout.aggs!" :data-basic="layout.data as TableDataResp"
         :pk-column-name="listConf.basic.pkColumnName" :columns-conf="columnsConf" :styles-conf="listConf.basic.styles"
@@ -95,11 +96,13 @@ function setTableWidth() {
           :group-value="groupData.groupValue" :set-column-styles="setColumnStyles"
         />
         <RowsComp
-          :records="groupData.records" :pk-column-name="listConf.basic.pkColumnName" :columns-conf="columnsConf"
+          :records="groupData.records" :pk-column-name="listConf.basic.pkColumnName" :parent-pk-column-name="listConf.basic.parentPkColumnName"
+          :expand-data-pks="listConf.layout.expandDataPks"
+          :pk-kind-is-number="pkKindIsNumber"
+          :columns-conf="columnsConf"
           :styles-conf="listConf.basic.styles" :set-column-styles="setColumnStyles"
           :open-context-menu-fun="showRowContextMenu"
         />
-        <RowAddComp :group-value="groupData.groupValue" />
       </template>
     </template>
     <CellSelectComp
@@ -120,6 +123,7 @@ function setTableWidth() {
   <MenuComp v-if="selectedDataPks.length > 0" ref="rowMenuCompRef">
     <RowCopyPasteComp :selected-pks="selectedDataPks" :pk-column-name="listConf.basic.pkColumnName" />
     <RowDeleteComp :selected-pks="selectedDataPks" />
+    <RowNewComp :selected-pks="selectedDataPks"/>
   </MenuComp>
   <RowSelectComp
     :selected-pks="selectedDataPks" :pk-column-name="listConf.basic.pkColumnName"

@@ -3,19 +3,19 @@ import type { TableCellDictItem, TableColumnProps, TableDataSliceReq, TableLayou
 import { AggregateKind, DATA_DICT_POSTFIX, DataKind, LayoutKind } from '../src/components/props'
 import { getRandomInt } from '../src/utils/basic'
 
-const columns = [{ name: 'no', dataKind: DataKind.NUMBER, dataEditable: false }, { name: 'name', useDict: true, dictEditable: true }, { name: 'phone' }, { name: 'stats', useDict: true, dictEditable: true, multiValue: true }, { name: 'addr' }, { name: 'time', dataKind: DataKind.DATETIME }]
+const columns = [{ name: 'no', dataKind: DataKind.NUMBER, dataEditable: false }, { name: 'pno', dataKind: DataKind.NUMBER, dataEditable: false }, { name: 'name', useDict: true, dictEditable: true }, { name: 'phone' }, { name: 'stats', useDict: true, dictEditable: true, multiValue: true }, { name: 'addr' }, { name: 'time', dataKind: DataKind.DATETIME }]
 
 const layouts = [{
   id: 'hi',
   title: 'HI',
   layoutKind: LayoutKind.LIST,
   columns: [{
-    name: 'no',
-    width: 80,
-  }, {
     name: 'name',
   }, {
     name: 'stats',
+  }, {
+    name: 'no',
+    width: 80,
   }, {
     name: 'addr',
   }, {
@@ -51,10 +51,11 @@ const events = {
           resolve(attachDict(data.map((d) => {
             d.no = getRandomInt(1000, 2000)
             d.name = 'xy'
-            d.stats = ['init']
-            d.phone = '！Phone2'
-            d.addr = '！Addr2'
-            d.time = '2023-10-24'
+            d.stats = []
+            d.phone = ''
+            d.addr = ''
+            d.time = ''
+            d.pno = data[0].pno
             return d
           })))
         }
@@ -246,26 +247,26 @@ const resp1 = {
 const data2 = [
   { no: 1, name: 'xh', stats: ['init'], phone: 'Phone1', addr: 'Addr1 Addr1 Addr1 Addr1 Addr1 Addr1', time: '2023-10-23' },
   { no: 2, name: 'xh', stats: ['init'], phone: 'Phone2', addr: 'Addr2', time: '2023-10-24' },
-  { no: 3, name: 'xh', stats: ['progress', 'risk'], phone: 'Phone3', addr: 'Addr3', time: '2023-10-25' },
-  { no: 4, name: 'xh', stats: ['init'], phone: 'Phone4', addr: 'Addr4', time: '2023-10-26' },
-  { no: 5, name: 'xh', stats: ['init'], phone: 'Phone5', addr: 'Addr5', time: '2023-10-27' },
+  { no: 3, pno: 1, name: 'xh', stats: ['progress', 'risk'], phone: 'Phone3', addr: 'Addr3', time: '2023-10-25' },
+  { no: 4, pno: 1, name: 'xh', stats: ['init'], phone: 'Phone4', addr: 'Addr4', time: '2023-10-26' },
+  { no: 5, pno: 1, name: 'xh', stats: ['init'], phone: 'Phone5', addr: 'Addr5', time: '2023-10-27' },
   { no: 6, name: 'xh', stats: ['init'], phone: 'Phone6', addr: 'Addr6', time: '2023-10-28' },
   { no: 7, name: 'xh', stats: ['init'], phone: 'Phone7', addr: 'Addr7', time: '2023-10-29' },
-  { no: 8, name: 'xh', stats: ['init'], phone: 'Phone8', addr: 'Addr8', time: '2023-10-30' },
-  { no: 9, name: 'xh', stats: ['init'], phone: 'Phone9', addr: 'Addr9', time: '2023-10-31' },
-  { no: 10, name: 'xh', stats: ['close'], phone: 'Phone10', addr: 'Addr10', time: '2023-11-1' },
+  { no: 8, pno: 4, name: 'xh', stats: ['init'], phone: 'Phone8', addr: 'Addr8', time: '2023-10-30' },
+  { no: 9, pno: 4, name: 'xh', stats: ['init'], phone: 'Phone9', addr: 'Addr9', time: '2023-10-31' },
+  { no: 10, pno: 8, name: 'xh', stats: ['close'], phone: 'Phone10', addr: 'Addr10', time: '2023-11-1' },
   { no: 11, name: 'xh', stats: ['close'], phone: 'Phone11', addr: 'Addr11', time: '2023-11-2' },
   { no: 12, name: 'xh', stats: ['close'], phone: 'Phone12', addr: 'Addr12', time: '2023-11-3' },
   { no: 13, name: 'xh', stats: ['close'], phone: 'Phone13', addr: 'Addr13', time: '2023-11-4' },
   { no: 14, name: 'xh', stats: ['close'], phone: 'Phone14', addr: 'Addr14', time: '2023-11-5' },
   { no: 15, name: 'xh', stats: ['close'], phone: 'Phone15', addr: 'Addr15', time: '2023-11-6' },
-  { no: 16, name: 'xh', stats: ['close'], phone: 'Phone16', addr: 'Addr16', time: '2023-11-7' },
+  { no: 16, pno: 8, name: 'xh', stats: ['close'], phone: 'Phone16', addr: 'Addr16', time: '2023-11-7' },
   { no: 17, name: 'xh', stats: ['finish'], phone: 'Phone17', addr: 'Addr17', time: '2023-11-8' },
   { no: 18, name: 'xh', stats: ['finish'], phone: 'Phone18', addr: 'Addr18', time: '2023-11-9' },
   { no: 19, name: 'xh', stats: ['finish'], phone: 'Phone19', addr: 'Addr19', time: '2023-11-10' },
   { no: 20, name: 'xh', stats: ['finish'], phone: 'Phone20', addr: 'Addr20', time: '2023-11-11' },
   { no: 21, name: 'xh', stats: ['finish'], phone: 'Phone21', addr: 'Addr21', time: '2023-11-12' },
-  { no: 22, name: 'xh', stats: ['finish'], phone: 'Phone22', addr: 'Addr22', time: '2023-11-13' },
+  { no: 22, pno: 1, name: 'xh', stats: ['finish'], phone: 'Phone22', addr: 'Addr22', time: '2023-11-13' },
   { no: 23, name: 'xh', stats: ['finish'], phone: 'Phone23', addr: 'Addr23', time: '2023-11-14' },
   { no: 24, name: 'xh', stats: ['progress', 'risk'], phone: 'Phone24', addr: 'Addr24', time: '2023-11-15' },
   { no: 25, name: 'xh', stats: ['close'], phone: 'Phone25', addr: 'Addr25', time: '2023-11-16' },
@@ -283,7 +284,7 @@ const data3 = [
   { no: 114, name: 'xy', stats: ['init'], phone: 'Phone14', addr: 'Addr14', time: '2023-11-5' },
   { no: 115, name: 'xy', stats: ['init'], phone: 'Phone15', addr: 'Addr15', time: '2023-11-6' },
   { no: 116, name: 'xy', stats: ['init'], phone: 'Phone16', addr: 'Addr16', time: '2023-11-7' },
-  { no: 117, name: 'xy', stats: ['init'], phone: 'Phone17', addr: 'Addr17', time: '2023-11-8' },
+  { no: 117, pno: 210, name: 'xy', stats: ['init'], phone: 'Phone17', addr: 'Addr17', time: '2023-11-8' },
   { no: 118, name: 'xy', stats: ['init'], phone: 'Phone18', addr: 'Addr18', time: '2023-11-9' },
   { no: 119, name: 'xy', stats: ['init'], phone: 'Phone19', addr: 'Addr19', time: '2023-11-10' },
   { no: 210, name: 'xy', stats: ['init'], phone: 'Phone20', addr: 'Addr20', time: '2023-11-11' },
@@ -345,7 +346,7 @@ const resp2 = [
   <div style="height: 600px">
     <!-- <iw-task-table  pk-column-name="no" :columns="columns" :events="events" :layouts="layouts"></iw-task-table> -->
     <iw-task-table
-      pk-column-name="no" :columns="columns" :events="events" :layouts="layouts"
+      pk-column-name="no" parent-pk-column-name="pno" :columns="columns" :events="events" :layouts="layouts"
       :group="group"
     />
   </div>
