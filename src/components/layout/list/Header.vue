@@ -44,7 +44,7 @@ async function showColumnMoreContextMenu(event: MouseEvent) {
   >
     <div
       v-for="(column, colIdx) in columnsConf" :key="column.name"
-      :class="`${props.basic.styles.cellClass} iw-list-cell iw-list-header-cell flex items-center bg-base-100 border-solid border-b border-b-base-300 border-l border-l-base-300 hover:cursor-pointer hover:bg-base-200`"
+      :class="`${props.basic.styles.cellClass} iw-list-cell iw-list-header-cell ${column.name !== props.basic.pkColumnName ? 'iw-list-header-normal-cell' : ''} flex items-center bg-base-100 border-solid border-b border-b-base-300 border-l border-l-base-300 hover:cursor-pointer hover:bg-base-200`"
       :data-column-name="column.name"
       :style="props.setColumnStyles(colIdx)"
       @click="(event: MouseEvent) => showHeaderContextMenu(event, column.name)"
@@ -69,7 +69,7 @@ async function showColumnMoreContextMenu(event: MouseEvent) {
       class="iw-contextmenu__item flex justify-between w-full p-1 mb-1 mt-1"
     >
       <ColumnCopyComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
-      <ColumnHideComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
+      <ColumnHideComp :cur-column-conf="selectedColumnConf" :pk-column-name="props.basic.pkColumnName" :columns-conf="columnsConf" />
       <ColumnDeleteComp
         :cur-column-conf="selectedColumnConf"
         :pk-column-name="props.basic.pkColumnName"
@@ -79,7 +79,7 @@ async function showColumnMoreContextMenu(event: MouseEvent) {
       class="iw-contextmenu__item flex justify-between w-full p-1"
     >
       <ColumnFixedComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
-      <CellWrapComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
+      <CellWrapComp :cur-column-conf="selectedColumnConf" :pk-column-name="props.basic.pkColumnName" :columns-conf="columnsConf" />
     </div>
     <ColumnDictComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
   </MenuComp>

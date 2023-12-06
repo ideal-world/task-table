@@ -8,6 +8,7 @@ import * as iconSvg from '../../../assets/icon'
 const props = defineProps<{
   curColumnConf: CachedColumnConf | undefined
   columnsConf: CachedColumnConf[]
+  pkColumnName: string
 }>()
 const modifyColumnFun = inject(FUN_MODIFY_COLUMN_TYPE)!
 const closeContextMenuFun = inject(FUN_CLOSE_CONTEXT_MENU_TYPE)!
@@ -22,7 +23,7 @@ async function setHidedColumn() {
 </script>
 
 <template>
-  <div class="cursor-pointer ml-1 mr-1" @click="setHidedColumn">
+  <div v-if="props.curColumnConf?.name !== props.pkColumnName" class="cursor-pointer ml-1 mr-1" @click="setHidedColumn">
     <i :class="iconSvg.HIDE" />
     {{ $t('list.columnHide.title') }}
   </div>

@@ -12,7 +12,7 @@ const modifyLayoutFun = inject(FUN_MODIFY_LAYOUT_TYPE)!
 
 onMounted(() => {
   Sortable.create(document.getElementsByClassName('iw-list-header')[0] as HTMLElement, {
-    draggable: '.iw-list-header-cell',
+    draggable: '.iw-list-header-normal-cell',
     async onEnd(evt) {
       if (evt.oldIndex !== evt.newIndex) {
         const changedLayoutReq: TableLayoutModifyReq = {

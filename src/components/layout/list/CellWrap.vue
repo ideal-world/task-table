@@ -8,6 +8,7 @@ import * as iconSvg from '../../../assets/icon'
 const props = defineProps<{
   curColumnConf: CachedColumnConf | undefined
   columnsConf: CachedColumnConf[]
+  pkColumnName: string
 }>()
 const modifyColumnFun = inject(FUN_MODIFY_COLUMN_TYPE)!
 const closeContextMenuFun = inject(FUN_CLOSE_CONTEXT_MENU_TYPE)!
@@ -22,7 +23,7 @@ async function setWrapColumn() {
 </script>
 
 <template>
-  <div class="flex justify-between items-center w-full  ml-2">
+  <div v-if="props.curColumnConf?.name !== props.pkColumnName" class="flex justify-between items-center w-full  ml-2">
     <span>
       <i :class="iconSvg.WRAP" />
       <span> {{ $t('list.cellWrap.title') }}</span>

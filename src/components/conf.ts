@@ -1,6 +1,6 @@
 import * as iconSvg from '../assets/icon'
 import locales from '../locales'
-import type { AggregateKind, TableDataFilterReq, TableDataGroupReq, TableDataGroupResp, TableDataResp, TableDataSliceReq, TableDataSortReq, TableProps } from './props'
+import type { AggregateKind, TableDataFilterReq, TableDataGroupReq, TableDataGroupResp, TableDataResp, TableDataSortReq, TableProps } from './props'
 import { DataKind, LayoutKind, OperatorKind, SizeKind } from './props'
 
 const { t } = locales.global
@@ -8,6 +8,7 @@ const { t } = locales.global
 export interface TableBasicConf {
   tableId: string
   pkColumnName: string
+  parentPkColumnName?: string
   columns: TableColumnConf[]
   styles: TableStyleConf
 }
@@ -33,7 +34,8 @@ export interface TableLayoutConf {
   sorts?: TableDataSortReq[]
   group?: TableDataGroupReq
   aggs?: { [key: string]: AggregateKind }
-  slice?: TableDataSliceReq
+  expandDataPks: any[]
+  fetchDataNumber: number
   data?: TableDataResp | TableDataGroupResp[]
 }
 
@@ -204,6 +206,7 @@ export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]]
   const basicConf = {
     tableId: props.tableId ?? `iw-table${Math.floor(Math.random() * 1000000)}`,
     pkColumnName: props.pkColumnName,
+    parentPkColumnName: props.parentPkColumnName,
     columns: props.columns.map((column) => {
       return {
         name: column.name,
@@ -249,6 +252,8 @@ export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]]
         sorts: layout.sorts,
         group: layout.group,
         aggs: layout.aggs,
+        expandDataPks: layout.expandDataPks ?? [],
+        fetchDataNumber: layout.fetchDataNumber ?? 20,
       })
     })
   }
@@ -263,8 +268,34 @@ export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]]
       }),
       filters: [],
       sorts: [],
+      expandDataPks: [],
+      fetchDataNumber: 20,
     })
   }
+  layoutsConf.forEach((layout) => {
+    // Make sure the primary key is in the first column
+    const pkIdx = layout.columns.findIndex(column => column.name === basicConf.pkColumnName)
+    if (pkIdx !== -1) {
+      const pkColumn = layout.columns[pkIdx]!
+      pkColumn.dateEnd = false
+      pkColumn.dateStart = false
+      pkColumn.hide = false
+      pkColumn.wrap = false
+      layout.columns.splice(pkIdx, 1)
+      layout.columns.splice(0, 0, pkColumn)
+    }
+    else {
+      layout.columns.splice(0, 0, {
+        name: basicConf.columns.find(column => column.name === basicConf.pkColumnName)!.name,
+        wrap: false,
+        fixed: false,
+        width: 200,
+        hide: false,
+        dateStart: false,
+        dateEnd: false,
+      })
+    }
+  })
   return [basicConf, layoutsConf]
 }
 

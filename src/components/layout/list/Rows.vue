@@ -1,29 +1,44 @@
 <script setup lang="ts">
 import type { CachedColumnConf, TableStyleConf } from '../../conf'
 import { DATA_DICT_POSTFIX } from '../../props'
+import RowTreeComp from '../../function/RowTree.vue'
 
 const props = defineProps<{
   records: { [key: string]: any }[]
   pkColumnName: string
+  parentPkColumnName?: string
+  expandDataPks: any[]
   columnsConf: CachedColumnConf[]
   stylesConf: TableStyleConf
   setColumnStyles: (colIdx: number) => any
   openContextMenuFun: (event: MouseEvent) => void
 }>()
+
+const columnsConfWithoutPk = props.columnsConf.filter(column => column.name !== props.pkColumnName)
 </script>
 
 <template>
   <div
-    v-for="(row) in props.records" :key="row[props.pkColumnName]" :data-pk="row[props.pkColumnName]"
+    v-for="(row, idx) in props.records" :key="row[props.pkColumnName]"
+    :data-pk="row[props.pkColumnName]"
+    :hidden="props.parentPkColumnName && row[props.parentPkColumnName] && props.expandDataPks.indexOf(row[props.parentPkColumnName]) === -1"
     :class="`${props.stylesConf.rowClass} iw-list-row iw-list-data-row flex border-r border-r-base-300`"
   >
-    <template v-for="(column, colIdx) in props.columnsConf" :key="column.name">
+    <!-- TODO openContextMenuFun 改成代理 -->
+    <div
+      :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-data-cell flex items-center iw-list-data-row--unselected border-solid border-b border-b-base-300 border-l border-l-base-300 whitespace-nowrap flex-nowrap`"
+      :data-column-name="props.pkColumnName" :style="props.setColumnStyles(0)" @contextmenu.prevent="openContextMenuFun"
+    >
+      <!-- <RowTreeComp v-if="props.parentPkColumnName" :cur-data="row" :next-data="props.records[idx + 1]" :pk-column-name="props.pkColumnName" :parent-pk-column-name="props.parentPkColumnName!" :expand-data-pks="expandDataPks" /> -->
+      <div>{{ row[props.pkColumnName] }}</div>
+    </div>
+    <template v-for="(column, colIdx) in columnsConfWithoutPk" :key="column.name">
       <div
         :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-data-cell flex items-center iw-list-data-row--unselected border-solid border-b border-b-base-300 border-l border-l-base-300 ${column.wrap ? 'break-words flex-wrap' : 'whitespace-nowrap overflow-hidden text-ellipsis flex-nowrap'}`"
-        :data-column-name="column.name" :style="props.setColumnStyles(colIdx)" @contextmenu.prevent="openContextMenuFun"
+        :data-column-name="column.name" :style="props.setColumnStyles(colIdx + 1)"
       >
         <template v-if="!column.useDict">
-          {{ row[column.name] }}
+          <div>{{ row[column.name] }}</div>
         </template>
         <template v-else>
           <div
