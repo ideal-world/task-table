@@ -313,6 +313,7 @@ export async function newColumn(newColumnConf: TableColumnConf, newLayoutColumnC
       useDict: newColumnConf.useDict,
       dictEditable: newColumnConf.dictEditable,
       multiValue: newColumnConf.multiValue,
+      kindDateTimeFormat: newColumnConf.kindDateTimeFormat,
     }, fromColumnName)
     && await events.modifyLayout({
       id: currentLayoutId.value,
@@ -381,6 +382,7 @@ export async function modifyColumn(changedColumnConf?: TableColumnConf, changedL
     icon: changedColumnConf.icon,
     dataKind: changedColumnConf.dataKind,
     dataEditable: changedColumnConf.dataEditable,
+    kindDateTimeFormat: changedColumnConf.kindDateTimeFormat,
   })))
     return false
 

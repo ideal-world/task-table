@@ -121,6 +121,13 @@
       "titlePlaceholder": "新的字典项名称",
       "submit": "添加"
     },
+    "columnKindDateTime": {
+      "dateTitle": "日期时间配置",
+      "formatPlaceholder": "格式化",
+      "formatError": "格式化错误",
+      "dateFormatTip": "YYYY 年, MM 月, DD 日",
+      "timeFormatTip": "HH 时, mm 分, ss 秒 SSS 毫秒"
+    },
     "rowNew": {
       "newTitle": "新增行"
     },

@@ -121,6 +121,13 @@
       "titlePlaceholder": "New name",
       "submit": "Add"
     },
+    "columnKindDateTime": {
+      "dateTitle": "Date/Time configuration",
+      "formatPlaceholder": "Format",
+      "formatError": "Format error",
+      "dateFormatTip": "YYYY Year, MM Month, DD Day",
+      "timeFormatTip": "HH Hour, mm Minute, ss Second, SSS Millisecond"
+    },
     "rowNew": {
       "newTitle": "New row"
     },

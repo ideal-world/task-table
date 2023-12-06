@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import type { CachedColumnConf, TableStyleConf } from '../../conf';
-import RowTreeComp from '../../function/RowTree.vue';
-import { DATA_DICT_POSTFIX } from '../../props';
+import { computed } from 'vue'
+import * as dayjs from 'dayjs'
+import type { CachedColumnConf, TableStyleConf } from '../../conf'
+import RowTreeComp from '../../function/RowTree.vue'
+import { DATA_DICT_POSTFIX, DataKind } from '../../props'
 
 const props = defineProps<{
   records: { [key: string]: any }[]
@@ -14,7 +16,9 @@ const props = defineProps<{
   setColumnStyles: (colIdx: number) => any
 }>()
 
-const columnsConfWithoutPk = props.columnsConf.filter(column => column.name !== props.pkColumnName)
+const columnsConfWithoutPk = computed<CachedColumnConf[]>(() => {
+  return props.columnsConf.filter(column => column.name !== props.pkColumnName)
+})
 </script>
 
 <template>
@@ -36,7 +40,10 @@ const columnsConfWithoutPk = props.columnsConf.filter(column => column.name !== 
           :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-data-cell flex items-center iw-list-data-row--unselected border-solid border-b border-b-base-300 border-l border-l-base-300 ${column.wrap ? 'break-words flex-wrap' : 'whitespace-nowrap overflow-hidden text-ellipsis flex-nowrap'}`"
           :data-column-name="column.name" :style="props.setColumnStyles(colIdx + 1)"
         >
-          <template v-if="!column.useDict">
+          <template v-if="column.dataKind === DataKind.DATE || column.dataKind === DataKind.TIME || column.dataKind === DataKind.DATETIME">
+            <div>{{ column.kindDateTimeFormat ? dayjs(row[column.name]).format(column.kindDateTimeFormat) : row[column.name] }}</div>
+          </template>
+          <template v-else-if="!column.useDict">
             <div>{{ row[column.name] }}</div>
           </template>
           <template v-else>

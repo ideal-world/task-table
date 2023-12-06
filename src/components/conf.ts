@@ -22,6 +22,7 @@ export interface TableColumnConf {
   useDict: boolean
   dictEditable: boolean
   multiValue: boolean
+  kindDateTimeFormat?: string
 }
 
 export interface TableLayoutConf {
@@ -217,6 +218,7 @@ export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]]
         useDict: column.useDict ?? false,
         dictEditable: column.dictEditable ?? false,
         multiValue: column.multiValue ?? false,
+        kindDateTimeFormat: column.kindDateTimeFormat,
       }
     }),
     styles: {

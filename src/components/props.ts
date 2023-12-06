@@ -148,6 +148,7 @@ export interface TableColumnProps {
   useDict?: boolean
   dictEditable?: boolean
   multiValue?: boolean
+  kindDateTimeFormat?:string
 }
 
 export interface TableLayoutProps {

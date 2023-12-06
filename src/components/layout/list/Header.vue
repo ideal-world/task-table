@@ -13,6 +13,7 @@ import ColumnMoreComp from './ColumnMore.vue'
 import ColumnRenameComp from './ColumnRename.vue'
 import ColumnResizeComp from './ColumnResize.vue'
 import ColumnSortComp from './ColumnSort.vue'
+import ColumnKindDateTimeComp from './ColumnKindDateTime.vue'
 
 const props = defineProps<{
   columnsConf: CachedColumnConf[]
@@ -82,6 +83,7 @@ async function showColumnMoreContextMenu(event: MouseEvent) {
       <CellWrapComp :cur-column-conf="selectedColumnConf" :pk-column-name="props.basic.pkColumnName" :columns-conf="columnsConf" />
     </div>
     <ColumnDictComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
+    <ColumnKindDateTimeComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
   </MenuComp>
   <ColumnMoreComp
     ref="headerColumnMoreCompRef" :basic-columns-conf="props.basic.columns"
