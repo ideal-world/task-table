@@ -59,7 +59,7 @@ const events = {
             return d
           })))
         }
-        else if (Object.values(data[0]).length === 1) {
+        else if (Object.keys(data[0]).length === 2 && Object.keys(data[0]).includes('pno')) {
           // Copy
           resp2.forEach((resp) => {
             const storageRecords = resp.records.filter(record => data.find(d => d.no === record.no))

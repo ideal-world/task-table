@@ -19,11 +19,42 @@ let listEle: HTMLElement | undefined
 
 onMounted(() => {
   document.querySelectorAll('.iw-list').forEach((listEle) => {
+    listEle.addEventListener('contextmenu', onSelectSingle as EventListener)
     listEle.addEventListener('pointerdown', onSelectDragging as EventListener)
     listEle.addEventListener('pointermove', onRowSelectMove as EventListener)
     listEle.addEventListener('pointerup', onRowSelectDraped as EventListener)
   })
 })
+
+function onSelectSingle(event: PointerEvent) {
+  event.preventDefault()
+
+  const targetEle = event.target
+  if (!(targetEle instanceof HTMLElement))
+    return
+
+  const cellEle = getParentWithClass(targetEle, 'iw-list-data-cell')
+  if (cellEle === null)
+    return
+
+  const selectRowEle = getParentWithClass(cellEle, 'iw-list-data-row')
+  if (selectRowEle == null)
+    return
+
+  let selectPk
+  if (props.pkKindIsNumber)
+    selectPk = Number.parseInt(selectRowEle.dataset.pk as string)
+  else
+    selectPk = selectRowEle.dataset.pk
+
+  if (!props.selectedPks.includes(selectPk)) {
+    const parentListEle = getParentWithClass(cellEle, 'iw-list')
+    if (parentListEle === null)
+      return
+    cleanSelects(parentListEle)
+    addSelect(selectRowEle)
+  }
+}
 
 function onSelectDragging(event: PointerEvent) {
   // Disable right-click to avoid right-click menu and selection conflicts

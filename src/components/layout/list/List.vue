@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
+import { getParentWithClass } from '../../../utils/basic'
 import MenuComp from '../../common/Menu.vue'
 import type { CachedColumnConf, TableBasicConf, TableLayoutConf } from '../../conf'
 import type { TableDataResp } from '../../props'
@@ -12,8 +13,8 @@ import ColumnAggsComp from './ColumnAggs.vue'
 import { setFixedColumnStyles } from './ColumnFixed.vue'
 import HeaderComp from './Header.vue'
 import RowCopyPasteComp from './RowCopyPaste.vue'
-import RowNewComp from './RowNew.vue'
 import RowDeleteComp from './RowDelete.vue'
+import RowNewComp from './RowNew.vue'
 import RowSelectComp from './RowSelect.vue'
 import RowsComp from './Rows.vue'
 
@@ -45,8 +46,8 @@ const columnsConf = computed<CachedColumnConf[]>(() => {
 
 const rowMenuCompRef = ref()
 
-function showRowContextMenu(event: MouseEvent) {
-  rowMenuCompRef.value.show(event)
+function showRowContextMenu(event: PointerEvent) {
+  rowMenuCompRef.value && rowMenuCompRef.value.show(event)
 }
 
 function setColumnStyles(colIdx: number) {
@@ -66,6 +67,19 @@ function setTableWidth() {
   styles.width = `${listConf.layout.columns.filter(column => !column.hide).reduce((count, col) => count + col.width, NEW_COLUMN_WIDTH)}px`
   return styles
 }
+
+onMounted(() => {
+  document.querySelectorAll('.iw-list').forEach((listEle) => {
+    listEle.addEventListener('contextmenu', (event) => {
+      const pkEle = getParentWithClass(event.target as HTMLElement, 'iw-list-data-pk-cell')
+      if (pkEle === null)
+        return
+
+      event.preventDefault()
+      showRowContextMenu(event as PointerEvent)
+    })
+  })
+})
 </script>
 
 <template>
@@ -80,7 +94,6 @@ function setTableWidth() {
         :expand-data-pks="listConf.layout.expandDataPks"
         :pk-kind-is-number="pkKindIsNumber"
         :columns-conf="columnsConf" :styles-conf="listConf.basic.styles" :set-column-styles="setColumnStyles"
-        :open-context-menu-fun="showRowContextMenu"
       />
       <ColumnAggsComp
         :layout-aggs="layout.aggs!" :data-basic="layout.data as TableDataResp"
@@ -101,7 +114,6 @@ function setTableWidth() {
           :pk-kind-is-number="pkKindIsNumber"
           :columns-conf="columnsConf"
           :styles-conf="listConf.basic.styles" :set-column-styles="setColumnStyles"
-          :open-context-menu-fun="showRowContextMenu"
         />
       </template>
     </template>
@@ -123,7 +135,7 @@ function setTableWidth() {
   <MenuComp v-if="selectedDataPks.length > 0" ref="rowMenuCompRef">
     <RowCopyPasteComp :selected-pks="selectedDataPks" :pk-column-name="listConf.basic.pkColumnName" />
     <RowDeleteComp :selected-pks="selectedDataPks" />
-    <RowNewComp :selected-pks="selectedDataPks"/>
+    <RowNewComp :selected-pks="selectedDataPks" />
   </MenuComp>
   <RowSelectComp
     :selected-pks="selectedDataPks" :pk-column-name="listConf.basic.pkColumnName"

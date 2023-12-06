@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { CachedColumnConf, TableStyleConf } from '../../conf'
-import { DATA_DICT_POSTFIX } from '../../props'
-import RowTreeComp from '../../function/RowTree.vue'
+import type { CachedColumnConf, TableStyleConf } from '../../conf';
+import RowTreeComp from '../../function/RowTree.vue';
+import { DATA_DICT_POSTFIX } from '../../props';
 
 const props = defineProps<{
   records: { [key: string]: any }[]
@@ -12,7 +12,6 @@ const props = defineProps<{
   columnsConf: CachedColumnConf[]
   stylesConf: TableStyleConf
   setColumnStyles: (colIdx: number) => any
-  openContextMenuFun: (event: MouseEvent) => void
 }>()
 
 const columnsConfWithoutPk = props.columnsConf.filter(column => column.name !== props.pkColumnName)
@@ -25,10 +24,9 @@ const columnsConfWithoutPk = props.columnsConf.filter(column => column.name !== 
       :data-pk="row[props.pkColumnName]"
       :class="`${props.stylesConf.rowClass} iw-list-row iw-list-data-row flex border-r border-r-base-300`"
     >
-      <!-- TODO openContextMenuFun 改成代理 -->
       <div
-        :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-data-cell flex items-center iw-list-data-row--unselected border-solid border-b border-b-base-300 border-l border-l-base-300 whitespace-nowrap flex-nowrap`"
-        :data-column-name="props.pkColumnName" :style="props.setColumnStyles(0)" @contextmenu.prevent="openContextMenuFun"
+        :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-data-cell iw-list-data-pk-cell flex items-center iw-list-data-row--unselected border-solid border-b border-b-base-300 border-l border-l-base-300 whitespace-nowrap flex-nowrap`"
+        :data-column-name="props.pkColumnName" :style="props.setColumnStyles(0)"
       >
         <RowTreeComp v-if="props.parentPkColumnName" :cur-data="row" :next-data="props.records[idx + 1]" :pk-kind-is-number="pkKindIsNumber" :pk-column-name="props.pkColumnName" :parent-pk-column-name="props.parentPkColumnName!" :expand-data-pks="expandDataPks" />
         <div>{{ row[props.pkColumnName] }}</div>
