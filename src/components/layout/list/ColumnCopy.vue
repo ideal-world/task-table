@@ -7,30 +7,29 @@ import type { CachedColumnConf, TableColumnConf, TableLayoutColumnConf } from '.
 import { FUN_NEW_COLUMN_TYPE } from '../../events'
 
 const props = defineProps<{
-  curColumnConf: CachedColumnConf | undefined
+  curColumnConf: CachedColumnConf
   columnsConf: CachedColumnConf[]
 }>()
 const newColumnFun = inject(FUN_NEW_COLUMN_TYPE)!
 const closeContextMenuFun = inject(FUN_CLOSE_CONTEXT_MENU_TYPE)!
 
 async function copyColumn() {
-  const curColumnConf = props.curColumnConf!
-  const newColumnName: string = `${curColumnConf.name}_${getRandomString(5)}`
+  const newColumnName: string = `${props.curColumnConf.name}_${getRandomString(5)}`
   const newColumnConf: TableColumnConf = {
     name: newColumnName,
-    title: `${curColumnConf.title}_copy`,
-    icon: curColumnConf.icon,
-    dataKind: curColumnConf.dataKind,
-    dataEditable: curColumnConf.dataEditable,
-    useDict: curColumnConf.useDict,
-    dictEditable: curColumnConf.dictEditable,
-    multiValue: curColumnConf.multiValue,
+    title: `${props.curColumnConf.title}_copy`,
+    icon: props.curColumnConf.icon,
+    dataKind: props.curColumnConf.dataKind,
+    dataEditable: props.curColumnConf.dataEditable,
+    useDict: props.curColumnConf.useDict,
+    dictEditable: props.curColumnConf.dictEditable,
+    multiValue: props.curColumnConf.multiValue,
   }
   const newLayoutColumnConf: TableLayoutColumnConf = {
-    ...curColumnConf,
+    ...props.curColumnConf,
     name: newColumnName,
   }
-  await newColumnFun(newColumnConf, newLayoutColumnConf, curColumnConf.name)
+  await newColumnFun(newColumnConf, newLayoutColumnConf, props.curColumnConf.name)
   closeContextMenuFun()
 }
 </script>

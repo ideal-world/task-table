@@ -9,7 +9,7 @@ import { FUN_DELETE_CELL_DICT_ITEM_TYPE, FUN_LOAD_CELL_DICT_ITEMS_TYPE, FUN_SAVE
 import type { TableCellDictItem } from '../../props'
 
 const props = defineProps<{
-  curColumnConf: CachedColumnConf | undefined
+  curColumnConf: CachedColumnConf
   columnsConf: CachedColumnConf[]
 }>()
 const loadCellDictItemsFun = inject(FUN_LOAD_CELL_DICT_ITEMS_TYPE)!
@@ -28,8 +28,8 @@ const selectedDictItem = ref< {
 }>({})
 
 watch(props, async () => {
-  if (props.curColumnConf?.useDict) {
-    curAllDictItems.value = (await loadCellDictItemsFun(props.curColumnConf!.name)).records
+  if (props.curColumnConf.useDict) {
+    curAllDictItems.value = (await loadCellDictItemsFun(props.curColumnConf.name)).records
     curDictItems.value = curAllDictItems.value
   }
 })
@@ -39,11 +39,15 @@ function searchDictItems(value: string) {
 }
 
 onMounted(async () => {
+  if (props.curColumnConf.useDict) {
+    curAllDictItems.value = (await loadCellDictItemsFun(props.curColumnConf.name)).records
+    curDictItems.value = curAllDictItems.value
+  }
   document.querySelector('.iw-column-dict-list')?.addEventListener('click', async (event) => {
     const targetEle = event.target as HTMLElement
     if (targetEle.classList.contains('iw-column-dict-list__item--delete')) {
       const value = targetEle.parentElement!.dataset.value
-      await deleteCellDictItemFun(props.curColumnConf!.name, value!)
+      await deleteCellDictItemFun(props.curColumnConf.name, value!)
       curDictItems.value = curDictItems.value.filter(val => val.value !== value)
       curAllDictItems.value = curAllDictItems.value.filter(val => val.value !== value)
     }
@@ -57,7 +61,7 @@ onMounted(async () => {
       if (evt.oldIndex !== evt.newIndex) {
         const oriItem = curDictItems.value[evt.oldIndex!]
         const newItem = curDictItems.value[evt.newIndex!]
-        await sortCellDictItemFun(props.curColumnConf!.name, oriItem.value, newItem.value)
+        await sortCellDictItemFun(props.curColumnConf.name, oriItem.value, newItem.value)
         curDictItems.value[evt.oldIndex!] = newItem
         curDictItems.value[evt.newIndex!] = oriItem
         const oriAllOriItemIdx = curAllDictItems.value.findIndex(val => val.value === oriItem.value)
@@ -84,7 +88,7 @@ function showModifyDictItemContextMenu(event: MouseEvent, itemValue?: any) {
 
 async function setDictItemTitle(title: string) {
   const selectedValue = selectedDictItem.value.value === undefined ? title : selectedDictItem.value.value
-  await saveCellDictItemFun(props.curColumnConf!.name, {
+  await saveCellDictItemFun(props.curColumnConf.name, {
     value: selectedValue,
     title,
     color: selectedDictItem.value.color,
@@ -110,7 +114,7 @@ async function setDictItemColor(event: MouseEvent) {
   if (selectedDictItem.value.value === undefined)
     return
 
-  await saveCellDictItemFun(props.curColumnConf!.name, {
+  await saveCellDictItemFun(props.curColumnConf.name, {
     value: selectedDictItem.value.value,
     title: selectedDictItem.value.title!,
     color,
@@ -119,7 +123,7 @@ async function setDictItemColor(event: MouseEvent) {
 </script>
 
 <template>
-  <div v-show="props.curColumnConf?.useDict && props.curColumnConf.dictEditable" class="iw-contextmenu__item w-full">
+  <div v-show="props.curColumnConf.useDict && props.curColumnConf.dictEditable" class="iw-contextmenu__item w-full">
     <div class="divider">
       {{ $t('list.columnDict.dictTitle') }}
     </div>

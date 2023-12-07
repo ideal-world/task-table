@@ -62,28 +62,30 @@ async function showColumnMoreContextMenu(event: MouseEvent) {
   <ColumnSortComp :columns-conf="columnsConf" />
   <ColumnResizeComp :columns-conf="columnsConf" />
   <MenuComp ref="headerMenuCompRef">
-    <ColumnRenameComp
-      :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf"
-      :pk-column-name="props.basic.pkColumnName"
-    />
-    <div
-      class="iw-contextmenu__item flex justify-between w-full p-1 mb-1 mt-1"
-    >
-      <ColumnCopyComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
-      <ColumnHideComp :cur-column-conf="selectedColumnConf" :pk-column-name="props.basic.pkColumnName" :columns-conf="columnsConf" />
-      <ColumnDeleteComp
-        :cur-column-conf="selectedColumnConf"
+    <template v-if="selectedColumnConf">
+      <ColumnRenameComp
+        :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf"
         :pk-column-name="props.basic.pkColumnName"
       />
-    </div>
-    <div
-      class="iw-contextmenu__item flex justify-between w-full p-1"
-    >
-      <ColumnFixedComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
-      <CellWrapComp :cur-column-conf="selectedColumnConf" :pk-column-name="props.basic.pkColumnName" :columns-conf="columnsConf" />
-    </div>
-    <ColumnDictComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
-    <ColumnKindDateTimeComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
+      <div
+        class="iw-contextmenu__item flex justify-between w-full p-1 mb-1 mt-1"
+      >
+        <ColumnCopyComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
+        <ColumnHideComp :cur-column-conf="selectedColumnConf" :pk-column-name="props.basic.pkColumnName" :columns-conf="columnsConf" />
+        <ColumnDeleteComp
+          :cur-column-conf="selectedColumnConf"
+          :pk-column-name="props.basic.pkColumnName"
+        />
+      </div>
+      <div
+        class="iw-contextmenu__item flex justify-between w-full p-1"
+      >
+        <ColumnFixedComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
+        <CellWrapComp :cur-column-conf="selectedColumnConf!" :pk-column-name="props.basic.pkColumnName" :columns-conf="columnsConf" />
+      </div>
+      <ColumnDictComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
+      <ColumnKindDateTimeComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
+    </template>
   </MenuComp>
   <ColumnMoreComp
     ref="headerColumnMoreCompRef" :basic-columns-conf="props.basic.columns"

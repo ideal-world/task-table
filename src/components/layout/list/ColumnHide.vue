@@ -6,7 +6,7 @@ import type { CachedColumnConf } from '../../conf'
 import { FUN_MODIFY_COLUMN_TYPE } from '../../events'
 
 const props = defineProps<{
-  curColumnConf: CachedColumnConf | undefined
+  curColumnConf: CachedColumnConf
   columnsConf: CachedColumnConf[]
   pkColumnName: string
 }>()
@@ -14,23 +14,21 @@ const modifyColumnFun = inject(FUN_MODIFY_COLUMN_TYPE)!
 const closeContextMenuFun = inject(FUN_CLOSE_CONTEXT_MENU_TYPE)!
 
 async function setHidedColumn() {
-  if (props.curColumnConf) {
-    await modifyColumnFun(undefined, {
-      name: props.curColumnConf.name,
-      wrap: props.curColumnConf.wrap,
-      fixed: props.curColumnConf.fixed,
-      width: props.curColumnConf.width,
-      hide: !props.curColumnConf.hide,
-      dateStart: props.curColumnConf.dateStart,
-      dateEnd: props.curColumnConf.dateEnd,
-    })
-  }
+  await modifyColumnFun(undefined, {
+    name: props.curColumnConf.name,
+    wrap: props.curColumnConf.wrap,
+    fixed: props.curColumnConf.fixed,
+    width: props.curColumnConf.width,
+    hide: !props.curColumnConf.hide,
+    dateStart: props.curColumnConf.dateStart,
+    dateEnd: props.curColumnConf.dateEnd,
+  })
   closeContextMenuFun()
 }
 </script>
 
 <template>
-  <div v-if="props.curColumnConf?.name !== props.pkColumnName" class="cursor-pointer ml-1 mr-1" @click="setHidedColumn">
+  <div v-if="props.curColumnConf.name !== props.pkColumnName" class="cursor-pointer ml-1 mr-1" @click="setHidedColumn">
     <i :class="iconSvg.HIDE" />
     {{ $t('list.columnHide.title') }}
   </div>

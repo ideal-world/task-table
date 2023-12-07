@@ -6,7 +6,7 @@ import type { CachedColumnConf } from '../../conf'
 import { FUN_MODIFY_COLUMN_TYPE } from '../../events'
 
 const props = defineProps<{
-  curColumnConf: CachedColumnConf | undefined
+  curColumnConf: CachedColumnConf
   pkColumnName: string
   columnsConf: CachedColumnConf[]
 }>()
@@ -16,19 +16,17 @@ const iconPickerCompRef = ref()
 
 async function renameColumn(event: Event) {
   const target = event.target as HTMLInputElement
-  if (props.curColumnConf) {
-    await modifyColumnFun({
-      name: props.curColumnConf.name,
-      title: target.value,
-      icon: props.curColumnConf.icon,
-      dataKind: props.curColumnConf.dataKind,
-      dataEditable: props.curColumnConf.dataEditable,
-      useDict: props.curColumnConf.useDict,
-      dictEditable: props.curColumnConf.dictEditable,
-      multiValue: props.curColumnConf.multiValue,
-      kindDateTimeFormat: props.curColumnConf.kindDateTimeFormat,
-    })
-  }
+  await modifyColumnFun({
+    name: props.curColumnConf.name,
+    title: target.value,
+    icon: props.curColumnConf.icon,
+    dataKind: props.curColumnConf.dataKind,
+    dataEditable: props.curColumnConf.dataEditable,
+    useDict: props.curColumnConf.useDict,
+    dictEditable: props.curColumnConf.dictEditable,
+    multiValue: props.curColumnConf.multiValue,
+    kindDateTimeFormat: props.curColumnConf.kindDateTimeFormat,
+  })
   closeContextMenuFun()
 }
 
@@ -37,22 +35,20 @@ async function showIconContainer(event: Event) {
 }
 
 async function selectIcon(icon: string) {
-  if (props.curColumnConf) {
-    props.curColumnConf.icon = icon
-    await modifyColumnFun(props.curColumnConf)
-  }
+  props.curColumnConf.icon = icon
+  await modifyColumnFun(props.curColumnConf)
 }
 </script>
 
 <template>
   <div class="iw-contextmenu__item flex justify-between items-center w-full">
     <i
-      :class="`${props.curColumnConf?.icon} cursor-pointer mr-1`"
+      :class="`${props.curColumnConf.icon} cursor-pointer mr-1`"
       @click="showIconContainer"
     />
     <input
       class="input input-bordered input-xs w-28 flex-1" type="text"
-      :value="props.curColumnConf?.title" @change="renameColumn"
+      :value="props.curColumnConf.title" @change="renameColumn"
     >
   </div>
   <IconPickerComp ref="iconPickerCompRef" @select-icon="selectIcon" />

@@ -6,21 +6,21 @@ import type { CachedColumnConf } from '../../conf'
 import { FUN_DELETE_COLUMN_TYPE } from '../../events'
 
 const props = defineProps<{
-  curColumnConf: CachedColumnConf | undefined
+  curColumnConf: CachedColumnConf
   pkColumnName: string
 }>()
 const deleteColumnFun = inject(FUN_DELETE_COLUMN_TYPE)!
 const closeContextMenuFun = inject(FUN_CLOSE_CONTEXT_MENU_TYPE)!
 
 async function deleteColumn() {
-  await deleteColumnFun(props.curColumnConf!.name)
+  await deleteColumnFun(props.curColumnConf.name)
   closeContextMenuFun()
 }
 </script>
 
 <template>
   <div
-    v-if="props.curColumnConf?.name !== props.pkColumnName" class="cursor-pointer"
+    v-if="props.curColumnConf.name !== props.pkColumnName" class="cursor-pointer"
     @click="deleteColumn"
   >
     <i :class="iconSvg.DELETE" />

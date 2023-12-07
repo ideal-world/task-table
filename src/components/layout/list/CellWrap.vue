@@ -1,18 +1,28 @@
 <script setup lang="ts">
-import { computed, inject } from 'vue'
+import { inject, onMounted, ref, watch } from 'vue'
 import * as iconSvg from '../../../assets/icon'
 import { FUN_CLOSE_CONTEXT_MENU_TYPE } from '../../common/Menu.vue'
 import type { CachedColumnConf } from '../../conf'
 import { FUN_MODIFY_COLUMN_TYPE } from '../../events'
 
 const props = defineProps<{
-  curColumnConf: CachedColumnConf | undefined
+  curColumnConf: CachedColumnConf
   columnsConf: CachedColumnConf[]
   pkColumnName: string
 }>()
 
 const modifyColumnFun = inject(FUN_MODIFY_COLUMN_TYPE)!
 const closeContextMenuFun = inject(FUN_CLOSE_CONTEXT_MENU_TYPE)!
+
+const wrapInputRef = ref()
+
+onMounted(() => {
+  wrapInputRef.value && (wrapInputRef.value.checked = props.curColumnConf.wrap)
+})
+
+watch(props, () => {
+  wrapInputRef.value && (wrapInputRef.value.checked = props.curColumnConf.wrap)
+})
 
 async function setWrapColumn() {
   if (props.curColumnConf) {
@@ -31,14 +41,15 @@ async function setWrapColumn() {
 </script>
 
 <template>
-  <div v-if="props.curColumnConf?.name !== props.pkColumnName" class="flex justify-between items-center w-full  ml-2">
+  <div v-if="props.curColumnConf.name !== props.pkColumnName" class="flex justify-between items-center w-full  ml-2">
     <span>
       <i :class="iconSvg.WRAP" />
       <span> {{ $t('list.cellWrap.title') }}</span>
     </span>
     <input
+      ref="wrapInputRef"
       type="checkbox" class="toggle toggle-xs"
-      :checked="props.curColumnConf?.wrap" @click="setWrapColumn"
+      @click="setWrapColumn"
     >
   </div>
 </template>

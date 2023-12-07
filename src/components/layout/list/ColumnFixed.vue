@@ -1,34 +1,42 @@
 <script setup lang="ts">
-import { inject } from 'vue'
+import { inject, onMounted, ref, watch } from 'vue'
 import * as iconSvg from '../../../assets/icon'
 import { FUN_CLOSE_CONTEXT_MENU_TYPE } from '../../common/Menu.vue'
 import type { CachedColumnConf } from '../../conf'
 import { FUN_MODIFY_COLUMN_TYPE } from '../../events'
 
 const props = defineProps<{
-  curColumnConf: CachedColumnConf | undefined
+  curColumnConf: CachedColumnConf
   columnsConf: CachedColumnConf[]
 }>()
 const modifyColumnFun = inject(FUN_MODIFY_COLUMN_TYPE)!
 const closeContextMenuFun = inject(FUN_CLOSE_CONTEXT_MENU_TYPE)!
 
+const fixedInputRef = ref()
+
+onMounted(() => {
+  fixedInputRef.value.checked = props.curColumnConf.fixed
+})
+
+watch(props, () => {
+  fixedInputRef.value.checked = props.curColumnConf.fixed
+})
+
 async function setFixedColumn() {
   const oldFixedColumnConf = props.columnsConf.find(col => col.fixed)
-  if (oldFixedColumnConf && oldFixedColumnConf.name !== props.curColumnConf?.name) {
+  if (oldFixedColumnConf && oldFixedColumnConf.name !== props.curColumnConf.name) {
     oldFixedColumnConf.fixed = false
     await modifyColumnFun(undefined, oldFixedColumnConf)
   }
-  if (props.curColumnConf) {
-    await modifyColumnFun(undefined, {
-      name: props.curColumnConf.name,
-      wrap: props.curColumnConf.wrap,
-      fixed: !props.curColumnConf.fixed,
-      width: props.curColumnConf.width,
-      hide: props.curColumnConf.hide,
-      dateStart: props.curColumnConf.dateStart,
-      dateEnd: props.curColumnConf.dateEnd,
-    })
-  }
+  await modifyColumnFun(undefined, {
+    name: props.curColumnConf.name,
+    wrap: props.curColumnConf.wrap,
+    fixed: !props.curColumnConf.fixed,
+    width: props.curColumnConf.width,
+    hide: props.curColumnConf.hide,
+    dateStart: props.curColumnConf.dateStart,
+    dateEnd: props.curColumnConf.dateEnd,
+  })
   closeContextMenuFun()
 }
 </script>
@@ -59,8 +67,9 @@ export function setFixedColumnStyles(styles: any, colIdx: number, columnsConf: C
       {{ $t('list.columnFixed.title') }}
     </span>
     <input
+      ref="fixedInputRef"
       type="checkbox" class="toggle toggle-xs"
-      :checked="props.curColumnConf?.fixed" @click="setFixedColumn"
+      @click="setFixedColumn"
     >
   </div>
 </template>
