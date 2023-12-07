@@ -93,7 +93,7 @@
     "rowDelete": {
       "title": "Delete row(s)"
     },
-    "cellWrap": {
+    "columnWrap": {
       "title": "Break words"
     },
     "columnCopy": {

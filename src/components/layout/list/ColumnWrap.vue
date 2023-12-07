@@ -44,7 +44,7 @@ async function setWrapColumn() {
   <div v-if="props.curColumnConf.name !== props.pkColumnName" class="flex justify-between items-center w-full  ml-2">
     <span>
       <i :class="iconSvg.WRAP" />
-      <span> {{ $t('list.cellWrap.title') }}</span>
+      <span> {{ $t('list.columnWrap.title') }}</span>
     </span>
     <input
       ref="wrapInputRef"

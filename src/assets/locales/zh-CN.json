@@ -93,7 +93,7 @@
     "rowDelete": {
       "title": "删除行"
     },
-    "cellWrap": {
+    "columnWrap": {
       "title": "换行"
     },
     "columnCopy": {

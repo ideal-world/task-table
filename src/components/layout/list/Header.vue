@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import * as iconSvg from '../../../assets/icon'
 import MenuComp, { MenuSizeKind } from '../../common/Menu.vue'
 import type { CachedColumnConf, TableBasicConf, TableLayoutConf } from '../../conf'
-import CellWrapComp from './CellWrap.vue'
+import ColumnWrapComp from './ColumnWrap.vue'
 import ColumnCopyComp from './ColumnCopy.vue'
 import ColumnDeleteComp from './ColumnDelete.vue'
 import ColumnDictComp from './ColumnDict.vue'
@@ -81,7 +81,7 @@ async function showColumnMoreContextMenu(event: MouseEvent) {
         class="iw-contextmenu__item flex justify-between w-full p-1"
       >
         <ColumnFixedComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
-        <CellWrapComp :cur-column-conf="selectedColumnConf!" :pk-column-name="props.basic.pkColumnName" :columns-conf="columnsConf" />
+        <ColumnWrapComp :cur-column-conf="selectedColumnConf!" :pk-column-name="props.basic.pkColumnName" :columns-conf="columnsConf" />
       </div>
       <ColumnDictComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
       <ColumnKindDateTimeComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
