@@ -74,6 +74,13 @@
       "selectColumnPlaceholder": "New column",
       "dictTitle": "Available dictionary values",
       "searchPlaceholder": "Search..."
+    },
+    "group": {
+      "groupTitle":"Group",
+      "columnsTitle": "Group columns",
+      "moreConfTitle": "More configuration",
+      "groupSortTitle": "Reverse order",
+      "hideEmptyTitle": "Hide empty group"
     }
   },
   "list": {

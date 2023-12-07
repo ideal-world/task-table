@@ -2,8 +2,8 @@
 import { inject, ref } from 'vue'
 import MenuComp, { MenuOffsetKind, MenuSizeKind } from '../../common/Menu.vue'
 import type { CachedColumnConf, TableStyleConf } from '../../conf'
-import { FUN_LOAD_DATA_TYPE } from '../../events'
-import { showGroupAggMappingByDataKind } from '../../function/Group.vue'
+import { FUN_MODIFY_LAYOUT_TYPE } from '../../events'
+import { showGroupAggMappingByDataKind } from '../../function/Group'
 import type { AggregateKind, TableDataResp } from '../../props'
 import { translateGroupAgg } from '../../props'
 
@@ -17,18 +17,21 @@ const props = defineProps<{
   setColumnStyles: (colIdx: number) => any
 }>()
 
+const modifyLayoutFun = inject(FUN_MODIFY_LAYOUT_TYPE)!
 const aggsMenuCompRefs = ref()
-const loadDataFun = inject(FUN_LOAD_DATA_TYPE)!
 
 function showAggsContextMenu(event: MouseEvent, colIdx: number) {
   const targetEle = event.target as HTMLElement
   aggsMenuCompRefs.value[colIdx].show(targetEle, MenuOffsetKind.RIGHT_BOTTOM, MenuSizeKind.SMALL)
 }
 
-function changeColumnAggs(aggKind: AggregateKind, colIdx: number) {
-  props.layoutAggs[props.columnsConf[colIdx].name] = aggKind
+async function changeColumnAggs(aggKind: AggregateKind, colIdx: number) {
+  const aggs = JSON.parse(JSON.stringify(props.layoutAggs))
+  aggs[props.columnsConf[colIdx].name] = aggKind
+  await modifyLayoutFun({
+    aggs,
+  })
   aggsMenuCompRefs.value[colIdx].close()
-  loadDataFun()
 }
 </script>
 

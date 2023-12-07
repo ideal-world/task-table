@@ -247,9 +247,9 @@ export interface TableDataFilterItemReq {
 }
 
 export interface TableDataGroupReq {
-  columnName: string
+  columnNames: string[]
   groupOrderDesc: boolean
-  useDict: boolean
+  // useDict: boolean
   hideEmptyRecord: boolean
 }
 

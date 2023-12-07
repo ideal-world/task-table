@@ -74,6 +74,13 @@
       "selectColumnPlaceholder": "新增列",
       "dictTitle": "可用字典项",
       "searchPlaceholder": "搜索字典项"
+    },
+    "group": {
+      "groupTitle": "分组",
+      "columnsTitle": "分组列",
+      "moreConfTitle": "更多设置",
+      "groupSortTitle": "倒序",
+      "hideEmptyTitle": "隐藏空组"
     }
   },
   "list": {

@@ -11,6 +11,7 @@ const props = defineProps<{
   sorts?: TableDataSortReq[]
   columnsConf: TableColumnConf[]
 }>()
+
 const modifyLayoutFun = inject(FUN_MODIFY_LAYOUT_TYPE)!
 const sortCompRef = ref()
 const sortColumnCompRef = ref()

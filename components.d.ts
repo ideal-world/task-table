@@ -24,7 +24,7 @@ declare module 'vue' {
     ColumnResize: typeof import('./src/components/layout/list/ColumnResize.vue')['default']
     ColumnSort: typeof import('./src/components/layout/list/ColumnSort.vue')['default']
     ColumnWrap: typeof import('./src/components/layout/list/ColumnWrap.vue')['default']
-    copy: typeof import('./src/components/layout/list/RowAdd copy.vue')['default']
+    copy: typeof import('./src/components/function/Group copy.vue')['default']
     Filter: typeof import('./src/components/function/Filter.vue')['default']
     Group: typeof import('./src/components/function/Group.vue')['default']
     Header: typeof import('./src/components/layout/list/Header.vue')['default']

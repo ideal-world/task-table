@@ -7,6 +7,7 @@ import { initConf } from './conf'
 import * as Event from './events'
 import FilterComp from './function/Filter.vue'
 import ResizeComp from './function/Resize.vue'
+import GroupComp from './function/Group.vue'
 import RowSortComp from './function/RowSort.vue'
 import ThemeComp from './function/Theme.vue'
 import ListComp from './layout/list/List.vue'
@@ -94,6 +95,8 @@ function showMoreMenu(event: MouseEvent) {
     <div class="iw-tt-main">
       <template v-for="layout in tableLayoutsConf" :key="layout.id">
         <div v-if="currentLayoutId === layout.id" class="iw-tt-toolbar flex items-center h-8 p-0.5">
+          <GroupComp :group="layout.group" :columns-conf="tableBasicConf.columns" />
+          <div class="divider divider-horizontal m-0.5" />
           <RowSortComp :sorts="layout.sorts" :columns-conf="tableBasicConf.columns" />
           <div class="divider divider-horizontal m-0.5" />
           <FilterComp :filters="layout.filters" :columns-conf="tableBasicConf.columns" />
