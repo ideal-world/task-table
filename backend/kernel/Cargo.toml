@@ -1,0 +1,22 @@
+[package]
+name = "task-table-kernel"
+version.workspace = true
+authors.workspace = true
+homepage.workspace = true
+repository.workspace = true
+license.workspace = true
+edition.workspace = true
+publish = false
+
+[lib]
+name = "task_table_kernel"
+path = "src/lib.rs"
+
+[dependencies]
+serde = { version = "1", featurces = ["derive"] }
+tardis = { version = "0.1.0-rc.5", features = [
+    "web-server",
+    "cluster",
+    "reldb-core",
+    "reldb-sqlite",
+] }

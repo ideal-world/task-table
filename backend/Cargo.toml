@@ -1,0 +1,17 @@
+[workspace]
+members = ["kernel", "mini_service"]
+resolver = "2"
+
+[profile.release]
+lto = true
+codegen-units = 1
+opt-level = "z"
+
+[workspace.package]
+version = "0.1.0"
+authors = ["gudaoxuri <i@sunisle.org>"]
+homepage = "https://github.com/ideal-world/task-table"
+repository = "https://github.com/ideal-world/task-table"
+edition = "2021"
+license = "MIT/Apache-2.0"
+rust-version = "1.72"
