@@ -325,7 +325,7 @@ const resp2 = [
   },
   {
     records: attachDict(data3),
-    totalNumber: data3.length,
+    totalNumber: data3.length + 100,
     aggs: { name: 'name' },
     groupValue: 'xy',
     offsetNumber: 0,

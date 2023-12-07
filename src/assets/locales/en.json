@@ -76,7 +76,7 @@
       "searchPlaceholder": "Search..."
     },
     "group": {
-      "groupTitle":"Group",
+      "groupTitle": "Group",
       "columnsTitle": "Group columns",
       "moreConfTitle": "More configuration",
       "groupSortTitle": "Reverse order",
@@ -142,6 +142,10 @@
       "copyTitle": "Copy row(s)",
       "pasteTitle": "Paste row(s)",
       "copyAndPasteTitle": "Copy and Paste row(s)"
+    },
+    "dataLoad": {
+      "loadTitle": "Load more data",
+      "loadingTitle": "Loading"
     }
   }
 }

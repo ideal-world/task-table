@@ -11,6 +11,7 @@ import type { CellSelectedInfo } from './CellSelect.vue'
 import CellSelectComp from './CellSelect.vue'
 import ColumnAggsComp from './ColumnAggs.vue'
 import { setFixedColumnStyles } from './ColumnFixed.vue'
+import DataLoadComp from './DataLoad.vue'
 import HeaderComp from './Header.vue'
 import RowCopyPasteComp from './RowCopyPaste.vue'
 import RowDeleteComp from './RowDelete.vue'
@@ -95,6 +96,7 @@ onMounted(() => {
         :pk-kind-is-number="pkKindIsNumber"
         :columns-conf="columnsConf" :styles-conf="listConf.basic.styles" :set-column-styles="setColumnStyles"
       />
+      <DataLoadComp :group-value="undefined" :total-number="listConf.layout.data.totalNumber" :loaded-number="listConf.layout.data.records.length" />
       <ColumnAggsComp
         :layout-aggs="layout.aggs!" :data-basic="layout.data as TableDataResp"
         :pk-column-name="listConf.basic.pkColumnName" :columns-conf="columnsConf" :styles-conf="listConf.basic.styles"
@@ -115,6 +117,7 @@ onMounted(() => {
           :columns-conf="columnsConf"
           :styles-conf="listConf.basic.styles" :set-column-styles="setColumnStyles"
         />
+        <DataLoadComp :group-value="groupData.groupValue" :total-number="groupData.totalNumber" :loaded-number="groupData.records.length" />
       </template>
     </template>
     <CellSelectComp
