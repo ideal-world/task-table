@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Sortable from 'sortablejs'
-import { inject, onMounted, ref, toRaw } from 'vue'
+import { inject, onMounted, ref } from 'vue'
 import * as iconSvg from '../../assets/icon'
 import MenuComp from '../common/Menu.vue'
 import type { TableColumnConf } from '../conf'
@@ -67,7 +67,7 @@ async function setSortAscDesc(event: MouseEvent) {
 
 async function addSort(newColumnName: string, newOrderDesc: boolean) {
   if (props.sorts) {
-    const sorts = toRaw(props.sorts)
+    const sorts = JSON.parse(JSON.stringify(props.sorts))
     sorts.push({
       columnName: newColumnName,
       orderDesc: newOrderDesc,
@@ -89,8 +89,8 @@ async function addSort(newColumnName: string, newOrderDesc: boolean) {
 }
 
 async function modifySort(oriColumnName: string, newColumnName: string, newOrderDesc: boolean) {
-  const sorts = toRaw(props.sorts)
-  sorts?.splice(sorts?.findIndex(sort => sort.columnName === oriColumnName), 1, {
+  const sorts = JSON.parse(JSON.stringify(props.sorts!)) as TableDataSortReq[]
+  sorts.splice(sorts.findIndex(sort => sort.columnName === oriColumnName), 1, {
     columnName: newColumnName,
     orderDesc: newOrderDesc,
   })
@@ -100,7 +100,7 @@ async function modifySort(oriColumnName: string, newColumnName: string, newOrder
 }
 
 async function deleteSort(columnName: string) {
-  const newSorts = props.sorts?.filter(sort => sort.columnName !== columnName)
+  const newSorts = JSON.parse(JSON.stringify(props.sorts?.filter(sort => sort.columnName !== columnName)))
   await modifyLayoutFun({
     sorts: newSorts,
   })
@@ -112,7 +112,7 @@ onMounted(() => {
     async onEnd(evt) {
       if (evt.oldIndex !== evt.newIndex && props.sorts) {
         const oriSort = props.sorts[evt.oldIndex!]
-        const sorts = toRaw(props.sorts)
+        const sorts = JSON.parse(JSON.stringify(props.sorts))
         sorts.splice(evt.oldIndex!, 1)
         sorts.splice(evt.newIndex!, 0, oriSort)
         await modifyLayoutFun({
@@ -131,26 +131,28 @@ onMounted(() => {
     {{ $t(props.sorts?.length! > 1 ? 'function.rowSort.multiTitle' : 'function.rowSort.singleTitle') }}
     <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />
   </button>
-  <MenuComp ref="sortCompRef" class="iw-row-sort">
-    <div
-      v-for="sort of props.sorts" :key="sort.columnName"
-      class="iw-contextmenu__item iw-row-sort__item flex justify-between w-full mb-1"
-    >
-      <span>
-        <i :class="`${iconSvg.GRABBER} cursor-pointer mr-0.5`" />
-        <button class="btn btn-outline btn-xs" @click="event => showSortColumnContextMenu(event, sort.columnName)">
-          <i :class="props.columnsConf.find(col => col.name === sort.columnName)?.icon" />
-          <span class="mr-0.5">{{ props.columnsConf.find(col => col.name === sort.columnName)?.title }}</span>
-          <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />
-        </button>
-      </span>
-      <span class="ml-1">
-        <button class="btn btn-outline btn-xs" @click="event => showSortAscDescContextMenu(event, sort.columnName)">
-          {{ $t(sort.orderDesc ? 'function.rowSort.desc' : 'function.rowSort.asc') }}
-          <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />
-        </button>
-        <i :class="`${iconSvg.DELETE}  cursor-pointer`" @click="deleteSort(sort.columnName)" />
-      </span>
+  <MenuComp ref="sortCompRef">
+    <div class="iw-row-sort">
+      <div
+        v-for="sort of props.sorts" :key="sort.columnName"
+        class="iw-contextmenu__item iw-row-sort__item flex justify-between w-full mb-1"
+      >
+        <span>
+          <i :class="`${iconSvg.GRABBER} cursor-pointer mr-0.5`" />
+          <button class="btn btn-outline btn-xs" @click="event => showSortColumnContextMenu(event, sort.columnName)">
+            <i :class="props.columnsConf.find(col => col.name === sort.columnName)?.icon" />
+            <span class="mr-0.5">{{ props.columnsConf.find(col => col.name === sort.columnName)?.title }}</span>
+            <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />
+          </button>
+        </span>
+        <span class="ml-1">
+          <button class="btn btn-outline btn-xs" @click="event => showSortAscDescContextMenu(event, sort.columnName)">
+            {{ $t(sort.orderDesc ? 'function.rowSort.desc' : 'function.rowSort.asc') }}
+            <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />
+          </button>
+          <i :class="`${iconSvg.DELETE}  cursor-pointer`" @click="deleteSort(sort.columnName)" />
+        </span>
+      </div>
     </div>
     <div class="iw-contextmenu__item flex justify-center w-full">
       <button class="btn btn-outline btn-xs" @click="showSortColumnContextMenu">

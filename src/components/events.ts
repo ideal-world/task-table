@@ -35,31 +35,32 @@ export async function loadData(layoutId?: string, moreForGroupedValue?: any) {
     offsetNumber: 0,
     fetchNumber: layout.fetchDataNumber,
   }
-  if (moreForGroupedValue) {
-    const groupFilter = {
-      items: [
-        {
-          columnName: layout.group?.columnName as string,
-          operator: OperatorKind.EQ,
-          value: moreForGroupedValue,
-        },
-      ],
-      and: true,
-    }
-    if (filters)
-      filters.push(groupFilter)
-    else
-      filters = [groupFilter]
-    if (layout.data && Array.isArray(layout.data)) {
-      const curGroupData = layout.data.find(d => d.groupValue === moreForGroupedValue)
-      if (curGroupData !== undefined)
-        slice.offsetNumber = curGroupData.records.length
-    }
-  }
-  else {
-    if (layout.data && !Array.isArray(layout.data))
-      slice.offsetNumber = layout.data.records.length
-  }
+  // TODO
+  // if (moreForGroupedValue) {
+  //   const groupFilter = {
+  //     items: [
+  //       {
+  //         columnName: layout.group?.columnNames.,
+  //         operator: OperatorKind.EQ,
+  //         value: moreForGroupedValue,
+  //       },
+  //     ],
+  //     and: true,
+  //   }
+  //   if (filters)
+  //     filters.push(groupFilter)
+  //   else
+  //     filters = [groupFilter]
+  //   if (layout.data && Array.isArray(layout.data)) {
+  //     const curGroupData = layout.data.find(d => d.groupValue === moreForGroupedValue)
+  //     if (curGroupData !== undefined)
+  //       slice.offsetNumber = curGroupData.records.length
+  //   }
+  // }
+  // else {
+  //   if (layout.data && !Array.isArray(layout.data))
+  //     slice.offsetNumber = layout.data.records.length
+  // }
   let sorts
   if (layout.sorts)
     sorts = toRaw(layout.sorts)
@@ -490,6 +491,7 @@ export async function modifyLayout(changedLayoutReq: TableLayoutModifyReq, reFil
   changedLayoutReq.filters && (layout.filters = changedLayoutReq.filters)
   changedLayoutReq.sorts && (layout.sorts = changedLayoutReq.sorts)
   changedLayoutReq.group && (layout.group = changedLayoutReq.group)
+  // TODO
   changedLayoutReq.aggs && (layout.aggs = changedLayoutReq.aggs)
   if (changedLayoutReq.newExpandDataPk) {
     const idx = layout.expandDataPks.indexOf(changedLayoutReq.newExpandDataPk)

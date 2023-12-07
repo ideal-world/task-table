@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, inject, ref, toRaw } from 'vue'
+import { computed, inject, ref } from 'vue'
 import * as iconSvg from '../../assets/icon'
 import MenuComp, { MenuSizeKind } from '../common/Menu.vue'
 import type { TableColumnConf } from '../conf'
@@ -185,7 +185,7 @@ async function addOrModifySimpleFilterItem(changedFilterItem: TableDataFilterIte
     changedFilterItem.value = changedFilterItem.values
 
   if (props.filters && props.filters.length === 1) {
-    const filters = toRaw(props.filters[0])
+    const filters = JSON.parse(JSON.stringify(props.filters[0]))
     if (changedFilterItem.idx === -1)
       filters.items.push(changedFilterItem)
     else
@@ -208,7 +208,7 @@ async function addOrModifySimpleFilterItem(changedFilterItem: TableDataFilterIte
 
 async function deleteSimpleFilterItem(idx: number) {
   if (props.filters && props.filters.length === 1) {
-    const filters = toRaw(props.filters[0])
+    const filters = JSON.parse(JSON.stringify(props.filters[0]))
     filters.items.splice(idx, 1)
     await modifyLayoutFun({
       filters: [filters],
