@@ -1,1 +1,12 @@
-frontend/.gitignore
+node_modules
+dist
+dist-ssr
+target
+*.local
+frontend/docs/.vitepress/cache
+frontend/docs/.vitepress/.temp
+frontend/docs/api
+types
+.idea
+.DS_Store
+

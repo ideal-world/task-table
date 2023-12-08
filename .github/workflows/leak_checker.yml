@@ -14,4 +14,4 @@ jobs:
         with:
           keywords: ${{secrets.LEAK_WORDS}}
           ignoreCase: true
-          ignoredDirs: '["docs","node_modules","pnpm-lock.yaml"]'
+          ignoredDirs: '["frontend/docs","frontend/node_modules","frontend/pnpm-lock.yaml"]'

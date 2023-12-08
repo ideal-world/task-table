@@ -51,10 +51,14 @@ jobs:
           pnpm install
 
       - name: Test
-        run: pnpm run test
+        run: |
+          cd ./frontend
+          pnpm run test
 
       - name: Build
-        run: pnpm run build
+        run: |
+          cd ./frontend
+          pnpm run build
 
       - name: Publish to NPM
         uses: JS-DevTools/npm-publish@v2
@@ -100,10 +104,13 @@ jobs:
           pnpm install
 
       - name: Test
-        run: pnpm run test
+        run: |
+          cd ./frontend
+          pnpm run test
 
       - name: Build with VitePress
         run: |
+          cd ./frontend
           pnpm run docs:build
           touch docs/.vitepress/dist/.nojekyll
 
@@ -113,7 +120,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
         with:
-          path: docs/.vitepress/dist
+          path: ./frontend/docs/.vitepress/dist
 
   doc-deploy:
     name: DocDeploy

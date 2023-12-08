@@ -1,3 +1,6 @@
 {
-  "vue-i18n.i18nPaths": "src\\assets\\locales"
+  "vue-i18n.i18nPaths": "src\\assets\\locales",
+  "rust-analyzer.linkedProjects": [
+    ".\\backend\\kernel\\Cargo.toml"
+  ]
 }
