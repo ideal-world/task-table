@@ -13,10 +13,6 @@ name = "task_table_kernel"
 path = "src/lib.rs"
 
 [dependencies]
-serde = { version = "1", featurces = ["derive"] }
-tardis = { version = "0.1.0-rc.5", features = [
-    "web-server",
-    "cluster",
-    "reldb-core",
-    "reldb-sqlite",
-] }
+serde.workspace = true
+lazy_static.workspace = true
+tardis = { version = "0.1.0-rc.5", features = ["reldb-core", "reldb-postgres"] }

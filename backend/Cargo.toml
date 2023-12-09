@@ -15,3 +15,8 @@ repository = "https://github.com/ideal-world/task-table"
 edition = "2021"
 license = "MIT/Apache-2.0"
 rust-version = "1.72"
+
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+lazy_static = { version = "1" }
+tardis = { version = "0.1.0-rc.5" }

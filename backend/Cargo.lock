@@ -3214,6 +3214,7 @@ dependencies = [
 name = "task-table-kernel"
 version = "0.1.0"
 dependencies = [
+ "lazy_static",
  "serde",
  "tardis",
 ]
@@ -3222,6 +3223,7 @@ dependencies = [
 name = "task-table-service"
 version = "0.1.0"
 dependencies = [
+ "lazy_static",
  "serde",
  "tardis",
  "task-table-kernel",

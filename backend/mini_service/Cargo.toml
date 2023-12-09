@@ -9,6 +9,7 @@ edition.workspace = true
 publish = false
 
 [dependencies]
-serde = { version = "1", featurces = ["derive"] }
+serde.workspace = true
+lazy_static.workspace = true
+tardis = { workspace = true, features = ["web-server", "cluster"] }
 task-table-kernel = { path = "../kernel" }
-tardis = { version = "0.1.0-rc.5", features = ["reldb-postgres"] }
