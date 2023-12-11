@@ -1,7 +1,12 @@
 {
-  "plugin": ["typedoc-plugin-markdown", "typedoc-vitepress-theme"],
+  "plugin": [
+    "typedoc-plugin-markdown",
+    "typedoc-vitepress-theme"
+  ],
   "entryFileName": "exports.md",
-  "entryPoints": ["src/index.ts"],
+  "entryPoints": [
+    "src/index.ts"
+  ],
   "includes": "src/*.ts",
   "readme": "none",
   "includeVersion": true,
