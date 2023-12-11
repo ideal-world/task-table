@@ -4,7 +4,7 @@ import type { TableBasicConf, TableColumnConf, TableLayoutColumnConf, TableLayou
 import { getDefaultValueByDataKind } from './conf'
 import { filterTreeDataPks, sortByTree } from './function/RowTree'
 import type { TableCellDictItem, TableCellDictItemResp, TableDataResp, TableDataSliceReq, TableEventProps, TableLayoutModifyReq } from './props'
-import { DATA_DICT_POSTFIX, OperatorKind } from './props'
+import { DATA_DICT_POSTFIX } from './props'
 
 let events: TableEventProps
 let tableBasicConf: TableBasicConf

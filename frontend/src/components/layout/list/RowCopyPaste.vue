@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { inject, ref } from 'vue';
-import * as iconSvg from '../../../assets/icon';
-import { FUN_CLOSE_CONTEXT_MENU_TYPE } from '../../common/Menu.vue';
-import { FUN_ADD_DATA_TYPE } from '../../events';
+import { inject, ref } from 'vue'
+import * as iconSvg from '../../../assets/icon'
+import { FUN_CLOSE_CONTEXT_MENU_TYPE } from '../../common/Menu.vue'
+import { FUN_ADD_DATA_TYPE } from '../../events'
 
 const props = defineProps<{
   pkColumnName: string

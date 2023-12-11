@@ -1,8 +1,5 @@
 # Task Table
 
-
 ## Features
 
-
 ## Design
-
