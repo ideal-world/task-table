@@ -99,10 +99,10 @@ onMounted(() => {
       if (props.selectedCellInfo === undefined)
         return
 
+      leaveEditMode()
       if (!event.target.classList.contains('iw-list-fill--select'))
         return
 
-      leaveEditMode()
       await enterEditMode(props.selectedCellInfo, event.target)
     })
   })

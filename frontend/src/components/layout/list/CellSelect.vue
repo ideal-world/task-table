@@ -64,21 +64,22 @@ function onKeyDown(event: KeyboardEvent) {
 }
 
 function setSelected(targetEle: HTMLElement) {
-  if (!targetEle.classList.contains('iw-list-data-cell')) {
+  const cellEle = getParentWithClass(targetEle, 'iw-list-data-cell')
+  if (!cellEle) {
     props.wrap.cellSelectedInfo = undefined
     return
   }
-  const columnName = targetEle.dataset.columnName!
+  const columnName = cellEle.dataset.columnName!
   if (props.columnsConf.find(item => item.name === columnName && (columnName === props.pkColumnName || !item.dataEditable))) {
     props.wrap.cellSelectedInfo = undefined
     return
   }
 
-  const selectRowEle = getParentWithClass(targetEle, 'iw-list-data-row')
+  const selectRowEle = getParentWithClass(cellEle, 'iw-list-data-row')
   const rowPkStr = selectRowEle!.dataset.pk!
   const rowPk = pkKindIsNumber ? Number.parseInt(rowPkStr) : rowPkStr
   props.wrap.cellSelectedInfo = {
-    ele: targetEle,
+    ele: cellEle,
     columnName,
     rowPk,
   }

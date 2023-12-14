@@ -34,7 +34,7 @@ function onSelectSingle(event: PointerEvent) {
   if (!(targetEle instanceof HTMLElement))
     return
 
-  const cellEle = getParentWithClass(targetEle, 'iw-list-data-cell')
+  const cellEle = getParentWithClass(targetEle, 'iw-list-data-pk-cell')
   if (cellEle === null)
     return
 
@@ -65,7 +65,7 @@ function onSelectMulti(event: PointerEvent) {
   if (!(targetEle instanceof HTMLElement))
     return
 
-  const cellEle = getParentWithClass(targetEle, 'iw-list-data-cell')
+  const cellEle = getParentWithClass(targetEle, 'iw-list-data-pk-cell')
   if (cellEle === null)
     return
 
@@ -95,7 +95,7 @@ function onSelectDragging(event: PointerEvent) {
   if (!(targetEle instanceof HTMLElement))
     return
 
-  const cellEle = getParentWithClass(targetEle, 'iw-list-data-cell')
+  const cellEle = getParentWithClass(targetEle, 'iw-list-data-pk-cell')
   if (cellEle === null)
     return
 
@@ -127,7 +127,7 @@ function onRowSelectDraped() {
 function onRowSelectMove(event: PointerEvent) {
   if (!listEle)
     return
-  const movedEleOpt = document.elementsFromPoint(startCellFixedX + 4, (event as MouseEvent).clientY).find(ele => ele.classList.contains('iw-list-data-cell'))
+  const movedEleOpt = document.elementsFromPoint(startCellFixedX + 4, (event as MouseEvent).clientY).find(ele => ele.classList.contains('iw-list-data-pk-cell'))
   if (!movedEleOpt) {
     showAlert(t('list.rowSelect.acrossGroupError'), 2, AlertKind.WARNING, getParentWithClass(listEle, 'iw-tt')!)
     cleanSelects(listEle)

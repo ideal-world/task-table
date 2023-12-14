@@ -29,7 +29,7 @@ const columnsConfWithoutPk = computed<CachedColumnConf[]>(() => {
       :class="`${props.stylesConf.rowClass} iw-list-row iw-list-data-row flex border-r border-r-base-300`"
     >
       <div
-        :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-data-cell iw-list-data-pk-cell flex items-center iw-list-data-row--unselected border-solid border-b border-b-base-300 border-l border-l-base-300 whitespace-nowrap flex-nowrap`"
+        :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-data-pk-cell flex items-center iw-list-data-row--unselected border-solid border-b border-b-base-300 border-l border-l-base-300 whitespace-nowrap flex-nowrap`"
         :data-column-name="props.pkColumnName" :style="props.setColumnStyles(0)"
       >
         <RowTreeComp v-if="props.parentPkColumnName" :cur-data="row" :next-data="props.records[idx + 1]" :pk-kind-is-number="pkKindIsNumber" :pk-column-name="props.pkColumnName" :parent-pk-column-name="props.parentPkColumnName!" :expand-data-pks="expandDataPks" />
