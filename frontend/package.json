@@ -35,7 +35,7 @@
   "scripts": {
     "build": "rimraf dist && vue-tsc && vite build",
     "docs:dev": "vitepress dev docs --host 0.0.0.0",
-    "docs:build": "npm run publish-typedoc && vitepress build docs",
+    "docs:build": "pnpm run publish-typedoc && vitepress build docs",
     "test": "vitest --run",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

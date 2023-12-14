@@ -72,13 +72,13 @@ async function setGroupHideEmpty() {
 </script>
 
 <template>
-  <button class="btn btn-outline btn-xs" @click="showGroupContextMenu">
+  <button class="iw-btn iw-btn-outline iw-btn-xs" @click="showGroupContextMenu">
     <i :class="iconSvg.GROUP" />
     <span class="mr-0.5">{{ props.group !== undefined ? props.group.columnNames.map(groupColumnName => props.columnsConf.find(column => column.name === groupColumnName)!.title).join('+') : $t("function.group.groupTitle") }}</span>
     <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />
   </button>
   <MenuComp ref="groupCompRef">
-    <div class="divider">
+    <div class="iw-divider">
       {{ $t('function.group.columnsTitle') }}
     </div>
     <div
@@ -91,12 +91,12 @@ async function setGroupHideEmpty() {
         {{ column.title }}
       </span>
       <input
-        type="checkbox" class="toggle toggle-xs"
+        type="checkbox" class="iw-toggle iw-toggle-xs"
         :checked="props.group !== undefined && props.group.columnNames.findIndex(groupColumnName => groupColumnName === column.name) !== -1"
         @click="setGroupColumn(column.name)"
       >
     </div>
-    <div class="divider">
+    <div class="iw-divider">
       {{ $t('function.group.moreConfTitle') }}
     </div>
     <div class="flex justify-between items-center w-full mr-2">
@@ -105,7 +105,7 @@ async function setGroupHideEmpty() {
         {{ $t('function.group.groupSortTitle') }}
       </span>
       <input
-        type="checkbox" class="toggle toggle-xs"
+        type="checkbox" class="iw-toggle iw-toggle-xs"
         :checked="props.group?.groupOrderDesc"
         @click="setGroupDescSort"
       >
@@ -116,7 +116,7 @@ async function setGroupHideEmpty() {
         {{ $t('function.group.hideEmptyTitle') }}
       </span>
       <input
-        type="checkbox" class="toggle toggle-xs"
+        type="checkbox" class="iw-toggle iw-toggle-xs"
         :checked="props.group?.hideEmptyRecord"
         @click="setGroupHideEmpty"
       >

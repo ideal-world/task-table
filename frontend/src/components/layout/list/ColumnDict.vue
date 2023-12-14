@@ -124,21 +124,21 @@ async function setDictItemColor(event: MouseEvent) {
 
 <template>
   <div v-show="props.curColumnConf.useDict && props.curColumnConf.dictEditable" class="iw-contextmenu__item w-full">
-    <div class="divider">
+    <div class="iw-divider">
       {{ $t('list.columnDict.dictTitle') }}
     </div>
     <div>
       <input
         type="search"
         :placeholder="$t('list.columnDict.searchPlaceholder') "
-        class="input input-bordered input-xs w-full max-w-xs"
+        class="iw-input iw-input-bordered iw-input-xs w-full max-w-xs"
         @input="(event) => searchDictItems((event.target as HTMLInputElement).value)"
       >
     </div>
     <div class="iw-column-dict-list">
       <div
         v-for="dictItem in curDictItems" :key="dictItem.value" :data-value="dictItem.value"
-        class="iw-column-dict-list__item badge badge-outline m-1.5 pl-0.5 pr-0.5 flex justify-between items-center cursor-pointer"
+        class="iw-column-dict-list__item iw-badge iw-badge-outline m-1.5 pl-0.5 pr-0.5 flex justify-between items-center cursor-pointer"
         :style="`background-color: ${dictItem.color}`"
       >
         <div class="flex items-center">
@@ -165,7 +165,7 @@ async function setDictItemColor(event: MouseEvent) {
       class="iw-contextmenu__item flex w-full"
     >
       <input
-        :value="selectedDictItem.title" class="input input-bordered input-xs w-32" type="text"
+        :value="selectedDictItem.title" class="iw-input iw-input-bordered iw-input-xs w-32" type="text"
         :placeholder="$t('list.columnDict.titlePlaceholder')"
         @change="event => setDictItemTitle((event.target as HTMLInputElement).value)"
       >
@@ -174,18 +174,18 @@ async function setDictItemColor(event: MouseEvent) {
       class="iw-contextmenu__item flex flex-col w-full justify-center items-center" @click="setDictItemColor"
     >
       <div>
-        <input type="radio" class="radio radio-xs border-4 m-1" data-color="#F1F0EF" style="border-color: #F1F0EF;" :checked="selectedDictItem.color === '#F1F0EF'">
-        <input type="radio" class="radio radio-xs border-4 m-1" data-color="#E3E2E0" style="border-color: #E3E2E0;" :checked="selectedDictItem.color === '#E3E2E0'">
-        <input type="radio" class="radio radio-xs border-4 m-1" data-color="#EEE0DA" style="border-color: #EEE0DA;" :checked="selectedDictItem.color === '#EEE0DA'">
-        <input type="radio" class="radio radio-xs border-4 m-1" data-color="#FADEC9" style="border-color: #FADEC9;" :checked="selectedDictItem.color === '#FADEC9'">
-        <input type="radio" class="radio radio-xs border-4 m-1" data-color="#FDECC8" style="border-color: #FDECC8;" :checked="selectedDictItem.color === '#FDECC8'">
+        <input type="radio" class="iw-radio iw-radio-xs border-4 m-1" data-color="#F1F0EF" style="border-color: #F1F0EF;" :checked="selectedDictItem.color === '#F1F0EF'">
+        <input type="radio" class="iw-radio iw-radio-xs border-4 m-1" data-color="#E3E2E0" style="border-color: #E3E2E0;" :checked="selectedDictItem.color === '#E3E2E0'">
+        <input type="radio" class="iw-radio iw-radio-xs border-4 m-1" data-color="#EEE0DA" style="border-color: #EEE0DA;" :checked="selectedDictItem.color === '#EEE0DA'">
+        <input type="radio" class="iw-radio iw-radio-xs border-4 m-1" data-color="#FADEC9" style="border-color: #FADEC9;" :checked="selectedDictItem.color === '#FADEC9'">
+        <input type="radio" class="iw-radio iw-radio-xs border-4 m-1" data-color="#FDECC8" style="border-color: #FDECC8;" :checked="selectedDictItem.color === '#FDECC8'">
       </div>
       <div>
-        <input type="radio" class="radio radio-xs border-4 m-1" data-color="#FDECC8" style="border-color: #FDECC8;" :checked="selectedDictItem.color === '#FDECC8'">
-        <input type="radio" class="radio radio-xs border-4 m-1" data-color="#D3E5EF" style="border-color: #D3E5EF;" :checked="selectedDictItem.color === '#D3E5EF'">
-        <input type="radio" class="radio radio-xs border-4 m-1" data-color="#E8DEEE" style="border-color: #E8DEEE;" :checked="selectedDictItem.color === '#E8DEEE'">
-        <input type="radio" class="radio radio-xs border-4 m-1" data-color="#F5E0E9" style="border-color: #F5E0E9;" :checked="selectedDictItem.color === '#F5E0E9'">
-        <input type="radio" class="radio radio-xs border-4 m-1" data-color="#FFE2DD" style="border-color: #FFE2DD;" :checked="selectedDictItem.color === '#FFE2DD'">
+        <input type="radio" class="iw-radio iw-radio-xs border-4 m-1" data-color="#FDECC8" style="border-color: #FDECC8;" :checked="selectedDictItem.color === '#FDECC8'">
+        <input type="radio" class="iw-radio iw-radio-xs border-4 m-1" data-color="#D3E5EF" style="border-color: #D3E5EF;" :checked="selectedDictItem.color === '#D3E5EF'">
+        <input type="radio" class="iw-radio iw-radio-xs border-4 m-1" data-color="#E8DEEE" style="border-color: #E8DEEE;" :checked="selectedDictItem.color === '#E8DEEE'">
+        <input type="radio" class="iw-radio iw-radio-xs border-4 m-1" data-color="#F5E0E9" style="border-color: #F5E0E9;" :checked="selectedDictItem.color === '#F5E0E9'">
+        <input type="radio" class="iw-radio iw-radio-xs border-4 m-1" data-color="#FFE2DD" style="border-color: #FFE2DD;" :checked="selectedDictItem.color === '#FFE2DD'">
       </div>
     </div>
   </MenuComp>

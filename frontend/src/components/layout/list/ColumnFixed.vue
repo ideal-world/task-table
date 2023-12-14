@@ -68,7 +68,7 @@ export function setFixedColumnStyles(styles: any, colIdx: number, columnsConf: C
     </span>
     <input
       ref="fixedInputRef"
-      type="checkbox" class="toggle toggle-xs"
+      type="checkbox" class="iw-toggle iw-toggle-xs"
       @click="setFixedColumn"
     >
   </div>

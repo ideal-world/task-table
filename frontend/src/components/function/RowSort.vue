@@ -125,7 +125,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <button class="btn btn-outline btn-xs" @click="showRowSortContextMenu">
+  <button class="iw-btn iw-btn-outline iw-btn-xs" @click="showRowSortContextMenu">
     <i :class="iconSvg.SORT" />
     <span class="mr-0.5">{{ props.sorts?.length }}</span>
     {{ $t(props.sorts?.length! > 1 ? 'function.rowSort.multiTitle' : 'function.rowSort.singleTitle') }}
@@ -139,14 +139,14 @@ onMounted(() => {
       >
         <span>
           <i :class="`${iconSvg.GRABBER} cursor-pointer mr-0.5`" />
-          <button class="btn btn-outline btn-xs" @click="event => showSortColumnContextMenu(event, sort.columnName)">
+          <button class="iw-btn iw-btn-outline iw-btn-xs" @click="event => showSortColumnContextMenu(event, sort.columnName)">
             <i :class="props.columnsConf.find(col => col.name === sort.columnName)?.icon" />
             <span class="mr-0.5">{{ props.columnsConf.find(col => col.name === sort.columnName)?.title }}</span>
             <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />
           </button>
         </span>
         <span class="ml-1">
-          <button class="btn btn-outline btn-xs" @click="event => showSortAscDescContextMenu(event, sort.columnName)">
+          <button class="iw-btn iw-btn-outline iw-btn-xs" @click="event => showSortAscDescContextMenu(event, sort.columnName)">
             {{ $t(sort.orderDesc ? 'function.rowSort.desc' : 'function.rowSort.asc') }}
             <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />
           </button>
@@ -155,13 +155,13 @@ onMounted(() => {
       </div>
     </div>
     <div class="iw-contextmenu__item flex justify-center w-full">
-      <button class="btn btn-outline btn-xs" @click="showSortColumnContextMenu">
+      <button class="iw-btn iw-btn-outline iw-btn-xs" @click="showSortColumnContextMenu">
         <i :class="props.columnsConf.find(col => col.name === tmpNewSortColumnName)?.icon" />
         <span class="mr-0.5">{{ props.columnsConf.find(col => col.name === tmpNewSortColumnName)?.title
           ?? $t('function.rowSort.selectColumnPlaceholder') }}</span>
         <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />
       </button>
-      <button class="btn btn-outline btn-xs ml-1" @click="showSortAscDescContextMenu">
+      <button class="iw-btn iw-btn-outline iw-btn-xs ml-1" @click="showSortAscDescContextMenu">
         {{ tmpNewSortOrderDesc !== undefined ? $t(tmpNewSortOrderDesc ? 'function.rowSort.desc' : 'function.rowSort.asc')
           : $t('function.rowSort.selectAscPlaceholder') }}
         <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />

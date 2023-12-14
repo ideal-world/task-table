@@ -73,11 +73,11 @@ function showMoreMenu(event: MouseEvent) {
     :id="tableBasicConf.tableId"
     :class="`${tableBasicConf.styles.tableClass} iw-tt w-full text-sm text-base-content bg-base-100 relative`"
   >
-    <div class=" iw-tt-header navbar p-0 min-h-0">
+    <div class=" iw-tt-header iw-navbar p-0 min-h-0">
       <div class="flex-1">
         <template v-for="layout in tableLayoutsConf" :key="layout.id">
           <a
-            :class="`iw-tt-header__item tab tab-bordered ${currentLayoutId === layout.id ? 'tab-active' : ''} flex flex-col`"
+            :class="`iw-tt-header__item iw-tab iw-tab-bordered ${currentLayoutId === layout.id ? 'iw-tab-active' : ''} flex flex-col`"
             @contextmenu.prevent="showLayoutMenu"
           >
             <i :class="`${layout.icon}`" /> {{ layout.title }}
@@ -96,9 +96,9 @@ function showMoreMenu(event: MouseEvent) {
       <template v-for="layout in tableLayoutsConf" :key="layout.id">
         <div v-if="currentLayoutId === layout.id" class="iw-tt-toolbar flex items-center h-8 p-0.5">
           <GroupComp :group="layout.group" :columns-conf="tableBasicConf.columns" />
-          <div class="divider divider-horizontal m-0.5" />
+          <div class="iw-divider iw-divider-horizontal m-0.5" />
           <RowSortComp :sorts="layout.sorts" :columns-conf="tableBasicConf.columns" />
-          <div class="divider divider-horizontal m-0.5" />
+          <div class="iw-divider iw-divider-horizontal m-0.5" />
           <FilterComp :filters="layout.filters" :columns-conf="tableBasicConf.columns" />
         </div>
         <div v-if="currentLayoutId === layout.id" class="iw-tt-table overflow-auto w-full">
@@ -111,7 +111,7 @@ function showMoreMenu(event: MouseEvent) {
     <div class="iw-contextmenu__item">
       <!-- TODO 抽取 -->
       <!-- <i :class="iconSvg.RENAME"></i>
-                                                                              <input class="input input-bordered input-sm" type="text"
+                                                                              <input class="iw-input iw-input-bordered iw-input-sm" type="text"
                                                                                 v-model="tableLayoutsConf.find(layout => layout.id == currentLayoutId)?.title" /> -->
     </div>
   </MenuComp>

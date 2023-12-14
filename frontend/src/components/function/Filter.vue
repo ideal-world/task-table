@@ -219,7 +219,7 @@ async function deleteSimpleFilterItem(idx: number) {
 
 <template>
   <div class="flex justify-center overflow-x-auto">
-    <button v-for="(item, idx) in simpleFilterItems" :key="idx" class="btn btn-outline btn-xs flex-none mr-1">
+    <button v-for="(item, idx) in simpleFilterItems" :key="idx" class="iw-btn iw-btn-outline iw-btn-xs flex-none mr-1">
       <span @click="event => showSimpleFilterItem(event, item, idx)">
         <i :class="props.columnsConf.find(col => col.name === item.columnName)?.icon" />
         <span class="mr-0.5">{{ props.columnsConf.find(col => col.name === item.columnName)?.title }}</span>
@@ -236,13 +236,13 @@ async function deleteSimpleFilterItem(idx: number) {
   </div>
   <MenuComp ref="simpleFilterCompRef">
     <div class="iw-contextmenu__item flex justify-between w-full">
-      <button class="btn btn-outline btn-xs" @click="showFilterColumns">
+      <button class="iw-btn iw-btn-outline iw-btn-xs" @click="showFilterColumns">
         <i :class="selectedFilterItem?.icon ?? ''" />
         <span class="mr-0.5">{{ selectedFilterItem?.title ? selectedFilterItem?.title
           : $t('function.filter.selectColumnPlaceholder') }}</span>
         <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />
       </button>
-      <button v-show="selectedFilterItem" class="btn btn-outline btn-xs" @click="showFilterOps">
+      <button v-show="selectedFilterItem" class="iw-btn iw-btn-outline iw-btn-xs" @click="showFilterOps">
         <span class="mr-0.5">{{ translateOperatorKind(selectedFilterItem?.operator) }}</span>
         <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />
       </button>
@@ -250,7 +250,7 @@ async function deleteSimpleFilterItem(idx: number) {
     <div v-if="selectedFilterItem" class="iw-contextmenu__item flex flex-wrap w-48">
       <div
         v-for="(val, idx) in parseDictTitle(selectedFilterItem.columnName, selectedFilterItem?.values)" :key="idx"
-        class="badge gap-2 m-1"
+        class="iw-badge gap-2 m-1"
       >
         {{ val }}
         <i
@@ -264,19 +264,19 @@ async function deleteSimpleFilterItem(idx: number) {
     >
       <div v-if="selectedFilterItem?.dataKind === DataKind.BOOLEAN" class="iw-contextmenu__item w-full">
         <input
-          class="toggle toggle-xs" type="checkbox" :checked="selectedFilterItem.value"
+          class="iw-toggle iw-toggle-xs" type="checkbox" :checked="selectedFilterItem.value"
           @click="event => setFilterValue((event.target as HTMLInputElement).checked)"
         >
       </div>
       <div v-else class="iw-contextmenu__item w-full">
         <input
-          class="input input-bordered input-xs w-full" :type="getInputTypeByDataKind(selectedFilterItem?.dataKind)"
+          class="iw-input iw-input-bordered iw-input-xs w-full" :type="getInputTypeByDataKind(selectedFilterItem?.dataKind)"
           :value="selectedFilterItem.value" @change="event => setFilterValue((event.target as HTMLInputElement).value)"
         >
       </div>
     </template>
     <div v-show="selectedFilterItem?.useDict" class="iw-contextmenu__item w-full" @click="setFilterDictItem">
-      <div class="divider">
+      <div class="iw-divider">
         {{ $t('function.filter.dictTitle') }}
       </div>
       <div>
@@ -284,13 +284,13 @@ async function deleteSimpleFilterItem(idx: number) {
           v-model="searchDictValue"
           type="search"
           :placeholder="$t('function.filter.searchPlaceholder') "
-          class="input input-bordered input-xs w-full max-w-xs"
+          class="iw-input iw-input-bordered iw-input-xs w-full max-w-xs"
         >
       </div>
       <div
         v-for="dictItem in selectedDictItems" :key="dictItem.value"
         :style="`background-color: ${dictItem.color}`"
-        class="iw-contextmenu__item flex cursor-pointer badge badge-outline m-1.5 pl-0.5" :data-value="dictItem.value"
+        class="iw-contextmenu__item flex cursor-pointer iw-badge iw-badge-outline m-1.5 pl-0.5" :data-value="dictItem.value"
         :data-title="dictItem.title"
       >
         <div v-if="dictItem.avatar !== undefined" class="avatar">

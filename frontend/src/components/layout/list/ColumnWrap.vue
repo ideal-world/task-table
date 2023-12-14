@@ -48,7 +48,7 @@ async function setWrapColumn() {
     </span>
     <input
       ref="wrapInputRef"
-      type="checkbox" class="toggle toggle-xs"
+      type="checkbox" class="iw-toggle iw-toggle-xs"
       @click="setWrapColumn"
     >
   </div>

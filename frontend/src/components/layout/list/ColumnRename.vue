@@ -47,7 +47,7 @@ async function selectIcon(icon: string) {
       @click="showIconContainer"
     />
     <input
-      class="input input-bordered input-xs w-28 flex-1" type="text"
+      class="iw-input iw-input-bordered iw-input-xs w-28 flex-1" type="text"
       :value="props.curColumnConf.title" @change="renameColumn"
     >
   </div>

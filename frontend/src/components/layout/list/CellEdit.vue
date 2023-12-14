@@ -177,13 +177,13 @@ async function setCellValue(value: any) {
   <div ref="cellEditSimpleRef" class="items-center absolute z-50 hidden">
     <template v-if="curColumnConf?.dataKind === DataKind.BOOLEAN">
       <input
-        class="toggle ml-1" type="checkbox" :checked="curCellValue"
+        class="iw-toggle ml-1" type="checkbox" :checked="curCellValue"
         @click="event => setCellValue((event.target as HTMLInputElement).checked)"
       >
     </template>
     <template v-else>
       <input
-        class="input input-bordered rounded-none border-2 pl-0.5 pr-0.5 h-full w-full" :type="getInputTypeByDataKind(curColumnConf?.dataKind)"
+        class="iw-input iw-input-bordered rounded-none border-2 pl-0.5 pr-0.5 h-full w-full" :type="getInputTypeByDataKind(curColumnConf?.dataKind)"
         :value="curCellValue" @change="event => setCellValue((event.target as HTMLInputElement).value)"
       >
     </template>
@@ -192,7 +192,7 @@ async function setCellValue(value: any) {
     <div class="iw-contextmenu__item flex flex-wrap w-48">
       <div
         v-for="selectedDictItem in selectedDictItems" :key="selectedDictItem.value"
-        class="iw-column-dict-list__item badge badge-outline m-1.5 pl-0.5 pr-0.5 flex items-center cursor-pointer"
+        class="iw-column-dict-list__item iw-badge iw-badge-outline m-1.5 pl-0.5 pr-0.5 flex items-center cursor-pointer"
         :style="`background-color: ${selectedDictItem.color}`"
       >
         <div v-if="selectedDictItem.avatar !== undefined" class="avatar">
@@ -208,21 +208,21 @@ async function setCellValue(value: any) {
       </div>
     </div>
     <div class="iw-contextmenu__item w-full">
-      <div class="divider">
+      <div class="iw-divider">
         {{ $t('list.cellEdit.dictTitle') }}
       </div>
       <div>
         <input
           type="search"
           :placeholder="$t('list.cellEdit.searchPlaceholder') "
-          class="input input-bordered input-xs w-full max-w-xs"
+          class="iw-input iw-input-bordered iw-input-xs w-full max-w-xs"
           @input="(event) => searchDictItems((event.target as HTMLInputElement).value)"
         >
       </div>
       <div class="iw-column-dict-list" @click="selectDictItem">
         <div
           v-for="dictItem in curDictItems" :key="dictItem.value" :data-value="dictItem.value"
-          class="iw-column-dict-list__item badge badge-outline m-1.5 pl-0.5 pr-0.5 flex items-center cursor-pointer"
+          class="iw-column-dict-list__item iw-badge iw-badge-outline m-1.5 pl-0.5 pr-0.5 flex items-center cursor-pointer"
           :style="`background-color: ${dictItem.color}`"
         >
           <div v-if="dictItem.avatar !== undefined" class="avatar">

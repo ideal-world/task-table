@@ -27,12 +27,12 @@ async function setDateTimeFormat(newFormat: string) {
 
 <template>
   <div v-show="props.curColumnConf.dataKind === DataKind.DATETIME || props.curColumnConf.dataKind === DataKind.DATE || props.curColumnConf.dataKind === DataKind.TIME" class="iw-contextmenu__item w-full">
-    <div class="divider">
+    <div class="iw-divider">
       {{ $t('list.columnKindDateTime.dateTitle') }}
     </div>
     <input
       :value="props.curColumnConf.kindDateTimeFormat"
-      class="input input-bordered input-xs w-full" type="text" :placeholder="$t('list.columnKindDateTime.formatPlaceholder')"
+      class="iw-input iw-input-bordered iw-input-xs w-full" type="text" :placeholder="$t('list.columnKindDateTime.formatPlaceholder')"
       @change="event => setDateTimeFormat((event.target as HTMLInputElement).value)"
     >
     <div class="text-sm m-1 p-1 bg-base-200 rounded-md">
