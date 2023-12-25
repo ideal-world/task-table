@@ -87,9 +87,9 @@ pub async fn modify_table(table_id: &str, layout_id: &str, modify_req: TableLayo
                 storage_layout.columns.remove(idx);
             }
         }
-        if let Some((left_name, right_name)) = modify_req.column_sorted_names {
-            let left_idx = storage_layout.columns.iter().position(|column| column.name == left_name);
-            let right_idx = storage_layout.columns.iter().position(|column| column.name == right_name);
+        if let Some(sorted_names) = modify_req.column_sorted_names {
+            let left_idx = storage_layout.columns.iter().position(|column| column.name == sorted_names[0]);
+            let right_idx = storage_layout.columns.iter().position(|column| column.name == sorted_names[1]);
             if left_idx.is_some() && right_idx.is_some() {
                 let left_idx = left_idx.unwrap();
                 let right_idx = right_idx.unwrap();

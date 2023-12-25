@@ -43,7 +43,6 @@ pub async fn delete_share(delete_req: ShareDeleteReq, funs: &TardisFunsInst, ctx
                 .and_where(Expr::col(tt_share::Column::Owner).eq(delete_req.owner)),
         )
         .await?;
-    // TODO process delete records
     Ok(())
 }
 

@@ -65,7 +65,6 @@ pub async fn delete_dict(dict_code: &str, value: &Value, funs: &TardisFunsInst, 
                 .and_where(Expr::col(tt_dict::Column::Value).eq(value.clone())),
         )
         .await?;
-    // TODO process delete records
     Ok(())
 }
 
@@ -107,8 +106,4 @@ pub async fn paginate_dicts(
         query_statement.order_by(tt_dict::Column::UpdateTime, if sort { Order::Desc } else { Order::Asc });
     }
     funs.db().paginate_dtos(&query_statement, page_number as u64, page_size as u64).await
-}
-
-pub fn get_table_name() -> String {
-    tt_dict::Entity.table_name().to_string()
 }

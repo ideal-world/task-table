@@ -11,5 +11,5 @@ publish = false
 [dependencies]
 serde.workspace = true
 lazy_static.workspace = true
-tardis = { workspace = true, features = ["web-server", "cluster"] }
+tardis = { workspace = true, features = ["web-server"] }
 task-table-kernel = { path = "../kernel" }

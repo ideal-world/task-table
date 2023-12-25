@@ -54,15 +54,15 @@ export enum OperatorKind {
   GT = '>',
   GE = '>=',
   IN = 'IN',
-  NIN = 'NOT IN',
+  NOT_IN = 'NOT IN',
   CONTAINS = 'CONTAINS',
-  NCONTAINS = 'NCONTAINS',
+  NOT_CONTAINS = 'NCONTAINS',
   STARTWITH = 'STARTWITH',
-  NSTARTWITH = 'NSTARTWITH',
+  NOT_STARTWITH = 'NSTARTWITH',
   ENDWITH = 'ENDWITH',
-  NENDWITH = 'NENDWITH',
+  NOT_ENDWITH = 'NENDWITH',
   ISEMPTY = 'ISEMPTY',
-  NOTEMPTY = 'NOTEMPTY',
+  NOT_EMPTY = 'NOTEMPTY',
   // TODO Add between
 }
 
@@ -76,15 +76,15 @@ export function translateOperatorKind(operatorKind?: OperatorKind): string {
     case OperatorKind.GT: return t('_.operatorkind.gt')
     case OperatorKind.GE: return t('_.operatorkind.ge')
     case OperatorKind.IN: return t('_.operatorkind.in')
-    case OperatorKind.NIN: return t('_.operatorkind.nin')
+    case OperatorKind.NOT_IN: return t('_.operatorkind.nin')
     case OperatorKind.CONTAINS: return t('_.operatorkind.contains')
-    case OperatorKind.NCONTAINS: return t('_.operatorkind.ncontains')
+    case OperatorKind.NOT_CONTAINS: return t('_.operatorkind.ncontains')
     case OperatorKind.STARTWITH: return t('_.operatorkind.startwith')
-    case OperatorKind.NSTARTWITH: return t('_.operatorkind.nstartwith')
+    case OperatorKind.NOT_STARTWITH: return t('_.operatorkind.nstartwith')
     case OperatorKind.ENDWITH: return t('_.operatorkind.endwith')
-    case OperatorKind.NENDWITH: return t('_.operatorkind.nendwith')
+    case OperatorKind.NOT_ENDWITH: return t('_.operatorkind.nendwith')
     case OperatorKind.ISEMPTY: return t('_.operatorkind.isempty')
-    case OperatorKind.NOTEMPTY: return t('_.operatorkind.notempty')
+    case OperatorKind.NOT_EMPTY: return t('_.operatorkind.notempty')
   }
 }
 
