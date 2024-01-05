@@ -1,7 +1,5 @@
 use super::tt_layout_dtos::TableLayoutProps;
 use serde::{Deserialize, Serialize};
-#[cfg(feature = "web")]
-use tardis::web::poem_openapi;
 use tardis::{
     chrono::{DateTime, Utc},
     db::sea_orm,
@@ -10,19 +8,17 @@ use tardis::{
 };
 
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "web", derive(poem_openapi::Object), oai(rename_all = "SCREAMING_SNAKE_CASE"))]
+#[serde(rename_all = "camelCase")]
 pub struct TableAddReq {
     pub pk_column_name: String,
     pub parent_pk_column_name: Option<String>,
-    pub columns: Vec<TableColumnProps>,
+    pub columns: Vec<TableColumnAddReq>,
     pub styles: Option<TableStyleProps>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "web", derive(poem_openapi::Object), oai(rename_all = "SCREAMING_SNAKE_CASE"))]
+#[serde(rename_all = "camelCase")]
 pub struct TableModifyReq {
-    pub pk_column_name: Option<String>,
-    pub parent_pk_column_name: Option<String>,
     pub new_column: Option<TableColumnAddReq>,
     pub changed_column: Option<TableColumnModifyReq>,
     pub deleted_column_name: Option<String>,
@@ -30,7 +26,7 @@ pub struct TableModifyReq {
 }
 
 #[derive(Serialize, Deserialize, Debug, sea_orm::FromQueryResult)]
-#[cfg_attr(feature = "web", derive(poem_openapi::Object), oai(rename_all = "SCREAMING_SNAKE_CASE"))]
+#[serde(rename_all = "camelCase")]
 pub struct TableSummaryResp {
     pub id: String,
     pub pk_column_name: String,
@@ -42,7 +38,7 @@ pub struct TableSummaryResp {
 }
 
 #[derive(Serialize, Deserialize, Debug, sea_orm::FromQueryResult)]
-#[cfg_attr(feature = "web", derive(poem_openapi::Object), oai(rename_all = "SCREAMING_SNAKE_CASE"))]
+#[serde(rename_all = "camelCase")]
 pub struct TableDetailResp {
     pub id: String,
     pub pk_column_name: String,
@@ -79,7 +75,7 @@ impl TableDetailResp {
 }
 
 #[derive(Serialize, Deserialize, Debug, sea_orm::FromQueryResult)]
-#[cfg_attr(feature = "web", derive(poem_openapi::Object), oai(rename_all = "SCREAMING_SNAKE_CASE"))]
+#[serde(rename_all = "camelCase")]
 pub struct TableColumnsResp {
     pub pk_column_name: String,
     pub columns: Value,
@@ -92,7 +88,7 @@ impl TableColumnsResp {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "web", derive(poem_openapi::Object), oai(rename_all = "SCREAMING_SNAKE_CASE"))]
+#[serde(rename_all = "camelCase")]
 pub struct TableColumnAddReq {
     pub name: String,
     pub icon: Option<String>,
@@ -106,7 +102,7 @@ pub struct TableColumnAddReq {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "web", derive(poem_openapi::Object), oai(rename_all = "SCREAMING_SNAKE_CASE"))]
+#[serde(rename_all = "camelCase")]
 pub struct TableColumnModifyReq {
     pub name: String,
     pub icon: Option<String>,
@@ -118,60 +114,61 @@ pub struct TableColumnModifyReq {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "web", derive(poem_openapi::Object), oai(rename_all = "SCREAMING_SNAKE_CASE"))]
+#[serde(rename_all = "camelCase")]
 pub struct TableColumnProps {
     pub name: String,
     pub icon: Option<String>,
-    pub title: Option<String>,
-    pub data_kind: Option<TableColumnDataKind>,
-    pub data_editable: Option<bool>,
-    pub use_dict: Option<bool>,
-    pub dict_editable: Option<bool>,
-    pub multi_value: Option<bool>,
+    pub title: String,
+    pub data_kind: TableColumnDataKind,
+    pub data_editable: bool,
+    pub use_dict:bool,
+    pub dict_editable: bool,
+    pub multi_value: bool,
     pub kind_date_time_format: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "web", derive(poem_openapi::Enum))]
 pub enum TableColumnDataKind {
-    #[cfg_attr(feature = "web", oai(rename = "TEXT"))]
+    #[serde(rename = "TEXT")]
     Text,
-    #[cfg_attr(feature = "web", oai(rename = "TEXTAREA"))]
+    #[serde(rename = "TEXTAREA")]
     Textarea,
-    #[cfg_attr(feature = "web", oai(rename = "NUMBER"))]
+    #[serde(rename = "SERIAL")]
+    Serial,
+    #[serde(rename = "NUMBER")]
     Number,
-    #[cfg_attr(feature = "web", oai(rename = "BOOLEAN"))]
+    #[serde(rename = "BOOLEAN")]
     Boolean,
-    #[cfg_attr(feature = "web", oai(rename = "FILE"))]
+    #[serde(rename = "FILE")]
     File,
-    #[cfg_attr(feature = "web", oai(rename = "IMAGE"))]
+    #[serde(rename = "IMAGE")]
     Image,
-    #[cfg_attr(feature = "web", oai(rename = "AMOUNT"))]
+    #[serde(rename = "AMOUNT")]
     Amount,
-    #[cfg_attr(feature = "web", oai(rename = "SELECT"))]
+    #[serde(rename = "SELECT")]
     Select,
-    #[cfg_attr(feature = "web", oai(rename = "MULTISELECT"))]
+    #[serde(rename = "MULTISELECT")]
     MultiSelect,
-    #[cfg_attr(feature = "web", oai(rename = "CHECKBOX"))]
+    #[serde(rename = "CHECKBOX")]
     Checkbox,
-    #[cfg_attr(feature = "web", oai(rename = "DATE"))]
+    #[serde(rename = "DATE")]
     Date,
-    #[cfg_attr(feature = "web", oai(rename = "DATETIME"))]
+    #[serde(rename = "DATETIME")]
     Datetime,
-    #[cfg_attr(feature = "web", oai(rename = "TIME"))]
+    #[serde(rename = "TIME")]
     Time,
-    #[cfg_attr(feature = "web", oai(rename = "EMAIL"))]
+    #[serde(rename = "EMAIL")]
     Email,
-    #[cfg_attr(feature = "web", oai(rename = "URL"))]
+    #[serde(rename = "URL")]
     Url,
-    #[cfg_attr(feature = "web", oai(rename = "PHONE"))]
+    #[serde(rename = "PHONE")]
     Phone,
-    #[cfg_attr(feature = "web", oai(rename = "PASSWORD"))]
+    #[serde(rename = "PASSWORD")]
     Password,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "web", derive(poem_openapi::Object), oai(rename_all = "SCREAMING_SNAKE_CASE"))]
+#[serde(rename_all = "camelCase")]
 pub struct TableStyleAddOrModifyReq {
     pub size: Option<String>,
     pub theme: Option<String>,
@@ -183,7 +180,7 @@ pub struct TableStyleAddOrModifyReq {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "web", derive(poem_openapi::Object), oai(rename_all = "SCREAMING_SNAKE_CASE"))]
+#[serde(rename_all = "camelCase")]
 pub struct TableStyleProps {
     pub size: Option<String>,
     pub theme: Option<String>,

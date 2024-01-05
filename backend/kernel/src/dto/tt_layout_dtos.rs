@@ -1,13 +1,11 @@
 use std::collections::HashMap;
 
+use super::tt_data_dtos::{TableDataFilterReq, TableDataGroupReq, TableDataSortReq};
 use serde::{Deserialize, Serialize};
 use tardis::serde_json::Value;
-#[cfg(feature = "web")]
-use tardis::web::poem_openapi;
-use super::tt_data_dtos::{TableDataFilterReq, TableDataGroupReq, TableDataSortReq};
 
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "web", derive(poem_openapi::Object), oai(rename_all = "SCREAMING_SNAKE_CASE"))]
+#[serde(rename_all = "camelCase")]
 pub struct TableLayoutAddReq {
     pub title: String,
     pub layout_kind: String,
@@ -22,7 +20,7 @@ pub struct TableLayoutAddReq {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "web", derive(poem_openapi::Object), oai(rename_all = "SCREAMING_SNAKE_CASE"))]
+#[serde(rename_all = "camelCase")]
 pub struct TableLayoutModifyReq {
     pub title: Option<String>,
     pub icon: Option<String>,
@@ -40,7 +38,7 @@ pub struct TableLayoutModifyReq {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "web", derive(poem_openapi::Object), oai(rename_all = "SCREAMING_SNAKE_CASE"))]
+#[serde(rename_all = "camelCase")]
 pub struct TableLayoutProps {
     pub id: String,
     pub title: String,
@@ -56,7 +54,7 @@ pub struct TableLayoutProps {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "web", derive(poem_openapi::Object), oai(rename_all = "SCREAMING_SNAKE_CASE"))]
+#[serde(rename_all = "camelCase")]
 pub struct TableLayoutColumnProps {
     pub name: String,
     pub wrap: Option<bool>,

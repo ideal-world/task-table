@@ -12,10 +12,11 @@ publish = false
 name = "task_table_kernel"
 path = "src/lib.rs"
 
-[features]
-web = ["tardis/web-server"]
-
 [dependencies]
 serde.workspace = true
 lazy_static.workspace = true
 tardis = { workspace = true, features = ["reldb-core", "reldb-postgres"] }
+
+[dev-dependencies]
+tardis = { workspace = true, features = ["test"] }
+

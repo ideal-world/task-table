@@ -2,18 +2,16 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 use tardis::serde_json::Value;
-#[cfg(feature = "web")]
-use tardis::web::poem_openapi;
 
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "web", derive(poem_openapi::Object), oai(rename_all = "SCREAMING_SNAKE_CASE"))]
+#[serde(rename_all = "camelCase")]
 pub struct TableDataFilterReq {
     pub items: Vec<TableDataFilterItemReq>,
     pub and: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "web", derive(poem_openapi::Object), oai(rename_all = "SCREAMING_SNAKE_CASE"))]
+#[serde(rename_all = "camelCase")]
 pub struct TableDataFilterItemReq {
     pub column_name: String,
     pub operator: TableDataOperatorKind,
@@ -21,14 +19,14 @@ pub struct TableDataFilterItemReq {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "web", derive(poem_openapi::Object), oai(rename_all = "SCREAMING_SNAKE_CASE"))]
+#[serde(rename_all = "camelCase")]
 pub struct TableDataSortReq {
     pub column_name: String,
     pub order_desc: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "web", derive(poem_openapi::Object), oai(rename_all = "SCREAMING_SNAKE_CASE"))]
+#[serde(rename_all = "camelCase")]
 pub struct TableDataGroupReq {
     pub column_names: Vec<String>,
     pub group_order_desc: bool,
@@ -36,83 +34,102 @@ pub struct TableDataGroupReq {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "web", derive(poem_openapi::Object), oai(rename_all = "SCREAMING_SNAKE_CASE"))]
+#[serde(rename_all = "camelCase")]
 pub struct TableDataSliceReq {
     pub offset_number: i32,
     pub fetch_number: i32,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "web", derive(poem_openapi::Object), oai(rename_all = "SCREAMING_SNAKE_CASE"))]
+#[serde(rename_all = "camelCase")]
 pub struct TableDataResp {
-    pub records: Vec<Value>,
+    pub records: Vec<HashMap<String, Value>>,
     pub aggs: HashMap<String, Value>,
     pub total_number: i32,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "web", derive(poem_openapi::Object), oai(rename_all = "SCREAMING_SNAKE_CASE"))]
+#[serde(rename_all = "camelCase")]
 pub struct TableDataGroupResp {
-    pub records: Vec<Value>,
+    pub records: Vec<HashMap<String, Value>>,
     pub aggs: HashMap<String, Value>,
     pub total_number: i32,
     pub group_value: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "web", derive(poem_openapi::Enum))]
 pub enum TableDataAggregateKind {
-    #[cfg_attr(feature = "web", oai(rename = "SUM"))]
+    #[serde(rename = "SUM")]
     Sum,
-    #[cfg_attr(feature = "web", oai(rename = "COUNT"))]
+    #[serde(rename = "COUNT")]
     Count,
-    #[cfg_attr(feature = "web", oai(rename = "MIN"))]
+    #[serde(rename = "MIN")]
     Min,
-    #[cfg_attr(feature = "web", oai(rename = "MAX"))]
+    #[serde(rename = "MAX")]
     Max,
-    #[cfg_attr(feature = "web", oai(rename = "AVG"))]
+    #[serde(rename = "AVG")]
     Avg,
-    #[cfg_attr(feature = "web", oai(rename = "MEDIAN"))]
-    median,
-    #[cfg_attr(feature = "web", oai(rename = "STDDEV"))]
+    #[serde(rename = "STDDEV")]
     Stddev,
-    #[cfg_attr(feature = "web", oai(rename = "DISTINCT"))]
+    #[serde(rename = "DISTINCT")]
     Distinct,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[cfg_attr(feature = "web", derive(poem_openapi::Enum))]
 pub enum TableDataOperatorKind {
-    #[cfg_attr(feature = "web", oai(rename = "="))]
+    #[serde(rename = "=")]
     Eq,
-    #[cfg_attr(feature = "web", oai(rename = "!="))]
+    #[serde(rename = "!=")]
     Ne,
-    #[cfg_attr(feature = "web", oai(rename = "<"))]
+    #[serde(rename = "<")]
     Lt,
-    #[cfg_attr(feature = "web", oai(rename = "<="))]
+    #[serde(rename = "<=")]
     Le,
-    #[cfg_attr(feature = "web", oai(rename = ">"))]
+    #[serde(rename = ">")]
     Gt,
-    #[cfg_attr(feature = "web", oai(rename = ">="))]
+    #[serde(rename = ">=")]
     Ge,
-    #[cfg_attr(feature = "web", oai(rename = "In"))]
+    #[serde(rename = "In")]
     In,
-    #[cfg_attr(feature = "web", oai(rename = "NOT IN"))]
+    #[serde(rename = "NOT IN")]
     NotIn,
-    #[cfg_attr(feature = "web", oai(rename = "CONTAINS"))]
+    #[serde(rename = "CONTAINS")]
     Contains,
-    #[cfg_attr(feature = "web", oai(rename = "NCONTAINS"))]
+    #[serde(rename = "NCONTAINS")]
     NotContains,
-    #[cfg_attr(feature = "web", oai(rename = "STARTWITH"))]
+    #[serde(rename = "STARTWITH")]
     StartWith,
-    #[cfg_attr(feature = "web", oai(rename = "NSTARTWITH"))]
+    #[serde(rename = "NSTARTWITH")]
     NotStartWith,
-    #[cfg_attr(feature = "web", oai(rename = "ENDWITH"))]
+    #[serde(rename = "ENDWITH")]
     EndWith,
-    #[cfg_attr(feature = "web", oai(rename = "NENDWITH"))]
+    #[serde(rename = "NENDWITH")]
     NotEndWith,
-    #[cfg_attr(feature = "web", oai(rename = "ISEMPTY"))]
+    #[serde(rename = "ISEMPTY")]
     IsEmpty,
-    #[cfg_attr(feature = "web", oai(rename = "NOTEMPTY"))]
+    #[serde(rename = "NOTEMPTY")]
     NotEmpty,
+}
+
+impl TableDataOperatorKind {
+    pub fn to_sql(&self, column_name: &str, placeholders: Vec<String>) -> String {
+        match self {
+            TableDataOperatorKind::Eq => format!("{} = {}", column_name, placeholders[0]),
+            TableDataOperatorKind::Ne => format!("{} != {}", column_name, placeholders[0]),
+            TableDataOperatorKind::Lt => format!("{} < {}", column_name, placeholders[0]),
+            TableDataOperatorKind::Le => format!("{} <= {}", column_name, placeholders[0]),
+            TableDataOperatorKind::Gt => format!("{} > {}", column_name, placeholders[0]),
+            TableDataOperatorKind::Ge => format!("{} >= {}", column_name, placeholders[0]),
+            TableDataOperatorKind::In => format!("{} IN ({})", column_name, placeholders.join(",")),
+            TableDataOperatorKind::NotIn => format!("{} NOT IN ({})", column_name, placeholders.join(",")),
+            TableDataOperatorKind::Contains => format!("{} LIKE %{}%", column_name, placeholders[0]),
+            TableDataOperatorKind::NotContains => format!("{} NOT LIKE %{}%", column_name, placeholders[0]),
+            TableDataOperatorKind::StartWith => format!("{} LIKE {}%", column_name, placeholders[0]),
+            TableDataOperatorKind::NotStartWith => format!("{} NOT LIKE {}%", column_name, placeholders[0]),
+            TableDataOperatorKind::EndWith => format!("{} LIKE %{}", column_name, placeholders[0]),
+            TableDataOperatorKind::NotEndWith => format!("{} NOT LIKE %{}", column_name, placeholders[0]),
+            TableDataOperatorKind::IsEmpty => format!("{} = ''", column_name),
+            TableDataOperatorKind::NotEmpty => format!("{} != ''", column_name),
+        }
+    }
 }
