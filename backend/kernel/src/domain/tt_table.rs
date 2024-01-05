@@ -18,7 +18,6 @@ pub struct Model {
     #[index]
     #[sea_orm(extra = "DEFAULT CURRENT_TIMESTAMP")]
     pub create_time: chrono::DateTime<Utc>,
-
     #[index]
     #[sea_orm(extra = "DEFAULT CURRENT_TIMESTAMP")]
     pub update_time: chrono::DateTime<Utc>,

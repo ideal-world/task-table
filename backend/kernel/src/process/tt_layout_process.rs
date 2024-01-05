@@ -11,6 +11,13 @@ use tardis::{
 
 pub async fn add_layout(table_id: &str, add_req: TableLayoutAddReq, funs: &TardisFunsInst, ctx: &TardisContext) -> TardisResult<String> {
     tt_share_process::check_share_full_control(table_id, funs, ctx).await?;
+    let storage_table_detail = tt_table_process::get_table(table_id, funs, ctx).await?;
+    let storage_columns = storage_table_detail.columns();
+
+    if add_req.columns.iter().any(|req_column| !storage_columns.iter().any(|column| column.name == req_column.name)) {
+        return Err(funs.err().not_found("layout", "add", &format!("Table.{} column not found by {}", table_id, ctx.owner), "404-column-not-found"));
+    }
+
     let layout_id: String = TardisFuns::field.nanoid();
     let layout_props = TableLayoutProps {
         id: layout_id.clone(),
@@ -41,7 +48,7 @@ pub async fn add_layout(table_id: &str, add_req: TableLayoutAddReq, funs: &Tardi
     Ok(layout_id)
 }
 
-pub async fn modify_table(table_id: &str, layout_id: &str, modify_req: TableLayoutModifyReq, funs: &TardisFunsInst, ctx: &TardisContext) -> TardisResult<()> {
+pub async fn modify_layout(table_id: &str, layout_id: &str, modify_req: TableLayoutModifyReq, funs: &TardisFunsInst, ctx: &TardisContext) -> TardisResult<()> {
     let mut storage_layouts = find_layouts(table_id, funs, ctx).await?;
     if let Some(storage_layout) = storage_layouts.iter_mut().find(|layout| layout.id == layout_id) {
         if let Some(title) = modify_req.title {
@@ -69,11 +76,19 @@ pub async fn modify_table(table_id: &str, layout_id: &str, modify_req: TableLayo
         if let Some(new_group) = modify_req.new_group {
             storage_layout.group = Some(new_group);
         }
-        if let Some(_delete_group) = modify_req.delete_group {
-            storage_layout.group = None;
+        if let Some(delete_group) = modify_req.delete_group {
+            if delete_group {
+                storage_layout.group = None;
+            }
         }
         // column
         if let Some(new_column) = modify_req.new_column {
+            let storage_table_detail = tt_table_process::get_table(table_id, funs, ctx).await?;
+            let storage_columns = storage_table_detail.columns();
+            if !storage_columns.iter().any(|column| column.name == new_column.name) {
+                return Err(funs.err().not_found("layout", "modify", &format!("Table.{} column not found by {}", table_id, ctx.owner), "404-column-not-found"));
+            }
+
             storage_layout.columns.push(new_column);
         }
         if let Some(deleted_column_name) = modify_req.deleted_column_name {
@@ -83,8 +98,8 @@ pub async fn modify_table(table_id: &str, layout_id: &str, modify_req: TableLayo
         }
         if let Some(changed_column) = modify_req.changed_column {
             if let Some(idx) = storage_layout.columns.iter().position(|column| column.name == changed_column.name) {
-                storage_layout.columns.insert(idx, changed_column);
                 storage_layout.columns.remove(idx);
+                storage_layout.columns.insert(idx, changed_column);
             }
         }
         if let Some(sorted_names) = modify_req.column_sorted_names {
@@ -108,8 +123,8 @@ pub async fn modify_table(table_id: &str, layout_id: &str, modify_req: TableLayo
         Err(funs.err().not_found(
             "layout",
             "modify",
-            &format!("table.{}.layout.{} not found by {}", table_id, layout_id, ctx.owner),
-            "404-not-exist",
+            &format!("Table.{}.layout.{} not found by {}", table_id, layout_id, ctx.owner),
+            "404-layout-not-found",
         ))
     }
 }
@@ -121,8 +136,8 @@ pub async fn delete_layout(table_id: &str, layout_id: &str, funs: &TardisFunsIns
         return Err(funs.err().not_found(
             "layout",
             "delete",
-            &format!("table.{}.layout.{} not found by {}", table_id, layout_id, ctx.owner),
-            "404-not-exist",
+            &format!("Table.{}.layout.{} not found by {}", table_id, layout_id, ctx.owner),
+            "404-layout-not-found",
         ));
     }
     storage_layouts.remove(storage_layout_idx.unwrap());
@@ -143,8 +158,8 @@ pub async fn get_layout(table_id: &str, layout_id: &str, funs: &TardisFunsInst, 
         return Err(funs.err().not_found(
             "layout",
             "get",
-            &format!("table.{}.layout.{} not found by {}", table_id, layout_id, ctx.owner),
-            "404-not-exist",
+            &format!("Table.{}.layout.{} not found by {}", table_id, layout_id, ctx.owner),
+            "404-layout-not-found",
         ));
     }
     Ok(storage_layout.unwrap())
@@ -154,7 +169,7 @@ pub async fn find_layouts(table_id: &str, funs: &TardisFunsInst, ctx: &TardisCon
     tt_share_process::check_share_full_control(table_id, funs, ctx).await?;
     let storage_layouts = tt_table_process::get_table(table_id, funs, ctx).await?.layouts();
     if storage_layouts.is_none() {
-        return Err(funs.err().not_found("layout", "find", &format!("table.{} not found by {}", table_id, ctx.owner), "404-not-exist"));
+        return Err(funs.err().not_found("layout", "find", &format!("Table.{} not found by {}", table_id, ctx.owner), "404-layout-not-found"));
     }
     Ok(storage_layouts.unwrap())
 }

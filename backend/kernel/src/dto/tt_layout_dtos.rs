@@ -59,7 +59,7 @@ pub struct TableLayoutColumnProps {
     pub name: String,
     pub wrap: Option<bool>,
     pub fixed: Option<bool>,
-    pub width: Option<f64>,
+    pub width: Option<u32>,
     pub hide: Option<bool>,
     pub date_start: Option<bool>,
     pub date_end: Option<bool>,

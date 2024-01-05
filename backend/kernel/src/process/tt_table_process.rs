@@ -1,4 +1,5 @@
 use crate::dto::tt_basic_dtos::RbumBasicFilterReq;
+use crate::dto::tt_share_dtos::ShareAddReq;
 use crate::dto::tt_table_dtos::{TableColumnAddReq, TableColumnDataKind, TableColumnProps, TableColumnsResp, TableDetailResp, TableModifyReq, TableSummaryResp};
 use crate::{domain::tt_table, dto::tt_table_dtos::TableAddReq};
 use lazy_static::lazy_static;
@@ -19,10 +20,14 @@ lazy_static! {
 }
 
 pub const INST_PREFIX: &str = "inst_";
+const ALPHABET: [char; 62] = [
+    '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y',
+    'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+];
 
 pub async fn add_table(mut add_req: TableAddReq, funs: &TardisFunsInst, ctx: &TardisContext) -> TardisResult<String> {
-    let table_id: String = TardisFuns::field.nanoid();
-
+    let table_id: String = TardisFuns::field.nanoid_custom(10, &ALPHABET);
+    
     if add_req.columns.iter().any(|column| !R_COLUMN_NAME.is_match(&column.name)) {
         return Err(funs.err().bad_request("table", "add_table", "Column name is illegal", "400-column-name-is-illegal"));
     }
@@ -103,6 +108,16 @@ pub async fn add_table(mut add_req: TableAddReq, funs: &TardisFunsInst, ctx: &Ta
             vec![],
         )
         .await?;
+    tt_share_process::add_share(
+        ShareAddReq {
+            table_id: table_id.clone(),
+            owner: ctx.owner.clone(),
+            full_control: true,
+        },
+        funs,
+        ctx,
+    )
+    .await?;
     Ok(table_id)
 }
 

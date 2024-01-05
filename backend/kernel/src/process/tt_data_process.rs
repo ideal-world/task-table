@@ -7,8 +7,7 @@ use tardis::{
         sea_query::{self, ArrayType},
     },
     futures_util::future::join_all,
-    serde_json::{self, json, Number, Value},
-    web::poem_openapi::types::Type,
+    serde_json::{self, json, Value},
     TardisFuns, TardisFunsInst,
 };
 
@@ -232,7 +231,7 @@ pub async fn load_data_with_group(
     let table_columns = tt_table_process::get_table_columns(table_id, funs, ctx).await?;
     let columns = table_columns.columns();
 
-    if group.column_names.iter().any(|group_column_name| columns.iter().any(|col| &col.name == group_column_name)).is_none() {
+    if group.column_names.iter().any(|group_column_name| !columns.iter().any(|col| &col.name == group_column_name)) {
         return Err(funs.err().conflict(
             "table",
             "load_data_group",
@@ -286,7 +285,7 @@ pub async fn load_data_with_group(
         group_records.reverse();
     }
 
-    let mut result = join_all(
+    let result = join_all(
         group_records
             .into_iter()
             .map(|group_record| {
@@ -418,7 +417,7 @@ fn package_aggs_sql(
     funs: &TardisFunsInst,
 ) -> TardisResult<String> {
     let aggs_sql = if let Some(aggs) = aggs {
-        if aggs.iter().any(|agg| columns.iter().any(|col| &col.name == agg.0)).is_none() {
+        if aggs.iter().any(|agg| !columns.iter().any(|col| &col.name == agg.0)) {
             return Err(funs.err().conflict(
                 "table",
                 "load_data_without_group",
@@ -456,7 +455,7 @@ fn package_limit_sql(slice: Option<TableDataSliceReq>) -> TardisResult<String> {
 
 fn package_sort_sql(sorts: Option<Vec<TableDataSortReq>>, columns: &Vec<TableColumnProps>, table_id: &str, funs: &TardisFunsInst) -> TardisResult<String> {
     let sort_sql = if let Some(sorts) = sorts {
-        if sorts.iter().any(|sort| columns.iter().any(|col| col.name == sort.column_name)).is_none() {
+        if sorts.iter().any(|sort| !columns.iter().any(|col| col.name == sort.column_name)) {
             return Err(funs.err().conflict(
                 "table",
                 "load_data_without_group",

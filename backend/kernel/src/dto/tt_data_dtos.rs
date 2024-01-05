@@ -57,7 +57,7 @@ pub struct TableDataGroupResp {
     pub group_value: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub enum TableDataAggregateKind {
     #[serde(rename = "SUM")]
     Sum,

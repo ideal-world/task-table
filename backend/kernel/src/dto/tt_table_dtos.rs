@@ -121,13 +121,13 @@ pub struct TableColumnProps {
     pub title: String,
     pub data_kind: TableColumnDataKind,
     pub data_editable: bool,
-    pub use_dict:bool,
+    pub use_dict: bool,
     pub dict_editable: bool,
     pub multi_value: bool,
     pub kind_date_time_format: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub enum TableColumnDataKind {
     #[serde(rename = "TEXT")]
     Text,
