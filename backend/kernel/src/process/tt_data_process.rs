@@ -1,5 +1,9 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, str::FromStr};
 
+use tardis::chrono::{NaiveDate, NaiveTime};
+use tardis::db::sea_orm::prelude::DateTimeWithTimeZone;
+use tardis::db::sea_orm::QueryResult;
+use tardis::log::warn;
 use tardis::{
     basic::{dto::TardisContext, result::TardisResult},
     db::sea_orm::{
@@ -34,53 +38,45 @@ pub async fn add_or_modify_data(
     if changed_records.len() == 0 {
         return Ok(Vec::new());
     }
-    let first_record = &changed_records[0];
-    for (key, _) in first_record {
-        if columns.iter().find(|col| col.name == *key).is_none() {
-            return Err(funs.err().conflict(
-                "table",
-                "add_or_modify_data",
-                &format!("table.{} changed_records keys illegal", table_id),
-                "409-keys-illegal",
-            ));
-        }
+    let changed_column_names = &changed_records[0].keys().map(|k| k.clone()).collect::<Vec<String>>();
+
+    if changed_column_names.iter().any(|column_name| !columns.iter().any(|col| &col.name == column_name)) {
+        return Err(funs.err().conflict("table", "add_or_modify_data", &format!("Table.{} column name illegal", table_id), "409-keys-illegal"));
     }
-    let others_records = &changed_records[1..];
     if changed_records.len() > 1 {
-        for record in others_records {
-            if record.keys().any(|k| !first_record.contains_key(k)) {
-                return Err(funs.err().conflict(
-                    "table",
-                    "add_or_modify_data",
-                    &format!("table.{} changed_records keys not same", table_id),
-                    "409-keys-not-same",
-                ));
+        for record in &changed_records {
+            if record.len() != changed_column_names.len() || record.keys().any(|k| !changed_column_names.contains(k)) {
+                return Err(funs.err().conflict("table", "add_or_modify_data", &format!("Table.{} column name not same", table_id), "409-keys-not-same"));
             }
         }
     }
 
-    let changed_keys = first_record.keys().filter(|k| k != &&table_columns.pk_column_name).map(|k| k.clone()).collect::<Vec<String>>();
-
-    if first_record.contains_key(&table_columns.pk_column_name) {
+    if changed_column_names.contains(&table_columns.pk_column_name) {
         // modify
-        let pks: Vec<Value> = changed_records.iter().map(|record| record.get(&table_columns.pk_column_name).unwrap().clone()).collect::<Vec<Value>>();
+        let pks: Vec<Value> = changed_records.iter().map(|record| record.get(&table_columns.pk_column_name).expect("ignore").clone()).collect::<Vec<Value>>();
 
         let params = changed_records
             .into_iter()
             .map(|mut record| {
-                let mut params: Vec<sea_query::Value> = Vec::new();
-                params.push(get_and_convert_to_db_value(&table_columns.pk_column_name, &mut record, &columns));
-                changed_keys.iter().for_each(|k| {
-                    params.push(get_and_convert_to_db_value(k, &mut record, &columns));
-                });
-                params
+                changed_column_names
+                    .iter()
+                    .filter(|column_name| column_name != &&table_columns.pk_column_name)
+                    .map(|column_name| get_and_convert_to_db_value(column_name, &mut record, &columns, funs))
+                    .collect::<TardisResult<Vec<sea_query::Value>>>()
             })
-            .collect::<Vec<Vec<sea_query::Value>>>();
+            .collect::<TardisResult<Vec<Vec<sea_query::Value>>>>()?;
+
         let update_sql = format!(
             r#"UPDATE {}_{} SET {} WHERE {} = $1"#,
             INST_PREFIX,
             table_id,
-            changed_keys.iter().enumerate().map(|(idx, k)| format!("{} = ${}", k, idx + 2)).collect::<Vec<String>>().join(", "),
+            changed_column_names
+                .iter()
+                .filter(|column_name| column_name != &&table_columns.pk_column_name)
+                .enumerate()
+                .map(|(idx, column_name)| format!("{} = ${}", column_name, idx + 2))
+                .collect::<Vec<String>>()
+                .join(", "),
             table_columns.pk_column_name
         );
         funs.db().execute_many(&update_sql, params).await?;
@@ -103,102 +99,35 @@ pub async fn add_or_modify_data(
                 Vec::new(),
             )
             .await?
-            .unwrap()
-            .try_get::<u64>("", "setval")
-            .unwrap();
-        let min_seq = max_seq - changed_records.len() as u64;
+            .expect("ignore")
+            .try_get::<i64>("", "setval")
+            .expect("ignore");
+        let min_seq = max_seq - changed_records.len() as i64 + 1;
         let pks: Vec<Value> = (min_seq..=max_seq).map(|pk| json!(pk)).collect();
 
         let params = changed_records
             .into_iter()
             .enumerate()
             .map(|(idx, mut record)| {
-                let mut params: Vec<sea_query::Value> = Vec::new();
-                params.push(sea_query::Value::BigUnsigned(Some(min_seq + idx as u64)));
-                changed_keys.iter().for_each(|k| {
-                    params.push(get_and_convert_to_db_value(k, &mut record, &columns));
+                let mut params: Vec<TardisResult<sea_query::Value>> = Vec::new();
+                params.push(Ok(sea_query::Value::BigInt(Some(min_seq + idx as i64))));
+                changed_column_names.iter().for_each(|k| {
+                    params.push(get_and_convert_to_db_value(k, &mut record, &columns, funs));
                 });
-                params
+                params.into_iter().collect::<TardisResult<Vec<sea_query::Value>>>()
             })
-            .collect::<Vec<Vec<sea_query::Value>>>();
+            .collect::<TardisResult<Vec<Vec<sea_query::Value>>>>()?;
         let insert_sql = format!(
             r#"INSERT INTO {}_{} ({}, {}) VALUES ($1, {})"#,
             INST_PREFIX,
             table_id,
             table_columns.pk_column_name,
-            changed_keys.join(", "),
-            changed_keys.iter().enumerate().map(|(idx, _)| format!("${}", idx + 2)).collect::<Vec<String>>().join(", "),
+            changed_column_names.join(", "),
+            changed_column_names.iter().enumerate().map(|(idx, _)| format!("${}", idx + 2)).collect::<Vec<String>>().join(", "),
         );
         funs.db().execute_many(&insert_sql, params).await?;
         let modify_records = load_data_without_group(table_id, None, None, None, None, Some(pks), funs, ctx).await?;
         Ok(modify_records.records)
-    }
-}
-
-fn get_and_convert_to_db_value(column_name: &str, record: &mut HashMap<String, Value>, columns: &Vec<TableColumnProps>) -> sea_query::Value {
-    let val = record.get_mut(column_name).unwrap().take();
-    convert_to_db_value(column_name, val, columns)
-}
-
-fn convert_to_db_value(column_name: &str, val: Value, columns: &Vec<TableColumnProps>) -> sea_query::Value {
-    let column = columns.iter().find(|c| c.name == column_name).unwrap();
-    if !column.multi_value {
-        match column.data_kind {
-            TableColumnDataKind::Number => sea_query::Value::Double(val.as_f64()),
-            TableColumnDataKind::Amount => sea_query::Value::Decimal(Some(Box::new(Decimal::from_scientific(val.as_str().unwrap()).unwrap()))),
-            TableColumnDataKind::Boolean => sea_query::Value::Bool(val.as_bool()),
-            TableColumnDataKind::Datetime => sea_query::Value::ChronoDateTimeUtc(Some(Box::new(serde_json::from_str(val.as_str().unwrap()).unwrap()))),
-            TableColumnDataKind::Time => sea_query::Value::ChronoTime(Some(Box::new(serde_json::from_str(val.as_str().unwrap()).unwrap()))),
-            TableColumnDataKind::Date => sea_query::Value::ChronoDate(Some(Box::new(serde_json::from_str(val.as_str().unwrap()).unwrap()))),
-            _ => sea_query::Value::String(Some(Box::new(val.to_string()))),
-        }
-    } else {
-        match column.data_kind {
-            TableColumnDataKind::Number => sea_query::Value::Array(
-                ArrayType::Double,
-                Some(Box::new(val.as_array().unwrap().into_iter().map(|v| sea_query::Value::Double(v.as_f64())).collect())),
-            ),
-            TableColumnDataKind::Amount => sea_query::Value::Array(
-                ArrayType::Decimal,
-                Some(Box::new(
-                    val.as_array().unwrap().into_iter().map(|v| sea_query::Value::Decimal(Some(Box::new(Decimal::from_scientific(val.as_str().unwrap()).unwrap())))).collect(),
-                )),
-            ),
-            TableColumnDataKind::Boolean => sea_query::Value::Array(
-                ArrayType::Bool,
-                Some(Box::new(val.as_array().unwrap().into_iter().map(|v| sea_query::Value::Bool(v.as_bool())).collect())),
-            ),
-            TableColumnDataKind::Datetime => sea_query::Value::Array(
-                ArrayType::ChronoDateTimeUtc,
-                Some(Box::new(
-                    val.as_array()
-                        .unwrap()
-                        .into_iter()
-                        .map(|v| sea_query::Value::ChronoDateTimeUtc(Some(Box::new(serde_json::from_str(val.as_str().unwrap()).unwrap()))))
-                        .collect(),
-                )),
-            ),
-            TableColumnDataKind::Time => sea_query::Value::Array(
-                ArrayType::ChronoTime,
-                Some(Box::new(
-                    val.as_array().unwrap().into_iter().map(|v| sea_query::Value::ChronoTime(Some(Box::new(serde_json::from_str(val.as_str().unwrap()).unwrap())))).collect(),
-                )),
-            ),
-            TableColumnDataKind::Date => sea_query::Value::Array(
-                ArrayType::ChronoDate,
-                Some(Box::new(
-                    val.as_array().unwrap().into_iter().map(|v| sea_query::Value::ChronoDate(Some(Box::new(serde_json::from_str(val.as_str().unwrap()).unwrap())))).collect(),
-                )),
-            ),
-            _ => {
-                return sea_query::Value::Array(
-                    ArrayType::String,
-                    Some(Box::new(
-                        val.as_array().unwrap().into_iter().map(|v| sea_query::Value::String(Some(Box::new(v.to_string())))).collect(),
-                    )),
-                )
-            }
-        }
     }
 }
 
@@ -208,21 +137,17 @@ pub async fn delete_data(table_id: &str, deleted_pks: Vec<Value>, funs: &TardisF
 
     let params = deleted_pks
         .into_iter()
-        .map(|pk_value| {
-            let mut params: Vec<sea_query::Value> = Vec::new();
-            params.push(convert_to_db_value(&table_columns.pk_column_name, pk_value, &columns));
-            params
-        })
-        .collect();
+        .map(|pk_value| vec![convert_to_db_value(&table_columns.pk_column_name, pk_value, &columns, funs)].into_iter().collect::<TardisResult<Vec<sea_query::Value>>>())
+        .collect::<TardisResult<Vec<Vec<sea_query::Value>>>>()?;
     let delete_sql = format!(r#"DELETE FROM {}_{} WHERE {} = $1"#, INST_PREFIX, table_id, table_columns.pk_column_name,);
     funs.db().execute_many(&delete_sql, params).await
 }
 
 pub async fn load_data_with_group(
     table_id: &str,
+    group: TableDataGroupReq,
     filters: Option<Vec<TableDataFilterReq>>,
     sorts: Option<Vec<TableDataSortReq>>,
-    group: TableDataGroupReq,
     mut aggs: Option<HashMap<String, TableDataAggregateKind>>,
     slice: Option<TableDataSliceReq>,
     funs: &TardisFunsInst,
@@ -235,13 +160,13 @@ pub async fn load_data_with_group(
         return Err(funs.err().conflict(
             "table",
             "load_data_group",
-            &format!("table.{} group column_name illegal", table_id),
+            &format!("Table.{} group column name illegal", table_id),
             "409-column-name-illegal",
         ));
     }
 
-    let mut params = Vec::new();
-    let where_sql = package_where_sql(filters, &mut params, &columns)?;
+    let mut params: Vec<TardisResult<sea_query::Value>> = Vec::new();
+    let where_sql = package_where_sql(filters, &mut params, &columns, funs)?;
     let sort_sql = package_sort_sql(sorts, &columns, table_id, funs)?;
     let limit_sql = package_limit_sql(slice)?;
 
@@ -255,10 +180,10 @@ pub async fn load_data_with_group(
     let aggs_sql = package_aggs_sql(Some(aggs), &table_columns.pk_column_name, &columns, table_id, funs)?;
 
     let group_sql = format!(
-        r#"SELECT {}, {} FROM {}{} WHERE {} {} {} {}"#,
+        r#"SELECT {}, {} FROM {}_{} WHERE {} {} {} {}"#,
         group_select_sql, aggs_sql, INST_PREFIX, table_id, where_sql, sort_sql, group_by_sql, limit_sql
     );
-    let group_result = funs.db().query_all(&group_sql, params.clone()).await?;
+    let group_result = funs.db().query_all(&group_sql, params.clone().into_iter().collect::<TardisResult<Vec<sea_query::Value>>>()?).await?;
     let mut group_records = group_result
         .into_iter()
         .map(|row| {
@@ -294,13 +219,13 @@ pub async fn load_data_with_group(
                     .column_names
                     .iter()
                     .map(|group_column_name| {
-                        group_params.push(sea_query::Value::Double(Some(group_record.get(group_column_name).unwrap().as_f64().unwrap())));
+                        group_params.push(Ok(sea_query::Value::Double(Some(group_record.get(group_column_name).unwrap().as_f64().unwrap()))));
                         format!("{} = ${}", group_column_name, params.len() + 1)
                     })
                     .collect::<Vec<String>>()
                     .join(" AND ");
                 let select_sql = format!(
-                    r#"SELECT * FROM {}{} WHERE ({}) AND  {} {} {}"#,
+                    r#"SELECT * FROM {}_{} WHERE ({}) AND  {} {} {}"#,
                     INST_PREFIX, table_id, where_sql, group_where_sql, sort_sql, limit_sql
                 );
                 (
@@ -309,7 +234,7 @@ pub async fn load_data_with_group(
                     aggs.iter().map(|(column_name, _)| (column_name.to_string(), group_record.get(column_name).unwrap().clone())).collect::<HashMap<String, Value>>(),
                     columns.iter().map(|column| column.name.clone()).collect::<Vec<_>>(),
                     select_sql,
-                    group_params,
+                    group_params.into_iter().collect::<TardisResult<Vec<sea_query::Value>>>().unwrap(),
                 )
             })
             .map(|(total_number, group_value, aggs, column_names, select_sql, group_params)| async move {
@@ -355,7 +280,7 @@ pub async fn load_data_without_group(
         if filters.is_none() {
             filters = Some(Vec::new())
         }
-        filters.as_mut().unwrap().push(TableDataFilterReq {
+        filters.as_mut().expect("ignore").push(TableDataFilterReq {
             items: vec![TableDataFilterItemReq {
                 column_name: table_columns.pk_column_name.clone(),
                 operator: TableDataOperatorKind::In,
@@ -365,30 +290,42 @@ pub async fn load_data_without_group(
         })
     }
 
-    let mut params = Vec::new();
-    let where_sql = package_where_sql(filters, &mut params, &columns)?;
+    let mut params: Vec<TardisResult<sea_query::Value>> = Vec::new();
+    let where_sql = package_where_sql(filters, &mut params, &columns, funs)?;
     let sort_sql = package_sort_sql(sorts, &columns, table_id, funs)?;
     let limit_sql = package_limit_sql(slice)?;
 
     // query
-    let select_sql = format!(r#"SELECT * FROM {}{} WHERE {} {} {}"#, INST_PREFIX, table_id, where_sql, sort_sql, limit_sql);
-    let total_number = funs.db().count_by_sql(&select_sql, params.clone()).await?;
-    let result = funs.db().query_all(&select_sql, params.clone()).await?;
+    let select_sql = format!(r#"SELECT * FROM {}_{} WHERE {} {} {}"#, INST_PREFIX, table_id, where_sql, sort_sql, limit_sql);
+    let total_number = funs.db().count_by_sql(&select_sql, params.clone().into_iter().collect::<TardisResult<Vec<sea_query::Value>>>()?).await?;
+    let result = funs.db().query_all(&select_sql, params.clone().into_iter().collect::<TardisResult<Vec<sea_query::Value>>>()?).await?;
     let records = result
         .into_iter()
         .map(|row| {
-            let mut record = HashMap::new();
-            for column in &columns {
-                record.insert(column.name.clone(), row.try_get::<Value>("", &column.name).unwrap());
-            }
-            record
+            columns
+                .iter()
+                .map(|column| match convert_to_json_value(&column.name, &row, &columns, funs) {
+                    Ok(val) => (column.name.clone(), val),
+                    Err(err) => {
+                        warn!("convert_to_json_value error: {}", err);
+                        (column.name.clone(), json!(null))
+                    }
+                })
+                .collect::<HashMap<String, Value>>()
         })
         .collect::<Vec<HashMap<String, Value>>>();
 
     // aggs
     let aggs = if let Some(mut aggs) = aggs {
         let aggs_sql = package_aggs_sql(Some(&mut aggs), &table_columns.pk_column_name, &columns, table_id, funs)?;
-        let agg_result = funs.db().query_one(&format!(r#"SELECT {} FROM {}{} WHERE {}"#, aggs_sql, INST_PREFIX, table_id, where_sql), params).await?.unwrap();
+        let agg_result = funs
+            .db()
+            .query_one(
+                &format!(r#"SELECT {} FROM {}_{} WHERE {}"#, aggs_sql, INST_PREFIX, table_id, where_sql),
+                params.into_iter().collect::<TardisResult<Vec<sea_query::Value>>>()?,
+            )
+            .await?
+            .unwrap();
 
         let mut aggs_result = HashMap::new();
         for (column_name, agg_kind) in &aggs {
@@ -409,6 +346,385 @@ pub async fn load_data_without_group(
     })
 }
 
+fn get_and_convert_to_db_value(column_name: &str, record: &mut HashMap<String, Value>, columns: &Vec<TableColumnProps>, funs: &TardisFunsInst) -> TardisResult<sea_query::Value> {
+    match record.get_mut(column_name) {
+        Some(val) => convert_to_db_value(column_name, val.take(), columns, funs),
+        None => Err(funs.err().conflict(
+            "table",
+            "get_and_convert_to_db_value",
+            &format!("Column {} not found in record", column_name),
+            "404-column-not-found",
+        )),
+    }
+}
+
+fn convert_to_db_value(column_name: &str, val: Value, columns: &Vec<TableColumnProps>, funs: &TardisFunsInst) -> TardisResult<sea_query::Value> {
+    let column = columns
+        .iter()
+        .find(|c| c.name == column_name)
+        .ok_or_else(|| funs.err().conflict("table", "convert_to_db_value", &format!("Column {} is illegal", column_name), "400-column-is-illegal"))?;
+    if !column.multi_value {
+        return do_convert_to_db_value(column_name, val, &column.data_kind, funs);
+    }
+    if val.as_array().is_none() {
+        return Err(funs.err().conflict(
+            "table",
+            "convert_to_db_value",
+            &format!("Column {} value {} data kind is not array", column_name, val),
+            "400-column-data-kind-is-illegal",
+        ));
+    }
+    let vals = val
+        .as_array()
+        .expect("ignore")
+        .into_iter()
+        .map(|val| do_convert_to_db_value(column_name, val.clone(), &column.data_kind, funs))
+        .collect::<TardisResult<Vec<sea_query::Value>>>()?;
+
+    let kind = match column.data_kind {
+        TableColumnDataKind::Serial => ArrayType::BigInt,
+        TableColumnDataKind::Number => ArrayType::Double,
+        TableColumnDataKind::Amount => ArrayType::Decimal,
+        TableColumnDataKind::Boolean => ArrayType::Bool,
+        TableColumnDataKind::Datetime => ArrayType::ChronoDateTimeUtc,
+        TableColumnDataKind::Time => ArrayType::ChronoTime,
+        TableColumnDataKind::Date => ArrayType::ChronoDate,
+        _ => ArrayType::String,
+    };
+    Ok(sea_query::Value::Array(kind, Some(Box::new(vals))))
+}
+
+fn do_convert_to_db_value(column_name: &str, val: Value, data_kind: &TableColumnDataKind, funs: &TardisFunsInst) -> TardisResult<sea_query::Value> {
+    match data_kind {
+        TableColumnDataKind::Serial => val.as_i64().map(|val| sea_query::Value::BigInt(Some(val))).ok_or_else(|| {
+            funs.err().conflict(
+                "table",
+                "convert_to_db_value",
+                &format!("Column {} value {} data kind is not serial", column_name, val),
+                "400-column-data-kind-is-illegal",
+            )
+        }),
+        TableColumnDataKind::Number => val.as_f64().map(|val| sea_query::Value::Double(Some(val))).ok_or_else(|| {
+            funs.err().conflict(
+                "table",
+                "convert_to_db_value",
+                &format!("Column {} value {} data kind is not number", column_name, val),
+                "400-column-data-kind-is-illegal",
+            )
+        }),
+        // TODO test
+        TableColumnDataKind::Amount => {
+            let val = val
+                .as_str()
+                .map(|val| {
+                    Decimal::from_str(val).map_err(|_| {
+                        funs.err().conflict(
+                            "table",
+                            "convert_to_db_value",
+                            &format!("Column {} value {} data kind is not amount", column_name, val),
+                            "400-column-data-kind-is-illegal",
+                        )
+                    })
+                })
+                .ok_or_else(|| {
+                    funs.err().conflict(
+                        "table",
+                        "convert_to_db_value",
+                        &format!("Column {} value {} data kind is not amount", column_name, val),
+                        "400-column-data-kind-is-illegal",
+                    )
+                })??;
+            Ok(sea_query::Value::Decimal(Some(Box::new(val))))
+        }
+        // TODO test
+        TableColumnDataKind::Boolean => val.as_bool().map(|val| sea_query::Value::Bool(Some(val))).ok_or_else(|| {
+            funs.err().conflict(
+                "table",
+                "convert_to_db_value",
+                &format!("Column {} value {} data kind is not boolean", column_name, val),
+                "400-column-data-kind-is-illegal",
+            )
+        }),
+        // TODO test
+        TableColumnDataKind::Datetime => {
+            let val = val
+                .as_str()
+                .map(|val| {
+                    serde_json::from_str(val).map_err(|_| {
+                        funs.err().conflict(
+                            "table",
+                            "convert_to_db_value",
+                            &format!("Column {} value {} data kind is not datetime", column_name, val),
+                            "400-column-data-kind-is-illegal",
+                        )
+                    })
+                })
+                .ok_or_else(|| {
+                    funs.err().conflict(
+                        "table",
+                        "convert_to_db_value",
+                        &format!("Column {} value {} data kind is not datetime", column_name, val),
+                        "400-column-data-kind-is-illegal",
+                    )
+                })??;
+            Ok(sea_query::Value::ChronoDateTimeWithTimeZone(Some(Box::new(val))))
+        }
+        // TODO test
+        TableColumnDataKind::Time => {
+            let val = val
+                .as_str()
+                .map(|val| {
+                    serde_json::from_str(val).map_err(|_| {
+                        funs.err().conflict(
+                            "table",
+                            "convert_to_db_value",
+                            &format!("Column {} value {} data kind is not time", column_name, val),
+                            "400-column-data-kind-is-illegal",
+                        )
+                    })
+                })
+                .ok_or_else(|| {
+                    funs.err().conflict(
+                        "table",
+                        "convert_to_db_value",
+                        &format!("Column {} value {} data kind is not time", column_name, val),
+                        "400-column-data-kind-is-illegal",
+                    )
+                })??;
+            Ok(sea_query::Value::ChronoTime(Some(Box::new(val))))
+        }
+        // TODO test
+        TableColumnDataKind::Date => {
+            let val = val
+                .as_str()
+                .map(|val| {
+                    serde_json::from_str(val).map_err(|_| {
+                        funs.err().conflict(
+                            "table",
+                            "convert_to_db_value",
+                            &format!("Column {} value {} data kind is not date", column_name, val),
+                            "400-column-data-kind-is-illegal",
+                        )
+                    })
+                })
+                .ok_or_else(|| {
+                    funs.err().conflict(
+                        "table",
+                        "convert_to_db_value",
+                        &format!("Column {} value {} data kind is not date", column_name, val),
+                        "400-column-data-kind-is-illegal",
+                    )
+                })??;
+            Ok(sea_query::Value::ChronoDate(Some(Box::new(val))))
+        }
+        // TODO test
+        _ => val.as_str().map(|val| sea_query::Value::String(Some(Box::new(val.to_string())))).ok_or_else(|| {
+            funs.err().conflict(
+                "table",
+                "convert_to_db_value",
+                &format!("Column {} value {} data kind is not string", column_name, val),
+                "400-column-data-kind-is-illegal",
+            )
+        }),
+    }
+}
+
+fn convert_to_json_value(column_name: &str, row: &QueryResult, columns: &Vec<TableColumnProps>, funs: &TardisFunsInst) -> TardisResult<Value> {
+    let column = columns
+        .iter()
+        .find(|c| c.name == column_name)
+        .ok_or_else(|| funs.err().conflict("table", "convert_to_json_value", &format!("Column {} is illegal", column_name), "400-column-is-illegal"))?;
+    do_convert_to_json_value(column_name, row, column.multi_value, &column.data_kind, funs)
+}
+
+fn do_convert_to_json_value(column_name: &str, row: &QueryResult, multi_value: bool, data_kind: &TableColumnDataKind, funs: &TardisFunsInst) -> TardisResult<Value> {
+    let val = match data_kind {
+        TableColumnDataKind::Serial => {
+            if multi_value {
+                json!(row.try_get::<Vec<i64>>("", column_name).or_else(|_| {
+                    Err(funs.err().conflict(
+                        "table",
+                        "convert_to_json_value",
+                        &format!("Column {} data kind is not serial", column_name),
+                        "400-column-data-kind-is-illegal",
+                    ))
+                })?)
+            } else {
+                json!(row.try_get::<i64>("", column_name).or_else(|_| {
+                    Err(funs.err().conflict(
+                        "table",
+                        "convert_to_json_value",
+                        &format!("Column {} data kind is not serial", column_name),
+                        "400-column-data-kind-is-illegal",
+                    ))
+                })?)
+            }
+        }
+        TableColumnDataKind::Number => {
+            if multi_value {
+                json!(row.try_get::<Vec<f64>>("", column_name).or_else(|_| {
+                    Err(funs.err().conflict(
+                        "table",
+                        "convert_to_json_value",
+                        &format!("Column {} data kind is not number", column_name),
+                        "400-column-data-kind-is-illegal",
+                    ))
+                })?)
+            } else {
+                json!(row.try_get::<f64>("", column_name).or_else(|_| {
+                    Err(funs.err().conflict(
+                        "table",
+                        "convert_to_json_value",
+                        &format!("Column {} data kind is not number", column_name),
+                        "400-column-data-kind-is-illegal",
+                    ))
+                })?)
+            }
+        }
+        // TODO test
+        TableColumnDataKind::Amount => {
+            if multi_value {
+                json!(row
+                    .try_get::<Vec<Decimal>>("", column_name)
+                    .or_else(|_| {
+                        Err(funs.err().conflict(
+                            "table",
+                            "convert_to_json_value",
+                            &format!("Column {} data kind is not amount", column_name),
+                            "400-column-data-kind-is-illegal",
+                        ))
+                    })?
+                    .into_iter()
+                    .map(|v| v.to_string())
+                    .collect::<Vec<_>>())
+            } else {
+                json!(row
+                    .try_get::<Decimal>("", column_name)
+                    .or_else(|_| {
+                        Err(funs.err().conflict(
+                            "table",
+                            "convert_to_json_value",
+                            &format!("Column {} data kind is not amount", column_name),
+                            "400-column-data-kind-is-illegal",
+                        ))
+                    })?
+                    .to_string())
+            }
+        }
+        // TODO test
+        TableColumnDataKind::Boolean => {
+            if multi_value {
+                json!(row.try_get::<Vec<bool>>("", column_name).or_else(|_| {
+                    Err(funs.err().conflict(
+                        "table",
+                        "convert_to_json_value",
+                        &format!("Column {} data kind is not boolean", column_name),
+                        "400-column-data-kind-is-illegal",
+                    ))
+                })?)
+            } else {
+                json!(row.try_get::<bool>("", column_name).or_else(|_| {
+                    Err(funs.err().conflict(
+                        "table",
+                        "convert_to_json_value",
+                        &format!("Column {} data kind is not boolean", column_name),
+                        "400-column-data-kind-is-illegal",
+                    ))
+                })?)
+            }
+        }
+        // TODO test
+        TableColumnDataKind::Datetime => {
+            if multi_value {
+                json!(row.try_get::<Vec<DateTimeWithTimeZone>>("", column_name).or_else(|_| {
+                    Err(funs.err().conflict(
+                        "table",
+                        "convert_to_json_value",
+                        &format!("Column {} data kind is not datetime", column_name),
+                        "400-column-data-kind-is-illegal",
+                    ))
+                })?)
+            } else {
+                json!(row.try_get::<DateTimeWithTimeZone>("", column_name).or_else(|_| {
+                    Err(funs.err().conflict(
+                        "table",
+                        "convert_to_json_value",
+                        &format!("Column {} data kind is not datetime", column_name),
+                        "400-column-data-kind-is-illegal",
+                    ))
+                })?)
+            }
+        }
+        // TODO test
+        TableColumnDataKind::Time => {
+            if multi_value {
+                json!(row.try_get::<Vec<NaiveTime>>("", column_name).or_else(|_| {
+                    Err(funs.err().conflict(
+                        "table",
+                        "convert_to_json_value",
+                        &format!("Column {} data kind is not time", column_name),
+                        "400-column-data-kind-is-illegal",
+                    ))
+                })?)
+            } else {
+                json!(row.try_get::<NaiveTime>("", column_name).or_else(|_| {
+                    Err(funs.err().conflict(
+                        "table",
+                        "convert_to_json_value",
+                        &format!("Column {} data kind is not time", column_name),
+                        "400-column-data-kind-is-illegal",
+                    ))
+                })?)
+            }
+        }
+        // TODO test
+        TableColumnDataKind::Date => {
+            if multi_value {
+                json!(row.try_get::<Vec<NaiveDate>>("", column_name).or_else(|_| {
+                    Err(funs.err().conflict(
+                        "table",
+                        "convert_to_json_value",
+                        &format!("Column {} data kind is not date", column_name),
+                        "400-column-data-kind-is-illegal",
+                    ))
+                })?)
+            } else {
+                json!(row.try_get::<NaiveDate>("", column_name).or_else(|_| {
+                    Err(funs.err().conflict(
+                        "table",
+                        "convert_to_json_value",
+                        &format!("Column {} data kind is not date", column_name),
+                        "400-column-data-kind-is-illegal",
+                    ))
+                })?)
+            }
+        }
+        // TODO test
+        _ => {
+            if multi_value {
+                json!(row.try_get::<Vec<String>>("", column_name).or_else(|_| {
+                    Err(funs.err().conflict(
+                        "table",
+                        "convert_to_json_value",
+                        &format!("Column {} data kind is not string", column_name),
+                        "400-column-data-kind-is-illegal",
+                    ))
+                })?)
+            } else {
+                json!(row.try_get::<String>("", column_name).or_else(|_| {
+                    Err(funs.err().conflict(
+                        "table",
+                        "convert_to_json_value",
+                        &format!("Column {} data kind is not string", column_name),
+                        "400-column-data-kind-is-illegal",
+                    ))
+                })?)
+            }
+        }
+    };
+    Ok(val)
+}
+
 fn package_aggs_sql(
     aggs: Option<&mut HashMap<String, TableDataAggregateKind>>,
     pk_column_name: &str,
@@ -421,7 +737,7 @@ fn package_aggs_sql(
             return Err(funs.err().conflict(
                 "table",
                 "load_data_without_group",
-                &format!("table.{} aggs column_name illegal", table_id),
+                &format!("Table.{} aggs column name illegal", table_id),
                 "409-column-name-illegal",
             ));
         }
@@ -459,7 +775,7 @@ fn package_sort_sql(sorts: Option<Vec<TableDataSortReq>>, columns: &Vec<TableCol
             return Err(funs.err().conflict(
                 "table",
                 "load_data_without_group",
-                &format!("table.{} sorts column_name illegal", table_id),
+                &format!("Table.{} sorts column name illegal", table_id),
                 "409-column-name-illegal",
             ));
         }
@@ -473,7 +789,12 @@ fn package_sort_sql(sorts: Option<Vec<TableDataSortReq>>, columns: &Vec<TableCol
     Ok(sort_sql)
 }
 
-fn package_where_sql(filters: Option<Vec<TableDataFilterReq>>, params: &mut Vec<tardis::db::sea_orm::prelude::Value>, columns: &Vec<TableColumnProps>) -> TardisResult<String> {
+fn package_where_sql(
+    filters: Option<Vec<TableDataFilterReq>>,
+    params: &mut Vec<TardisResult<sea_query::Value>>,
+    columns: &Vec<TableColumnProps>,
+    funs: &TardisFunsInst,
+) -> TardisResult<String> {
     let where_sql = if let Some(filters) = filters {
         let and_inner = filters[0].and;
         filters
@@ -487,15 +808,15 @@ fn package_where_sql(filters: Option<Vec<TableDataFilterReq>>, params: &mut Vec<
                             if value.is_array() {
                                 value
                                     .as_array()
-                                    .unwrap()
+                                    .expect("ignore")
                                     .into_iter()
                                     .map(|v| {
-                                        params.push(convert_to_db_value(&item.column_name, v.clone(), columns));
+                                        params.push(convert_to_db_value(&item.column_name, v.clone(), columns, funs));
                                         format!("${}", params.len())
                                     })
                                     .collect()
                             } else {
-                                params.push(convert_to_db_value(&item.column_name, value, columns));
+                                params.push(convert_to_db_value(&item.column_name, value, columns, funs));
                                 vec![format!("${}", params.len())]
                             }
                         } else {

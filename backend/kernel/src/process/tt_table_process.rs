@@ -19,7 +19,7 @@ lazy_static! {
     pub static ref R_COLUMN_NAME: Regex = Regex::new(r"^[a-z0-9_]+$").expect("Regular parsing error");
 }
 
-pub const INST_PREFIX: &str = "inst_";
+pub const INST_PREFIX: &str = "inst";
 const ALPHABET: [char; 62] = [
     '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y',
     'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
@@ -298,7 +298,7 @@ fn covert_column_data_kind_to_postgre_type(column_data_kind: &TableColumnDataKin
         TableColumnDataKind::Text => "character varying",
         TableColumnDataKind::Textarea => "text",
         TableColumnDataKind::Serial => "serial primary key",
-        TableColumnDataKind::Number => "numeric",
+        TableColumnDataKind::Number => "double precision",
         TableColumnDataKind::Boolean => "boolean",
         TableColumnDataKind::File => "character varying",
         TableColumnDataKind::Image => "character varying",

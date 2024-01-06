@@ -7,6 +7,7 @@ use task_table_kernel::initializer;
 
 mod test_table;
 mod test_layout;
+mod test_data;
 
 #[tokio::test]
 async fn test_all() -> TardisResult<()> {
@@ -22,7 +23,8 @@ async fn test_all() -> TardisResult<()> {
     initializer::init().await?;
 
     let table_id = test_table::test().await?;
-    let layout_id = test_layout::test(&table_id).await?;
+    let _layout_id = test_layout::test(&table_id).await?;
+    test_data::test(&table_id).await?;
     
     Ok(())
 }
