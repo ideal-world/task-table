@@ -27,7 +27,7 @@ const ALPHABET: [char; 62] = [
 
 pub async fn add_table(mut add_req: TableAddReq, funs: &TardisFunsInst, ctx: &TardisContext) -> TardisResult<String> {
     let table_id: String = TardisFuns::field.nanoid_custom(10, &ALPHABET);
-    
+
     if add_req.columns.iter().any(|column| !R_COLUMN_NAME.is_match(&column.name)) {
         return Err(funs.err().bad_request("table", "add_table", "Column name is illegal", "400-column-name-is-illegal"));
     }
@@ -295,24 +295,14 @@ pub fn get_table_name() -> String {
 
 fn covert_column_data_kind_to_postgre_type(column_data_kind: &TableColumnDataKind, multi_value: bool) -> String {
     let tp = match column_data_kind {
-        TableColumnDataKind::Text => "character varying",
-        TableColumnDataKind::Textarea => "text",
         TableColumnDataKind::Serial => "serial primary key",
         TableColumnDataKind::Number => "double precision",
         TableColumnDataKind::Boolean => "boolean",
-        TableColumnDataKind::File => "character varying",
-        TableColumnDataKind::Image => "character varying",
         TableColumnDataKind::Amount => "money",
-        TableColumnDataKind::Select => "character varying",
-        TableColumnDataKind::MultiSelect => "character varying",
-        TableColumnDataKind::Checkbox => "character varying",
         TableColumnDataKind::Date => "date",
         TableColumnDataKind::Datetime => "timestamp with time zone",
         TableColumnDataKind::Time => "time",
-        TableColumnDataKind::Email => "character varying",
-        TableColumnDataKind::Url => "character varying",
-        TableColumnDataKind::Phone => "character varying",
-        TableColumnDataKind::Password => "character varying",
+        _ => "text",
     };
     if multi_value {
         format!("{}[]", tp)

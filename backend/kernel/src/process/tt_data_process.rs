@@ -1,7 +1,6 @@
 use std::{collections::HashMap, str::FromStr};
 
-use tardis::chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime, Utc};
-use tardis::db::sea_orm::prelude::DateTimeWithTimeZone;
+use tardis::chrono::{DateTime, NaiveDate, NaiveTime, Utc};
 use tardis::db::sea_orm::QueryResult;
 use tardis::log::warn;
 use tardis::{
@@ -41,12 +40,12 @@ pub async fn add_or_modify_data(
     let mut changed_column_names = changed_records[0].keys().map(|k| k.to_string()).collect::<Vec<String>>();
 
     if changed_column_names.iter().any(|column_name| !columns.iter().any(|col| &col.name == column_name)) {
-        return Err(funs.err().conflict("table", "add_or_modify_data", &format!("Table.{} column name illegal", table_id), "409-keys-illegal"));
+        return Err(funs.err().conflict("data", "add_or_modify_data", &format!("Table.{} column name illegal", table_id), "409-keys-illegal"));
     }
     if changed_records.len() > 1 {
         for record in &changed_records {
             if record.len() != changed_column_names.len() || record.keys().any(|k| !changed_column_names.contains(k)) {
-                return Err(funs.err().conflict("table", "add_or_modify_data", &format!("Table.{} column name not same", table_id), "409-keys-not-same"));
+                return Err(funs.err().conflict("data", "add_or_modify_data", &format!("Table.{} column name not same", table_id), "409-keys-not-same"));
             }
         }
     }
@@ -154,7 +153,7 @@ pub async fn load_data_with_group(
 
     if group.column_names.iter().any(|group_column_name| !columns.iter().any(|col| &col.name == group_column_name)) {
         return Err(funs.err().conflict(
-            "table",
+            "data",
             "load_data_group",
             &format!("Table.{} group column name illegal", table_id),
             "409-column-name-illegal",
@@ -172,34 +171,32 @@ pub async fn load_data_with_group(
     if aggs.is_none() {
         aggs = Some(HashMap::new());
     }
-    let aggs = aggs.as_mut().unwrap();
+    let aggs: &mut HashMap<String, TableDataAggregateKind> = aggs.as_mut().expect("ignore");
     let aggs_sql = package_aggs_sql(Some(aggs), &table_columns.pk_column_name, &columns, table_id, funs)?;
 
     let group_sql = format!(
-        r#"SELECT {}, {} FROM {}_{} WHERE {} {} {} {}"#,
-        group_select_sql, aggs_sql, INST_PREFIX, table_id, where_sql, sort_sql, group_by_sql, limit_sql
+        r#"SELECT {}, {} FROM {}_{} WHERE {} {}"#,
+        group_select_sql, aggs_sql, INST_PREFIX, table_id, where_sql, group_by_sql
     );
-    let group_result = funs.db().query_all(&group_sql, params.clone().into_iter().collect::<TardisResult<Vec<sea_query::Value>>>()?).await?;
-    let mut group_records = group_result
+    let mut group_records = funs
+        .db()
+        .query_all(&group_sql, params.clone().into_iter().collect::<TardisResult<Vec<sea_query::Value>>>()?)
+        .await?
         .into_iter()
         .map(|row| {
-            let mut record = HashMap::new();
-            for column in &columns {
-                record.insert(
-                    column.name.clone(),
-                    row.try_get::<Value>(
-                        "",
-                        &format!("{}_{}", TardisFuns::json.obj_to_string(&aggs.get(&column.name).unwrap()).unwrap(), column.name),
-                    )
-                    .unwrap(),
-                );
-            }
+            let mut record: HashMap<String, Value> = HashMap::new();
+            group.column_names.iter().for_each(|group_column_name| {
+                record.insert(group_column_name.clone(), convert_to_json_value(&group_column_name, &row, &columns, funs).expect("ignore"));
+            });
+            aggs.iter().for_each(|(column_name, agg_kind)| {
+                record.insert(column_name.clone(), convert_agg_to_json_value(column_name, agg_kind, &row, funs).expect("ignore"));
+            });
             record
         })
         .collect::<Vec<HashMap<String, Value>>>();
 
     if group.hide_empty_record {
-        group_records = group_records.into_iter().filter(|record| record.get(&table_columns.pk_column_name).unwrap().as_i64().unwrap() != 0 as i64).collect();
+        group_records = group_records.into_iter().filter(|record| record.get(&table_columns.pk_column_name).expect("ignore").as_i64().expect("ignore") != 0).collect();
     }
 
     if group.group_order_desc {
@@ -215,34 +212,38 @@ pub async fn load_data_with_group(
                     .column_names
                     .iter()
                     .map(|group_column_name| {
-                        group_params.push(Ok(sea_query::Value::Double(Some(group_record.get(group_column_name).unwrap().as_f64().unwrap()))));
+                        group_params.push(convert_to_db_value(
+                            group_column_name,
+                            group_record.get(group_column_name).expect("ignore").clone(),
+                            &columns,
+                            funs,
+                        ));
                         format!("{} = ${}", group_column_name, params.len() + 1)
                     })
                     .collect::<Vec<String>>()
                     .join(" AND ");
                 let select_sql = format!(
-                    r#"SELECT * FROM {}_{} WHERE ({}) AND  {} {} {}"#,
+                    r#"SELECT * FROM {}_{} WHERE ({}) AND {} {} {}"#,
                     INST_PREFIX, table_id, where_sql, group_where_sql, sort_sql, limit_sql
                 );
                 (
-                    group_record.get(&table_columns.pk_column_name).unwrap().as_i64().unwrap() as i32,
-                    group.column_names.iter().map(|group_column_name| group_record.get(group_column_name).unwrap().to_string()).collect::<Vec<String>>().join("-"),
-                    aggs.iter().map(|(column_name, _)| (column_name.to_string(), group_record.get(column_name).unwrap().clone())).collect::<HashMap<String, Value>>(),
-                    columns.iter().map(|column| column.name.clone()).collect::<Vec<_>>(),
+                    group_record.get(&table_columns.pk_column_name).expect("ignore").as_i64().expect("ignore") as i32,
+                    group.column_names.iter().map(|group_column_name| group_record.get(group_column_name).expect("ignore").to_string()).collect::<Vec<String>>().join("-"),
+                    aggs.iter().map(|(column_name, _)| (column_name.to_string(), group_record.get(column_name).expect("ignore").clone())).collect::<HashMap<String, Value>>(),
+                    &columns,
                     select_sql,
-                    group_params.into_iter().collect::<TardisResult<Vec<sea_query::Value>>>().unwrap(),
+                    group_params.into_iter().collect::<TardisResult<Vec<sea_query::Value>>>().expect("ignore"),
                 )
             })
-            .map(|(total_number, group_value, aggs, column_names, select_sql, group_params)| async move {
-                let result = funs.db().query_all(&select_sql, group_params).await.unwrap();
+            .map(|(total_number, group_value, aggs, columns, select_sql, group_params)| async move {
+                let result = funs.db().query_all(&select_sql, group_params).await.expect("ignore");
                 let records = result
                     .into_iter()
                     .map(|row| {
-                        let mut record = HashMap::new();
-                        for column_name in &column_names {
-                            record.insert(column_name.to_string(), row.try_get::<Value>("", column_name).unwrap());
-                        }
-                        record
+                        columns
+                            .iter()
+                            .map(|column| (column.name.to_string(), convert_to_json_value(&column.name, &row, &columns, funs).expect("ignore")))
+                            .collect::<HashMap<String, Value>>()
                     })
                     .collect::<Vec<HashMap<String, Value>>>();
                 TableDataGroupResp {
@@ -293,7 +294,13 @@ pub async fn load_data_without_group(
 
     // query
     let select_sql = format!(r#"SELECT * FROM {}_{} WHERE {} {} {}"#, INST_PREFIX, table_id, where_sql, sort_sql, limit_sql);
-    let total_number = funs.db().count_by_sql(&select_sql, params.clone().into_iter().collect::<TardisResult<Vec<sea_query::Value>>>()?).await?;
+    let total_number = funs
+        .db()
+        .count_by_sql(
+            &format!(r#"SELECT 1 FROM {}_{} WHERE {} {}"#, INST_PREFIX, table_id, where_sql, sort_sql),
+            params.clone().into_iter().collect::<TardisResult<Vec<sea_query::Value>>>()?,
+        )
+        .await?;
     let result = funs.db().query_all(&select_sql, params.clone().into_iter().collect::<TardisResult<Vec<sea_query::Value>>>()?).await?;
     let records = result
         .into_iter()
@@ -321,16 +328,11 @@ pub async fn load_data_without_group(
                 params.into_iter().collect::<TardisResult<Vec<sea_query::Value>>>()?,
             )
             .await?
-            .unwrap();
+            .expect("ignore");
 
-        let mut aggs_result = HashMap::new();
-        for (column_name, agg_kind) in &aggs {
-            aggs_result.insert(
-                column_name.clone(),
-                agg_result.try_get::<Value>("", &format!("{}_{}", TardisFuns::json.obj_to_string(&agg_kind)?, column_name)).unwrap(),
-            );
-        }
-        aggs_result
+        aggs.iter()
+            .map(|(column_name, agg_kind)| (column_name.clone(), convert_agg_to_json_value(column_name, agg_kind, &agg_result, funs).expect("ignore")))
+            .collect::<HashMap<String, Value>>()
     } else {
         HashMap::new()
     };
@@ -346,7 +348,7 @@ fn get_and_convert_to_db_value(column_name: &str, record: &mut HashMap<String, V
     match record.get_mut(column_name) {
         Some(val) => convert_to_db_value(column_name, val.take(), columns, funs),
         None => Err(funs.err().conflict(
-            "table",
+            "data",
             "get_and_convert_to_db_value",
             &format!("Column {} not found in record", column_name),
             "404-column-not-found",
@@ -358,13 +360,13 @@ fn convert_to_db_value(column_name: &str, val: Value, columns: &Vec<TableColumnP
     let column = columns
         .iter()
         .find(|c| c.name == column_name)
-        .ok_or_else(|| funs.err().conflict("table", "convert_to_db_value", &format!("Column {} is illegal", column_name), "400-column-is-illegal"))?;
+        .ok_or_else(|| funs.err().conflict("data", "convert_to_db_value", &format!("Column {} is illegal", column_name), "400-column-is-illegal"))?;
     if !column.multi_value {
         return do_convert_to_db_value(column_name, val, &column.data_kind, funs);
     }
     if val.as_array().is_none() {
         return Err(funs.err().conflict(
-            "table",
+            "data",
             "convert_to_db_value",
             &format!("Column {} value {} data kind is not array", column_name, val),
             "400-column-data-kind-is-illegal",
@@ -394,7 +396,7 @@ fn do_convert_to_db_value(column_name: &str, val: Value, data_kind: &TableColumn
     match data_kind {
         TableColumnDataKind::Serial => val.as_i64().map(|val| sea_query::Value::from(val)).ok_or_else(|| {
             funs.err().conflict(
-                "table",
+                "data",
                 "convert_to_db_value",
                 &format!("Column {} value {} data kind is not serial", column_name, val),
                 "400-column-data-kind-is-illegal",
@@ -402,7 +404,7 @@ fn do_convert_to_db_value(column_name: &str, val: Value, data_kind: &TableColumn
         }),
         TableColumnDataKind::Number => val.as_f64().map(|val| sea_query::Value::from(val)).ok_or_else(|| {
             funs.err().conflict(
-                "table",
+                "data",
                 "convert_to_db_value",
                 &format!("Column {} value {} data kind is not number", column_name, val),
                 "400-column-data-kind-is-illegal",
@@ -415,7 +417,7 @@ fn do_convert_to_db_value(column_name: &str, val: Value, data_kind: &TableColumn
                 .map(|val| {
                     Decimal::from_str(val).map_err(|_| {
                         funs.err().conflict(
-                            "table",
+                            "data",
                             "convert_to_db_value",
                             &format!("Column {} value {} data kind is not amount", column_name, val),
                             "400-column-data-kind-is-illegal",
@@ -424,7 +426,7 @@ fn do_convert_to_db_value(column_name: &str, val: Value, data_kind: &TableColumn
                 })
                 .ok_or_else(|| {
                     funs.err().conflict(
-                        "table",
+                        "data",
                         "convert_to_db_value",
                         &format!("Column {} value {} data kind is not amount", column_name, val),
                         "400-column-data-kind-is-illegal",
@@ -435,7 +437,7 @@ fn do_convert_to_db_value(column_name: &str, val: Value, data_kind: &TableColumn
         // TODO test
         TableColumnDataKind::Boolean => val.as_bool().map(|val| sea_query::Value::from(val)).ok_or_else(|| {
             funs.err().conflict(
-                "table",
+                "data",
                 "convert_to_db_value",
                 &format!("Column {} value {} data kind is not boolean", column_name, val),
                 "400-column-data-kind-is-illegal",
@@ -717,6 +719,20 @@ fn do_convert_to_json_value(column_name: &str, row: &QueryResult, multi_value: b
     Ok(val)
 }
 
+fn convert_agg_to_json_value(column_name: &str, agg_kind: &TableDataAggregateKind, row: &QueryResult, _funs: &TardisFunsInst) -> TardisResult<Value> {
+    let column_name_with_agg = format!("{}_{}", TardisFuns::json.obj_to_json(&agg_kind).expect("ignore").as_str().expect("ignore"), column_name).to_lowercase();
+    let agg_value = match agg_kind {
+        TableDataAggregateKind::Sum => Value::from(row.try_get::<i64>("", &column_name_with_agg)?),
+        TableDataAggregateKind::Count => Value::from(row.try_get::<i64>("", &column_name_with_agg)?),
+        TableDataAggregateKind::Min => Value::from(row.try_get::<f64>("", &column_name_with_agg)?),
+        TableDataAggregateKind::Max => Value::from(row.try_get::<f64>("", &column_name_with_agg)?),
+        TableDataAggregateKind::Avg => Value::from(row.try_get::<f64>("", &column_name_with_agg)?),
+        TableDataAggregateKind::Stddev => Value::from(row.try_get::<f64>("", &column_name_with_agg)?),
+        TableDataAggregateKind::Distinct => Value::from(row.try_get::<f64>("", &column_name_with_agg)?),
+    };
+    Ok(agg_value)
+}
+
 fn package_aggs_sql(
     aggs: Option<&mut HashMap<String, TableDataAggregateKind>>,
     pk_column_name: &str,
@@ -736,13 +752,13 @@ fn package_aggs_sql(
         aggs.insert(pk_column_name.to_string(), TableDataAggregateKind::Count);
         aggs.iter()
             .map(|(column_name, agg_kind)| match agg_kind {
-                TableDataAggregateKind::Count => format!("COUNT({}) as COUNT_{}", column_name, column_name),
-                TableDataAggregateKind::Sum => format!("SUM({}) as SUM_{}", column_name, column_name),
-                TableDataAggregateKind::Avg => format!("AVG({}) as AVG_{}", column_name, column_name),
-                TableDataAggregateKind::Max => format!("MAX({}) as MAX_{}", column_name, column_name),
-                TableDataAggregateKind::Min => format!("MIN({}) as MIN_{}", column_name, column_name),
-                TableDataAggregateKind::Stddev => format!("STDDEV({}) as STDDEV_{}", column_name, column_name),
-                TableDataAggregateKind::Distinct => format!("DISTINCT({}) as DISTINCT_{}", column_name, column_name),
+                TableDataAggregateKind::Count => format!("COUNT({}) AS COUNT_{}", column_name, column_name),
+                TableDataAggregateKind::Sum => format!("SUM({}) AS SUM_{}", column_name, column_name),
+                TableDataAggregateKind::Avg => format!("AVG({}) AS AVG_{}", column_name, column_name),
+                TableDataAggregateKind::Max => format!("MAX({}) AS MAX_{}", column_name, column_name),
+                TableDataAggregateKind::Min => format!("MIN({}) AS MIN_{}", column_name, column_name),
+                TableDataAggregateKind::Stddev => format!("STDDEV({}) AS STDDEV_{}", column_name, column_name),
+                TableDataAggregateKind::Distinct => format!("DISTINCT({}) AS DISTINCT_{}", column_name, column_name),
             })
             .collect::<Vec<String>>()
             .join(", ")
@@ -807,6 +823,35 @@ fn package_where_sql(
                                         format!("${}", params.len())
                                     })
                                     .collect()
+                            } else if item.operator == TableDataOperatorKind::Contains
+                                || item.operator == TableDataOperatorKind::NotContains
+                                || item.operator == TableDataOperatorKind::StartWith
+                                || item.operator == TableDataOperatorKind::NotStartWith
+                                || item.operator == TableDataOperatorKind::EndWith
+                                || item.operator == TableDataOperatorKind::NotEndWith
+                            {
+                                let val = value
+                                    .as_str()
+                                    .ok_or_else(|| {
+                                        funs.err().conflict(
+                                            "data",
+                                            "convert_to_db_value",
+                                            &format!("Column {} value {} data kind is not string", &item.column_name, value),
+                                            "400-column-data-kind-is-illegal",
+                                        )
+                                    })
+                                    .map(|value| {
+                                        let val = match item.operator {
+                                            TableDataOperatorKind::StartWith => format!("{}%", value),
+                                            TableDataOperatorKind::NotStartWith => format!("{}%", value),
+                                            TableDataOperatorKind::EndWith => format!("%{}", value),
+                                            TableDataOperatorKind::NotEndWith => format!("%{}", value),
+                                            _ => format!("%{}%", value),
+                                        };
+                                        sea_query::Value::from(val)
+                                    });
+                                params.push(val);
+                                vec![format!("${}", params.len())]
                             } else {
                                 params.push(convert_to_db_value(&item.column_name, value, columns, funs));
                                 vec![format!("${}", params.len())]

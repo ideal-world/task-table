@@ -176,7 +176,7 @@ pub async fn test(table_id: &str) -> TardisResult<()> {
     assert_eq!(data.total_number, 5);
     assert_eq!(
         data.aggs,
-        HashMap::from_iter(vec![("age".to_string(), json!(4.8)), ("name".to_string(), json!(5))].into_iter())
+        HashMap::from_iter(vec![("age".to_string(), json!(4.8)), ("name".to_string(), json!(5)), ("id".to_string(), json!(5))].into_iter())
     );
     assert_eq!(data.records[0]["id"], json!(5));
     assert_eq!(data.records[1]["id"], json!(4));
@@ -203,14 +203,14 @@ pub async fn test(table_id: &str) -> TardisResult<()> {
         &ctx,
     )
     .await?;
-    assert_eq!(data.total_number, 3);
+    assert_eq!(data.total_number, 5);
     assert_eq!(
         data.aggs,
-        HashMap::from_iter(vec![("age".to_string(), json!(4.8)), ("name".to_string(), json!(5))].into_iter())
+        HashMap::from_iter(vec![("age".to_string(), json!(4.8)), ("name".to_string(), json!(5)), ("id".to_string(), json!(5))].into_iter())
     );
-    assert_eq!(data.records[0]["id"], json!(5));
-    assert_eq!(data.records[1]["id"], json!(4));
-    assert_eq!(data.records[1]["id"], json!(3));
+    assert_eq!(data.records[0]["id"], json!(3));
+    assert_eq!(data.records[1]["id"], json!(2));
+    assert_eq!(data.records[2]["id"], json!(1));
 
     // ----------------------------------
     // ----- test load data with sorts & aggs & slice & filter
@@ -254,7 +254,7 @@ pub async fn test(table_id: &str) -> TardisResult<()> {
     assert_eq!(data.total_number, 3);
     assert_eq!(
         data.aggs,
-        HashMap::from_iter(vec![("age".to_string(), json!(4.66)), ("name".to_string(), json!(3))].into_iter())
+        HashMap::from_iter(vec![("age".to_string(), json!(4.666666666666667)), ("name".to_string(), json!(3)), ("id".to_string(), json!(3))].into_iter())
     );
     assert_eq!(data.records.len(), 1);
     assert_eq!(data.records[0]["id"], json!(5));
@@ -279,43 +279,44 @@ pub async fn test(table_id: &str) -> TardisResult<()> {
             vec![("age".to_string(), TableDataAggregateKind::Avg), ("name".to_string(), TableDataAggregateKind::Count)].into_iter(),
         )),
         Some(TableDataSliceReq {
-            offset_number: 2,
-            fetch_number: 3,
+            offset_number: 1,
+            fetch_number: 2,
         }),
         &funs,
         &ctx,
     )
     .await?;
+
     assert_eq!(data.len(), 4);
-    assert_eq!(data[0].group_value, "D");
-    assert_eq!(data[0].total_number, 1);
+
+    assert_eq!(data[0].group_value, "[\"B\"]");
+    assert_eq!(data[0].total_number, 2);
     assert_eq!(
         data[0].aggs,
-        HashMap::from_iter(vec![("age".to_string(), json!(6)), ("name".to_string(), json!(1))].into_iter())
+        HashMap::from_iter(vec![("age".to_string(), json!(4.0)), ("name".to_string(), json!(2)), ("id".to_string(), json!(2))].into_iter())
     );
-    assert_eq!(data[0].records[0]["name"], json!("xymm4"));
-    assert_eq!(data[1].group_value, "B");
-    assert_eq!(data[1].total_number, 2);
+    assert_eq!(data[0].records[0]["name"], json!("xymm"));
+    assert_eq!(data[1].group_value, "[\"A\"]");
+    assert_eq!(data[1].total_number, 1);
     assert_eq!(
         data[1].aggs,
-        HashMap::from_iter(vec![("age".to_string(), json!(4)), ("name".to_string(), json!(2))].into_iter())
+        HashMap::from_iter(vec![("age".to_string(), json!(4.0)), ("name".to_string(), json!(1)), ("id".to_string(), json!(1))].into_iter())
     );
-    assert_eq!(data[1].records[0]["name"], json!("xymm3"));
-    assert_eq!(data[1].records[1]["name"], json!("xymm"));
-    assert_eq!(data[2].group_value, "A");
+    assert_eq!(data[1].records.len(), 0);
+    assert_eq!(data[2].group_value, "[\"A\",\"B\"]");
     assert_eq!(data[2].total_number, 1);
     assert_eq!(
         data[2].aggs,
-        HashMap::from_iter(vec![("age".to_string(), json!(4)), ("name".to_string(), json!(1))].into_iter())
+        HashMap::from_iter(vec![("age".to_string(), json!(6.0)), ("name".to_string(), json!(1)), ("id".to_string(), json!(1))].into_iter())
     );
-    assert_eq!(data[2].records[0]["name"], json!("xymm2"));
-    assert_eq!(data[3].group_value, "A,B");
+    assert_eq!(data[2].records.len(), 0);
+    assert_eq!(data[3].group_value, "[\"D\"]");
     assert_eq!(data[3].total_number, 1);
     assert_eq!(
         data[3].aggs,
-        HashMap::from_iter(vec![("age".to_string(), json!(6)), ("name".to_string(), json!(1))].into_iter())
+        HashMap::from_iter(vec![("age".to_string(), json!(6.0)), ("name".to_string(), json!(1)), ("id".to_string(), json!(1))].into_iter())
     );
-    assert_eq!(data[3].records[0]["name"], json!("xh"));
+    assert_eq!(data[3].records.len(), 0);
 
     // ----------------------------------
     // ----- test delete layout

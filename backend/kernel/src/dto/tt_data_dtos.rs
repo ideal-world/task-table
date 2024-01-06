@@ -75,7 +75,7 @@ pub enum TableDataAggregateKind {
     Distinct,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
 pub enum TableDataOperatorKind {
     #[serde(rename = "=")]
     Eq,
@@ -122,12 +122,12 @@ impl TableDataOperatorKind {
             TableDataOperatorKind::Ge => format!("{} >= {}", column_name, placeholders[0]),
             TableDataOperatorKind::In => format!("{} IN ({})", column_name, placeholders.join(",")),
             TableDataOperatorKind::NotIn => format!("{} NOT IN ({})", column_name, placeholders.join(",")),
-            TableDataOperatorKind::Contains => format!("{} LIKE %{}%", column_name, placeholders[0]),
-            TableDataOperatorKind::NotContains => format!("{} NOT LIKE %{}%", column_name, placeholders[0]),
-            TableDataOperatorKind::StartWith => format!("{} LIKE {}%", column_name, placeholders[0]),
-            TableDataOperatorKind::NotStartWith => format!("{} NOT LIKE {}%", column_name, placeholders[0]),
-            TableDataOperatorKind::EndWith => format!("{} LIKE %{}", column_name, placeholders[0]),
-            TableDataOperatorKind::NotEndWith => format!("{} NOT LIKE %{}", column_name, placeholders[0]),
+            TableDataOperatorKind::Contains => format!("{} LIKE {}", column_name, placeholders[0]),
+            TableDataOperatorKind::NotContains => format!("{} NOT LIKE {}", column_name, placeholders[0]),
+            TableDataOperatorKind::StartWith => format!("{} LIKE {}", column_name, placeholders[0]),
+            TableDataOperatorKind::NotStartWith => format!("{} NOT LIKE {}", column_name, placeholders[0]),
+            TableDataOperatorKind::EndWith => format!("{} LIKE {}", column_name, placeholders[0]),
+            TableDataOperatorKind::NotEndWith => format!("{} NOT LIKE {}", column_name, placeholders[0]),
             TableDataOperatorKind::IsEmpty => format!("{} = ''", column_name),
             TableDataOperatorKind::NotEmpty => format!("{} != ''", column_name),
         }
