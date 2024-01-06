@@ -1,6 +1,6 @@
 use std::{collections::HashMap, str::FromStr};
 
-use tardis::chrono::{NaiveDate, NaiveTime};
+use tardis::chrono::{DateTime, NaiveDate, NaiveDateTime, NaiveTime, Utc};
 use tardis::db::sea_orm::prelude::DateTimeWithTimeZone;
 use tardis::db::sea_orm::QueryResult;
 use tardis::log::warn;
@@ -11,7 +11,7 @@ use tardis::{
         sea_query::{self, ArrayType},
     },
     futures_util::future::join_all,
-    serde_json::{self, json, Value},
+    serde_json::{json, Value},
     TardisFuns, TardisFunsInst,
 };
 
@@ -38,7 +38,7 @@ pub async fn add_or_modify_data(
     if changed_records.len() == 0 {
         return Ok(Vec::new());
     }
-    let changed_column_names = &changed_records[0].keys().map(|k| k.clone()).collect::<Vec<String>>();
+    let mut changed_column_names = changed_records[0].keys().map(|k| k.to_string()).collect::<Vec<String>>();
 
     if changed_column_names.iter().any(|column_name| !columns.iter().any(|col| &col.name == column_name)) {
         return Err(funs.err().conflict("table", "add_or_modify_data", &format!("Table.{} column name illegal", table_id), "409-keys-illegal"));
@@ -53,6 +53,9 @@ pub async fn add_or_modify_data(
 
     if changed_column_names.contains(&table_columns.pk_column_name) {
         // modify
+        changed_column_names.remove(changed_column_names.iter().position(|column_name| column_name == &table_columns.pk_column_name).expect("ignore"));
+        changed_column_names.insert(0, table_columns.pk_column_name.clone());
+
         let pks: Vec<Value> = changed_records.iter().map(|record| record.get(&table_columns.pk_column_name).expect("ignore").clone()).collect::<Vec<Value>>();
 
         let params = changed_records
@@ -60,7 +63,6 @@ pub async fn add_or_modify_data(
             .map(|mut record| {
                 changed_column_names
                     .iter()
-                    .filter(|column_name| column_name != &&table_columns.pk_column_name)
                     .map(|column_name| get_and_convert_to_db_value(column_name, &mut record, &columns, funs))
                     .collect::<TardisResult<Vec<sea_query::Value>>>()
             })
@@ -70,13 +72,7 @@ pub async fn add_or_modify_data(
             r#"UPDATE {}_{} SET {} WHERE {} = $1"#,
             INST_PREFIX,
             table_id,
-            changed_column_names
-                .iter()
-                .filter(|column_name| column_name != &&table_columns.pk_column_name)
-                .enumerate()
-                .map(|(idx, column_name)| format!("{} = ${}", column_name, idx + 2))
-                .collect::<Vec<String>>()
-                .join(", "),
+            changed_column_names.iter().skip(1).enumerate().map(|(idx, column_name)| format!("{} = ${}", column_name, idx + 2)).collect::<Vec<String>>().join(", "),
             table_columns.pk_column_name
         );
         funs.db().execute_many(&update_sql, params).await?;
@@ -396,7 +392,7 @@ fn convert_to_db_value(column_name: &str, val: Value, columns: &Vec<TableColumnP
 
 fn do_convert_to_db_value(column_name: &str, val: Value, data_kind: &TableColumnDataKind, funs: &TardisFunsInst) -> TardisResult<sea_query::Value> {
     match data_kind {
-        TableColumnDataKind::Serial => val.as_i64().map(|val| sea_query::Value::BigInt(Some(val))).ok_or_else(|| {
+        TableColumnDataKind::Serial => val.as_i64().map(|val| sea_query::Value::from(val)).ok_or_else(|| {
             funs.err().conflict(
                 "table",
                 "convert_to_db_value",
@@ -404,7 +400,7 @@ fn do_convert_to_db_value(column_name: &str, val: Value, data_kind: &TableColumn
                 "400-column-data-kind-is-illegal",
             )
         }),
-        TableColumnDataKind::Number => val.as_f64().map(|val| sea_query::Value::Double(Some(val))).ok_or_else(|| {
+        TableColumnDataKind::Number => val.as_f64().map(|val| sea_query::Value::from(val)).ok_or_else(|| {
             funs.err().conflict(
                 "table",
                 "convert_to_db_value",
@@ -434,10 +430,10 @@ fn do_convert_to_db_value(column_name: &str, val: Value, data_kind: &TableColumn
                         "400-column-data-kind-is-illegal",
                     )
                 })??;
-            Ok(sea_query::Value::Decimal(Some(Box::new(val))))
+            Ok(sea_query::Value::from(val))
         }
         // TODO test
-        TableColumnDataKind::Boolean => val.as_bool().map(|val| sea_query::Value::Bool(Some(val))).ok_or_else(|| {
+        TableColumnDataKind::Boolean => val.as_bool().map(|val| sea_query::Value::from(val)).ok_or_else(|| {
             funs.err().conflict(
                 "table",
                 "convert_to_db_value",
@@ -450,9 +446,9 @@ fn do_convert_to_db_value(column_name: &str, val: Value, data_kind: &TableColumn
             let val = val
                 .as_str()
                 .map(|val| {
-                    serde_json::from_str(val).map_err(|_| {
+                    DateTime::<Utc>::from_str(val).map_err(|_| {
                         funs.err().conflict(
-                            "table",
+                            "data",
                             "convert_to_db_value",
                             &format!("Column {} value {} data kind is not datetime", column_name, val),
                             "400-column-data-kind-is-illegal",
@@ -461,22 +457,22 @@ fn do_convert_to_db_value(column_name: &str, val: Value, data_kind: &TableColumn
                 })
                 .ok_or_else(|| {
                     funs.err().conflict(
-                        "table",
+                        "data",
                         "convert_to_db_value",
                         &format!("Column {} value {} data kind is not datetime", column_name, val),
                         "400-column-data-kind-is-illegal",
                     )
                 })??;
-            Ok(sea_query::Value::ChronoDateTimeWithTimeZone(Some(Box::new(val))))
+            Ok(sea_query::Value::from(val))
         }
         // TODO test
         TableColumnDataKind::Time => {
             let val = val
                 .as_str()
                 .map(|val| {
-                    serde_json::from_str(val).map_err(|_| {
+                    NaiveTime::from_str(val).map_err(|_| {
                         funs.err().conflict(
-                            "table",
+                            "data",
                             "convert_to_db_value",
                             &format!("Column {} value {} data kind is not time", column_name, val),
                             "400-column-data-kind-is-illegal",
@@ -485,22 +481,22 @@ fn do_convert_to_db_value(column_name: &str, val: Value, data_kind: &TableColumn
                 })
                 .ok_or_else(|| {
                     funs.err().conflict(
-                        "table",
+                        "data",
                         "convert_to_db_value",
                         &format!("Column {} value {} data kind is not time", column_name, val),
                         "400-column-data-kind-is-illegal",
                     )
                 })??;
-            Ok(sea_query::Value::ChronoTime(Some(Box::new(val))))
+            Ok(sea_query::Value::from(val))
         }
         // TODO test
         TableColumnDataKind::Date => {
             let val = val
                 .as_str()
                 .map(|val| {
-                    serde_json::from_str(val).map_err(|_| {
+                    NaiveDate::from_str(val).map_err(|_| {
                         funs.err().conflict(
-                            "table",
+                            "data",
                             "convert_to_db_value",
                             &format!("Column {} value {} data kind is not date", column_name, val),
                             "400-column-data-kind-is-illegal",
@@ -509,18 +505,18 @@ fn do_convert_to_db_value(column_name: &str, val: Value, data_kind: &TableColumn
                 })
                 .ok_or_else(|| {
                     funs.err().conflict(
-                        "table",
+                        "data",
                         "convert_to_db_value",
                         &format!("Column {} value {} data kind is not date", column_name, val),
                         "400-column-data-kind-is-illegal",
                     )
                 })??;
-            Ok(sea_query::Value::ChronoDate(Some(Box::new(val))))
+            Ok(sea_query::Value::from(val))
         }
         // TODO test
-        _ => val.as_str().map(|val| sea_query::Value::String(Some(Box::new(val.to_string())))).ok_or_else(|| {
+        _ => val.as_str().map(|val| sea_query::Value::from(val)).ok_or_else(|| {
             funs.err().conflict(
-                "table",
+                "data",
                 "convert_to_db_value",
                 &format!("Column {} value {} data kind is not string", column_name, val),
                 "400-column-data-kind-is-illegal",
@@ -533,7 +529,7 @@ fn convert_to_json_value(column_name: &str, row: &QueryResult, columns: &Vec<Tab
     let column = columns
         .iter()
         .find(|c| c.name == column_name)
-        .ok_or_else(|| funs.err().conflict("table", "convert_to_json_value", &format!("Column {} is illegal", column_name), "400-column-is-illegal"))?;
+        .ok_or_else(|| funs.err().conflict("data", "convert_to_json_value", &format!("Column {} is illegal", column_name), "400-column-is-illegal"))?;
     do_convert_to_json_value(column_name, row, column.multi_value, &column.data_kind, funs)
 }
 
@@ -541,18 +537,18 @@ fn do_convert_to_json_value(column_name: &str, row: &QueryResult, multi_value: b
     let val = match data_kind {
         TableColumnDataKind::Serial => {
             if multi_value {
-                json!(row.try_get::<Vec<i64>>("", column_name).or_else(|_| {
+                json!(row.try_get::<Option<Vec<i32>>>("", column_name).or_else(|_| {
                     Err(funs.err().conflict(
-                        "table",
+                        "data",
                         "convert_to_json_value",
                         &format!("Column {} data kind is not serial", column_name),
                         "400-column-data-kind-is-illegal",
                     ))
                 })?)
             } else {
-                json!(row.try_get::<i64>("", column_name).or_else(|_| {
+                json!(row.try_get::<Option<i32>>("", column_name).or_else(|_| {
                     Err(funs.err().conflict(
-                        "table",
+                        "data",
                         "convert_to_json_value",
                         &format!("Column {} data kind is not serial", column_name),
                         "400-column-data-kind-is-illegal",
@@ -562,18 +558,18 @@ fn do_convert_to_json_value(column_name: &str, row: &QueryResult, multi_value: b
         }
         TableColumnDataKind::Number => {
             if multi_value {
-                json!(row.try_get::<Vec<f64>>("", column_name).or_else(|_| {
+                json!(row.try_get::<Option<Vec<f64>>>("", column_name).or_else(|_| {
                     Err(funs.err().conflict(
-                        "table",
+                        "data",
                         "convert_to_json_value",
                         &format!("Column {} data kind is not number", column_name),
                         "400-column-data-kind-is-illegal",
                     ))
                 })?)
             } else {
-                json!(row.try_get::<f64>("", column_name).or_else(|_| {
+                json!(row.try_get::<Option<f64>>("", column_name).or_else(|_| {
                     Err(funs.err().conflict(
-                        "table",
+                        "data",
                         "convert_to_json_value",
                         &format!("Column {} data kind is not number", column_name),
                         "400-column-data-kind-is-illegal",
@@ -585,47 +581,45 @@ fn do_convert_to_json_value(column_name: &str, row: &QueryResult, multi_value: b
         TableColumnDataKind::Amount => {
             if multi_value {
                 json!(row
-                    .try_get::<Vec<Decimal>>("", column_name)
+                    .try_get::<Option<Vec<Decimal>>>("", column_name)
                     .or_else(|_| {
                         Err(funs.err().conflict(
-                            "table",
+                            "data",
                             "convert_to_json_value",
                             &format!("Column {} data kind is not amount", column_name),
                             "400-column-data-kind-is-illegal",
                         ))
                     })?
-                    .into_iter()
-                    .map(|v| v.to_string())
-                    .collect::<Vec<_>>())
+                    .map(|v: Vec<Decimal>| v.into_iter().map(|v| v.to_string()).collect::<Vec<_>>()))
             } else {
                 json!(row
-                    .try_get::<Decimal>("", column_name)
+                    .try_get::<Option<Decimal>>("", column_name)
                     .or_else(|_| {
                         Err(funs.err().conflict(
-                            "table",
+                            "data",
                             "convert_to_json_value",
                             &format!("Column {} data kind is not amount", column_name),
                             "400-column-data-kind-is-illegal",
                         ))
                     })?
-                    .to_string())
+                    .map(|v| v.to_string()))
             }
         }
         // TODO test
         TableColumnDataKind::Boolean => {
             if multi_value {
-                json!(row.try_get::<Vec<bool>>("", column_name).or_else(|_| {
+                json!(row.try_get::<Option<Vec<bool>>>("", column_name).or_else(|_| {
                     Err(funs.err().conflict(
-                        "table",
+                        "data",
                         "convert_to_json_value",
                         &format!("Column {} data kind is not boolean", column_name),
                         "400-column-data-kind-is-illegal",
                     ))
                 })?)
             } else {
-                json!(row.try_get::<bool>("", column_name).or_else(|_| {
+                json!(row.try_get::<Option<bool>>("", column_name).or_else(|_| {
                     Err(funs.err().conflict(
-                        "table",
+                        "data",
                         "convert_to_json_value",
                         &format!("Column {} data kind is not boolean", column_name),
                         "400-column-data-kind-is-illegal",
@@ -633,21 +627,20 @@ fn do_convert_to_json_value(column_name: &str, row: &QueryResult, multi_value: b
                 })?)
             }
         }
-        // TODO test
         TableColumnDataKind::Datetime => {
             if multi_value {
-                json!(row.try_get::<Vec<DateTimeWithTimeZone>>("", column_name).or_else(|_| {
+                json!(row.try_get::<Option<Vec<DateTime<Utc>>>>("", column_name).or_else(|_| {
                     Err(funs.err().conflict(
-                        "table",
+                        "data",
                         "convert_to_json_value",
                         &format!("Column {} data kind is not datetime", column_name),
                         "400-column-data-kind-is-illegal",
                     ))
                 })?)
             } else {
-                json!(row.try_get::<DateTimeWithTimeZone>("", column_name).or_else(|_| {
+                json!(row.try_get::<Option<DateTime<Utc>>>("", column_name).or_else(|_| {
                     Err(funs.err().conflict(
-                        "table",
+                        "data",
                         "convert_to_json_value",
                         &format!("Column {} data kind is not datetime", column_name),
                         "400-column-data-kind-is-illegal",
@@ -658,18 +651,18 @@ fn do_convert_to_json_value(column_name: &str, row: &QueryResult, multi_value: b
         // TODO test
         TableColumnDataKind::Time => {
             if multi_value {
-                json!(row.try_get::<Vec<NaiveTime>>("", column_name).or_else(|_| {
+                json!(row.try_get::<Option<Vec<NaiveTime>>>("", column_name).or_else(|_| {
                     Err(funs.err().conflict(
-                        "table",
+                        "data",
                         "convert_to_json_value",
                         &format!("Column {} data kind is not time", column_name),
                         "400-column-data-kind-is-illegal",
                     ))
                 })?)
             } else {
-                json!(row.try_get::<NaiveTime>("", column_name).or_else(|_| {
+                json!(row.try_get::<Option<NaiveTime>>("", column_name).or_else(|_| {
                     Err(funs.err().conflict(
-                        "table",
+                        "data",
                         "convert_to_json_value",
                         &format!("Column {} data kind is not time", column_name),
                         "400-column-data-kind-is-illegal",
@@ -680,18 +673,18 @@ fn do_convert_to_json_value(column_name: &str, row: &QueryResult, multi_value: b
         // TODO test
         TableColumnDataKind::Date => {
             if multi_value {
-                json!(row.try_get::<Vec<NaiveDate>>("", column_name).or_else(|_| {
+                json!(row.try_get::<Option<Vec<NaiveDate>>>("", column_name).or_else(|_| {
                     Err(funs.err().conflict(
-                        "table",
+                        "data",
                         "convert_to_json_value",
                         &format!("Column {} data kind is not date", column_name),
                         "400-column-data-kind-is-illegal",
                     ))
                 })?)
             } else {
-                json!(row.try_get::<NaiveDate>("", column_name).or_else(|_| {
+                json!(row.try_get::<Option<NaiveDate>>("", column_name).or_else(|_| {
                     Err(funs.err().conflict(
-                        "table",
+                        "data",
                         "convert_to_json_value",
                         &format!("Column {} data kind is not date", column_name),
                         "400-column-data-kind-is-illegal",
@@ -699,21 +692,20 @@ fn do_convert_to_json_value(column_name: &str, row: &QueryResult, multi_value: b
                 })?)
             }
         }
-        // TODO test
         _ => {
             if multi_value {
-                json!(row.try_get::<Vec<String>>("", column_name).or_else(|_| {
+                json!(row.try_get::<Option<Vec<String>>>("", column_name).or_else(|_| {
                     Err(funs.err().conflict(
-                        "table",
+                        "data",
                         "convert_to_json_value",
                         &format!("Column {} data kind is not string", column_name),
                         "400-column-data-kind-is-illegal",
                     ))
                 })?)
             } else {
-                json!(row.try_get::<String>("", column_name).or_else(|_| {
+                json!(row.try_get::<Option<String>>("", column_name).or_else(|_| {
                     Err(funs.err().conflict(
-                        "table",
+                        "data",
                         "convert_to_json_value",
                         &format!("Column {} data kind is not string", column_name),
                         "400-column-data-kind-is-illegal",
@@ -735,7 +727,7 @@ fn package_aggs_sql(
     let aggs_sql = if let Some(aggs) = aggs {
         if aggs.iter().any(|agg| !columns.iter().any(|col| &col.name == agg.0)) {
             return Err(funs.err().conflict(
-                "table",
+                "data",
                 "load_data_without_group",
                 &format!("Table.{} aggs column name illegal", table_id),
                 "409-column-name-illegal",
@@ -773,7 +765,7 @@ fn package_sort_sql(sorts: Option<Vec<TableDataSortReq>>, columns: &Vec<TableCol
     let sort_sql = if let Some(sorts) = sorts {
         if sorts.iter().any(|sort| !columns.iter().any(|col| col.name == sort.column_name)) {
             return Err(funs.err().conflict(
-                "table",
+                "data",
                 "load_data_without_group",
                 &format!("Table.{} sorts column name illegal", table_id),
                 "409-column-name-illegal",

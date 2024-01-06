@@ -307,7 +307,7 @@ fn covert_column_data_kind_to_postgre_type(column_data_kind: &TableColumnDataKin
         TableColumnDataKind::MultiSelect => "character varying",
         TableColumnDataKind::Checkbox => "character varying",
         TableColumnDataKind::Date => "date",
-        TableColumnDataKind::Datetime => "timestamp",
+        TableColumnDataKind::Datetime => "timestamp with time zone",
         TableColumnDataKind::Time => "time",
         TableColumnDataKind::Email => "character varying",
         TableColumnDataKind::Url => "character varying",

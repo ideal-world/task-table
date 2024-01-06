@@ -36,17 +36,16 @@ pub async fn test(table_id: &str) -> TardisResult<()> {
     )
     .await?;
 
-    println!("data: {:?}", data);
     let id = data[1]["id"].clone();
     assert_eq!(data.len(), 2);
     assert_eq!(data[0]["id"], json!(1));
-    assert_eq!(data[0]["name"], json!(["xh"]));
+    assert_eq!(data[0]["name"], json!("xh"));
     assert_eq!(data[0]["cate"], json!(["A", "B"]));
-    assert_eq!(data[0]["age"], json!(6));
+    assert_eq!(data[0]["age"], json!(6.0));
     assert_eq!(data[1]["id"], json!(2));
-    assert_eq!(data[1]["name"], json!(["xy"]));
+    assert_eq!(data[1]["name"], json!("xy"));
     assert_eq!(data[1]["cate"], json!(["B"]));
-    assert_eq!(data[1]["age"], json!(3));
+    assert_eq!(data[1]["age"], json!(3.0));
 
     // ----------------------------------
     // ----- test modify data
@@ -68,10 +67,10 @@ pub async fn test(table_id: &str) -> TardisResult<()> {
 
     assert_eq!(data.len(), 1);
     assert_eq!(data[0]["id"], json!(2));
-    assert_eq!(data[0]["name"], json!(["xymm"]));
+    assert_eq!(data[0]["name"], json!("xymm"));
     assert_eq!(data[0]["cate"], json!(["B"]));
-    assert_eq!(data[0]["age"], json!(3));
-    assert_eq!(data[0]["ts"], json!("2024-1-4T11:11:11.111Z"));
+    assert_eq!(data[0]["age"], json!(3.0));
+    assert_eq!(data[0]["ts"], json!("2024-01-04T11:11:11.111Z"));
 
     tt_data_process::add_or_modify_data(
         table_id,
@@ -124,14 +123,14 @@ pub async fn test(table_id: &str) -> TardisResult<()> {
     assert_eq!(data.aggs, HashMap::new());
     assert_eq!(data.records.len(), 5);
     assert_eq!(data.records[0]["id"], json!(1));
-    assert_eq!(data.records[0]["name"], json!(["xh"]));
+    assert_eq!(data.records[0]["name"], json!("xh"));
     assert_eq!(data.records[0]["cate"], json!(["A", "B"]));
-    assert_eq!(data.records[0]["age"], json!(6));
+    assert_eq!(data.records[0]["age"], json!(6.0));
     assert_eq!(data.records[1]["id"], json!(2));
-    assert_eq!(data.records[1]["name"], json!(["xymm"]));
+    assert_eq!(data.records[1]["name"], json!("xymm"));
     assert_eq!(data.records[1]["cate"], json!(["B"]));
-    assert_eq!(data.records[1]["age"], json!(3));
-    assert_eq!(data.records[1]["ts"], json!("2024-1-4T11:11:11.111Z"));
+    assert_eq!(data.records[1]["age"], json!(3.0));
+    assert_eq!(data.records[1]["ts"], json!("2024-01-04T11:11:11.111Z"));
 
     // ----------------------------------
     // ----- test load data with sort
@@ -153,7 +152,7 @@ pub async fn test(table_id: &str) -> TardisResult<()> {
     assert_eq!(data.total_number, 5);
     assert_eq!(data.aggs, HashMap::new());
     assert_eq!(data.records[0]["id"], json!(5));
-    assert_eq!(data.records[1]["id"], json!(1));
+    assert_eq!(data.records[1]["id"], json!(4));
 
     // ----------------------------------
     // ----- test load data with sorts & aggs
@@ -180,7 +179,7 @@ pub async fn test(table_id: &str) -> TardisResult<()> {
         HashMap::from_iter(vec![("age".to_string(), json!(4.8)), ("name".to_string(), json!(5))].into_iter())
     );
     assert_eq!(data.records[0]["id"], json!(5));
-    assert_eq!(data.records[1]["id"], json!(1));
+    assert_eq!(data.records[1]["id"], json!(4));
 
     // ----------------------------------
     // ----- test load data with sorts & aggs & slice
