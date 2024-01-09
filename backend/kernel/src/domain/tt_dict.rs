@@ -14,8 +14,8 @@ pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub value: Json,
     pub title: String,
-    pub color: Option<String>,
-    pub avatar: Option<String>,
+    pub color: String,
+    pub avatar: String,
 
     pub create_time: chrono::DateTime<Utc>,
     pub update_time: chrono::DateTime<Utc>,
@@ -36,10 +36,11 @@ impl TardisActiveModel for ActiveModel {
             .table(Entity.table_ref())
             .if_not_exists()
             .col(ColumnDef::new(Column::DictCode).not_null().string())
-            .col(ColumnDef::new(Column::Value).not_null().string())
+            .col(ColumnDef::new(Column::Value).not_null().json_binary())
             .col(ColumnDef::new(Column::Title).string())
             .col(ColumnDef::new(Column::Color).string())
             .col(ColumnDef::new(Column::Avatar).string())
+            .col(ColumnDef::new(Column::Owner).string())
             .col(ColumnDef::new(Column::CreateTime).extra("DEFAULT CURRENT_TIMESTAMP".to_string()).timestamp_with_time_zone())
             .col(ColumnDef::new(Column::UpdateTime).extra("DEFAULT CURRENT_TIMESTAMP".to_string()).timestamp_with_time_zone())
             .primary_key(Index::create().col(Column::DictCode).col(Column::Value));

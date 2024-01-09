@@ -5,9 +5,10 @@ use tardis::test::test_container::TardisTestContainer;
 use tardis::{testcontainers, tokio, TardisFuns};
 use task_table_kernel::initializer;
 
-mod test_table;
-mod test_layout;
 mod test_data;
+mod test_dict;
+mod test_layout;
+mod test_table;
 
 #[tokio::test]
 async fn test_all() -> TardisResult<()> {
@@ -24,7 +25,8 @@ async fn test_all() -> TardisResult<()> {
 
     let table_id = test_table::test().await?;
     let _layout_id = test_layout::test(&table_id).await?;
+    test_dict::test().await?;
     test_data::test(&table_id).await?;
-    
+
     Ok(())
 }

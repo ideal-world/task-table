@@ -3,9 +3,17 @@ use tardis::{db::sea_orm, serde_json::Value};
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct TableDictAddOrModifyReq {
+pub struct TableDictAddReq {
     pub title: String,
     pub value: Value,
+    pub color: Option<String>,
+    pub avatar: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct TableDictModifyReq {
+    pub title: Option<String>,
     pub color: Option<String>,
     pub avatar: Option<String>,
 }
@@ -15,8 +23,8 @@ pub struct TableDictAddOrModifyReq {
 pub struct TableDictInfo {
     pub title: String,
     pub value: Value,
-    pub color: Option<String>,
-    pub avatar: Option<String>,
+    pub color: String,
+    pub avatar: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

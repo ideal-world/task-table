@@ -8,13 +8,13 @@ use tardis::{
 };
 
 use crate::domain::tt_dict;
-use crate::dto::tt_dict_dtos::{TableDictAddOrModifyReq, TableDictInfo};
+use crate::dto::tt_dict_dtos::{TableDictAddReq, TableDictInfo, TableDictModifyReq};
 
-pub async fn add_dict(dict_code: &str, add_req: TableDictAddOrModifyReq, funs: &TardisFunsInst, ctx: &TardisContext) -> TardisResult<()> {
+pub async fn add_dict(dict_code: &str, add_req: TableDictAddReq, funs: &TardisFunsInst, ctx: &TardisContext) -> TardisResult<()> {
     if funs
         .db()
         .count(
-            &Query::select()
+            Query::select()
                 .columns(vec![tt_dict::Column::Value])
                 .from(tt_dict::Entity)
                 .and_where(Expr::col(tt_dict::Column::DictCode).eq(dict_code))
@@ -34,8 +34,8 @@ pub async fn add_dict(dict_code: &str, add_req: TableDictAddOrModifyReq, funs: &
     let dict_domain = tt_dict::ActiveModel {
         title: Set(add_req.title),
         value: Set(add_req.value),
-        color: Set(add_req.color),
-        avatar: Set(add_req.avatar),
+        color: Set(add_req.color.unwrap_or("".to_string())),
+        avatar: Set(add_req.avatar.unwrap_or("".to_string())),
         dict_code: Set(dict_code.to_string()),
         ..Default::default()
     };
@@ -43,16 +43,22 @@ pub async fn add_dict(dict_code: &str, add_req: TableDictAddOrModifyReq, funs: &
     Ok(())
 }
 
-pub async fn modify_dict(dict_code: &str, modify_req: TableDictAddOrModifyReq, funs: &TardisFunsInst, ctx: &TardisContext) -> TardisResult<()> {
-    let dict_domain = tt_dict::ActiveModel {
-        title: Set(modify_req.title),
-        value: Set(modify_req.value),
-        color: Set(modify_req.color),
-        avatar: Set(modify_req.avatar),
+pub async fn modify_dict(dict_code: &str, value: Value, modify_req: TableDictModifyReq, funs: &TardisFunsInst, ctx: &TardisContext) -> TardisResult<()> {
+    let mut dict_domain = tt_dict::ActiveModel {
+        value: Set(value),
         dict_code: Set(dict_code.to_string()),
         ..Default::default()
     };
-    funs.db().insert_one(dict_domain, ctx).await?;
+    if let Some(title) = modify_req.title {
+        dict_domain.title = Set(title);
+    }
+    if let Some(color) = modify_req.color {
+        dict_domain.color = Set(color);
+    }
+    if let Some(avatar) = modify_req.avatar {
+        dict_domain.avatar = Set(avatar);
+    }
+    funs.db().update_one(dict_domain, ctx).await?;
     Ok(())
 }
 
