@@ -34,7 +34,7 @@ impl TardisActiveModel for ActiveModel {
             .col(ColumnDef::new(Column::FullControl).not_null().boolean())
             .col(ColumnDef::new(Column::CreateTime).extra("DEFAULT CURRENT_TIMESTAMP".to_string()).timestamp_with_time_zone())
             .col(ColumnDef::new(Column::UpdateTime).extra("DEFAULT CURRENT_TIMESTAMP".to_string()).timestamp_with_time_zone())
-            .primary_key(Index::create().col(Column::TableId).col(Column::Owner));
+            .primary_key(Index::create().if_not_exists().col(Column::TableId).col(Column::Owner));
         builder.to_owned()
     }
 

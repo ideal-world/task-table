@@ -106,8 +106,8 @@ pub async fn modify_layout(table_id: &str, layout_id: &str, modify_req: TableLay
             let left_idx = storage_layout.columns.iter().position(|column| column.name == sorted_names[0]);
             let right_idx = storage_layout.columns.iter().position(|column| column.name == sorted_names[1]);
             if left_idx.is_some() && right_idx.is_some() {
-                let left_idx = left_idx.unwrap();
-                let right_idx = right_idx.unwrap();
+                let left_idx = left_idx.expect("ignore");
+                let right_idx = right_idx.expect("ignore");
                 storage_layout.columns.swap(left_idx, right_idx);
             }
         }
@@ -140,7 +140,7 @@ pub async fn delete_layout(table_id: &str, layout_id: &str, funs: &TardisFunsIns
             "404-layout-not-found",
         ));
     }
-    storage_layouts.remove(storage_layout_idx.unwrap());
+    storage_layouts.remove(storage_layout_idx.expect("ignore"));
 
     let table_domain = tt_table::ActiveModel {
         id: Set(table_id.to_string()),
@@ -162,7 +162,7 @@ pub async fn get_layout(table_id: &str, layout_id: &str, funs: &TardisFunsInst, 
             "404-layout-not-found",
         ));
     }
-    Ok(storage_layout.unwrap())
+    Ok(storage_layout.expect("ignore"))
 }
 
 pub async fn find_layouts(table_id: &str, funs: &TardisFunsInst, ctx: &TardisContext) -> TardisResult<Vec<TableLayoutProps>> {
@@ -171,5 +171,5 @@ pub async fn find_layouts(table_id: &str, funs: &TardisFunsInst, ctx: &TardisCon
     if storage_layouts.is_none() {
         return Err(funs.err().not_found("layout", "find", &format!("Table.{} not found by {}", table_id, ctx.owner), "404-layout-not-found"));
     }
-    Ok(storage_layouts.unwrap())
+    Ok(storage_layouts.expect("ignore"))
 }
