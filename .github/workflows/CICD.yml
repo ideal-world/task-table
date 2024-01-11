@@ -47,17 +47,14 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd ./frontend
           pnpm install
 
       - name: Test
         run: |
-          cd ./frontend
           pnpm run test
 
       - name: Build
         run: |
-          cd ./frontend
           pnpm run build
 
       - name: Publish to NPM
@@ -100,17 +97,14 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd ./frontend
           pnpm install
 
       - name: Test
         run: |
-          cd ./frontend
           pnpm run test
 
       - name: Build with VitePress
         run: |
-          cd ./frontend
           pnpm run docs:build
           touch docs/.vitepress/dist/.nojekyll
 
@@ -120,7 +114,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
         with:
-          path: ./frontend/docs/.vitepress/dist
+          path: ./docs/.vitepress/dist
 
   doc-deploy:
     name: DocDeploy
