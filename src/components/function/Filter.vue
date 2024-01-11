@@ -117,7 +117,7 @@ async function setFilterColumn(event: MouseEvent) {
       values: [],
     }
   }
-  if (selectedFilterItem.value.value !== undefined || selectedFilterItem.value.operator === OperatorKind.ISEMPTY || selectedFilterItem.value.operator === OperatorKind.NOTEMPTY)
+  if (selectedFilterItem.value.value !== undefined || selectedFilterItem.value.operator === OperatorKind.IS_EMPTY || selectedFilterItem.value.operator === OperatorKind.NOT_EMPTY)
     await addOrModifySimpleFilterItem(selectedFilterItem.value)
 
   if (selectedFilterItem.value && selectedFilterItem.value.useDict) {
@@ -181,7 +181,7 @@ async function setFilterDictItem(event: Event) {
 }
 
 async function addOrModifySimpleFilterItem(changedFilterItem: TableDataFilterItemReq & { idx: number, values: any[] }) {
-  if (changedFilterItem.operator === OperatorKind.IN || changedFilterItem.operator === OperatorKind.NIN)
+  if (changedFilterItem.operator === OperatorKind.IN || changedFilterItem.operator === OperatorKind.NOT_IN)
     changedFilterItem.value = changedFilterItem.values
 
   if (props.filters && props.filters.length === 1) {
@@ -260,7 +260,7 @@ async function deleteSimpleFilterItem(idx: number) {
       </div>
     </div>
     <template
-      v-if="selectedFilterItem && !selectedFilterItem.useDict && selectedFilterItem.operator !== OperatorKind.ISEMPTY && selectedFilterItem.operator !== OperatorKind.NOTEMPTY"
+      v-if="selectedFilterItem && !selectedFilterItem.useDict && selectedFilterItem.operator !== OperatorKind.IS_EMPTY && selectedFilterItem.operator !== OperatorKind.NOT_EMPTY"
     >
       <div v-if="selectedFilterItem?.dataKind === DataKind.BOOLEAN" class="iw-contextmenu__item w-full">
         <input

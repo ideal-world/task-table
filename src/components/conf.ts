@@ -145,18 +145,18 @@ export function getOperatorKindsByDataKind(dataKind?: DataKind): OperatorKind[] 
       return []
     case DataKind.NUMBER:
     case DataKind.AMOUNT:
-      return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.LT, OperatorKind.LE, OperatorKind.GT, OperatorKind.GE, OperatorKind.IN, OperatorKind.NOT_IN, OperatorKind.ISEMPTY, OperatorKind.NOT_EMPTY]
+      return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.LT, OperatorKind.LE, OperatorKind.GT, OperatorKind.GE, OperatorKind.IN, OperatorKind.NOT_IN, OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]
     case DataKind.BOOLEAN:
-      return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.ISEMPTY, OperatorKind.NOT_EMPTY]
+      return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]
     case DataKind.FILE:
     case DataKind.IMAGE:
-      return [OperatorKind.ISEMPTY, OperatorKind.NOT_EMPTY]
+      return [OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]
     case DataKind.DATE:
     case DataKind.DATETIME:
     case DataKind.TIME:
-      return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.LT, OperatorKind.LE, OperatorKind.GT, OperatorKind.GE, OperatorKind.IN, OperatorKind.NOT_IN, OperatorKind.ISEMPTY, OperatorKind.NOT_EMPTY]
+      return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.LT, OperatorKind.LE, OperatorKind.GT, OperatorKind.GE, OperatorKind.IN, OperatorKind.NOT_IN, OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]
     default:
-      return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.LT, OperatorKind.LE, OperatorKind.GT, OperatorKind.GE, OperatorKind.IN, OperatorKind.NOT_IN, OperatorKind.CONTAINS, OperatorKind.CONTAINS, OperatorKind.STARTWITH, OperatorKind.NOT_STARTWITH, OperatorKind.ENDWITH, OperatorKind.NOT_ENDWITH, OperatorKind.ISEMPTY, OperatorKind.NOT_EMPTY]
+      return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.LT, OperatorKind.LE, OperatorKind.GT, OperatorKind.GE, OperatorKind.IN, OperatorKind.NOT_IN, OperatorKind.CONTAINS, OperatorKind.CONTAINS, OperatorKind.STARTWITH, OperatorKind.NOT_STARTWITH, OperatorKind.ENDWITH, OperatorKind.NOT_ENDWITH, OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]
   }
 }
 

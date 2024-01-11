@@ -61,7 +61,7 @@ export enum OperatorKind {
   NOT_STARTWITH = 'NSTARTWITH',
   ENDWITH = 'ENDWITH',
   NOT_ENDWITH = 'NENDWITH',
-  ISEMPTY = 'ISEMPTY',
+  IS_EMPTY = 'ISEMPTY',
   NOT_EMPTY = 'NOTEMPTY',
   // TODO Add between
 }
@@ -83,7 +83,7 @@ export function translateOperatorKind(operatorKind?: OperatorKind): string {
     case OperatorKind.NOT_STARTWITH: return t('_.operatorkind.nstartwith')
     case OperatorKind.ENDWITH: return t('_.operatorkind.endwith')
     case OperatorKind.NOT_ENDWITH: return t('_.operatorkind.nendwith')
-    case OperatorKind.ISEMPTY: return t('_.operatorkind.isempty')
+    case OperatorKind.IS_EMPTY: return t('_.operatorkind.isempty')
     case OperatorKind.NOT_EMPTY: return t('_.operatorkind.notempty')
   }
 }
