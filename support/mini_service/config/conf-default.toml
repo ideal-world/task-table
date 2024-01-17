@@ -96,3 +96,6 @@ kBAtL3ogKBt46B88cy8+bfBkZkMcURvotE+rOw4/eZQX07SbQQHksK3tlCyeHrQ=
 
 [fw.db]
 url = "postgres://postgres:123456@localhost:54321/test"
+
+[fw.log]
+level = "trace"

@@ -3137,9 +3137,9 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 
 [[package]]
 name = "tardis"
-version = "0.1.0-rc.7"
+version = "0.1.0-rc.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "385e00002861121a7e018148f7e8f5762d81f936655389a34f7c11ee663ce6bc"
+checksum = "7de3fd147ee3fee9bb259678cfd5d83d71d505a3cad6e35b4c657b539c07cf7e"
 dependencies = [
  "async-stream",
  "async-trait",

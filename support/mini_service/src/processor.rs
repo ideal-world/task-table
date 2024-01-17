@@ -27,14 +27,14 @@ impl WsProcessor {
     #[oai(path = "/ws", method = "get")]
     async fn process(&self, websocket: WebSocket, sender: Data<&Sender<TardisWebsocketMgrMessage>>) -> BoxWebSocketUpgraded {
         ws_broadcast(
-            vec![],
+            vec!["default".to_string()],
             false,
             false,
             [].into(),
             websocket,
             sender.clone(),
             |req_msg, _ext| async move {
-                let funs = TardisFuns::inst("", None);
+                let funs = TardisFuns::inst_with_db_conn("", None);
                 // TODO
                 let ctx = TardisContext {
                     own_paths: "".to_string(),
@@ -49,21 +49,21 @@ impl WsProcessor {
                 if msg.is_err() {
                     return Some(TardisWebsocketResp {
                         msg: TardisFuns::json.obj_to_json(&msg).expect("ignore"),
-                        to_avatars: vec![],
+                        to_avatars: req_msg.to_avatars.unwrap_or(vec![]),
                         ignore_avatars: vec![],
                     });
                 }
                 let msg = msg.expect("ignore");
 
-                match distribute(msg, &funs, &ctx).await {
+                match distribute(msg, funs, &ctx).await {
                     Ok(resp) => Some(TardisWebsocketResp {
                         msg: resp,
-                        to_avatars: vec![],
+                        to_avatars: req_msg.to_avatars.unwrap_or(vec![]),
                         ignore_avatars: vec![],
                     }),
                     Err(err) => Some(TardisWebsocketResp {
                         msg: TardisFuns::json.obj_to_json(&err).expect("ignore"),
-                        to_avatars: vec![],
+                        to_avatars: req_msg.to_avatars.unwrap_or(vec![]),
                         ignore_avatars: vec![],
                     }),
                 }
@@ -74,11 +74,13 @@ impl WsProcessor {
     }
 }
 
-async fn distribute(msg: WsMessage, funs: &TardisFunsInst, ctx: &TardisContext) -> TardisResult<Value> {
+async fn distribute(msg: WsMessage, mut funs: TardisFunsInst, ctx: &TardisContext) -> TardisResult<Value> {
     match msg.kind {
         WsMessageKind::AddTable => {
             let body = TardisFuns::json.json_to_obj::<TableAddReq>(msg.body)?;
+            funs.begin().await?;
             let resp = tt_table_process::add_table(body, &funs, &ctx).await;
+            funs.commit().await?;
             TardisFuns::json.obj_to_json(&resp)
         }
         WsMessageKind::ModifyTable => {
@@ -89,7 +91,9 @@ async fn distribute(msg: WsMessage, funs: &TardisFunsInst, ctx: &TardisContext) 
                 .flatten()
                 .ok_or_else(|| funs.err().bad_request("ws", "modify_table", "table_id is required", "400-params-error"))?;
             let body = TardisFuns::json.json_to_obj::<TableModifyReq>(msg.body)?;
+            funs.begin().await?;
             let resp = tt_table_process::modify_table(table_id, body, &funs, &ctx).await;
+            funs.commit().await?;
             TardisFuns::json.obj_to_json(&resp)
         }
         WsMessageKind::DeleteTable => {
@@ -99,7 +103,9 @@ async fn distribute(msg: WsMessage, funs: &TardisFunsInst, ctx: &TardisContext) 
                 .map(|table_id| table_id.as_str())
                 .flatten()
                 .ok_or_else(|| funs.err().bad_request("ws", "delete_table", "table_id is required", "400-params-error"))?;
+            funs.begin().await?;
             let resp = tt_table_process::delete_table(table_id, &funs, &ctx).await;
+            funs.commit().await?;
             TardisFuns::json.obj_to_json(&resp)
         }
         WsMessageKind::GetTable => {
@@ -153,7 +159,9 @@ async fn distribute(msg: WsMessage, funs: &TardisFunsInst, ctx: &TardisContext) 
                 .flatten()
                 .ok_or_else(|| funs.err().bad_request("ws", "add_layout", "table_id is required", "400-params-error"))?;
             let body = TardisFuns::json.json_to_obj::<TableLayoutAddReq>(msg.body)?;
+            funs.begin().await?;
             let resp = tt_layout_process::add_layout(table_id, body, &funs, &ctx).await;
+            funs.commit().await?;
             TardisFuns::json.obj_to_json(&resp)
         }
         WsMessageKind::ModifyLayout => {
@@ -170,7 +178,9 @@ async fn distribute(msg: WsMessage, funs: &TardisFunsInst, ctx: &TardisContext) 
                 .flatten()
                 .ok_or_else(|| funs.err().bad_request("ws", "modify_layout", "layout_id is required", "400-params-error"))?;
             let body = TardisFuns::json.json_to_obj::<TableLayoutModifyReq>(msg.body)?;
+            funs.begin().await?;
             let resp = tt_layout_process::modify_layout(table_id, layout_id, body, &funs, &ctx).await;
+            funs.commit().await?;
             TardisFuns::json.obj_to_json(&resp)
         }
         WsMessageKind::DeleteLayout => {
@@ -186,7 +196,9 @@ async fn distribute(msg: WsMessage, funs: &TardisFunsInst, ctx: &TardisContext) 
                 .map(|layout_id| layout_id.as_str())
                 .flatten()
                 .ok_or_else(|| funs.err().bad_request("ws", "delete_layout", "layout_id is required", "400-params-error"))?;
+            funs.begin().await?;
             let resp = tt_layout_process::delete_layout(table_id, layout_id, &funs, &ctx).await;
+            funs.commit().await?;
             TardisFuns::json.obj_to_json(&resp)
         }
         WsMessageKind::GetLayout => {
@@ -223,7 +235,9 @@ async fn distribute(msg: WsMessage, funs: &TardisFunsInst, ctx: &TardisContext) 
                 .flatten()
                 .ok_or_else(|| funs.err().bad_request("ws", "add_dict", "dict_code is required", "400-params-error"))?;
             let body = TardisFuns::json.json_to_obj::<TableDictAddReq>(msg.body)?;
+            funs.begin().await?;
             let resp = tt_dict_process::add_dict(dict_code, body, &funs, &ctx).await;
+            funs.commit().await?;
             TardisFuns::json.obj_to_json(&resp)
         }
         WsMessageKind::ModifyDict => {
@@ -235,7 +249,9 @@ async fn distribute(msg: WsMessage, funs: &TardisFunsInst, ctx: &TardisContext) 
                 .ok_or_else(|| funs.err().bad_request("ws", "modify_dict", "dict_code is required", "400-params-error"))?;
             let value = msg.params.get("value").ok_or_else(|| funs.err().bad_request("ws", "modify_dict", "value is required", "400-params-error"))?;
             let body = TardisFuns::json.json_to_obj::<TableDictModifyReq>(msg.body)?;
+            funs.begin().await?;
             let resp = tt_dict_process::modify_dict(dict_code, value.clone(), body, &funs, &ctx).await;
+            funs.commit().await?;
             TardisFuns::json.obj_to_json(&resp)
         }
         WsMessageKind::DeleteDict => {
@@ -246,7 +262,9 @@ async fn distribute(msg: WsMessage, funs: &TardisFunsInst, ctx: &TardisContext) 
                 .flatten()
                 .ok_or_else(|| funs.err().bad_request("ws", "delete_dict", "dict_code is required", "400-params-error"))?;
             let value = msg.params.get("value").ok_or_else(|| funs.err().bad_request("ws", "delete_dict", "value is required", "400-params-error"))?;
+            funs.begin().await?;
             let resp = tt_dict_process::delete_dict(dict_code, value, &funs, &ctx).await;
+            funs.commit().await?;
             TardisFuns::json.obj_to_json(&resp)
         }
         WsMessageKind::GetDict => {
@@ -290,12 +308,16 @@ async fn distribute(msg: WsMessage, funs: &TardisFunsInst, ctx: &TardisContext) 
         }
         WsMessageKind::AddShare => {
             let body = TardisFuns::json.json_to_obj::<ShareAddReq>(msg.body)?;
+            funs.begin().await?;
             let resp = tt_share_process::add_share(body, &funs, &ctx).await;
+            funs.commit().await?;
             TardisFuns::json.obj_to_json(&resp)
         }
         WsMessageKind::DeleteShare => {
             let body = TardisFuns::json.json_to_obj::<ShareDeleteReq>(msg.body)?;
+            funs.begin().await?;
             let resp = tt_share_process::delete_share(body, &funs, &ctx).await;
+            funs.commit().await?;
             TardisFuns::json.obj_to_json(&resp)
         }
         WsMessageKind::AddOrModifyData => {
@@ -306,7 +328,9 @@ async fn distribute(msg: WsMessage, funs: &TardisFunsInst, ctx: &TardisContext) 
                 .flatten()
                 .ok_or_else(|| funs.err().bad_request("ws", "add_or_modify_data", "table_id is required", "400-params-error"))?;
             let body = TardisFuns::json.json_to_obj::<Vec<HashMap<String, Value>>>(msg.body)?;
+            funs.begin().await?;
             let resp = tt_data_process::add_or_modify_data(table_id, body, &funs, &ctx).await;
+            funs.commit().await?;
             TardisFuns::json.obj_to_json(&resp)
         }
         WsMessageKind::DeleteData => {
@@ -317,7 +341,9 @@ async fn distribute(msg: WsMessage, funs: &TardisFunsInst, ctx: &TardisContext) 
                 .flatten()
                 .ok_or_else(|| funs.err().bad_request("ws", "delete_data", "table_id is required", "400-params-error"))?;
             let body = TardisFuns::json.json_to_obj::<Vec<Value>>(msg.body)?;
+            funs.begin().await?;
             let resp = tt_data_process::delete_data(table_id, body, &funs, &ctx).await;
+            funs.commit().await?;
             TardisFuns::json.obj_to_json(&resp)
         }
         WsMessageKind::LoadDataWithGroup => {
