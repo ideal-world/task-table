@@ -130,7 +130,7 @@ export enum LayoutKind {
 }
 
 export interface TableProps {
-  tableId?: string
+  id?: string
   pkColumnName: string
   parentPkColumnName?: string
   columns: TableColumnProps[]

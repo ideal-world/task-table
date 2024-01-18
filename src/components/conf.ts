@@ -6,7 +6,7 @@ import { DataKind, LayoutKind, OperatorKind, SizeKind } from './props'
 const { t } = locales.global
 
 export interface TableBasicConf {
-  tableId: string
+  id: string
   pkColumnName: string
   parentPkColumnName?: string
   columns: TableColumnConf[]
@@ -205,7 +205,7 @@ export function getInputTypeByDataKind(dataKind?: DataKind): string {
 
 export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]] {
   const basicConf = {
-    tableId: props.tableId ?? `iw-table${Math.floor(Math.random() * 1000000)}`,
+    id: props.id ?? `iw-table${Math.floor(Math.random() * 1000000)}`,
     pkColumnName: props.pkColumnName,
     parentPkColumnName: props.parentPkColumnName,
     columns: props.columns.map((column) => {

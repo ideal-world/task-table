@@ -70,7 +70,7 @@ function showMoreMenu(event: MouseEvent) {
 
 <template>
   <div
-    :id="tableBasicConf.tableId"
+    :id="tableBasicConf.id"
     :class="`${tableBasicConf.styles.tableClass} iw-tt w-full text-sm text-base-content bg-base-100 relative`"
   >
     <div class=" iw-tt-header iw-navbar p-0 min-h-0">

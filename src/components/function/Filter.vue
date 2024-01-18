@@ -138,7 +138,7 @@ async function setFilterOp(event: MouseEvent) {
   if (!selectedFilterItem.value)
     return
 
-  if (selectedFilterItem.value.value !== undefined || selectedFilterItem.value.operator === OperatorKind.ISEMPTY || selectedFilterItem.value.operator === OperatorKind.NOTEMPTY)
+  if (selectedFilterItem.value.value !== undefined || selectedFilterItem.value.operator === OperatorKind.IS_EMPTY || selectedFilterItem.value.operator === OperatorKind.NOT_EMPTY)
     await addOrModifySimpleFilterItem(selectedFilterItem.value)
 }
 

@@ -19,4 +19,7 @@ rust-version = "1.72"
 [workspace.dependencies]
 serde = { version = "1", features = ["derive"] }
 lazy_static = { version = "1" }
-tardis = { version = "0.1.0-rc.8" }
+strum = { version = "0.25", features = ["derive"] }
+# tardis = { version = "0.1.0-rc.8" }
+tardis = { path = "../../tardis/tardis"}
+
