@@ -56,14 +56,14 @@ export class WebsocketP {
   }
 
   protected onMessage(me: MessageEvent) {
-    const resp = me.data
-    const reqId = this.extractReqIdFun(JSON.parse(resp))
+    const resp = JSON.parse(me.data)
+    const reqId = this.extractReqIdFun(resp)
     if (reqId) {
       const promise = this.reqPromises.get(reqId)
       if (promise) {
         this.reqPromises.delete(reqId)
         window.clearTimeout(promise[2])
-        promise[0](resp.msg)
+        promise[0](resp)
       }
       else {
         this.onMessageFun(resp)
