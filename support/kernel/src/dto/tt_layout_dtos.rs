@@ -2,8 +2,10 @@ use std::collections::HashMap;
 
 use super::tt_data_dtos::{TableDataFilterReq, TableDataGroupReq, TableDataSortReq};
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 use tardis::serde_json::Value;
 
+#[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct TableLayoutAddReq {
@@ -19,6 +21,7 @@ pub struct TableLayoutAddReq {
     pub fetch_data_number: Option<i32>,
 }
 
+#[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct TableLayoutModifyReq {
@@ -37,6 +40,7 @@ pub struct TableLayoutModifyReq {
     pub deleted_column_name: Option<String>,
 }
 
+#[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct TableLayoutProps {
@@ -53,6 +57,7 @@ pub struct TableLayoutProps {
     pub fetch_data_number: Option<i32>,
 }
 
+#[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct TableLayoutColumnProps {

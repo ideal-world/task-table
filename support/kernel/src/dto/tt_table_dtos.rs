@@ -1,5 +1,6 @@
 use super::tt_layout_dtos::TableLayoutProps;
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 use tardis::{
     chrono::{DateTime, Utc},
     db::sea_orm,
@@ -7,6 +8,7 @@ use tardis::{
     TardisFuns,
 };
 
+#[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct TableAddReq {
@@ -16,6 +18,7 @@ pub struct TableAddReq {
     pub styles: Option<TableStyleProps>,
 }
 
+#[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct TableModifyReq {
@@ -25,6 +28,7 @@ pub struct TableModifyReq {
     pub styles: Option<TableStyleProps>,
 }
 
+#[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug, sea_orm::FromQueryResult)]
 #[serde(rename_all = "camelCase")]
 pub struct TableSummaryResp {
@@ -37,6 +41,7 @@ pub struct TableSummaryResp {
     pub update_time: DateTime<Utc>,
 }
 
+#[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug, sea_orm::FromQueryResult)]
 #[serde(rename_all = "camelCase")]
 pub struct TableDetailResp {
@@ -74,6 +79,7 @@ impl TableDetailResp {
     }
 }
 
+#[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug, sea_orm::FromQueryResult)]
 #[serde(rename_all = "camelCase")]
 pub struct TableColumnsResp {
@@ -87,6 +93,7 @@ impl TableColumnsResp {
     }
 }
 
+#[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct TableColumnAddReq {
@@ -101,6 +108,7 @@ pub struct TableColumnAddReq {
     pub kind_date_time_format: Option<String>,
 }
 
+#[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct TableColumnModifyReq {
@@ -113,6 +121,7 @@ pub struct TableColumnModifyReq {
     pub kind_date_time_format: Option<String>,
 }
 
+#[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct TableColumnProps {
@@ -167,6 +176,7 @@ pub enum TableColumnDataKind {
     Password,
 }
 
+#[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct TableStyleAddOrModifyReq {
@@ -179,6 +189,7 @@ pub struct TableStyleAddOrModifyReq {
     pub agg_class: Option<String>,
 }
 
+#[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct TableStyleProps {

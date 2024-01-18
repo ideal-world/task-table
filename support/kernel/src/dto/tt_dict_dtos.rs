@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 use tardis::{db::sea_orm, serde_json::Value};
 
+#[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct TableDictAddReq {
@@ -10,6 +12,7 @@ pub struct TableDictAddReq {
     pub avatar: Option<String>,
 }
 
+#[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct TableDictModifyReq {
@@ -18,6 +21,7 @@ pub struct TableDictModifyReq {
     pub avatar: Option<String>,
 }
 
+#[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug, sea_orm::FromQueryResult)]
 #[serde(rename_all = "camelCase")]
 pub struct TableDictInfo {
@@ -27,6 +31,7 @@ pub struct TableDictInfo {
     pub avatar: String,
 }
 
+#[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct TableDictItemResp {

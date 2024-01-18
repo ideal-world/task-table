@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import type { TableCellDictItem, TableColumnProps, TableDataSliceReq, TableLayoutModifyReq, TableLayoutProps, TableProps, TableStyleProps } from '../src/components/props'
+import { onMounted, ref } from 'vue'
+import type { TableCellDictItem, TableColumnProps, TableDataSliceReq, TableLayoutColumnProps, TableLayoutModifyReq, TableLayoutProps, TableProps, TableStyleProps } from '../src/components/props'
 import { AggregateKind, DATA_DICT_POSTFIX, DataKind, LayoutKind } from '../src/components/props'
 import { DefaultWebSocketP, DefaultWsResp } from '../src/utils/wsp'
+
+// 定义是否已初始化变量
+const isInit = ref<boolean>(false)
 
 const tableId = ref<string>('')
 const layoutId = ref<string>('')
@@ -10,123 +13,180 @@ const columns = ref<TableColumnProps[]>([])
 const layouts = ref<TableLayoutProps[]>([])
 const styles = ref<TableStyleProps | undefined>(undefined)
 
-const ws = await DefaultWebSocketP.initDefault('wss://127.0.0.1:8089/ws', (_) => {
-
+onMounted(async () => {
+  await init()
+  isInit.value = true
 })
 
-// // Create dict
-// ws.reqOk('AddDict', {
-//   title: '星航',
-//   value: 'xh',
-//   avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg',
-// }, {
-//   dict_code: 'name',
-// })
-// ws.reqOk('AddDict', {
-//   title: '星杨',
-//   value: 'xy',
-//   avatar: 'https://pic1.zhimg.com/v2-770e9580d5febfb49cbb23c409cea85d_r.jpg?source=1def8aca',
-// }, {
-//   dict_code: 'name',
-// })
-// ws.reqOk('AddDict', {
-//   title: '星辰',
-//   value: 'xc',
-// }, {
-//   dict_code: 'name',
-// })
-// ws.reqOk('AddDict', {
-//   title: '初始化',
-//   value: 'init',
-//   color: '#43ad7f7f',
-// }, {
-//   dict_code: 'stats',
-// })
-// ws.reqOk('AddDict', {
-//   title: '初进行中始化',
-//   value: 'progress',
-// }, {
-//   dict_code: 'stats',
-// })
-// ws.reqOk('AddDict', {
-//   title: '有风险',
-//   value: 'risk',
-//   color: '#be14807f',
-// }, {
-//   dict_code: 'stats',
-// })
-// ws.reqOk('AddDict', {
-//   title: '已完成',
-//   value: 'finish',
-// }, {
-//   dict_code: 'stats',
-// })
-// ws.reqOk('AddDict', {
-//   title: '已关闭',
-//   value: 'close',
-// }, {
-//   dict_code: 'stats',
-// })
+async function init() {
+  const ws = await DefaultWebSocketP.initDefault('wss://127.0.0.1:8089/ws', (_) => {
+  })
 
-// Create table
-tableId.value = await ws.reqOk<string>('AddTable', {
-  pkColumnName: 'no',
-  parent_pk_column_name: 'pno',
-  columns: [
-    {
-      name: 'name',
-      useDict: true,
-      dictEditable: true,
-    },
-    {
-      name: 'phone',
-    },
-    {
-      name: 'stats',
-      useDict: true,
-      dictEditable: true,
-      multiValue: true,
-    },
-    {
-      name: 'addr',
-    },
-    {
-      name: 'time',
-      DataKind: DataKind.DATETIME,
-    },
-  ] as TableColumnProps[],
-}, {})
+  // Create dict
+  // ws.reqOk('AddDict', {
+  //   title: '星航',
+  //   value: 'xh',
+  //   avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg',
+  // }, {
+  //   dict_code: 'name',
+  // })
+  // ws.reqOk('AddDict', {
+  //   title: '星杨',
+  //   value: 'xy',
+  //   avatar: 'https://pic1.zhimg.com/v2-770e9580d5febfb49cbb23c409cea85d_r.jpg?source=1def8aca',
+  // }, {
+  //   dict_code: 'name',
+  // })
+  // ws.reqOk('AddDict', {
+  //   title: '星辰',
+  //   value: 'xc',
+  // }, {
+  //   dict_code: 'name',
+  // })
+  // ws.reqOk('AddDict', {
+  //   title: '初始化',
+  //   value: 'init',
+  //   color: '#43ad7f7f',
+  // }, {
+  //   dict_code: 'stats',
+  // })
+  // ws.reqOk('AddDict', {
+  //   title: '初进行中始化',
+  //   value: 'progress',
+  // }, {
+  //   dict_code: 'stats',
+  // })
+  // ws.reqOk('AddDict', {
+  //   title: '有风险',
+  //   value: 'risk',
+  //   color: '#be14807f',
+  // }, {
+  //   dict_code: 'stats',
+  // })
+  // ws.reqOk('AddDict', {
+  //   title: '已完成',
+  //   value: 'finish',
+  // }, {
+  //   dict_code: 'stats',
+  // })
+  // ws.reqOk('AddDict', {
+  //   title: '已关闭',
+  //   value: 'close',
+  // }, {
+  //   dict_code: 'stats',
+  // })
 
-console.log(tableId.value)
-// // Create layout
-// layoutId.value = await ws.reqOk<string>('AddLayout', {
-//   title: 'HI',
-//   layoutKind: LayoutKind.LIST,
-//   columns: [
-//     {
-//       name: 'name',
+  // Create table
+  tableId.value = await ws.reqOk<string>('AddTable', {
+    pkColumnName: 'no',
+    parent_pk_column_name: 'pno',
+    columns: [
+      {
+        name: 'pno',
+      },
+      {
+        name: 'name',
+        useDict: true,
+        dictEditable: true,
+      },
+      {
+        name: 'phone',
+      },
+      {
+        name: 'stats',
+        useDict: true,
+        dictEditable: true,
+        multiValue: true,
+      },
+      {
+        name: 'addr',
+      },
+      {
+        name: 'time',
+        DataKind: DataKind.DATETIME,
+      },
+    ] as TableColumnProps[],
+  }, {})
+
+  // Create layout
+  layoutId.value = await ws.reqOk<string>('AddLayout', {
+    title: 'HI',
+    layoutKind: LayoutKind.LIST,
+    columns: [
+      {
+        name: 'no',
+      },
+      {
+        name: 'pno',
+      },
+      {
+        name: 'name',
+      },
+      {
+        name: 'stats',
+      },
+      {
+        name: 'addr',
+      },
+      {
+        name: 'time',
+      },
+    ],
+    aggs: { name: AggregateKind.MIN },
+  }, {
+    table_id: tableId.value,
+  })
+
+  // Get Table
+  const tableProps = await ws.reqOk<TableProps>('GetTable', {}, {
+    table_id: tableId.value,
+  })
+  columns.value = tableProps.columns as TableColumnProps[]
+  layouts.value = tableProps.layouts as TableLayoutProps[]
+  styles.value = tableProps.styles as TableStyleProps
+}
+
+// columns.value = [
+//   {
+//     dataEditable: false,
+//     dataKind: 'TEXT',
+//     dictEditable: false,
+//     multiValue: false,
+//     name: 'pno',
+//     title: 'pno',
+//     useDict: false,
+//   },
+//   {
+//     dataEditable: false,
+//     dataKind: 'TEXT',
+//     dictEditable: true,
+//     multiValue: false,
+//     name: 'name',
+//     title: 'name',
+//     useDict: true,
+//   }
+// ] as TableColumnProps[]
+// layouts.value = [
+//   {
+//     aggs: {
+//       name: 'MIN',
 //     },
-//     {
-//       name: 'stats',
-//     },
-//     {
-//       name: 'addr',
-//     },
-//     {
-//       name: 'time',
-//     },
-//   ],
-//   aggs: { name: AggregateKind.MIN },
-// }, {
-//   table_id: tableId,
-// })
-// // Get Table
-// const tableProps = await ws.reqOk<TableProps>('GetTable', {}, {
-//   table_id: tableId,
-// })
-// columns.value = tableProps.columns as TableColumnProps[]
-// layouts.value = tableProps.layouts as TableLayoutProps[]
-// styles.value = tableProps.styles as TableStyleProps
+//     columns: [
+//       {
+//         name: 'no',
+//       },
+//       {
+//         name: 'pno',
+//       },
+//       {
+//         name: 'name',
+//       },
+//     ] as TableLayoutColumnProps[],
+//     id: 'WKoGYuPHO1FJzAcnBWyW9',
+//     layoutKind: 'LIST',
+//     title: 'HI',
+//   },
+// ] as TableLayoutProps[]
 
 const events = {
 
@@ -450,6 +510,7 @@ const events = {
 <template>
   <div style="height: 600px">
     <iw-task-table
+      v-if="isInit"
       pk-column-name="no" parent-pk-column-name="pno" :columns="columns" :events="events" :layouts="layouts"
     />
   </div>

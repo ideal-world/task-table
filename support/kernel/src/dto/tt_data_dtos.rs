@@ -1,8 +1,10 @@
 use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
+use serde_with::skip_serializing_none;
 use tardis::serde_json::Value;
 
+#[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct TableDataFilterReq {
@@ -10,6 +12,7 @@ pub struct TableDataFilterReq {
     pub and: bool,
 }
 
+#[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct TableDataFilterItemReq {
@@ -18,6 +21,7 @@ pub struct TableDataFilterItemReq {
     pub value: Option<Value>,
 }
 
+#[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct TableDataSortReq {
@@ -25,6 +29,7 @@ pub struct TableDataSortReq {
     pub order_desc: bool,
 }
 
+#[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct TableDataGroupReq {
@@ -33,6 +38,7 @@ pub struct TableDataGroupReq {
     pub hide_empty_record: bool,
 }
 
+#[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct TableDataSliceReq {
@@ -40,6 +46,7 @@ pub struct TableDataSliceReq {
     pub fetch_number: i32,
 }
 
+#[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct TableDataResp {
@@ -48,6 +55,7 @@ pub struct TableDataResp {
     pub total_number: i32,
 }
 
+#[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct TableDataGroupResp {
