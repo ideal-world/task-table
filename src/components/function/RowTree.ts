@@ -4,7 +4,7 @@ export function sortByTree(data: any[], pkColumnName: string, parentPkColumnName
   if (parentPkColumnName === undefined)
     return data
 
-  return getTreeData(data, undefined, pkColumnName, parentPkColumnName, 0)
+  return getTreeData(data, null, pkColumnName, parentPkColumnName, 0)
 }
 
 function getTreeData(data: any[], parentPk: any, pkColumnName: string, parentPkColumnName: string, depth: number): any[] {

@@ -84,7 +84,7 @@ impl TableDetailResp {
 #[serde(rename_all = "camelCase")]
 pub struct TableColumnsResp {
     pub pk_column_name: String,
-    pub columns: Value,
+        pub columns: Value,
 }
 
 impl TableColumnsResp {

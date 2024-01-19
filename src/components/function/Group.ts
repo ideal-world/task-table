@@ -8,18 +8,11 @@ export interface GroupAggItem {
 export function showGroupAggMappingByDataKind(dataKind: DataKind): GroupAggItem[] {
   const items = [
     { kind: AggregateKind.COUNT, title: translateGroupAgg(AggregateKind.COUNT) },
+    { kind: AggregateKind.DISTINCT, title: translateGroupAgg(AggregateKind.DISTINCT) },
   ]
   switch (dataKind) {
     case DataKind.NUMBER:
     case DataKind.AMOUNT:
-      items.push(...[
-        { kind: AggregateKind.MAX, title: translateGroupAgg(AggregateKind.MAX) },
-        { kind: AggregateKind.MIN, title: translateGroupAgg(AggregateKind.MIN) },
-        { kind: AggregateKind.DISTINCT, title: translateGroupAgg(AggregateKind.DISTINCT) },
-      ])
-      break
-    case DataKind.TEXT:
-    case DataKind.TEXTAREA:
       items.push(...[
         { kind: AggregateKind.SUM, title: translateGroupAgg(AggregateKind.SUM) },
         { kind: AggregateKind.AVG, title: translateGroupAgg(AggregateKind.AVG) },
@@ -30,14 +23,24 @@ export function showGroupAggMappingByDataKind(dataKind: DataKind): GroupAggItem[
         { kind: AggregateKind.DISTINCT, title: translateGroupAgg(AggregateKind.DISTINCT) },
       ])
       break
+    case DataKind.TEXT:
+    case DataKind.TEXTAREA:
+      items.push(...[
+        { kind: AggregateKind.MAX, title: translateGroupAgg(AggregateKind.MAX) },
+        { kind: AggregateKind.MIN, title: translateGroupAgg(AggregateKind.MIN) },
+        { kind: AggregateKind.DISTINCT, title: translateGroupAgg(AggregateKind.DISTINCT) },
+      ])
+      break
     case DataKind.DATE:
     case DataKind.DATETIME:
     case DataKind.TIME:
-      // TODO
+      items.push(...[
+        { kind: AggregateKind.MAX, title: translateGroupAgg(AggregateKind.MAX) },
+        { kind: AggregateKind.MIN, title: translateGroupAgg(AggregateKind.MIN) },
+        { kind: AggregateKind.DISTINCT, title: translateGroupAgg(AggregateKind.DISTINCT) },
+      ])
       break
-    case DataKind.FILE:
-    case DataKind.IMAGE:
-      // TODO
+    default:
       break
   }
   return items

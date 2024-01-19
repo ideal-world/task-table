@@ -14,6 +14,7 @@ use tardis::{
     TardisFuns, TardisFunsInst,
 };
 
+use crate::dto::tt_dict_dtos::TableDictInfo;
 use crate::{
     dto::tt_data_dtos::{TableDataFilterItemReq, TableDataOperatorKind},
     process::tt_table_process,
@@ -26,9 +27,13 @@ use crate::{
     process::tt_table_process::INST_PREFIX,
 };
 
+use super::tt_dict_process;
+
+const DATA_DICT_POSTFIX: &str = "__dict";
+
 pub async fn add_or_modify_data(
     table_id: &str,
-    changed_records: Vec<HashMap<String, Value>>,
+    mut changed_records: Vec<HashMap<String, Value>>,
     funs: &TardisFunsInst,
     ctx: &TardisContext,
 ) -> TardisResult<Vec<HashMap<String, Value>>> {
@@ -48,6 +53,27 @@ pub async fn add_or_modify_data(
                 return Err(funs.err().conflict("data", "add_or_modify_data", &format!("Table.{} column name not same", table_id), "409-keys-not-same"));
             }
         }
+    }
+
+    if changed_column_names.contains(&table_columns.pk_column_name) && changed_column_names.len() == 1 {
+        // Copy
+        changed_column_names = columns.iter().filter(|column| column.name != table_columns.pk_column_name).map(|column| column.name.clone()).collect::<Vec<String>>();
+
+        let record_pks = changed_records
+            .iter()
+            .map(|record| record.get(&table_columns.pk_column_name))
+            .filter(|value| value.is_some())
+            .map(|value| value.expect("ignore").clone())
+            .collect::<Vec<_>>();
+        changed_records = load_data_without_group(table_id, None, None, None, None, Some(record_pks), funs, ctx)
+            .await?
+            .records
+            .into_iter()
+            .map(|mut record| {
+                record.retain(|k, _| changed_column_names.contains(k));
+                record
+            })
+            .collect::<Vec<_>>();
     }
 
     if changed_column_names.contains(&table_columns.pk_column_name) {
@@ -113,12 +139,12 @@ pub async fn add_or_modify_data(
             })
             .collect::<TardisResult<Vec<Vec<sea_query::Value>>>>()?;
         let insert_sql = format!(
-            r#"INSERT INTO {}_{} ({}, {}) VALUES ($1, {})"#,
+            r#"INSERT INTO {}_{} ({} {}) VALUES ($1 {})"#,
             INST_PREFIX,
             table_id,
             table_columns.pk_column_name,
-            changed_column_names.join(", "),
-            changed_column_names.iter().enumerate().map(|(idx, _)| format!("${}", idx + 2)).collect::<Vec<String>>().join(", "),
+            changed_column_names.iter().map(|name| format!(",{}", name)).collect::<String>(),
+            changed_column_names.iter().enumerate().map(|(idx, _)| format!(", ${}", idx + 2)).collect::<String>(),
         );
         funs.db().execute_many(&insert_sql, params).await?;
         let modify_records = load_data_without_group(table_id, None, None, None, None, Some(pks), funs, ctx).await?;
@@ -247,7 +273,8 @@ pub async fn load_data_with_group(
                     })
                     .collect::<Vec<HashMap<String, Value>>>();
                 TableDataGroupResp {
-                    records,
+                    // TODO expect
+                    records: attach_dict(records, columns, funs, ctx).await.expect("ignore"),
                     total_number,
                     group_value,
                     aggs,
@@ -338,10 +365,80 @@ pub async fn load_data_without_group(
     };
 
     Ok(TableDataResp {
-        records,
+        records: attach_dict(records, &columns, funs, ctx).await?,
         aggs,
         total_number: total_number as i32,
     })
+}
+
+async fn attach_dict(
+    records: Vec<HashMap<String, Value>>,
+    columns: &Vec<TableColumnProps>,
+    funs: &TardisFunsInst,
+    ctx: &TardisContext,
+) -> TardisResult<Vec<HashMap<String, Value>>> {
+    if records.is_empty() {
+        return Ok(records);
+    }
+    let first_record = records.first().expect("ignore");
+    let dict_names = columns.iter().filter(|column| column.use_dict).map(|column| (column.name.clone(), column.multi_value)).collect::<HashMap<String, bool>>();
+    if dict_names.is_empty() {
+        return Ok(records);
+    }
+
+    let dict_values = dict_names
+        .clone()
+        .into_iter()
+        .filter(|(column_name, _)| first_record.contains_key(column_name))
+        .map(|(column_name, multi_value)| {
+            let values = records
+                .iter()
+                .map(|record| {
+                    let values = record.get(&column_name).expect("ignore");
+                    if values.is_null() {
+                        vec![]
+                    } else if multi_value {
+                        values.as_array().unwrap_or(&vec![]).clone()
+                    } else {
+                        vec![values.clone()]
+                    }
+                })
+                .flatten()
+                .collect::<Vec<_>>();
+            (column_name, values)
+        })
+        .collect::<HashMap<_, _>>();
+    let dict_values = join_all(dict_values.into_iter().map(|(column_name, values)| tt_dict_process::find_dicts(column_name, values, funs, ctx)).collect::<Vec<_>>())
+        .await
+        .into_iter()
+        .collect::<TardisResult<Vec<_>>>()?
+        .into_iter()
+        .flatten()
+        .map(|dict| (format!("{}.{}", dict.dict_code, dict.value), dict))
+        .collect::<HashMap<String, TableDictInfo>>();
+
+    let records = records
+        .into_iter()
+        .map(|mut record| {
+            for (column_name, multi_value) in &dict_names {
+                let values = record.get(column_name).expect("ignore");
+                let dict_values = if values.is_null() {
+                    vec![None]
+                } else if *multi_value {
+                    values.as_array().unwrap_or(&vec![]).iter().map(|value| dict_values.get(&format!("{}.{}", column_name, value))).collect::<Vec<_>>()
+                } else {
+                    vec![dict_values.get(&format!("{}.{}", column_name, values))]
+                }
+                .into_iter()
+                .filter(|v| v.is_some())
+                .map(|v| v.expect("ignore"))
+                .collect::<Vec<_>>();
+                record.insert(format!("{}{}", column_name, DATA_DICT_POSTFIX), TardisFuns::json.obj_to_json(&dict_values).expect("ignore"));
+            }
+            record
+        })
+        .collect::<Vec<_>>();
+    Ok(records)
 }
 
 fn get_and_convert_to_db_value(column_name: &str, record: &mut HashMap<String, Value>, columns: &Vec<TableColumnProps>, funs: &TardisFunsInst) -> TardisResult<sea_query::Value> {
@@ -722,13 +819,15 @@ fn do_convert_to_json_value(column_name: &str, row: &QueryResult, multi_value: b
 fn convert_agg_to_json_value(column_name: &str, agg_kind: &TableDataAggregateKind, row: &QueryResult, _funs: &TardisFunsInst) -> TardisResult<Value> {
     let column_name_with_agg = format!("{}_{}", TardisFuns::json.obj_to_json(&agg_kind).expect("ignore").as_str().expect("ignore"), column_name).to_lowercase();
     let agg_value = match agg_kind {
-        TableDataAggregateKind::Sum => Value::from(row.try_get::<i64>("", &column_name_with_agg)?),
+        TableDataAggregateKind::Sum => Value::from(row.try_get::<Option<i64>>("", &column_name_with_agg)?),
         TableDataAggregateKind::Count => Value::from(row.try_get::<i64>("", &column_name_with_agg)?),
-        TableDataAggregateKind::Min => Value::from(row.try_get::<f64>("", &column_name_with_agg)?),
-        TableDataAggregateKind::Max => Value::from(row.try_get::<f64>("", &column_name_with_agg)?),
-        TableDataAggregateKind::Avg => Value::from(row.try_get::<f64>("", &column_name_with_agg)?),
-        TableDataAggregateKind::Stddev => Value::from(row.try_get::<f64>("", &column_name_with_agg)?),
-        TableDataAggregateKind::Distinct => Value::from(row.try_get::<f64>("", &column_name_with_agg)?),
+        TableDataAggregateKind::Min => Value::from(row.try_get::<Option<String>>("", &column_name_with_agg)?),
+        TableDataAggregateKind::Max => Value::from(row.try_get::<Option<String>>("", &column_name_with_agg)?),
+        TableDataAggregateKind::Avg => Value::from(row.try_get::<Option<f64>>("", &column_name_with_agg)?),
+        TableDataAggregateKind::Stddev => Value::from(row.try_get::<Option<f64>>("", &column_name_with_agg)?),
+        // TODO fix
+        // 在 PostgreSQL 中，要对一个字段进行去重，并对另一个字段进行计数，需要使用 GROUP BY 语句，而不是 DISTINCT
+        TableDataAggregateKind::Distinct => Value::from(row.try_get::<Option<f64>>("", &column_name_with_agg)?),
     };
     Ok(agg_value)
 }

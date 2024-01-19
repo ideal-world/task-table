@@ -273,7 +273,7 @@ pub async fn get_table_columns(table_id: &str, funs: &TardisFunsInst, ctx: &Tard
     let mut query_statement = Query::select();
     query_statement
         .columns(vec![(tt_table::Entity, tt_table::Column::PkColumnName)])
-        .columns(vec![(tt_table::Entity, tt_table::Column::Columns)])
+                .columns(vec![(tt_table::Entity, tt_table::Column::Columns)])
         .from(tt_table::Entity)
         .and_where(Expr::col((tt_table::Entity, ID_FIELD.clone())).eq(table_id));
 

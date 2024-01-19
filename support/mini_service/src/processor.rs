@@ -31,7 +31,7 @@ impl WsProcessor {
         ws_broadcast(
             vec!["default".to_string()],
             false,
-            false,
+            true,
             [].into(),
             websocket,
             sender.clone(),
@@ -304,7 +304,7 @@ async fn distribute(msg: WsMessage, event: WsMessageKind, mut funs: TardisFunsIn
                 .map(|dict_code| dict_code.as_str())
                 .flatten()
                 .ok_or_else(|| funs.err().bad_request("ws", "find_dicts", "dict_code is required", "400-params-error"))?;
-            let resp = tt_dict_process::find_dicts(dict_code, &funs, &ctx).await?;
+            let resp = tt_dict_process::find_all_dicts(dict_code, &funs, &ctx).await?;
             Ok(TardisFuns::json.obj_to_json(&resp).expect("ignore"))
         }
         WsMessageKind::PaginateDicts => {
@@ -365,48 +365,18 @@ async fn distribute(msg: WsMessage, event: WsMessageKind, mut funs: TardisFunsIn
             funs.commit().await?;
             Ok(json!({}))
         }
-        WsMessageKind::LoadDataWithGroup => {
+        WsMessageKind::LoadData => {
             let table_id = msg
                 .params
                 .get("table_id")
                 .map(|table_id| table_id.as_str())
                 .flatten()
-                .ok_or_else(|| funs.err().bad_request("ws", "load_data_with_group", "table_id is required", "400-params-error"))?;
-            let group = msg
-                .params
-                .get("group")
-                .map(|group| TardisFuns::json.json_to_obj::<TableDataGroupReq>(group.clone()))
-                .ok_or_else(|| funs.err().bad_request("ws", "load_data_with_group", "table_id is required", "400-params-error"))??;
-            let filters = if let Some(filters) = msg.params.get("filters") {
-                Some(TardisFuns::json.json_to_obj::<Vec<TableDataFilterReq>>(filters.clone())?)
+                .ok_or_else(|| funs.err().bad_request("ws", "load_data", "table_id is required", "400-params-error"))?;
+            let group = if let Some(group) = msg.params.get("group") {
+                Some(TardisFuns::json.json_to_obj::<TableDataGroupReq>(group.clone())?)
             } else {
                 None
             };
-            let sorts = if let Some(sorts) = msg.params.get("sorts") {
-                Some(TardisFuns::json.json_to_obj::<Vec<TableDataSortReq>>(sorts.clone())?)
-            } else {
-                None
-            };
-            let aggs = if let Some(aggs) = msg.params.get("aggs") {
-                Some(TardisFuns::json.json_to_obj::<HashMap<String, TableDataAggregateKind>>(aggs.clone())?)
-            } else {
-                None
-            };
-            let slice = if let Some(slice) = msg.params.get("slice") {
-                Some(TardisFuns::json.json_to_obj::<TableDataSliceReq>(slice.clone())?)
-            } else {
-                None
-            };
-            let resp = tt_data_process::load_data_with_group(table_id, group, filters, sorts, aggs, slice, &funs, &ctx).await?;
-            Ok(TardisFuns::json.obj_to_json(&resp).expect("ignore"))
-        }
-        WsMessageKind::LoadDataWithoutGroup => {
-            let table_id = msg
-                .params
-                .get("table_id")
-                .map(|table_id| table_id.as_str())
-                .flatten()
-                .ok_or_else(|| funs.err().bad_request("ws", "load_data_without_group", "table_id is required", "400-params-error"))?;
             let filters = if let Some(filters) = msg.params.get("filters") {
                 Some(TardisFuns::json.json_to_obj::<Vec<TableDataFilterReq>>(filters.clone())?)
             } else {
@@ -432,8 +402,13 @@ async fn distribute(msg: WsMessage, event: WsMessageKind, mut funs: TardisFunsIn
             } else {
                 None
             };
-            let resp = tt_data_process::load_data_without_group(table_id, filters, sorts, aggs, slice, record_pks, &funs, &ctx).await?;
-            Ok(TardisFuns::json.obj_to_json(&resp).expect("ignore"))
+            if let Some(group) = group {
+                let resp = tt_data_process::load_data_with_group(table_id, group, filters, sorts, aggs, slice, &funs, &ctx).await?;
+                Ok(TardisFuns::json.obj_to_json(&resp).expect("ignore"))
+            } else {
+                let resp = tt_data_process::load_data_without_group(table_id, filters, sorts, aggs, slice, record_pks, &funs, &ctx).await?;
+                Ok(TardisFuns::json.obj_to_json(&resp).expect("ignore"))
+            }
         }
     }
 }
@@ -478,6 +453,5 @@ pub enum WsMessageKind {
     DeleteShare,
     AddOrModifyData,
     DeleteData,
-    LoadDataWithGroup,
-    LoadDataWithoutGroup,
+    LoadData,
 }

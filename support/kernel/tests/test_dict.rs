@@ -105,7 +105,7 @@ pub async fn test() -> TardisResult<()> {
         &ctx,
     )
     .await?;
-    let data = tt_dict_process::find_dicts(dict_code, &funs, &ctx).await?;
+    let data = tt_dict_process::find_all_dicts(dict_code, &funs, &ctx).await?;
     assert_eq!(data.len(), 3);
     assert_eq!(data[0].value, json!("bug"));
     assert_eq!(data[0].color, "red".to_string());

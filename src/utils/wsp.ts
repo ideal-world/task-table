@@ -21,13 +21,13 @@ export class WebsocketP {
     this.onMessageFun = onMessageFun
 
     this.ws.onclose = function () {
-         // eslint-disable-next-line no-console
-      console.log('ws %s closed',wsAddr)
+      // eslint-disable-next-line no-console
+      console.log('ws %s closed', wsAddr)
     }
 
     this.ws.onerror = function (e) {
       // eslint-disable-next-line no-console
-      console.log('ws %s error',wsAddr, e)
+      console.log('ws %s error', wsAddr, e)
     }
 
     this.ws.addEventListener('message', this.onMessage.bind(this))
@@ -49,7 +49,7 @@ export class WebsocketP {
 
     return new Promise<T>((resolve, reject) => {
       const timer = window.setTimeout(() => {
-        reject(new Error('websocket timeout'))
+        reject(new Error(`websocket: ${reqId} timeout`))
       }, timeout)
       this.reqPromises.set(reqId, [resolve, reject, timer])
     })

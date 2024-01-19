@@ -25,6 +25,7 @@ pub struct TableDictModifyReq {
 #[derive(Serialize, Deserialize, Debug, sea_orm::FromQueryResult)]
 #[serde(rename_all = "camelCase")]
 pub struct TableDictInfo {
+    pub dict_code: String,
     pub title: String,
     pub value: Value,
     pub color: String,

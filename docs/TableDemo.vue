@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import type { TableCellDictItem, TableColumnProps, TableDataSliceReq, TableLayoutColumnProps, TableLayoutModifyReq, TableLayoutProps, TableProps, TableStyleProps } from '../src/components/props'
+import type { TableCellDictItem, TableColumnProps, TableDataFilterReq, TableDataGroupReq, TableDataGroupResp, TableDataResp, TableDataSliceReq, TableDataSortReq, TableEventProps, TableLayoutColumnProps, TableLayoutModifyReq, TableLayoutProps, TableProps, TableStyleProps } from '../src/components/props'
 import { AggregateKind, DATA_DICT_POSTFIX, DataKind, LayoutKind } from '../src/components/props'
 import { DefaultWebSocketP, DefaultWsResp } from '../src/utils/wsp'
 
+let ws: DefaultWebSocketP
 // 定义是否已初始化变量
 const isInit = ref<boolean>(false)
 
@@ -19,7 +20,7 @@ onMounted(async () => {
 })
 
 async function init() {
-  const ws = await DefaultWebSocketP.initDefault('wss://127.0.0.1:8089/ws', (_) => {
+  ws = await DefaultWebSocketP.initDefault('wss://127.0.0.1:8089/ws', (_) => {
   })
 
   // Create dict
@@ -116,9 +117,9 @@ async function init() {
       {
         name: 'no',
       },
-      {
-        name: 'pno',
-      },
+      // {
+      //   name: 'pno',
+      // },
       {
         name: 'name',
       },
@@ -132,7 +133,7 @@ async function init() {
         name: 'time',
       },
     ],
-    aggs: { name: AggregateKind.MIN },
+    aggs: { pno: AggregateKind.MIN },
   }, {
     table_id: tableId.value,
   })
@@ -144,51 +145,44 @@ async function init() {
   columns.value = tableProps.columns as TableColumnProps[]
   layouts.value = tableProps.layouts as TableLayoutProps[]
   styles.value = tableProps.styles as TableStyleProps
+
+  // Init Data
+  await ws.reqOk('AddOrModifyData', [
+    {
+      name: 'xy',
+      stats: ['progress', 'risk'],
+      phone: '18600000',
+      addr: '浙江杭州xxx',
+      // time: new Date().toUTCString(),
+    },
+  ], {
+    table_id: tableId.value,
+  })
 }
 
-// columns.value = [
-//   {
-//     dataEditable: false,
-//     dataKind: 'TEXT',
-//     dictEditable: false,
-//     multiValue: false,
-//     name: 'pno',
-//     title: 'pno',
-//     useDict: false,
-//   },
-//   {
-//     dataEditable: false,
-//     dataKind: 'TEXT',
-//     dictEditable: true,
-//     multiValue: false,
-//     name: 'name',
-//     title: 'name',
-//     useDict: true,
-//   }
-// ] as TableColumnProps[]
-// layouts.value = [
-//   {
-//     aggs: {
-//       name: 'MIN',
-//     },
-//     columns: [
-//       {
-//         name: 'no',
-//       },
-//       {
-//         name: 'pno',
-//       },
-//       {
-//         name: 'name',
-//       },
-//     ] as TableLayoutColumnProps[],
-//     id: 'WKoGYuPHO1FJzAcnBWyW9',
-//     layoutKind: 'LIST',
-//     title: 'HI',
-//   },
-// ] as TableLayoutProps[]
+const events: TableEventProps = {
+  loadData: async (filters?: TableDataFilterReq[], sorts?: TableDataSortReq[], group?: TableDataGroupReq, aggs?: { [key: string]: AggregateKind }, slice?: TableDataSliceReq): Promise<TableDataResp | TableDataGroupResp[]> => {
+    const params: { [k: string]: any } = {
+      table_id: tableId.value,
+    }
+    if (filters)
+      params.filters = filters
+    if (sorts)
+      params.sorts = sorts
+    if (group)
+      params.group = group
+    if (aggs)
+      params.aggs = aggs
+    if (slice)
+      params.slice = slice
+    return await ws.reqOk<TableDataResp | TableDataGroupResp[]>('LoadData', {}, params)
+  },
 
-const events = {
+  saveData: async (changedRecords: { [key: string]: any }[]): Promise<{ [key: string]: any }[]> => {
+    return await ws.reqOk<{ [key: string]: any }[]>('AddOrModifyData', changedRecords, {
+      table_id: tableId.value,
+    })
+  },
 
 }
 
@@ -200,14 +194,6 @@ const events = {
 // }
 
 // const events = {
-//   loadData: async () => {
-//     return new Promise((resolve) => {
-//       setTimeout(() => {
-//         // resolve(resp1)
-//         resolve(resp2)
-//       }, 100)
-//     })
-//   },
 //   saveData: async (data: { [key: string]: any }[]) => {
 //     return new Promise((resolve) => {
 //       setTimeout(() => {
@@ -508,7 +494,7 @@ const events = {
 </script>
 
 <template>
-  <div style="height: 600px">
+  <div style="height: 300px">
     <iw-task-table
       v-if="isInit"
       pk-column-name="no" parent-pk-column-name="pno" :columns="columns" :events="events" :layouts="layouts"

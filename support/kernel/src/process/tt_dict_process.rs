@@ -77,7 +77,13 @@ pub async fn delete_dict(dict_code: &str, value: &Value, funs: &TardisFunsInst, 
 pub async fn get_dict(dict_code: &str, value: &Value, funs: &TardisFunsInst, ctx: &TardisContext) -> TardisResult<TableDictInfo> {
     let mut query_statement = Query::select();
     query_statement
-        .columns(vec![tt_dict::Column::Value, tt_dict::Column::Title, tt_dict::Column::Color, tt_dict::Column::Avatar])
+        .columns(vec![
+            tt_dict::Column::DictCode,
+            tt_dict::Column::Value,
+            tt_dict::Column::Title,
+            tt_dict::Column::Color,
+            tt_dict::Column::Avatar,
+        ])
         .from(tt_dict::Entity)
         .and_where(Expr::col(tt_dict::Column::DictCode).eq(dict_code))
         .and_where(Expr::col(tt_dict::Column::Value).eq(value.clone()));
@@ -88,9 +94,33 @@ pub async fn get_dict(dict_code: &str, value: &Value, funs: &TardisFunsInst, ctx
     }
 }
 
-pub async fn find_dicts(dict_code: &str, funs: &TardisFunsInst, _ctx: &TardisContext) -> TardisResult<Vec<TableDictInfo>> {
+pub async fn find_dicts(dict_code: String, values: Vec<Value>, funs: &TardisFunsInst, _ctx: &TardisContext) -> TardisResult<Vec<TableDictInfo>> {
     let mut query_statement = Query::select();
-    query_statement.columns([tt_dict::Column::Value, tt_dict::Column::Title, tt_dict::Column::Color, tt_dict::Column::Avatar]).from(tt_dict::Entity);
+    query_statement
+        .columns(vec![
+            tt_dict::Column::DictCode,
+            tt_dict::Column::Value,
+            tt_dict::Column::Title,
+            tt_dict::Column::Color,
+            tt_dict::Column::Avatar,
+        ])
+        .from(tt_dict::Entity)
+        .and_where(Expr::col(tt_dict::Column::DictCode).eq(dict_code))
+        .and_where(Expr::col(tt_dict::Column::Value).is_in(values));
+    funs.db().find_dtos::<TableDictInfo>(&query_statement).await
+}
+
+pub async fn find_all_dicts(dict_code: &str, funs: &TardisFunsInst, _ctx: &TardisContext) -> TardisResult<Vec<TableDictInfo>> {
+    let mut query_statement = Query::select();
+    query_statement
+        .columns([
+            tt_dict::Column::DictCode,
+            tt_dict::Column::Value,
+            tt_dict::Column::Title,
+            tt_dict::Column::Color,
+            tt_dict::Column::Avatar,
+        ])
+        .from(tt_dict::Entity);
     query_statement.and_where(Expr::col(tt_dict::Column::DictCode).eq(dict_code));
     funs.db().find_dtos::<TableDictInfo>(&query_statement).await
 }

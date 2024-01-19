@@ -114,27 +114,28 @@ export async function addData(newRecords: { [key: string]: any }[], afterPk: any
   if (!events.saveData)
     return false
 
-  if (tableBasicConf.parentPkColumnName) {
-    if (Array.isArray(layout.data)) {
-      for (const groupData of layout.data) {
-        const afterRecord = groupData.records.find(record => record[tableBasicConf.pkColumnName] === afterPk)
-        if (afterRecord) {
-          newRecords.forEach((record) => {
-            record[tableBasicConf.parentPkColumnName!] = afterRecord[tableBasicConf.parentPkColumnName!]
-          })
-          break
-        }
-      }
-    }
-    else if (layout.data && !Array.isArray(layout.data)) {
-      const afterRecord = layout.data.records.find(record => record[tableBasicConf.pkColumnName] === afterPk)
-      if (afterRecord) {
-        newRecords.forEach((record) => {
-          record[tableBasicConf.parentPkColumnName!] = afterRecord[tableBasicConf.parentPkColumnName!]
-        })
-      }
-    }
-  }
+  // TODO 
+  // if (tableBasicConf.parentPkColumnName) {
+  //   if (Array.isArray(layout.data)) {
+  //     for (const groupData of layout.data) {
+  //       const afterRecord = groupData.records.find(record => record[tableBasicConf.pkColumnName] === afterPk)
+  //       if (afterRecord) {
+  //         newRecords.forEach((record) => {
+  //           record[tableBasicConf.parentPkColumnName!] = afterRecord[tableBasicConf.parentPkColumnName!]
+  //         })
+  //         break
+  //       }
+  //     }
+  //   }
+  //   else if (layout.data && !Array.isArray(layout.data)) {
+  //     const afterRecord = layout.data.records.find(record => record[tableBasicConf.pkColumnName] === afterPk)
+  //     if (afterRecord) {
+  //       newRecords.forEach((record) => {
+  //         record[tableBasicConf.parentPkColumnName!] = afterRecord[tableBasicConf.parentPkColumnName!]
+  //       })
+  //     }
+  //   }
+  // }
 
   const savedRecords = await events.saveData(newRecords)
   if (reLoad) {
