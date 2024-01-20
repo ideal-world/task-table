@@ -461,20 +461,24 @@ fn convert_to_db_value(column_name: &str, val: Value, columns: &Vec<TableColumnP
     if !column.multi_value {
         return do_convert_to_db_value(column_name, val, &column.data_kind, funs);
     }
-    if val.as_array().is_none() {
+    let vals = if val.is_null() {
+        None
+    } else if val.as_array().is_none() {
         return Err(funs.err().conflict(
             "data",
             "convert_to_db_value",
             &format!("Column {} value {} data kind is not array", column_name, val),
             "400-column-data-kind-is-illegal",
         ));
-    }
-    let vals = val
-        .as_array()
-        .expect("ignore")
-        .into_iter()
-        .map(|val| do_convert_to_db_value(column_name, val.clone(), &column.data_kind, funs))
-        .collect::<TardisResult<Vec<sea_query::Value>>>()?;
+    } else {
+        let vals = val
+            .as_array()
+            .expect("ignore")
+            .into_iter()
+            .map(|val| do_convert_to_db_value(column_name, val.clone(), &column.data_kind, funs))
+            .collect::<TardisResult<Vec<sea_query::Value>>>()?;
+        Some(Box::new(vals))
+    };
 
     let kind = match column.data_kind {
         TableColumnDataKind::Serial => ArrayType::BigInt,
@@ -486,141 +490,181 @@ fn convert_to_db_value(column_name: &str, val: Value, columns: &Vec<TableColumnP
         TableColumnDataKind::Date => ArrayType::ChronoDate,
         _ => ArrayType::String,
     };
-    Ok(sea_query::Value::Array(kind, Some(Box::new(vals))))
+    Ok(sea_query::Value::Array(kind, vals))
 }
 
 fn do_convert_to_db_value(column_name: &str, val: Value, data_kind: &TableColumnDataKind, funs: &TardisFunsInst) -> TardisResult<sea_query::Value> {
     match data_kind {
-        TableColumnDataKind::Serial => val.as_i64().map(|val| sea_query::Value::from(val)).ok_or_else(|| {
-            funs.err().conflict(
-                "data",
-                "convert_to_db_value",
-                &format!("Column {} value {} data kind is not serial", column_name, val),
-                "400-column-data-kind-is-illegal",
-            )
-        }),
-        TableColumnDataKind::Number => val.as_f64().map(|val| sea_query::Value::from(val)).ok_or_else(|| {
-            funs.err().conflict(
-                "data",
-                "convert_to_db_value",
-                &format!("Column {} value {} data kind is not number", column_name, val),
-                "400-column-data-kind-is-illegal",
-            )
-        }),
+        TableColumnDataKind::Serial => {
+            if val.is_null() {
+                Ok(sea_query::Value::Int(None))
+            } else {
+                val.as_i64().map(|val| sea_query::Value::from(val)).ok_or_else(|| {
+                    funs.err().conflict(
+                        "data",
+                        "convert_to_db_value",
+                        &format!("Column {} value {} data kind is not serial", column_name, val),
+                        "400-column-data-kind-is-illegal",
+                    )
+                })
+            }
+        }
+        TableColumnDataKind::Number => {
+            if val.is_null() {
+                Ok(sea_query::Value::Double(None))
+            } else {
+                val.as_f64().map(|val| sea_query::Value::from(val)).ok_or_else(|| {
+                    funs.err().conflict(
+                        "data",
+                        "convert_to_db_value",
+                        &format!("Column {} value {} data kind is not number", column_name, val),
+                        "400-column-data-kind-is-illegal",
+                    )
+                })
+            }
+        }
         // TODO test
         TableColumnDataKind::Amount => {
-            let val = val
-                .as_str()
-                .map(|val| {
-                    Decimal::from_str(val).map_err(|_| {
+            if val.is_null() {
+                Ok(sea_query::Value::Decimal(None))
+            } else {
+                let val = val
+                    .as_str()
+                    .map(|val| {
+                        Decimal::from_str(val).map_err(|_| {
+                            funs.err().conflict(
+                                "data",
+                                "convert_to_db_value",
+                                &format!("Column {} value {} data kind is not amount", column_name, val),
+                                "400-column-data-kind-is-illegal",
+                            )
+                        })
+                    })
+                    .ok_or_else(|| {
                         funs.err().conflict(
                             "data",
                             "convert_to_db_value",
                             &format!("Column {} value {} data kind is not amount", column_name, val),
                             "400-column-data-kind-is-illegal",
                         )
-                    })
-                })
-                .ok_or_else(|| {
+                    })??;
+                Ok(sea_query::Value::from(val))
+            }
+        }
+        // TODO test
+        TableColumnDataKind::Boolean => {
+            if val.is_null() {
+                Ok(sea_query::Value::Bool(None))
+            } else {
+                val.as_bool().map(|val| sea_query::Value::from(val)).ok_or_else(|| {
                     funs.err().conflict(
                         "data",
                         "convert_to_db_value",
-                        &format!("Column {} value {} data kind is not amount", column_name, val),
+                        &format!("Column {} value {} data kind is not boolean", column_name, val),
                         "400-column-data-kind-is-illegal",
                     )
-                })??;
-            Ok(sea_query::Value::from(val))
+                })
+            }
         }
         // TODO test
-        TableColumnDataKind::Boolean => val.as_bool().map(|val| sea_query::Value::from(val)).ok_or_else(|| {
-            funs.err().conflict(
-                "data",
-                "convert_to_db_value",
-                &format!("Column {} value {} data kind is not boolean", column_name, val),
-                "400-column-data-kind-is-illegal",
-            )
-        }),
-        // TODO test
         TableColumnDataKind::Datetime => {
-            let val = val
-                .as_str()
-                .map(|val| {
-                    DateTime::<Utc>::from_str(val).map_err(|_| {
+            if val.is_null() {
+                Ok(sea_query::Value::ChronoDateTimeUtc(None))
+            } else {
+                let val = val
+                    .as_str()
+                    .map(|val| {
+                        DateTime::<Utc>::from_str(val).map_err(|_| {
+                            funs.err().conflict(
+                                "data",
+                                "convert_to_db_value",
+                                &format!("Column {} value {} data kind is not datetime", column_name, val),
+                                "400-column-data-kind-is-illegal",
+                            )
+                        })
+                    })
+                    .ok_or_else(|| {
                         funs.err().conflict(
                             "data",
                             "convert_to_db_value",
                             &format!("Column {} value {} data kind is not datetime", column_name, val),
                             "400-column-data-kind-is-illegal",
                         )
-                    })
-                })
-                .ok_or_else(|| {
-                    funs.err().conflict(
-                        "data",
-                        "convert_to_db_value",
-                        &format!("Column {} value {} data kind is not datetime", column_name, val),
-                        "400-column-data-kind-is-illegal",
-                    )
-                })??;
-            Ok(sea_query::Value::from(val))
+                    })??;
+                Ok(sea_query::Value::from(val))
+            }
         }
         // TODO test
         TableColumnDataKind::Time => {
-            let val = val
-                .as_str()
-                .map(|val| {
-                    NaiveTime::from_str(val).map_err(|_| {
+            if val.is_null() {
+                Ok(sea_query::Value::ChronoTime(None))
+            } else {
+                let val = val
+                    .as_str()
+                    .map(|val| {
+                        NaiveTime::from_str(val).map_err(|_| {
+                            funs.err().conflict(
+                                "data",
+                                "convert_to_db_value",
+                                &format!("Column {} value {} data kind is not time", column_name, val),
+                                "400-column-data-kind-is-illegal",
+                            )
+                        })
+                    })
+                    .ok_or_else(|| {
                         funs.err().conflict(
                             "data",
                             "convert_to_db_value",
                             &format!("Column {} value {} data kind is not time", column_name, val),
                             "400-column-data-kind-is-illegal",
                         )
-                    })
-                })
-                .ok_or_else(|| {
-                    funs.err().conflict(
-                        "data",
-                        "convert_to_db_value",
-                        &format!("Column {} value {} data kind is not time", column_name, val),
-                        "400-column-data-kind-is-illegal",
-                    )
-                })??;
-            Ok(sea_query::Value::from(val))
+                    })??;
+                Ok(sea_query::Value::from(val))
+            }
         }
         // TODO test
         TableColumnDataKind::Date => {
-            let val = val
-                .as_str()
-                .map(|val| {
-                    NaiveDate::from_str(val).map_err(|_| {
+            if val.is_null() {
+                Ok(sea_query::Value::ChronoDate(None))
+            } else {
+                let val = val
+                    .as_str()
+                    .map(|val| {
+                        NaiveDate::from_str(val).map_err(|_| {
+                            funs.err().conflict(
+                                "data",
+                                "convert_to_db_value",
+                                &format!("Column {} value {} data kind is not date", column_name, val),
+                                "400-column-data-kind-is-illegal",
+                            )
+                        })
+                    })
+                    .ok_or_else(|| {
                         funs.err().conflict(
                             "data",
                             "convert_to_db_value",
                             &format!("Column {} value {} data kind is not date", column_name, val),
                             "400-column-data-kind-is-illegal",
                         )
-                    })
-                })
-                .ok_or_else(|| {
+                    })??;
+                Ok(sea_query::Value::from(val))
+            }
+        }
+        // TODO test
+        _ => {
+            if val.is_null() {
+                Ok(sea_query::Value::String(None))
+            } else {
+                val.as_str().map(|val| sea_query::Value::from(val)).ok_or_else(|| {
                     funs.err().conflict(
                         "data",
                         "convert_to_db_value",
-                        &format!("Column {} value {} data kind is not date", column_name, val),
+                        &format!("Column {} value {} data kind is not string", column_name, val),
                         "400-column-data-kind-is-illegal",
                     )
-                })??;
-            Ok(sea_query::Value::from(val))
+                })
+            }
         }
-        // TODO test
-        _ => val.as_str().map(|val| sea_query::Value::from(val)).ok_or_else(|| {
-            funs.err().conflict(
-                "data",
-                "convert_to_db_value",
-                &format!("Column {} value {} data kind is not string", column_name, val),
-                "400-column-data-kind-is-illegal",
-            )
-        }),
     }
 }
 

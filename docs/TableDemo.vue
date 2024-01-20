@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
-import type { TableCellDictItem, TableColumnProps, TableDataFilterReq, TableDataGroupReq, TableDataGroupResp, TableDataResp, TableDataSliceReq, TableDataSortReq, TableEventProps, TableLayoutColumnProps, TableLayoutModifyReq, TableLayoutProps, TableProps, TableStyleProps } from '../src/components/props'
+import type { TableCellDictItem, TableCellDictItemResp, TableColumnProps, TableDataFilterReq, TableDataGroupReq, TableDataGroupResp, TableDataResp, TableDataSliceReq, TableDataSortReq, TableEventProps, TableLayoutColumnProps, TableLayoutKernelProps, TableLayoutModifyReq, TableLayoutProps, TableProps, TableStyleProps } from '../src/components/props'
 import { AggregateKind, DATA_DICT_POSTFIX, DataKind, LayoutKind } from '../src/components/props'
 import { DefaultWebSocketP, DefaultWsResp } from '../src/utils/wsp'
 
@@ -24,87 +24,89 @@ async function init() {
   })
 
   // Create dict
-  // ws.reqOk('AddDict', {
-  //   title: '星航',
-  //   value: 'xh',
-  //   avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg',
-  // }, {
-  //   dict_code: 'name',
-  // })
-  // ws.reqOk('AddDict', {
-  //   title: '星杨',
-  //   value: 'xy',
-  //   avatar: 'https://pic1.zhimg.com/v2-770e9580d5febfb49cbb23c409cea85d_r.jpg?source=1def8aca',
-  // }, {
-  //   dict_code: 'name',
-  // })
-  // ws.reqOk('AddDict', {
-  //   title: '星辰',
-  //   value: 'xc',
-  // }, {
-  //   dict_code: 'name',
-  // })
-  // ws.reqOk('AddDict', {
-  //   title: '初始化',
-  //   value: 'init',
-  //   color: '#43ad7f7f',
-  // }, {
-  //   dict_code: 'stats',
-  // })
-  // ws.reqOk('AddDict', {
-  //   title: '初进行中始化',
-  //   value: 'progress',
-  // }, {
-  //   dict_code: 'stats',
-  // })
-  // ws.reqOk('AddDict', {
-  //   title: '有风险',
-  //   value: 'risk',
-  //   color: '#be14807f',
-  // }, {
-  //   dict_code: 'stats',
-  // })
-  // ws.reqOk('AddDict', {
-  //   title: '已完成',
-  //   value: 'finish',
-  // }, {
-  //   dict_code: 'stats',
-  // })
-  // ws.reqOk('AddDict', {
-  //   title: '已关闭',
-  //   value: 'close',
-  // }, {
-  //   dict_code: 'stats',
-  // })
+  ws.reqOk('AddDict', {
+    title: '星航',
+    value: 'xh',
+    avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg',
+  }, {
+    dict_code: 'name',
+  })
+  ws.reqOk('AddDict', {
+    title: '星杨',
+    value: 'xy',
+    avatar: 'https://pic1.zhimg.com/v2-770e9580d5febfb49cbb23c409cea85d_r.jpg?source=1def8aca',
+  }, {
+    dict_code: 'name',
+  })
+  ws.reqOk('AddDict', {
+    title: '星辰',
+    value: 'xc',
+  }, {
+    dict_code: 'name',
+  })
+  ws.reqOk('AddDict', {
+    title: '初始化',
+    value: 'init',
+    color: '#43ad7f7f',
+  }, {
+    dict_code: 'stats',
+  })
+  ws.reqOk('AddDict', {
+    title: '初进行中始化',
+    value: 'progress',
+  }, {
+    dict_code: 'stats',
+  })
+  ws.reqOk('AddDict', {
+    title: '有风险',
+    value: 'risk',
+    color: '#be14807f',
+  }, {
+    dict_code: 'stats',
+  })
+  ws.reqOk('AddDict', {
+    title: '已完成',
+    value: 'finish',
+  }, {
+    dict_code: 'stats',
+  })
+  ws.reqOk('AddDict', {
+    title: '已关闭',
+    value: 'close',
+  }, {
+    dict_code: 'stats',
+  })
 
   // Create table
   tableId.value = await ws.reqOk<string>('AddTable', {
     pkColumnName: 'no',
-    parent_pk_column_name: 'pno',
+    parentPkColumnName: 'pno',
     columns: [
-      {
-        name: 'pno',
-      },
       {
         name: 'name',
         useDict: true,
+        dataEditable: true,
         dictEditable: true,
       },
       {
         name: 'phone',
+        dataEditable: true,
       },
       {
         name: 'stats',
         useDict: true,
+        dataEditable: true,
         dictEditable: true,
         multiValue: true,
       },
       {
         name: 'addr',
+        dataEditable: true,
       },
       {
         name: 'time',
-        DataKind: DataKind.DATETIME,
+        dataEditable: true,
+        dataKind: DataKind.DATETIME,
       },
     ] as TableColumnProps[],
   }, {})
@@ -117,9 +119,9 @@ async function init() {
       {
         name: 'no',
       },
-      // {
-      //   name: 'pno',
-      // },
+      {
+        name: 'pno',
+      },
       {
         name: 'name',
       },
@@ -153,7 +155,7 @@ async function init() {
       stats: ['progress', 'risk'],
       phone: '18600000',
       addr: '浙江杭州xxx',
-      // time: new Date().toUTCString(),
+      time: new Date(),
     },
   ], {
     table_id: tableId.value,
@@ -184,6 +186,95 @@ const events: TableEventProps = {
     })
   },
 
+  deleteData: async (deletedPks: any[]): Promise<boolean> => {
+    return await ws.reqOk<boolean>('DeleteData', deletedPks, {
+      table_id: tableId.value,
+    })
+  },
+
+  modifyStyles: async (changedStyleProps: TableStyleProps): Promise<boolean> => {
+    return await ws.reqOk<boolean>('ModifyTable', {
+      styles: changedStyleProps,
+    }, {
+      table_id: tableId.value,
+    })
+  },
+
+  newColumn: async (newColumnProps: TableColumnProps, fromColumnName?: string): Promise<boolean> => {
+    return await ws.reqOk<boolean>('ModifyTable', {
+      newColumn: {
+        ...newColumnProps,
+        fromColumnName,
+      },
+    }, {
+      table_id: tableId.value,
+    })
+  },
+
+  modifyColumn: async (changedColumnProps: TableColumnProps): Promise<boolean> => {
+    return await ws.reqOk<boolean>('ModifyTable', {
+      changedColumn: changedColumnProps,
+    }, {
+      table_id: tableId.value,
+    })
+  },
+
+  deleteColumn: async (deletedColumnName: string): Promise<boolean> => {
+    return await ws.reqOk<boolean>('ModifyTable', {
+      deletedColumnName,
+    }, {
+      table_id: tableId.value,
+    })
+  },
+
+  newLayout: async (newLayoutProps: TableLayoutKernelProps): Promise<string> => {
+    return await ws.reqOk<string>('AddLayout', newLayoutProps, {
+      table_id: tableId.value,
+    })
+  },
+
+  modifyLayout: async (changedLayoutId: string, changedLayoutProps: TableLayoutModifyReq): Promise<boolean> => {
+    return await ws.reqOk<boolean>('ModifyLayout', changedLayoutProps, {
+      table_id: tableId.value,
+      layout_id: changedLayoutId,
+    })
+  },
+  deleteLayout: async (deletedLayoutId: string): Promise<boolean> => {
+    return await ws.reqOk<boolean>('DeleteLayout', {
+    }, {
+      table_id: tableId.value,
+      layout_id: deletedLayoutId,
+    })
+  },
+
+  loadCellDictItems: async (columnName: string, filterValue?: any, slice?: TableDataSliceReq): Promise<TableCellDictItemResp> => {
+    const params: { [k: string]: any } = {
+      dict_code: columnName,
+    }
+    if (filterValue)
+      params.value = filterValue
+    if (slice) {
+      params.page_size = slice.fetchNumber
+      params.page_number = slice.offsetNumber / slice.fetchNumber + 1
+    }
+
+    return await ws.reqOk<(TableCellDictItemResp)>('PaginateDicts', {
+    }, params)
+  },
+
+  saveCellDictItem: async (columnName: string, changedItem: TableCellDictItem): Promise<boolean> => {
+    return await ws.reqOk<boolean>('AddDict', changedItem, {
+      dict_code: columnName,
+    })
+  },
+  deleteCellDictItem: async (columnName: string, value: any): Promise<boolean> => {
+    return await ws.reqOk<boolean>('DeleteDict', {
+    }, {
+      dict_code: columnName,
+      value,
+    })
+  },
+
 }
 
 // const group = {
@@ -194,147 +285,7 @@ const events: TableEventProps = {
 // }
 
 // const events = {
-//   saveData: async (data: { [key: string]: any }[]) => {
-//     return new Promise((resolve) => {
-//       setTimeout(() => {
-//         if (data.length === 1 && data[0].no === undefined) {
-//           // New
-//           resolve(attachDict(data.map((d) => {
-//             d.no = getRandomInt(1000, 2000)
-//             d.name = 'xy'
-//             d.stats = []
-//             d.phone = ''
-//             d.addr = ''
-//             d.time = ''
-//             d.pno = data[0].pno
-//             return d
-//           })))
-//         }
-//         else if (Object.keys(data[0]).length === 2 && Object.keys(data[0]).includes('pno')) {
-//           // Copy
-//           resp2.forEach((resp) => {
-//             const storageRecords = resp.records.filter(record => data.find(d => d.no === record.no))
-//             if (storageRecords.length > 0) {
-//               let newRecords = JSON.parse(JSON.stringify(storageRecords))
-//               newRecords = newRecords
-//                 .map((record) => {
-//                   record.no = getRandomInt(1000, 2000)
-//                   return record
-//                 })
-//               resolve(attachDict(newRecords))
-//             }
-//           })
-//         }
-//         else {
-//           // Update
-//           resp2.forEach((resp) => {
-//             const newRecords = data.map(d => [d, resp.records.find(record => record.no === d.no)])
-//               .filter(d => d[1] !== undefined)
-//               .map((d) => {
-//                 return {
-//                   ...JSON.parse(JSON.stringify(d[1])),
-//                   ...d[0],
-//                 }
-//               })
-//             if (newRecords)
-//               resolve(attachDict(newRecords))
-//           })
-//         }
-//       }, 100)
-//     })
-//   },
-//   deleteData: async (deletedPks: string[]) => {
-//     return new Promise((resolve) => {
-//       setTimeout(() => {
-//         resolve(true)
-//       }, 100)
-//     })
-//   },
-//   loadCellDictItems: async (columnName: string, filterValue?: any, slice?: TableDataSliceReq) => {
-//     return new Promise((resolve) => {
-//       setTimeout(() => {
-//         if (columnName === 'name') {
-//           resolve({
-//             records: nameDict,
-//             totalNumber: 3,
-//           })
-//         }
-//         else if (columnName === 'stats') {
-//           resolve({
-//             records: statsDict,
-//             totalNumber: 3,
-//           })
-//         }
-//         else {
-//           resolve({})
-//         }
-//       }, 100)
-//     })
-//   },
-//   saveCellDictItem: async (columnName: string, changedItem: TableCellDictItem) => {
-//     return new Promise((resolve) => {
-//       setTimeout(() => {
-//         resolve(true)
-//       }, 100)
-//     })
-//   },
-//   deleteCellDictItem: async (columnName: string, value: any) => {
-//     return new Promise((resolve) => {
-//       setTimeout(() => {
-//         resolve(true)
-//       }, 100)
-//     })
-//   },
 //   sortCellDictItem: async (columnName: string, leftItemValue: any, rightItemValue: any) => {
-//     return new Promise((resolve) => {
-//       setTimeout(() => {
-//         resolve(true)
-//       }, 100)
-//     })
-//   },
-//   modifyStyles: async (changedStyleProps: TableStyleProps) => {
-//     return new Promise((resolve) => {
-//       setTimeout(() => {
-//         resolve(true)
-//       }, 100)
-//     })
-//   },
-//   newColumn: async (newColumnProps: TableColumnProps, fromColumnName?: string) => {
-//     return new Promise((resolve) => {
-//       setTimeout(() => {
-//         resolve(true)
-//       }, 100)
-//     })
-//   },
-//   modifyColumn: async (changedColumnProps: TableColumnProps) => {
-//     return new Promise((resolve) => {
-//       setTimeout(() => {
-//         resolve(true)
-//       }, 100)
-//     })
-//   },
-//   deleteColumn: async (deletedColumnName: string) => {
-//     return new Promise((resolve) => {
-//       setTimeout(() => {
-//         resolve(true)
-//       }, 100)
-//     })
-//   },
-//   newLayout: async (newLayoutProps: TableLayoutProps, fromLayoutId?: string) => {
-//     return new Promise((resolve) => {
-//       setTimeout(() => {
-//         resolve(true)
-//       }, 100)
-//     })
-//   },
-//   modifyLayout: async (changedLayoutProps: TableLayoutModifyReq) => {
-//     return new Promise((resolve) => {
-//       setTimeout(() => {
-//         resolve(true)
-//       }, 100)
-//     })
-//   },
-//   deleteLayout: async (deletedLayoutId: string) => {
 //     return new Promise((resolve) => {
 //       setTimeout(() => {
 //         resolve(true)
@@ -348,14 +299,6 @@ const events: TableEventProps = {
 //       }, 100)
 //     })
 //   },
-// }
-
-// function attachDict(data: { [key: string]: any }[]) {
-//   return data.map((d) => {
-//     d[`name${DATA_DICT_POSTFIX}`] = [nameDict.find(dict => dict.value === d.name)!]
-//     d[`stats${DATA_DICT_POSTFIX}`] = d.stats.map((s) => { return statsDict.find(dict => dict.value === s)! })
-//     return d
-//   })
 // }
 
 // const data1 = [

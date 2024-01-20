@@ -8,7 +8,7 @@ use tardis::{
 };
 
 use crate::domain::tt_dict;
-use crate::dto::tt_dict_dtos::{TableDictAddReq, TableDictInfo, TableDictModifyReq};
+use crate::dto::tt_dict_dtos::{TableDictAddReq, TableDictInfo, TableDictItemResp, TableDictModifyReq};
 
 pub async fn add_dict(dict_code: &str, add_req: TableDictAddReq, funs: &TardisFunsInst, ctx: &TardisContext) -> TardisResult<()> {
     if funs
@@ -126,20 +126,48 @@ pub async fn find_all_dicts(dict_code: &str, funs: &TardisFunsInst, _ctx: &Tardi
 }
 
 pub async fn paginate_dicts(
-    page_number: u32,
-    page_size: u32,
+    dict_code: Option<&str>,
+    value: Option<&Value>,
+    page_number: Option<u64>,
+    page_size: Option<u64>,
     desc_sort_by_create: Option<bool>,
     desc_sort_by_update: Option<bool>,
     funs: &TardisFunsInst,
     _ctx: &TardisContext,
-) -> TardisResult<(Vec<TableDictInfo>, u64)> {
+) -> TardisResult<TableDictItemResp> {
     let mut query_statement: sea_query::SelectStatement = Query::select();
-    query_statement.columns([tt_dict::Column::Value, tt_dict::Column::Title, tt_dict::Column::Color, tt_dict::Column::Avatar]).from(tt_dict::Entity);
+    query_statement
+        .columns([
+            tt_dict::Column::DictCode,
+            tt_dict::Column::Value,
+            tt_dict::Column::Title,
+            tt_dict::Column::Color,
+            tt_dict::Column::Avatar,
+        ])
+        .from(tt_dict::Entity);
+    if let Some(dict_code) = dict_code {
+        query_statement.and_where(Expr::col(tt_dict::Column::DictCode).eq(dict_code));
+    }
+    if let Some(value) = value {
+        query_statement.and_where(Expr::col(tt_dict::Column::Value).like(format!("%{}%", value)));
+    }
     if let Some(sort) = desc_sort_by_create {
         query_statement.order_by(tt_dict::Column::CreateTime, if sort { Order::Desc } else { Order::Asc });
     }
     if let Some(sort) = desc_sort_by_update {
         query_statement.order_by(tt_dict::Column::UpdateTime, if sort { Order::Desc } else { Order::Asc });
     }
-    funs.db().paginate_dtos(&query_statement, page_number as u64, page_size as u64).await
+    if page_number.is_some() && page_size.is_some() {
+        let resp = funs.db().paginate_dtos(&query_statement, page_number.expect("ignore"), page_size.expect("ignore")).await?;
+        Ok(TableDictItemResp {
+            total_number: resp.1 as i32,
+            records: resp.0,
+        })
+    } else {
+        let resp = funs.db().find_dtos(&query_statement).await?;
+        Ok(TableDictItemResp {
+            total_number: resp.len() as i32,
+            records: resp,
+        })
+    }
 }

@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use strum::EnumString;
 use tardis::basic::dto::TardisContext;
 use tardis::basic::result::TardisResult;
+use tardis::log::trace;
 use tardis::serde_json::{json, Value};
 use tardis::tokio::sync::broadcast::Sender;
 use tardis::web::poem::web::websocket::BoxWebSocketUpgraded;
@@ -31,11 +32,13 @@ impl WsProcessor {
         ws_broadcast(
             vec!["default".to_string()],
             false,
-            true,
+            false,
             [].into(),
             websocket,
             sender.clone(),
             |req_msg, _ext| async move {
+                trace!("[tt.ws] ----------- request ----------- : \r\n{:#?}", req_msg);
+
                 let funs = TardisFuns::inst_with_db_conn("", None);
 
                 if req_msg.event.is_none() {
@@ -74,18 +77,20 @@ impl WsProcessor {
                     groups: vec![],
                     ..Default::default()
                 };
-                match distribute(msg, event, funs, &ctx).await {
-                    Ok(resp) => Some(TardisWebsocketResp {
+                let resp = match distribute(msg, event, funs, &ctx).await {
+                    Ok(resp) => TardisWebsocketResp {
                         msg: TardisFuns::json.obj_to_json(&TardisResp::ok(resp)).expect("ignore"),
                         to_avatars: req_msg.to_avatars.unwrap_or(vec![]),
                         ignore_avatars: vec![],
-                    }),
-                    Err(err) => Some(TardisWebsocketResp {
+                    },
+                    Err(err) => TardisWebsocketResp {
                         msg: TardisFuns::json.obj_to_json(&err).expect("ignore"),
                         to_avatars: req_msg.to_avatars.unwrap_or(vec![]),
                         ignore_avatars: vec![],
-                    }),
-                }
+                    },
+                };
+                trace!("[tt.ws] ----------- response ----------- \r\n{:#?}", resp);
+                Some(resp)
             },
             |_, _| async move {},
         )
@@ -113,7 +118,7 @@ async fn distribute(msg: WsMessage, event: WsMessageKind, mut funs: TardisFunsIn
             funs.begin().await?;
             tt_table_process::modify_table(table_id, body, &funs, &ctx).await?;
             funs.commit().await?;
-            Ok(json!({}))
+            Ok(json!(true))
         }
         WsMessageKind::DeleteTable => {
             let table_id = msg
@@ -125,7 +130,7 @@ async fn distribute(msg: WsMessage, event: WsMessageKind, mut funs: TardisFunsIn
             funs.begin().await?;
             tt_table_process::delete_table(table_id, &funs, &ctx).await?;
             funs.commit().await?;
-            Ok(json!({}))
+            Ok(json!(true))
         }
         WsMessageKind::GetTable => {
             let table_id = msg
@@ -200,7 +205,7 @@ async fn distribute(msg: WsMessage, event: WsMessageKind, mut funs: TardisFunsIn
             funs.begin().await?;
             tt_layout_process::modify_layout(table_id, layout_id, body, &funs, &ctx).await?;
             funs.commit().await?;
-            Ok(json!({}))
+            Ok(json!(true))
         }
         WsMessageKind::DeleteLayout => {
             let table_id = msg
@@ -218,7 +223,7 @@ async fn distribute(msg: WsMessage, event: WsMessageKind, mut funs: TardisFunsIn
             funs.begin().await?;
             tt_layout_process::delete_layout(table_id, layout_id, &funs, &ctx).await?;
             funs.commit().await?;
-            Ok(json!({}))
+            Ok(json!(true))
         }
         WsMessageKind::GetLayout => {
             let table_id = msg
@@ -271,7 +276,7 @@ async fn distribute(msg: WsMessage, event: WsMessageKind, mut funs: TardisFunsIn
             funs.begin().await?;
             tt_dict_process::modify_dict(dict_code, value.clone(), body, &funs, &ctx).await?;
             funs.commit().await?;
-            Ok(json!({}))
+            Ok(json!(true))
         }
         WsMessageKind::DeleteDict => {
             let dict_code = msg
@@ -284,7 +289,7 @@ async fn distribute(msg: WsMessage, event: WsMessageKind, mut funs: TardisFunsIn
             funs.begin().await?;
             tt_dict_process::delete_dict(dict_code, value, &funs, &ctx).await?;
             funs.commit().await?;
-            Ok(json!({}))
+            Ok(json!(true))
         }
         WsMessageKind::GetDict => {
             let dict_code = msg
@@ -297,32 +302,14 @@ async fn distribute(msg: WsMessage, event: WsMessageKind, mut funs: TardisFunsIn
             let resp = tt_dict_process::get_dict(dict_code, value, &funs, &ctx).await?;
             Ok(TardisFuns::json.obj_to_json(&resp).expect("ignore"))
         }
-        WsMessageKind::FindDicts => {
-            let dict_code = msg
-                .params
-                .get("dict_code")
-                .map(|dict_code| dict_code.as_str())
-                .flatten()
-                .ok_or_else(|| funs.err().bad_request("ws", "find_dicts", "dict_code is required", "400-params-error"))?;
-            let resp = tt_dict_process::find_all_dicts(dict_code, &funs, &ctx).await?;
-            Ok(TardisFuns::json.obj_to_json(&resp).expect("ignore"))
-        }
         WsMessageKind::PaginateDicts => {
-            let page_number = msg
-                .params
-                .get("page_number")
-                .map(|page_number| page_number.as_u64())
-                .flatten()
-                .ok_or_else(|| funs.err().bad_request("ws", "paginate_dicts", "page_number is required", "400-params-error"))?;
-            let page_size = msg
-                .params
-                .get("page_size")
-                .map(|page_size| page_size.as_u64())
-                .flatten()
-                .ok_or_else(|| funs.err().bad_request("ws", "paginate_dicts", "page_size is required", "400-params-error"))?;
+            let dict_code = msg.params.get("dict_code").map(|dict_code| dict_code.as_str()).flatten();
+            let value = msg.params.get("value");
+            let page_number = msg.params.get("page_number").map(|page_number| page_number.as_u64()).flatten();
+            let page_size = msg.params.get("page_size").map(|page_size| page_size.as_u64()).flatten();
             let desc_sort_by_create = msg.params.get("desc_sort_by_create").map(|desc_sort_by_create| desc_sort_by_create.as_bool()).flatten();
             let desc_sort_by_update = msg.params.get("desc_sort_by_update").map(|desc_sort_by_update| desc_sort_by_update.as_bool()).flatten();
-            let resp = tt_dict_process::paginate_dicts(page_number as u32, page_size as u32, desc_sort_by_create, desc_sort_by_update, &funs, &ctx).await?;
+            let resp = tt_dict_process::paginate_dicts(dict_code, value, page_number, page_size, desc_sort_by_create, desc_sort_by_update, &funs, &ctx).await?;
             Ok(TardisFuns::json.obj_to_json(&resp).expect("ignore"))
         }
         WsMessageKind::AddShare => {
@@ -330,14 +317,14 @@ async fn distribute(msg: WsMessage, event: WsMessageKind, mut funs: TardisFunsIn
             funs.begin().await?;
             tt_share_process::add_share(body, &funs, &ctx).await?;
             funs.commit().await?;
-            Ok(json!({}))
+            Ok(json!(true))
         }
         WsMessageKind::DeleteShare => {
             let body = TardisFuns::json.json_to_obj::<ShareDeleteReq>(msg.body)?;
             funs.begin().await?;
             tt_share_process::delete_share(body, &funs, &ctx).await?;
             funs.commit().await?;
-            Ok(json!({}))
+            Ok(json!(true))
         }
         WsMessageKind::AddOrModifyData => {
             let table_id = msg
@@ -363,7 +350,7 @@ async fn distribute(msg: WsMessage, event: WsMessageKind, mut funs: TardisFunsIn
             funs.begin().await?;
             tt_data_process::delete_data(table_id, body, &funs, &ctx).await?;
             funs.commit().await?;
-            Ok(json!({}))
+            Ok(json!(true))
         }
         WsMessageKind::LoadData => {
             let table_id = msg
@@ -447,7 +434,6 @@ pub enum WsMessageKind {
     ModifyDict,
     DeleteDict,
     GetDict,
-    FindDicts,
     PaginateDicts,
     AddShare,
     DeleteShare,

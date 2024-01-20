@@ -87,7 +87,7 @@ const events = {
       }, 1000)
     })
   },
-  newLayout: async (newLayoutProps: TableLayoutProps, fromLayoutId?: string) => {
+  newLayout: async (newLayoutProps: TableLayoutProps) => {
     return new Promise((resolve) => {
       setTimeout(() => {
         resolve(true)

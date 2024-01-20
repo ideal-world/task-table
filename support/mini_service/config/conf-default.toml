@@ -95,7 +95,9 @@ kBAtL3ogKBt46B88cy8+bfBkZkMcURvotE+rOw4/eZQX07SbQQHksK3tlCyeHrQ=
 """
 
 [fw.db]
-url = "postgres://postgres:123456@localhost:54321/test"
+url = "postgres://postgres:123456@127.0.0.1:54321/test"
 
 [fw.log]
-level = "trace"
+level = "info"
+directives = ["task_table_service=trace","task_table_kernel=trace","tardis=trace","sqlx=off"]
+# tracing_appender = { rotation = "minutely", dir = "./log", filename = "app.log" }

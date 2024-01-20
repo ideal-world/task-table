@@ -44,6 +44,7 @@ pub async fn add_table(mut add_req: TableAddReq, funs: &TardisFunsInst, ctx: &Ta
             dict_editable: Some(false),
             multi_value: Some(false),
             kind_date_time_format: None,
+            from_column_name: None,
         });
     }
     if add_req.parent_pk_column_name.is_some()
@@ -60,6 +61,7 @@ pub async fn add_table(mut add_req: TableAddReq, funs: &TardisFunsInst, ctx: &Ta
             dict_editable: Some(false),
             multi_value: Some(false),
             kind_date_time_format: None,
+            from_column_name: None,
         });
     }
 
@@ -95,7 +97,7 @@ pub async fn add_table(mut add_req: TableAddReq, funs: &TardisFunsInst, ctx: &Ta
     // create instance table
     let columns = columns
         .iter()
-        .map(|column| format!("{} {}", column.name, covert_column_data_kind_to_postgre_type(&column.data_kind, column.multi_value)))
+        .map(|column| format!("{} {}", column.name, covert_column_data_kind_to_postgres_type(&column.data_kind, column.multi_value)))
         .collect::<Vec<String>>()
         .join(",\r\n");
     funs.db()
@@ -146,12 +148,12 @@ pub async fn modify_table(table_id: &str, modify_req: TableModifyReq, funs: &Tar
             let new_db_column = format!(
                 "{} {}",
                 new_column.name,
-                covert_column_data_kind_to_postgre_type(new_column.data_kind.as_ref().unwrap_or(&TableColumnDataKind::Text), new_column.multi_value.unwrap_or(false))
+                covert_column_data_kind_to_postgres_type(new_column.data_kind.as_ref().unwrap_or(&TableColumnDataKind::Text), new_column.multi_value.unwrap_or(false))
             );
             storage_columns.push(TableColumnProps {
                 name: new_column.name.clone(),
                 icon: new_column.icon,
-                title: new_column.title.unwrap_or(new_column.name),
+                title: new_column.title.unwrap_or(new_column.name.clone()),
                 data_kind: new_column.data_kind.unwrap_or(TableColumnDataKind::Text),
                 data_editable: new_column.data_editable.unwrap_or(false),
                 use_dict: new_column.use_dict.unwrap_or(false),
@@ -161,6 +163,9 @@ pub async fn modify_table(table_id: &str, modify_req: TableModifyReq, funs: &Tar
             });
             // add instance column
             funs.db().execute_one(&format!(r#"ALTER TABLE {INST_PREFIX}_{table_id} ADD COLUMN {new_db_column}"#), vec![]).await?;
+            if let Some(from_column_name) = new_column.from_column_name {
+                funs.db().execute_one(&format!(r#"UPDATE {INST_PREFIX}_{table_id} SET {} = {}"#, new_column.name, from_column_name), vec![]).await?;
+            }
         }
         if let Some(deleted_column_name) = modify_req.deleted_column_name {
             if storage_table_detail.pk_column_name == deleted_column_name
@@ -273,7 +278,7 @@ pub async fn get_table_columns(table_id: &str, funs: &TardisFunsInst, ctx: &Tard
     let mut query_statement = Query::select();
     query_statement
         .columns(vec![(tt_table::Entity, tt_table::Column::PkColumnName)])
-                .columns(vec![(tt_table::Entity, tt_table::Column::Columns)])
+        .columns(vec![(tt_table::Entity, tt_table::Column::Columns)])
         .from(tt_table::Entity)
         .and_where(Expr::col((tt_table::Entity, ID_FIELD.clone())).eq(table_id));
 
@@ -293,7 +298,7 @@ pub fn get_table_name() -> String {
     tt_table::Entity.table_name().to_string()
 }
 
-fn covert_column_data_kind_to_postgre_type(column_data_kind: &TableColumnDataKind, multi_value: bool) -> String {
+fn covert_column_data_kind_to_postgres_type(column_data_kind: &TableColumnDataKind, multi_value: bool) -> String {
     let tp = match column_data_kind {
         TableColumnDataKind::Serial => "serial primary key",
         TableColumnDataKind::Number => "double precision",

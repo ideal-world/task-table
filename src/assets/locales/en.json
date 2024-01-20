@@ -11,6 +11,7 @@
       "stddev": "STDDEV VALUE"
     },
     "datakind": {
+      "serial": "Serial",
       "text": "Text",
       "textarea": "Multi-line text",
       "number": "Number",

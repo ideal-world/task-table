@@ -12,6 +12,7 @@ import type { CellSelectedInfo } from './CellSelect.vue'
 const props = defineProps<{
   columnsConf: CachedColumnConf[]
   data: TableDataResp | TableDataGroupResp[]
+  pkKindIsNumber: boolean
   pkColumnName: string
   selectedCellInfo: CellSelectedInfo | undefined
 }>()
@@ -84,11 +85,10 @@ onMounted(() => {
     if (parentListEle == null)
       return
 
-    const pkKindIsNumber = props.columnsConf.find(col => col.name === props.pkColumnName)?.dataKind === DataKind.NUMBER
     const selectedPks: any[] = []
     if (startRowIdx < movedRowIdx) {
       for (let i = startRowIdx; i <= movedRowIdx; i++) {
-        if (pkKindIsNumber)
+        if (props.pkKindIsNumber)
           selectedPks.push(Number.parseInt((parentListEle.children[i] as HTMLElement).dataset.pk ?? ''))
         else
           selectedPks.push((parentListEle.children[i] as HTMLElement).dataset.pk ?? '')
@@ -96,7 +96,7 @@ onMounted(() => {
     }
     else {
       for (let i = startRowIdx; i >= movedRowIdx; i--) {
-        if (pkKindIsNumber)
+        if (props.pkKindIsNumber)
           selectedPks.push(Number.parseInt((parentListEle.children[i] as HTMLElement).dataset.pk ?? ''))
         else
           selectedPks.push((parentListEle.children[i] as HTMLElement).dataset.pk ?? '')

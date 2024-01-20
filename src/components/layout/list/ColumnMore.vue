@@ -53,7 +53,7 @@ function setNewColumnIcon(icon: string) {
 
 async function submitNewColumn() {
   if (newColumnInfo.value.title && newColumnInfo.value.dataKind) {
-    const name = getRandomString(10)
+    const name = getRandomString(10, 'abcdefghijklmnopqrstuvwxyz')
     await newColumnFun({
       name,
       title: newColumnInfo.value.title,

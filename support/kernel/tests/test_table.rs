@@ -65,6 +65,7 @@ pub async fn test() -> TardisResult<String> {
                 dict_editable: None,
                 multi_value: None,
                 kind_date_time_format: None,
+                from_column_name: None,
             }),
             changed_column: None,
             deleted_column_name: None,
@@ -103,6 +104,7 @@ pub async fn test() -> TardisResult<String> {
                 dict_editable: None,
                 multi_value: None,
                 kind_date_time_format: None,
+                from_column_name: None,
             }),
             styles: Some(TableStyleProps {
                 size: Some("mini".to_string()),
@@ -133,6 +135,7 @@ pub async fn test() -> TardisResult<String> {
                 dict_editable: None,
                 multi_value: None,
                 kind_date_time_format: None,
+                from_column_name: None,
             }),
             changed_column: None,
             deleted_column_name: None,
@@ -230,6 +233,7 @@ pub async fn test() -> TardisResult<String> {
                     dict_editable: None,
                     multi_value: None,
                     kind_date_time_format: None,
+                    from_column_name: None,
                 },
                 TableColumnAddReq {
                     name: "cate".to_string(),
@@ -241,6 +245,7 @@ pub async fn test() -> TardisResult<String> {
                     data_kind: None,
                     data_editable: None,
                     kind_date_time_format: None,
+                    from_column_name: None,
                 },
                 TableColumnAddReq {
                     name: "age".to_string(),
@@ -252,6 +257,7 @@ pub async fn test() -> TardisResult<String> {
                     dict_editable: None,
                     multi_value: None,
                     kind_date_time_format: None,
+                    from_column_name: None,
                 },
                 TableColumnAddReq {
                     name: "ts".to_string(),
@@ -263,6 +269,7 @@ pub async fn test() -> TardisResult<String> {
                     dict_editable: None,
                     multi_value: None,
                     kind_date_time_format: None,
+                    from_column_name: None,
                 },
             ],
             styles: Some(TableStyleProps {

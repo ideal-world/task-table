@@ -7,12 +7,11 @@ import { DataKind } from '../../props'
 const props = defineProps<{
   columnsConf: CachedColumnConf[]
   pkColumnName: string
+  pkKindIsNumber: boolean
   wrap: {
     cellSelectedInfo: CellSelectedInfo | undefined
   }
 }>()
-
-const pkKindIsNumber = props.columnsConf.find(col => col.name === props.pkColumnName)?.dataKind === DataKind.NUMBER
 
 onMounted(() => {
   document.querySelectorAll('.iw-list').forEach((listEle) => {
@@ -77,7 +76,7 @@ function setSelected(targetEle: HTMLElement) {
 
   const selectRowEle = getParentWithClass(cellEle, 'iw-list-data-row')
   const rowPkStr = selectRowEle!.dataset.pk!
-  const rowPk = pkKindIsNumber ? Number.parseInt(rowPkStr) : rowPkStr
+  const rowPk = props.pkKindIsNumber ? Number.parseInt(rowPkStr) : rowPkStr
   props.wrap.cellSelectedInfo = {
     ele: cellEle,
     columnName,

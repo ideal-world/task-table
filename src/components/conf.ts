@@ -25,8 +25,7 @@ export interface TableColumnConf {
   kindDateTimeFormat?: string
 }
 
-export interface TableLayoutConf {
-  id: string
+export interface TableLayoutKernelConf {
   title: string
   layoutKind: LayoutKind
   icon: string
@@ -38,6 +37,10 @@ export interface TableLayoutConf {
   expandDataPks: any[]
   fetchDataNumber: number
   data?: TableDataResp | TableDataGroupResp[]
+}
+
+export interface TableLayoutConf extends TableLayoutKernelConf {
+  id: string
 }
 
 export interface TableLayoutColumnConf {
@@ -68,6 +71,7 @@ export function getDefaultValueByDataKind(dataKind: DataKind): any {
   switch (dataKind) {
     case DataKind.NUMBER:
     case DataKind.AMOUNT:
+    case DataKind.SERIAL:
       return 0
     case DataKind.BOOLEAN:
       return false
@@ -90,6 +94,7 @@ export function getDefaultIconByDataKind(dataKind: DataKind): string {
     case DataKind.TEXTAREA:
       return iconSvg.TEXTAREA
     case DataKind.NUMBER:
+    case DataKind.SERIAL:
       return iconSvg.NUMBER
     case DataKind.BOOLEAN:
       return iconSvg.BOOLEAN
@@ -143,6 +148,7 @@ export function getOperatorKindsByDataKind(dataKind?: DataKind): OperatorKind[] 
   switch (dataKind) {
     case undefined:
       return []
+    case DataKind.SERIAL:
     case DataKind.NUMBER:
     case DataKind.AMOUNT:
       return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.LT, OperatorKind.LE, OperatorKind.GT, OperatorKind.GE, OperatorKind.IN, OperatorKind.NOT_IN, OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]
@@ -177,6 +183,7 @@ export function dictEnableByDataKind(dataKind: DataKind): boolean {
 
 export function getInputTypeByDataKind(dataKind?: DataKind): string {
   switch (dataKind) {
+    case DataKind.SERIAL:
     case DataKind.NUMBER:
     case DataKind.AMOUNT:
       return 'number'

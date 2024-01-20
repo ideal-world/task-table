@@ -11,6 +11,7 @@ export function showGroupAggMappingByDataKind(dataKind: DataKind): GroupAggItem[
     { kind: AggregateKind.DISTINCT, title: translateGroupAgg(AggregateKind.DISTINCT) },
   ]
   switch (dataKind) {
+    case DataKind.SERIAL:
     case DataKind.NUMBER:
     case DataKind.AMOUNT:
       items.push(...[

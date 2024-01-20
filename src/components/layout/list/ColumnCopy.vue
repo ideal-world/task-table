@@ -14,7 +14,7 @@ const newColumnFun = inject(FUN_NEW_COLUMN_TYPE)!
 const closeContextMenuFun = inject(FUN_CLOSE_CONTEXT_MENU_TYPE)!
 
 async function copyColumn() {
-  const newColumnName: string = `${props.curColumnConf.name}_${getRandomString(5)}`
+  const newColumnName: string = `${props.curColumnConf.name}_${getRandomString(5, 'abcdefghijklmnopqrstuvwxyz0123456789')}`
   const newColumnConf: TableColumnConf = {
     name: newColumnName,
     title: `${props.curColumnConf.title}_copy`,

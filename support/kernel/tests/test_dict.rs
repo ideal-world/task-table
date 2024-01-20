@@ -114,12 +114,12 @@ pub async fn test() -> TardisResult<()> {
     // ----------------------------------
     // ----- test paginate dicts
     // ----------------------------------
-    let data = tt_dict_process::paginate_dicts(1, 2, None, None, &funs, &ctx).await?;
-    assert_eq!(data.0.len(), 2);
-    assert_eq!(data.1, 3);
-    assert_eq!(data.0[0].value, json!("bug"));
-    assert_eq!(data.0[0].color, "red".to_string());
-    assert_eq!(data.0[0].avatar, "".to_string());
+    let data = tt_dict_process::paginate_dicts(None, None, Some(1), Some(2), None, None, &funs, &ctx).await?;
+    assert_eq!(data.records.len(), 2);
+    assert_eq!(data.total_number, 3);
+    assert_eq!(data.records[0].value, json!("bug"));
+    assert_eq!(data.records[0].color, "red".to_string());
+    assert_eq!(data.records[0].avatar, "".to_string());
 
     funs.commit().await?;
     Ok(())

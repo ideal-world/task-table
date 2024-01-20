@@ -34,7 +34,7 @@ const selectedCellWrap = ref<{
 }>({
   cellSelectedInfo: undefined,
 })
-const pkKindIsNumber = listConf.basic.columns.find(col => col.name === listConf.basic.pkColumnName)?.dataKind === DataKind.NUMBER
+const pkKindIsNumber = listConf.basic.columns.some(col => col.name === listConf.basic.pkColumnName && [DataKind.NUMBER, DataKind.SERIAL].includes(col.dataKind))
 
 const columnsConf = computed<CachedColumnConf[]>(() => {
   return listConf.layout.columns.filter(column => !column.hide).map((column) => {
@@ -123,10 +123,12 @@ onMounted(() => {
     <CellSelectComp
       :wrap="selectedCellWrap" :columns-conf="columnsConf"
       :pk-column-name="listConf.basic.pkColumnName"
+      :pk-kind-is-number="pkKindIsNumber"
     />
     <CellFillComp
       :columns-conf="columnsConf" :data="listConf.layout.data!"
       :pk-column-name="listConf.basic.pkColumnName"
+      :pk-kind-is-number="pkKindIsNumber"
       :selected-cell-info="selectedCellWrap.cellSelectedInfo"
     />
     <CellEditComp

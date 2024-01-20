@@ -106,6 +106,7 @@ pub struct TableColumnAddReq {
     pub dict_editable: Option<bool>,
     pub multi_value: Option<bool>,
     pub kind_date_time_format: Option<String>,
+    pub from_column_name: Option<String>,
 }
 
 #[skip_serializing_none]

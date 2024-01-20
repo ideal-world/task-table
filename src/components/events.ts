@@ -1,6 +1,6 @@
 import type { InjectionKey, Ref } from 'vue'
 import { toRaw } from 'vue'
-import type { TableBasicConf, TableColumnConf, TableLayoutColumnConf, TableLayoutConf, TableStyleConf } from './conf'
+import type { TableBasicConf, TableColumnConf, TableLayoutColumnConf, TableLayoutConf, TableLayoutKernelConf, TableStyleConf } from './conf'
 import { getDefaultValueByDataKind } from './conf'
 import { filterTreeDataPks, sortByTree } from './function/RowTree'
 import type { TableCellDictItem, TableCellDictItemResp, TableDataResp, TableDataSliceReq, TableEventProps, TableLayoutModifyReq } from './props'
@@ -114,7 +114,7 @@ export async function addData(newRecords: { [key: string]: any }[], afterPk: any
   if (!events.saveData)
     return false
 
-  // TODO 
+  // TODO
   // if (tableBasicConf.parentPkColumnName) {
   //   if (Array.isArray(layout.data)) {
   //     for (const groupData of layout.data) {
@@ -301,8 +301,7 @@ export async function newColumn(newColumnConf: TableColumnConf, newLayoutColumnC
       multiValue: newColumnConf.multiValue,
       kindDateTimeFormat: newColumnConf.kindDateTimeFormat,
     }, fromColumnName)
-    && await events.modifyLayout({
-      id: currentLayoutId.value,
+    && await events.modifyLayout(layout.id, {
       newColumn: {
         name: newLayoutColumnConf.name,
         wrap: newLayoutColumnConf.wrap,
@@ -372,8 +371,7 @@ export async function modifyColumn(changedColumnConf?: TableColumnConf, changedL
   })))
     return false
 
-  if (changedLayoutColumnConf && (!events.modifyLayout || !await events.modifyLayout({
-    id: currentLayoutId.value,
+  if (changedLayoutColumnConf && (!events.modifyLayout || !await events.modifyLayout(layout.id, {
     changedColumn: {
       name: changedLayoutColumnConf.name,
       wrap: changedLayoutColumnConf.wrap,
@@ -405,8 +403,7 @@ export async function modifyColumn(changedColumnConf?: TableColumnConf, changedL
 export const FUN_DELETE_COLUMN_TYPE = Symbol('FUN_DELETE_COLUMN_TYPE') as InjectionKey<(deletedColumnName: string, reFilter?: boolean, reSort?: boolean, reLoad?: boolean) => Promise<boolean>>
 export async function deleteColumn(deletedColumnName: string, reFilter?: boolean, reSort?: boolean, reLoad?: boolean): Promise<boolean> {
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
-  if (events.deleteColumn && events.modifyLayout && await events.deleteColumn(deletedColumnName) && await events.modifyLayout({
-    id: currentLayoutId.value,
+  if (events.deleteColumn && events.modifyLayout && await events.deleteColumn(deletedColumnName) && await events.modifyLayout(layout.id, {
     deletedColumnName,
   })) {
     if (reLoad) {
@@ -437,31 +434,32 @@ export async function deleteColumn(deletedColumnName: string, reFilter?: boolean
   // TODO agg清空，重新计算
 }
 
-export const FUN_NEW_LAYOUT_TYPE = Symbol('FUN_NEW_LAYOUT_TYPE') as InjectionKey<(newLayoutConf: TableLayoutConf, reFilter?: boolean, reSort?: boolean, reLoad?: boolean) => Promise<boolean>>
-export async function newLayout(newLayoutConf: TableLayoutConf, reFilter?: boolean, reSort?: boolean, reLoad?: boolean): Promise<boolean> {
-  if (events.newLayout && (await events.newLayout({
-    id: newLayoutConf.id,
-    title: newLayoutConf.title,
-    layoutKind: newLayoutConf.layoutKind,
-    icon: newLayoutConf.icon,
-    columns: Object.entries(newLayoutConf.columns).map(([name, column]) => {
-      return {
-        name,
-        wrap: column.wrap,
-        fixed: column.fixed,
-        width: column.width,
-        hide: column.hide,
-        dateStart: column.dateStart,
-        dateEnd: column.dateEnd,
-      }
-    }),
-    filters: newLayoutConf.filters,
-    sorts: newLayoutConf.sorts,
-    group: newLayoutConf.group,
-    aggs: newLayoutConf.aggs,
-    expandDataPks: newLayoutConf.expandDataPks,
-    fetchDataNumber: newLayoutConf.fetchDataNumber,
-  }))) {
+export const FUN_NEW_LAYOUT_TYPE = Symbol('FUN_NEW_LAYOUT_TYPE') as InjectionKey<(newLayoutConf: TableLayoutKernelConf, reFilter?: boolean, reSort?: boolean, reLoad?: boolean) => Promise<boolean>>
+export async function newLayout(newLayoutConf: TableLayoutKernelConf, reFilter?: boolean, reSort?: boolean, reLoad?: boolean): Promise<boolean> {
+  let layoutId
+  if (events.newLayout) {
+    layoutId = await events.newLayout({
+      title: newLayoutConf.title,
+      layoutKind: newLayoutConf.layoutKind,
+      icon: newLayoutConf.icon,
+      columns: Object.entries(newLayoutConf.columns).map(([name, column]) => {
+        return {
+          name,
+          wrap: column.wrap,
+          fixed: column.fixed,
+          width: column.width,
+          hide: column.hide,
+          dateStart: column.dateStart,
+          dateEnd: column.dateEnd,
+        }
+      }),
+      filters: newLayoutConf.filters,
+      sorts: newLayoutConf.sorts,
+      group: newLayoutConf.group,
+      aggs: newLayoutConf.aggs,
+      expandDataPks: newLayoutConf.expandDataPks,
+      fetchDataNumber: newLayoutConf.fetchDataNumber,
+    })
     if (reLoad) {
       await loadData()
       return true
@@ -470,15 +468,18 @@ export async function newLayout(newLayoutConf: TableLayoutConf, reFilter?: boole
   else {
     return false
   }
-  tableLayoutsConf.push(newLayoutConf)
+  tableLayoutsConf.push({
+    id: layoutId,
+    ...newLayoutConf,
+  })
   return true
   // TODO agg清空，重新计算
 }
 
 export const FUN_MODIFY_LAYOUT_TYPE = Symbol('FUN_MODIFY_LAYOUT_TYPE') as InjectionKey<(changedLayoutReq: TableLayoutModifyReq, reFilter?: boolean, reSort?: boolean, reLoad?: boolean) => Promise<boolean>>
 export async function modifyLayout(changedLayoutReq: TableLayoutModifyReq, reFilter?: boolean, reSort?: boolean, reLoad?: boolean): Promise<boolean> {
-  const layout = changedLayoutReq.id ? tableLayoutsConf.find(layout => layout.id === changedLayoutReq.id)! : tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
-  if (events.modifyLayout && (await events.modifyLayout(changedLayoutReq))) {
+  const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
+  if (events.modifyLayout && (await events.modifyLayout(layout.id, changedLayoutReq))) {
     if (reLoad) {
       await loadData()
       return true

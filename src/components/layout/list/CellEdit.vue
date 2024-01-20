@@ -59,12 +59,20 @@ async function enterEditMode(selectedCellInfo: CellSelectedInfo, fillEle: HTMLEl
   if (curColumnConf.value.useDict) {
     curAllDictItems.value = (await loadCellDictItemsFun(curColumnConf.value!.name)).records
     selectedDictItems.value = []
-    if (curColumnConf.value.multiValue) {
-      for (const val of curCellValue.value)
-        selectedDictItems.value.push(curAllDictItems.value.find(dictItem => dictItem.value === val)!)
+    if (curCellValue.value == null) {
+      // Do Noting
+    }
+    else if (curColumnConf.value.multiValue) {
+      for (const val of curCellValue.value) {
+        const findVal = curAllDictItems.value.find(dictItem => dictItem.value === val)
+        if (findVal)
+          selectedDictItems.value.push(findVal)
+      }
     }
     else {
-      selectedDictItems.value.push(curAllDictItems.value.find(dictItem => dictItem.value === curCellValue.value)!)
+      const findVal = curAllDictItems.value.find(dictItem => dictItem.value === curCellValue.value)
+      if (findVal)
+        selectedDictItems.value.push(findVal)
     }
     filterCurDictItems()
     cellEditDictContextMenuRef.value.show(selectedCellInfo.ele, MenuOffsetKind.LEFT_TOP)
@@ -164,6 +172,9 @@ async function deleteDictItem(value: string) {
 
 async function setCellValue(value: any) {
   if (value !== curCellValue.value) {
+    if (curColumnConf.value!.dataKind === DataKind.DATETIME)
+      value = new Date(value)
+
     await updateDataFun([{
       [props.pkColumnName]: curRowPk.value,
       [curColumnConf.value!.name]: value,

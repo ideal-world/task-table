@@ -7,6 +7,7 @@ export const DATA_DICT_POSTFIX = '__dict'
 export enum DataKind {
   TEXT = 'TEXT',
   TEXTAREA = 'TEXTAREA',
+  SERIAL = 'SERIAL',
   NUMBER = 'NUMBER',
   BOOLEAN = 'BOOLEAN',
   FILE = 'FILE',
@@ -28,6 +29,7 @@ export function translateDataKind(dataKind: DataKind): string {
   switch (dataKind) {
     case DataKind.TEXT: return t('_.datakind.text')
     case DataKind.TEXTAREA: return t('_.datakind.textarea')
+    case DataKind.SERIAL: return t('_.datakind.serial')
     case DataKind.NUMBER: return t('_.datakind.number')
     case DataKind.BOOLEAN: return t('_.datakind.boolean')
     case DataKind.FILE: return t('_.datakind.file')
@@ -151,8 +153,7 @@ export interface TableColumnProps {
   kindDateTimeFormat?: string
 }
 
-export interface TableLayoutProps {
-  id: string
+export interface TableLayoutKernelProps {
   title: string
   layoutKind: LayoutKind
   icon?: string
@@ -164,6 +165,10 @@ export interface TableLayoutProps {
   aggs?: { [key: string]: AggregateKind }
   expandDataPks?: any[]
   fetchDataNumber?: number
+}
+
+export interface TableLayoutProps extends TableLayoutKernelProps {
+  id: string
 }
 
 export interface TableLayoutColumnProps {
@@ -207,14 +212,13 @@ export interface TableEventProps {
 
   modifyStyles?: (changedStyleProps: TableStyleProps) => Promise<boolean>
 
-  newLayout?: (newLayoutProps: TableLayoutProps, fromLayoutId?: string) => Promise<boolean>
-  modifyLayout?: (changedLayoutProps: TableLayoutModifyReq) => Promise<boolean>
+  newLayout?: (newLayoutProps: TableLayoutKernelProps) => Promise<string>
+  modifyLayout?: (changedLayoutId: string, changedLayoutProps: TableLayoutModifyReq) => Promise<boolean>
   deleteLayout?: (deletedLayoutId: string) => Promise<boolean>
   sortLayouts?: (leftLayoutId: string, rightLayoutId: string) => Promise<boolean>
 }
 
 export interface TableLayoutModifyReq {
-  id?: string
   title?: string
   icon?: string
   filters?: TableDataFilterReq[]
