@@ -4,7 +4,7 @@ import * as iconSvg from '../../assets/icon'
 import MenuComp, { MenuSizeKind } from '../common/Menu.vue'
 import type { TableColumnConf } from '../conf'
 import { getInputTypeByDataKind, getOperatorKindsByDataKind } from '../conf'
-import { FUN_LOAD_CELL_DICT_ITEMS_TYPE, FUN_MODIFY_LAYOUT_TYPE } from '../events'
+import { FUN_LOAD_CELL_DICT_ITEMS_TYPE, FUN_LOAD_DATA_TYPE, FUN_MODIFY_LAYOUT_TYPE } from '../events'
 import type { TableCellDictItem, TableCellDictItemResp, TableDataFilterItemReq, TableDataFilterReq } from '../props'
 import { DataKind, OperatorKind, translateOperatorKind } from '../props'
 import { getParentWithClass } from '../../utils/basic'
@@ -14,6 +14,7 @@ const props = defineProps<{
   columnsConf: TableColumnConf[]
 }>()
 const modifyLayoutFun = inject(FUN_MODIFY_LAYOUT_TYPE)!
+const loadDataFun = inject(FUN_LOAD_DATA_TYPE)!
 const loadCellDictItemsFun = inject(FUN_LOAD_CELL_DICT_ITEMS_TYPE)!
 const simpleFilterCompRef = ref()
 const filterColumnCompRef = ref()
@@ -186,23 +187,39 @@ async function addOrModifySimpleFilterItem(changedFilterItem: TableDataFilterIte
 
   if (props.filters && props.filters.length === 1) {
     const filters = JSON.parse(JSON.stringify(props.filters[0]))
-    if (changedFilterItem.idx === -1)
-      filters.items.push(changedFilterItem)
-    else
-      filters.items.splice(changedFilterItem.idx, 1, changedFilterItem)
+    if (changedFilterItem.idx === -1) {
+      filters.items.push({
+        columnName: changedFilterItem.columnName,
+        operator: changedFilterItem.operator,
+        value: changedFilterItem.value,
+      })
+    }
+    else {
+      filters.items.splice(changedFilterItem.idx, 1, {
+        columnName: changedFilterItem.columnName,
+        operator: changedFilterItem.operator,
+        value: changedFilterItem.value,
+      })
+    }
     await modifyLayoutFun({
       filters: [filters],
     })
+    await loadDataFun()
   }
   else if (props.filters === undefined || props.filters.length === 0) {
     await modifyLayoutFun({
       filters: [
         {
           and: true,
-          items: [changedFilterItem],
+          items: [{
+            columnName: changedFilterItem.columnName,
+            operator: changedFilterItem.operator,
+            value: changedFilterItem.value,
+          }],
         },
       ],
     })
+    await loadDataFun()
   }
 }
 
@@ -213,6 +230,7 @@ async function deleteSimpleFilterItem(idx: number) {
     await modifyLayoutFun({
       filters: [filters],
     })
+    await loadDataFun()
   }
 }
 </script>
@@ -313,7 +331,7 @@ async function deleteSimpleFilterItem(idx: number) {
   </MenuComp>
   <MenuComp ref="filterOpCompRef" @click="setFilterOp">
     <div
-      v-for="op in getOperatorKindsByDataKind(selectedFilterItem?.dataKind)" :key="op"
+      v-for="op in getOperatorKindsByDataKind(selectedFilterItem?.dataKind, selectedFilterItem?.multiValue)" :key="op"
       class="iw-contextmenu__item flex w-full cursor-pointer" :data-op="op"
     >
       {{ translateOperatorKind(op) }}

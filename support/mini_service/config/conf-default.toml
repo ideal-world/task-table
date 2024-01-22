@@ -99,5 +99,5 @@ url = "postgres://postgres:123456@127.0.0.1:54321/test"
 
 [fw.log]
 level = "info"
-directives = ["task_table_service=trace","task_table_kernel=trace","tardis=trace","sqlx=off"]
+directives = ["task_table_service=trace","task_table_kernel=trace","tardis=trace","sqlx=off","sea_orm::driver::sqlx_postgres=trace"]
 # tracing_appender = { rotation = "minutely", dir = "./log", filename = "app.log" }

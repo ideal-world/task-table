@@ -144,25 +144,30 @@ export function getDefaultIconByLayoutKind(layoutKind: LayoutKind): string {
   }
 }
 
-export function getOperatorKindsByDataKind(dataKind?: DataKind): OperatorKind[] {
-  switch (dataKind) {
-    case undefined:
-      return []
-    case DataKind.SERIAL:
-    case DataKind.NUMBER:
-    case DataKind.AMOUNT:
-      return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.LT, OperatorKind.LE, OperatorKind.GT, OperatorKind.GE, OperatorKind.IN, OperatorKind.NOT_IN, OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]
-    case DataKind.BOOLEAN:
-      return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]
-    case DataKind.FILE:
-    case DataKind.IMAGE:
-      return [OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]
-    case DataKind.DATE:
-    case DataKind.DATETIME:
-    case DataKind.TIME:
-      return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.LT, OperatorKind.LE, OperatorKind.GT, OperatorKind.GE, OperatorKind.IN, OperatorKind.NOT_IN, OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]
-    default:
-      return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.LT, OperatorKind.LE, OperatorKind.GT, OperatorKind.GE, OperatorKind.IN, OperatorKind.NOT_IN, OperatorKind.CONTAINS, OperatorKind.CONTAINS, OperatorKind.STARTWITH, OperatorKind.NOT_STARTWITH, OperatorKind.ENDWITH, OperatorKind.NOT_ENDWITH, OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]
+export function getOperatorKindsByDataKind(dataKind?: DataKind, multiValue?: bool): OperatorKind[] {
+  if (multiValue) {
+    return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.IN, OperatorKind.NOT_IN, OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]
+  }
+  else {
+    switch (dataKind) {
+      case undefined:
+        return []
+      case DataKind.SERIAL:
+      case DataKind.NUMBER:
+      case DataKind.AMOUNT:
+        return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.LT, OperatorKind.LE, OperatorKind.GT, OperatorKind.GE, OperatorKind.IN, OperatorKind.NOT_IN, OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]
+      case DataKind.BOOLEAN:
+        return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]
+      case DataKind.FILE:
+      case DataKind.IMAGE:
+        return [OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]
+      case DataKind.DATE:
+      case DataKind.DATETIME:
+      case DataKind.TIME:
+        return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.LT, OperatorKind.LE, OperatorKind.GT, OperatorKind.GE, OperatorKind.IN, OperatorKind.NOT_IN, OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]
+      default:
+        return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.LT, OperatorKind.LE, OperatorKind.GT, OperatorKind.GE, OperatorKind.IN, OperatorKind.NOT_IN, OperatorKind.CONTAINS, OperatorKind.NOT_CONTAINS, OperatorKind.STARTWITH, OperatorKind.NOT_STARTWITH, OperatorKind.ENDWITH, OperatorKind.NOT_ENDWITH, OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]
+    }
   }
 }
 

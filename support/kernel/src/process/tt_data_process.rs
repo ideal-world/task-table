@@ -2,7 +2,7 @@ use std::{collections::HashMap, str::FromStr};
 
 use tardis::chrono::{DateTime, NaiveDate, NaiveTime, Utc};
 use tardis::db::sea_orm::QueryResult;
-use tardis::log::warn;
+use tardis::log::{trace, warn};
 use tardis::{
     basic::{dto::TardisContext, result::TardisResult},
     db::sea_orm::{
@@ -204,6 +204,9 @@ pub async fn load_data_with_group(
         r#"SELECT {}, {} FROM {}_{} WHERE {} {}"#,
         group_select_sql, aggs_sql, INST_PREFIX, table_id, where_sql, group_by_sql
     );
+
+    trace!("group_sql: {}", group_sql);
+
     let mut group_records = funs
         .db()
         .query_all(&group_sql, params.clone().into_iter().collect::<TardisResult<Vec<sea_query::Value>>>()?)
@@ -321,6 +324,9 @@ pub async fn load_data_without_group(
 
     // query
     let select_sql = format!(r#"SELECT * FROM {}_{} WHERE {} {} {}"#, INST_PREFIX, table_id, where_sql, sort_sql, limit_sql);
+
+    trace!("select_sql: {}", select_sql);
+
     let total_number = funs
         .db()
         .count_by_sql(
@@ -948,13 +954,20 @@ fn package_where_sql(
 ) -> TardisResult<String> {
     let where_sql = if let Some(filters) = filters {
         let and_inner = filters[0].and;
-        filters
+        let filter_sql_items = filters
             .into_iter()
+            .filter(|filter| !filter.items.is_empty())
             .map(|filter| {
                 let items = filter
                     .items
                     .into_iter()
                     .map(|item| {
+                        let column = columns.iter().find(|column| column.name == item.column_name);
+                        (column, item)
+                    })
+                    .filter(|(column, _)| column.is_some())
+                    .map(|(column, item)| {
+                        let column = column.expect("ignore");
                         let placeholders = if let Some(value) = item.value {
                             if value.is_array() {
                                 value
@@ -962,7 +975,7 @@ fn package_where_sql(
                                     .expect("ignore")
                                     .into_iter()
                                     .map(|v| {
-                                        params.push(convert_to_db_value(&item.column_name, v.clone(), columns, funs));
+                                        params.push(do_convert_to_db_value(&item.column_name, v.clone(), &column.data_kind, funs));
                                         format!("${}", params.len())
                                     })
                                     .collect()
@@ -995,22 +1008,39 @@ fn package_where_sql(
                                     });
                                 params.push(val);
                                 vec![format!("${}", params.len())]
+                            } else if item.operator == TableDataOperatorKind::IsEmpty || item.operator == TableDataOperatorKind::NotEmpty {
+                                // No parameters required
+                                vec![]
                             } else {
-                                params.push(convert_to_db_value(&item.column_name, value, columns, funs));
+                                params.push(do_convert_to_db_value(&item.column_name, value, &column.data_kind, funs));
                                 vec![format!("${}", params.len())]
                             }
                         } else {
                             vec![]
                         };
-                        item.operator.to_sql(&item.column_name, placeholders)
+                        item.operator.to_sql(&item.column_name, column.multi_value, placeholders)
                     })
-                    .collect::<Vec<String>>();
-                format!("({})", items.join(if filter.and { " AND " } else { " OR " }))
+                    .filter(|item| item.is_some())
+                    .collect::<Option<Vec<String>>>()
+                    .expect("ignore");
+                if !items.is_empty() {
+                    format!("({})", items.join(if filter.and { " AND " } else { " OR " }))
+                } else {
+                    "".to_string()
+                }
             })
-            .collect::<Vec<String>>()
-            .join(if and_inner { " OR " } else { " AND " })
+            .collect::<Vec<String>>();
+        if !filter_sql_items.is_empty() {
+            filter_sql_items.join(if and_inner { " OR " } else { " AND " })
+        } else {
+            "".to_string()
+        }
     } else {
-        "1 = 1".to_string()
+        "".to_string()
     };
-    Ok(where_sql)
+    if where_sql.trim().is_empty() {
+        Ok("1 = 1".to_string())
+    } else {
+        Ok(where_sql)
+    }
 }

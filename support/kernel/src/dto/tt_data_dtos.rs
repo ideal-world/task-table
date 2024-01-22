@@ -97,7 +97,7 @@ pub enum TableDataOperatorKind {
     Gt,
     #[serde(rename = ">=")]
     Ge,
-    #[serde(rename = "In")]
+    #[serde(rename = "IN")]
     In,
     #[serde(rename = "NOT IN")]
     NotIn,
@@ -120,24 +120,40 @@ pub enum TableDataOperatorKind {
 }
 
 impl TableDataOperatorKind {
-    pub fn to_sql(&self, column_name: &str, placeholders: Vec<String>) -> String {
-        match self {
-            TableDataOperatorKind::Eq => format!("{} = {}", column_name, placeholders[0]),
-            TableDataOperatorKind::Ne => format!("{} != {}", column_name, placeholders[0]),
-            TableDataOperatorKind::Lt => format!("{} < {}", column_name, placeholders[0]),
-            TableDataOperatorKind::Le => format!("{} <= {}", column_name, placeholders[0]),
-            TableDataOperatorKind::Gt => format!("{} > {}", column_name, placeholders[0]),
-            TableDataOperatorKind::Ge => format!("{} >= {}", column_name, placeholders[0]),
-            TableDataOperatorKind::In => format!("{} IN ({})", column_name, placeholders.join(",")),
-            TableDataOperatorKind::NotIn => format!("{} NOT IN ({})", column_name, placeholders.join(",")),
-            TableDataOperatorKind::Contains => format!("{} LIKE {}", column_name, placeholders[0]),
-            TableDataOperatorKind::NotContains => format!("{} NOT LIKE {}", column_name, placeholders[0]),
-            TableDataOperatorKind::StartWith => format!("{} LIKE {}", column_name, placeholders[0]),
-            TableDataOperatorKind::NotStartWith => format!("{} NOT LIKE {}", column_name, placeholders[0]),
-            TableDataOperatorKind::EndWith => format!("{} LIKE {}", column_name, placeholders[0]),
-            TableDataOperatorKind::NotEndWith => format!("{} NOT LIKE {}", column_name, placeholders[0]),
-            TableDataOperatorKind::IsEmpty => format!("{} = ''", column_name),
-            TableDataOperatorKind::NotEmpty => format!("{} != ''", column_name),
+    pub fn to_sql(&self, column_name: &str, multi_value: bool, placeholders: Vec<String>) -> Option<String> {
+        if multi_value {
+            match self {
+                TableDataOperatorKind::Eq if !placeholders.is_empty() => Some(format!("{} = ARRAY[{}]", column_name, placeholders.join(","))),
+                TableDataOperatorKind::Eq if placeholders.is_empty() => None,
+                TableDataOperatorKind::Ne if !placeholders.is_empty() => Some(format!("{} != ARRAY[{}]", column_name, placeholders.join(","))),
+                TableDataOperatorKind::Ne if placeholders.is_empty() => None,
+                TableDataOperatorKind::In if !placeholders.is_empty() => Some(format!("{} @> ARRAY[{}]", column_name, placeholders.join(","))),
+                TableDataOperatorKind::In if placeholders.is_empty() => None,
+                TableDataOperatorKind::NotIn if !placeholders.is_empty() => Some(format!("NOT {} @> ARRAY[{}]", column_name, placeholders.join(","))),
+                TableDataOperatorKind::NotIn if placeholders.is_empty() => None,
+                TableDataOperatorKind::IsEmpty => Some(format!("array_length({}, 1) IS NULL", column_name)),
+                TableDataOperatorKind::NotEmpty => Some(format!("array_length({}, 1) IS NOT NULL", column_name)),
+                _ => None,
+            }
+        } else {
+            match self {
+                TableDataOperatorKind::Eq => Some(format!("{} = {}", column_name, placeholders[0])),
+                TableDataOperatorKind::Ne => Some(format!("{} != {}", column_name, placeholders[0])),
+                TableDataOperatorKind::Lt => Some(format!("{} < {}", column_name, placeholders[0])),
+                TableDataOperatorKind::Le => Some(format!("{} <= {}", column_name, placeholders[0])),
+                TableDataOperatorKind::Gt => Some(format!("{} > {}", column_name, placeholders[0])),
+                TableDataOperatorKind::Ge => Some(format!("{} >= {}", column_name, placeholders[0])),
+                TableDataOperatorKind::In => Some(format!("{} IN ({})", column_name, placeholders.join(","))),
+                TableDataOperatorKind::NotIn => Some(format!("{} NOT IN ({})", column_name, placeholders.join(","))),
+                TableDataOperatorKind::Contains => Some(format!("{} LIKE {}", column_name, placeholders[0])),
+                TableDataOperatorKind::NotContains => Some(format!("{} NOT LIKE {}", column_name, placeholders[0])),
+                TableDataOperatorKind::StartWith => Some(format!("{} LIKE {}", column_name, placeholders[0])),
+                TableDataOperatorKind::NotStartWith => Some(format!("{} NOT LIKE {}", column_name, placeholders[0])),
+                TableDataOperatorKind::EndWith => Some(format!("{} LIKE {}", column_name, placeholders[0])),
+                TableDataOperatorKind::NotEndWith => Some(format!("{} NOT LIKE {}", column_name, placeholders[0])),
+                TableDataOperatorKind::IsEmpty => Some(format!("{} = ''", column_name)),
+                TableDataOperatorKind::NotEmpty => Some(format!("{} != ''", column_name)),
+            }
         }
     }
 }

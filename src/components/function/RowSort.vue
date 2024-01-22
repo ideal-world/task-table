@@ -4,7 +4,7 @@ import { inject, onMounted, ref } from 'vue'
 import * as iconSvg from '../../assets/icon'
 import MenuComp from '../common/Menu.vue'
 import type { TableColumnConf } from '../conf'
-import { FUN_MODIFY_LAYOUT_TYPE } from '../events'
+import { FUN_LOAD_DATA_TYPE, FUN_MODIFY_LAYOUT_TYPE } from '../events'
 import type { TableDataSortReq } from '../props'
 
 const props = defineProps<{
@@ -13,6 +13,8 @@ const props = defineProps<{
 }>()
 
 const modifyLayoutFun = inject(FUN_MODIFY_LAYOUT_TYPE)!
+const loadDataFun = inject(FUN_LOAD_DATA_TYPE)!
+
 const sortCompRef = ref()
 const sortColumnCompRef = ref()
 const sortAscDescCompRef = ref()
@@ -75,6 +77,7 @@ async function addSort(newColumnName: string, newOrderDesc: boolean) {
     await modifyLayoutFun({
       sorts,
     })
+    await loadDataFun()
   }
   else {
     await modifyLayoutFun({
@@ -83,6 +86,7 @@ async function addSort(newColumnName: string, newOrderDesc: boolean) {
         orderDesc: newOrderDesc,
       }],
     })
+    await loadDataFun()
   }
   tmpNewSortColumnName.value = undefined
   tmpNewSortOrderDesc.value = undefined
@@ -97,6 +101,7 @@ async function modifySort(oriColumnName: string, newColumnName: string, newOrder
   await modifyLayoutFun({
     sorts,
   })
+  await loadDataFun()
 }
 
 async function deleteSort(columnName: string) {
@@ -104,6 +109,7 @@ async function deleteSort(columnName: string) {
   await modifyLayoutFun({
     sorts: newSorts,
   })
+  await loadDataFun()
 }
 
 onMounted(() => {
@@ -118,6 +124,7 @@ onMounted(() => {
         await modifyLayoutFun({
           sorts,
         })
+        await loadDataFun()
       }
     },
   })
