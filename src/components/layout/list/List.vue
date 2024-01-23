@@ -92,6 +92,7 @@ onMounted(() => {
     <template v-if="listConf.layout.data && !Array.isArray(listConf.layout.data)">
       <RowsComp
         :records="listConf.layout.data.records" :pk-column-name="listConf.basic.pkColumnName"
+        :parent-pk-column-name="listConf.basic.parentPkColumnName"
         :expand-data-pks="listConf.layout.expandDataPks"
         :pk-kind-is-number="pkKindIsNumber"
         :columns-conf="columnsConf" :styles-conf="listConf.basic.styles" :set-column-styles="setColumnStyles"

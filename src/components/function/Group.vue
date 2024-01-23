@@ -3,7 +3,7 @@ import { inject, ref } from 'vue'
 import * as iconSvg from '../../assets/icon'
 import MenuComp from '../common/Menu.vue'
 import type { TableColumnConf } from '../conf'
-import { FUN_MODIFY_LAYOUT_TYPE } from '../events'
+import { FUN_LOAD_DATA_TYPE, FUN_MODIFY_LAYOUT_TYPE } from '../events'
 import type { TableDataGroupReq } from '../props'
 
 const props = defineProps<{
@@ -12,6 +12,7 @@ const props = defineProps<{
 }>()
 
 const modifyLayoutFun = inject(FUN_MODIFY_LAYOUT_TYPE)!
+const loadDataFun = inject(FUN_LOAD_DATA_TYPE)!
 const groupCompRef = ref()
 
 function showGroupContextMenu(event: MouseEvent) {
@@ -34,6 +35,7 @@ async function setGroupColumn(columnName: string) {
         hideEmptyRecord: props.group.hideEmptyRecord,
       },
     })
+    await loadDataFun()
   }
   else {
     await modifyLayoutFun({
@@ -43,6 +45,7 @@ async function setGroupColumn(columnName: string) {
         hideEmptyRecord: false,
       },
     })
+    await loadDataFun()
   }
 }
 
@@ -55,6 +58,7 @@ async function setGroupDescSort() {
         hideEmptyRecord: props.group.hideEmptyRecord,
       },
     })
+    await loadDataFun()
   }
 }
 
@@ -67,6 +71,7 @@ async function setGroupHideEmpty() {
         hideEmptyRecord: !props.group.hideEmptyRecord,
       },
     })
+    await loadDataFun()
   }
 }
 </script>

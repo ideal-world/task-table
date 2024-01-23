@@ -52,7 +52,7 @@ async function init() {
     dict_code: 'stats',
   })
   ws.reqOk('AddDict', {
-    title: '初进行中始化',
+    title: '进行中',
     value: 'progress',
   }, {
     dict_code: 'stats',
@@ -120,9 +120,6 @@ async function init() {
         name: 'no',
       },
       {
-        name: 'pno',
-      },
-      {
         name: 'name',
       },
       {
@@ -156,6 +153,19 @@ async function init() {
       phone: '18600000',
       addr: '浙江杭州xxx',
       time: new Date(),
+    },
+  ], {
+    table_id: tableId.value,
+  })
+
+  await ws.reqOk('AddOrModifyData', [
+    {
+      name: 'xh',
+      stats: ['progress'],
+      phone: '18600001',
+      addr: '浙江杭州xxx',
+      time: new Date(),
+      pno: 1,
     },
   ], {
     table_id: tableId.value,

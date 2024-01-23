@@ -218,7 +218,17 @@ pub async fn load_data_with_group(
                 record.insert(group_column_name.clone(), convert_to_json_value(&group_column_name, &row, &columns, funs).expect("ignore"));
             });
             aggs.iter().for_each(|(column_name, agg_kind)| {
-                record.insert(column_name.clone(), convert_agg_to_json_value(column_name, agg_kind, &row, funs).expect("ignore"));
+                record.insert(
+                    column_name.clone(),
+                    convert_agg_to_json_value(
+                        column_name,
+                        &columns.iter().find(|column| &column.name == column_name).expect("ignore").data_kind,
+                        agg_kind,
+                        &row,
+                        funs,
+                    )
+                    .expect("ignore"),
+                );
             });
             record
         })
@@ -364,7 +374,19 @@ pub async fn load_data_without_group(
             .expect("ignore");
 
         aggs.iter()
-            .map(|(column_name, agg_kind)| (column_name.clone(), convert_agg_to_json_value(column_name, agg_kind, &agg_result, funs).expect("ignore")))
+            .map(|(column_name, agg_kind)| {
+                (
+                    column_name.clone(),
+                    convert_agg_to_json_value(
+                        column_name,
+                        &columns.iter().find(|column| &column.name == column_name).expect("ignore").data_kind,
+                        agg_kind,
+                        &agg_result,
+                        funs,
+                    )
+                    .expect("ignore"),
+                )
+            })
             .collect::<HashMap<String, Value>>()
     } else {
         HashMap::new()
@@ -866,15 +888,22 @@ fn do_convert_to_json_value(column_name: &str, row: &QueryResult, multi_value: b
     Ok(val)
 }
 
-fn convert_agg_to_json_value(column_name: &str, agg_kind: &TableDataAggregateKind, row: &QueryResult, _funs: &TardisFunsInst) -> TardisResult<Value> {
+fn convert_agg_to_json_value(
+    column_name: &str,
+    data_kind: &TableColumnDataKind,
+    agg_kind: &TableDataAggregateKind,
+    row: &QueryResult,
+    _funs: &TardisFunsInst,
+) -> TardisResult<Value> {
     let column_name_with_agg = format!("{}_{}", TardisFuns::json.obj_to_json(&agg_kind).expect("ignore").as_str().expect("ignore"), column_name).to_lowercase();
     let agg_value = match agg_kind {
         TableDataAggregateKind::Sum => Value::from(row.try_get::<Option<i64>>("", &column_name_with_agg)?),
         TableDataAggregateKind::Count => Value::from(row.try_get::<i64>("", &column_name_with_agg)?),
-        TableDataAggregateKind::Min => Value::from(row.try_get::<Option<String>>("", &column_name_with_agg)?),
-        TableDataAggregateKind::Max => Value::from(row.try_get::<Option<String>>("", &column_name_with_agg)?),
-        TableDataAggregateKind::Avg => Value::from(row.try_get::<Option<f64>>("", &column_name_with_agg)?),
-        TableDataAggregateKind::Stddev => Value::from(row.try_get::<Option<f64>>("", &column_name_with_agg)?),
+        TableDataAggregateKind::Min | TableDataAggregateKind::Max => match data_kind {
+            TableColumnDataKind::Serial | TableColumnDataKind::Number => Value::from(row.try_get::<Option<f64>>("", &column_name_with_agg)?),
+            _ => Value::from(row.try_get::<Option<String>>("", &column_name_with_agg)?),
+        },
+        TableDataAggregateKind::Avg | TableDataAggregateKind::Stddev => Value::from(row.try_get::<Option<f64>>("", &column_name_with_agg)?),
         // TODO fix
         // 在 PostgreSQL 中，要对一个字段进行去重，并对另一个字段进行计数，需要使用 GROUP BY 语句，而不是 DISTINCT
         TableDataAggregateKind::Distinct => Value::from(row.try_get::<Option<f64>>("", &column_name_with_agg)?),
