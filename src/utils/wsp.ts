@@ -49,7 +49,7 @@ export class WebsocketP {
 
     return new Promise<T>((resolve, reject) => {
       const timer = window.setTimeout(() => {
-        reject(new Error(`websocket: ${reqId} timeout`))
+        reject(new Error(`[websocket] ${reqId} timeout. data: ${JSON.stringify(data)}`))
       }, timeout)
       this.reqPromises.set(reqId, [resolve, reject, timer])
     })
@@ -114,7 +114,7 @@ export class DefaultWebSocketP extends WebsocketP {
       from_avatar,
       to_avatars: [
         from_avatar,
-      ],
+      ], 
       ignore_self: false,
     }, timeout)
     if (resp.msg.code.startsWith('200'))
