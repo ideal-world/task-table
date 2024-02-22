@@ -18,3 +18,23 @@ textarea {
   border-width: 1px;
   border-style: solid;
 }
+
+.iw-alert-wrap {
+  @apply iw-alert iw-alert-error absolute z-[10000] bottom-2 right-2 p-1 w-1/2 rounded-lg;
+}
+
+.iw-alert-wrap--success {
+  @apply iw-alert-success;
+}
+
+.iw-alert-wrap--info {
+  @apply iw-alert-info;
+}
+
+.iw-alert-wrap--warning {
+  @apply iw-alert-warning;
+}
+
+.iw-alert-wrap--error {
+  @apply iw-alert-error;
+}

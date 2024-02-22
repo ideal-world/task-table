@@ -3,20 +3,20 @@ import { ref } from 'vue'
 import MenuComp, { MenuOffsetKind } from './Menu.vue'
 
 const emit = defineEmits(['selectIcon'])
-const iconCompRef = ref()
+const iconCompRef = ref<InstanceType<typeof MenuComp>>()
 
 async function selectIcon(event: Event) {
   const target = event.target as HTMLInputElement
   emit('selectIcon', target.classList[0])
-  iconCompRef.value.close()
+  iconCompRef.value?.close()
 }
 
-function showContainer(event: Event, offsetKind: MenuOffsetKind = MenuOffsetKind.MEDIUM_BOTTOM) {
-  iconCompRef.value.show(event, offsetKind)
+function showContainer(event: MouseEvent, offsetKind: MenuOffsetKind = MenuOffsetKind.MEDIUM_BOTTOM) {
+  iconCompRef.value?.show(event, offsetKind)
 }
 
 function hideContainer() {
-  iconCompRef.value.close()
+  iconCompRef.value?.close()
 }
 
 defineExpose({
