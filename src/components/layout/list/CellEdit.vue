@@ -5,8 +5,8 @@ import { getParentWithClass } from '../../../utils/basic'
 import MenuComp, { MenuOffsetKind } from '../../common/Menu.vue'
 import type { CachedColumnConf } from '../../conf'
 import { getInputTypeByDataKind } from '../../conf'
-import { FUN_LOAD_CELL_DICT_ITEMS_TYPE, FUN_UPDATE_DATA_TYPE } from '../../events'
-import type { TableCellDictItem, TableDataGroupResp, TableDataResp } from '../../props'
+import { FUN_LOAD_CELL_DICT_ITEMS_TYPE, FUN_MODIFY_DATA_TYPE } from '../../events'
+import type { TableCellDictItemProps, TableDataGroupResp, TableDataResp } from '../../props'
 import { DataKind } from '../../props'
 import type { CellSelectedInfo } from './CellSelect.vue'
 
@@ -18,19 +18,19 @@ const props = defineProps<{
 }>()
 
 const loadCellDictItemsFun = inject(FUN_LOAD_CELL_DICT_ITEMS_TYPE)!
-const updateDataFun = inject(FUN_UPDATE_DATA_TYPE)!
+const modifyDataFun = inject(FUN_MODIFY_DATA_TYPE)!
 
-const cellEditSimpleRef = ref()
-const cellEditDictContextMenuRef = ref()
+const cellEditSimpleRef = ref<HTMLElement>()
+const cellEditDictContextMenuRef = ref<InstanceType<typeof MenuComp>>()
 
 const curColumnConf = ref<CachedColumnConf>()
-const curRowPk = ref()
-const curCellValue = ref()
+const curRowPk = ref<any>()
+const curCellValue = ref<any>()
 
-const curAllDictItems = ref<TableCellDictItem[]>([])
-const curDictItems = ref<TableCellDictItem[]>([])
-const selectedDictItems = ref<TableCellDictItem[]>([])
-const searchDictValue = ref()
+const curAllDictItems = ref<TableCellDictItemProps[]>([])
+const curDictItems = ref<TableCellDictItemProps[]>([])
+const selectedDictItems = ref<TableCellDictItemProps[]>([])
+const searchDictValue = ref<any>()
 
 async function enterEditMode(selectedCellInfo: CellSelectedInfo, fillEle: HTMLElement) {
   const columnConf = props.columnsConf.find(col => col.name === selectedCellInfo.columnName)!
@@ -75,10 +75,10 @@ async function enterEditMode(selectedCellInfo: CellSelectedInfo, fillEle: HTMLEl
         selectedDictItems.value.push(findVal)
     }
     filterCurDictItems()
-    cellEditDictContextMenuRef.value.show(selectedCellInfo.ele, MenuOffsetKind.LEFT_TOP)
+    cellEditDictContextMenuRef.value?.show(selectedCellInfo.ele, MenuOffsetKind.LEFT_TOP)
   }
   else {
-    const cellEditEle = cellEditSimpleRef.value as HTMLElement
+    const cellEditEle = cellEditSimpleRef.value!
     cellEditEle.style.left = `${selectedCellInfo.ele.offsetLeft - 1}px`
     cellEditEle.style.top = `${selectedCellInfo.ele.offsetTop - 1}px`
     cellEditEle.style.width = `${selectedCellInfo.ele.offsetWidth + 2}px`
@@ -94,7 +94,7 @@ function leaveEditMode() {
   curColumnConf.value = undefined
   curRowPk.value = undefined
   curCellValue.value = undefined
-  const cellEditEle = cellEditSimpleRef.value as HTMLElement
+  const cellEditEle = cellEditSimpleRef.value!
   cellEditEle.style.display = `none`
 }
 
@@ -148,7 +148,7 @@ function searchDictItems(value: string) {
 async function updateDictItem() {
   filterCurDictItems()
   const newValue = curColumnConf.value!.multiValue ? selectedDictItems.value.map(item => item.value) : selectedDictItems.value[0].value
-  await updateDataFun([{
+  await modifyDataFun([{
     [props.pkColumnName]: curRowPk.value,
     [curColumnConf.value!.name]: newValue,
   }])
@@ -175,7 +175,7 @@ async function setCellValue(value: any) {
     if (curColumnConf.value!.dataKind === DataKind.DATETIME)
       value = new Date(value)
 
-    await updateDataFun([{
+    await modifyDataFun([{
       [props.pkColumnName]: curRowPk.value,
       [curColumnConf.value!.name]: value,
     }])

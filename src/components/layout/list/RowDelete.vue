@@ -12,7 +12,7 @@ const deleteDataFun = inject(FUN_DELETE_DATA_TYPE)!
 const closeContextMenuFun = inject(FUN_CLOSE_CONTEXT_MENU_TYPE)!
 
 async function deleteRow() {
-  await deleteDataFun(props.selectedPks)
+  await deleteDataFun(props.selectedPks.slice())
   closeContextMenuFun()
 }
 </script>

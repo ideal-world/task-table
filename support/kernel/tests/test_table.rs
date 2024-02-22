@@ -2,7 +2,7 @@ use tardis::basic::dto::TardisContext;
 use tardis::basic::result::TardisResult;
 use tardis::TardisFuns;
 use task_table_kernel::dto::tt_basic_dtos::RbumBasicFilterReq;
-use task_table_kernel::dto::tt_table_dtos::{TableAddReq, TableColumnAddReq, TableColumnDataKind, TableColumnModifyReq, TableModifyReq, TableStyleProps};
+use task_table_kernel::dto::tt_table_dtos::{TableColumnDataKind, TableColumnModifyReq, TableColumnNewReq, TableModifyReq, TableNewReq, TableStyleProps};
 use task_table_kernel::process::tt_table_process;
 
 pub async fn test() -> TardisResult<String> {
@@ -21,10 +21,11 @@ pub async fn test() -> TardisResult<String> {
     // ----------------------------------
     // ----- test add table
     // ----------------------------------
-    let table_id = tt_table_process::add_table(
-        TableAddReq {
+    let table_id = tt_table_process::new_table(
+        TableNewReq {
             pk_column_name: "id".to_string(),
             parent_pk_column_name: Some("pid".to_string()),
+            free_sort_column_name: None,
             columns: Vec::new(),
             styles: Some(TableStyleProps {
                 size: Some("medium".to_string()),
@@ -55,7 +56,7 @@ pub async fn test() -> TardisResult<String> {
     assert!(tt_table_process::modify_table(
         &table_id,
         TableModifyReq {
-            new_column: Some(TableColumnAddReq {
+            new_column: Some(TableColumnNewReq {
                 name: "COLUMNXX".to_string(),
                 icon: None,
                 title: None,
@@ -64,6 +65,7 @@ pub async fn test() -> TardisResult<String> {
                 use_dict: None,
                 dict_editable: None,
                 multi_value: None,
+                groupable: None,
                 kind_date_time_format: None,
                 from_column_name: None,
             }),
@@ -94,7 +96,7 @@ pub async fn test() -> TardisResult<String> {
     tt_table_process::modify_table(
         &table_id,
         TableModifyReq {
-            new_column: Some(TableColumnAddReq {
+            new_column: Some(TableColumnNewReq {
                 name: "col_1".to_string(),
                 icon: None,
                 title: None,
@@ -103,6 +105,7 @@ pub async fn test() -> TardisResult<String> {
                 use_dict: None,
                 dict_editable: None,
                 multi_value: None,
+                groupable: None,
                 kind_date_time_format: None,
                 from_column_name: None,
             }),
@@ -125,7 +128,7 @@ pub async fn test() -> TardisResult<String> {
     tt_table_process::modify_table(
         &table_id,
         TableModifyReq {
-            new_column: Some(TableColumnAddReq {
+            new_column: Some(TableColumnNewReq {
                 name: "col_2".to_string(),
                 data_kind: Some(TableColumnDataKind::Number),
                 icon: None,
@@ -134,6 +137,7 @@ pub async fn test() -> TardisResult<String> {
                 use_dict: None,
                 dict_editable: None,
                 multi_value: None,
+                groupable: None,
                 kind_date_time_format: None,
                 from_column_name: None,
             }),
@@ -156,6 +160,7 @@ pub async fn test() -> TardisResult<String> {
                 use_dict: None,
                 dict_editable: None,
                 kind_date_time_format: None,
+                groupable: None,
             }),
             new_column: None,
             deleted_column_name: None,
@@ -218,12 +223,13 @@ pub async fn test() -> TardisResult<String> {
     .await?;
     assert_eq!(table_summary.1, 0);
 
-    let table_id = tt_table_process::add_table(
-        TableAddReq {
+    let table_id = tt_table_process::new_table(
+        TableNewReq {
             pk_column_name: "id".to_string(),
             parent_pk_column_name: Some("pid".to_string()),
+            free_sort_column_name: None,
             columns: vec![
-                TableColumnAddReq {
+                TableColumnNewReq {
                     name: "name".to_string(),
                     data_editable: Some(true),
                     icon: None,
@@ -232,14 +238,16 @@ pub async fn test() -> TardisResult<String> {
                     use_dict: None,
                     dict_editable: None,
                     multi_value: None,
+                    groupable: None,
                     kind_date_time_format: None,
                     from_column_name: None,
                 },
-                TableColumnAddReq {
+                TableColumnNewReq {
                     name: "cate".to_string(),
                     use_dict: Some(true),
                     dict_editable: Some(true),
                     multi_value: Some(true),
+                    groupable: None,
                     icon: None,
                     title: None,
                     data_kind: None,
@@ -247,7 +255,7 @@ pub async fn test() -> TardisResult<String> {
                     kind_date_time_format: None,
                     from_column_name: None,
                 },
-                TableColumnAddReq {
+                TableColumnNewReq {
                     name: "age".to_string(),
                     data_kind: Some(TableColumnDataKind::Number),
                     icon: None,
@@ -256,10 +264,11 @@ pub async fn test() -> TardisResult<String> {
                     use_dict: None,
                     dict_editable: None,
                     multi_value: None,
+                    groupable: None,
                     kind_date_time_format: None,
                     from_column_name: None,
                 },
-                TableColumnAddReq {
+                TableColumnNewReq {
                     name: "ts".to_string(),
                     data_kind: Some(TableColumnDataKind::Datetime),
                     icon: None,
@@ -268,6 +277,7 @@ pub async fn test() -> TardisResult<String> {
                     use_dict: None,
                     dict_editable: None,
                     multi_value: None,
+                    groupable: None,
                     kind_date_time_format: None,
                     from_column_name: None,
                 },

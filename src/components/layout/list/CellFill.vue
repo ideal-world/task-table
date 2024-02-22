@@ -2,11 +2,10 @@
 import { inject, onMounted, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { getChildIndex, getParentWithClass } from '../../../utils/basic'
-import { AlertKind, showAlert } from '../../common/Alert.vue'
+import { AlertKind, showAlert } from '../../common/Alert'
 import type { CachedColumnConf } from '../../conf'
-import { FUN_UPDATE_DATA_TYPE } from '../../events'
+import { FUN_MODIFY_DATA_TYPE } from '../../events'
 import type { TableDataGroupResp, TableDataResp } from '../../props'
-import { DataKind } from '../../props'
 import type { CellSelectedInfo } from './CellSelect.vue'
 
 const props = defineProps<{
@@ -19,7 +18,7 @@ const props = defineProps<{
 
 const { t } = useI18n()
 
-const updateDataFun = inject(FUN_UPDATE_DATA_TYPE)!
+const modifyDataFun = inject(FUN_MODIFY_DATA_TYPE)!
 
 const selectDiv = document.createElement('div')
 let startColumnName = ''
@@ -136,7 +135,7 @@ onMounted(() => {
         })
       })
     }
-    updateDataFun(changedData)
+    modifyDataFun(changedData)
   })
 
   dragDiv.addEventListener('pointermove', (event) => {

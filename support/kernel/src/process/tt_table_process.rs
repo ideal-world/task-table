@@ -1,7 +1,7 @@
 use crate::dto::tt_basic_dtos::RbumBasicFilterReq;
-use crate::dto::tt_share_dtos::ShareAddReq;
-use crate::dto::tt_table_dtos::{TableColumnAddReq, TableColumnDataKind, TableColumnProps, TableColumnsResp, TableDetailResp, TableModifyReq, TableSummaryResp};
-use crate::{domain::tt_table, dto::tt_table_dtos::TableAddReq};
+use crate::dto::tt_share_dtos::ShareNewReq;
+use crate::dto::tt_table_dtos::{TableColumnDataKind, TableColumnNewReq, TableColumnProps, TableColumnsResp, TableDetailResp, TableModifyReq, TableSummaryResp};
+use crate::{domain::tt_table, dto::tt_table_dtos::TableNewReq};
 use lazy_static::lazy_static;
 use tardis::db::sea_orm::sea_query::{Expr, Query};
 use tardis::db::sea_orm::*;
@@ -25,17 +25,17 @@ const ALPHABET: [char; 62] = [
     'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
 ];
 
-pub async fn add_table(mut add_req: TableAddReq, funs: &TardisFunsInst, ctx: &TardisContext) -> TardisResult<String> {
+pub async fn new_table(mut new_req: TableNewReq, funs: &TardisFunsInst, ctx: &TardisContext) -> TardisResult<String> {
     let table_id: String = TardisFuns::field.nanoid_custom(10, &ALPHABET);
 
-    if add_req.columns.iter().any(|column| !R_COLUMN_NAME.is_match(&column.name)) {
-        return Err(funs.err().bad_request("table", "add_table", "Column name is illegal", "400-column-name-is-illegal"));
+    if new_req.columns.iter().any(|column| !R_COLUMN_NAME.is_match(&column.name)) {
+        return Err(funs.err().bad_request("table", "new_table", "Column name is illegal", "400-column-name-is-illegal"));
     }
 
-    if add_req.columns.is_empty() || !add_req.columns.iter().any(|column| column.name == add_req.pk_column_name) {
+    if new_req.columns.is_empty() || !new_req.columns.iter().any(|column| column.name == new_req.pk_column_name) {
         // add default id column
-        add_req.columns.push(TableColumnAddReq {
-            name: add_req.pk_column_name.to_string(),
+        new_req.columns.push(TableColumnNewReq {
+            name: new_req.pk_column_name.to_string(),
             icon: None,
             title: Some("ID".to_string()),
             data_kind: Some(TableColumnDataKind::Serial),
@@ -43,16 +43,17 @@ pub async fn add_table(mut add_req: TableAddReq, funs: &TardisFunsInst, ctx: &Ta
             use_dict: Some(false),
             dict_editable: Some(false),
             multi_value: Some(false),
+            groupable: Some(false),
             kind_date_time_format: None,
             from_column_name: None,
         });
     }
-    if add_req.parent_pk_column_name.is_some()
-        && (add_req.columns.is_empty() || !add_req.columns.iter().any(|column| &column.name == add_req.parent_pk_column_name.as_ref().unwrap_or(&"".to_string())))
+    if new_req.parent_pk_column_name.is_some()
+        && (new_req.columns.is_empty() || !new_req.columns.iter().any(|column| &column.name == new_req.parent_pk_column_name.as_ref().unwrap_or(&"".to_string())))
     {
         // add default parent_id column
-        add_req.columns.push(TableColumnAddReq {
-            name: add_req.parent_pk_column_name.as_ref().unwrap_or(&"".to_string()).to_string(),
+        new_req.columns.push(TableColumnNewReq {
+            name: new_req.parent_pk_column_name.as_ref().unwrap_or(&"".to_string()).to_string(),
             icon: None,
             title: Some("Parent ID".to_string()),
             data_kind: Some(TableColumnDataKind::Number),
@@ -60,12 +61,13 @@ pub async fn add_table(mut add_req: TableAddReq, funs: &TardisFunsInst, ctx: &Ta
             use_dict: Some(false),
             dict_editable: Some(false),
             multi_value: Some(false),
+            groupable: Some(false),
             kind_date_time_format: None,
             from_column_name: None,
         });
     }
 
-    let columns = add_req
+    let columns = new_req
         .columns
         .into_iter()
         .map(|req_column| TableColumnProps {
@@ -77,17 +79,18 @@ pub async fn add_table(mut add_req: TableAddReq, funs: &TardisFunsInst, ctx: &Ta
             use_dict: req_column.use_dict.unwrap_or(false),
             dict_editable: req_column.dict_editable.unwrap_or(false),
             multi_value: req_column.multi_value.unwrap_or(false),
+            groupable: req_column.groupable.unwrap_or(false),
             kind_date_time_format: req_column.kind_date_time_format,
         })
         .collect::<Vec<_>>();
 
     let table_domain = tt_table::ActiveModel {
         id: Set(table_id.clone()),
-        pk_column_name: Set(add_req.pk_column_name),
-        parent_pk_column_name: Set(add_req.parent_pk_column_name),
+        pk_column_name: Set(new_req.pk_column_name),
+        parent_pk_column_name: Set(new_req.parent_pk_column_name),
         columns: Set(TardisFuns::json.obj_to_json(&columns).expect("ignore")),
-        styles: Set(if add_req.styles.is_some() {
-            Some(TardisFuns::json.obj_to_json(&add_req.styles).expect("ignore"))
+        styles: Set(if new_req.styles.is_some() {
+            Some(TardisFuns::json.obj_to_json(&new_req.styles).expect("ignore"))
         } else {
             None
         }),
@@ -110,8 +113,8 @@ pub async fn add_table(mut add_req: TableAddReq, funs: &TardisFunsInst, ctx: &Ta
             vec![],
         )
         .await?;
-    tt_share_process::add_share(
-        ShareAddReq {
+    tt_share_process::new_share(
+        ShareNewReq {
             table_id: table_id.clone(),
             owner: ctx.owner.clone(),
             full_control: true,
@@ -159,6 +162,7 @@ pub async fn modify_table(table_id: &str, modify_req: TableModifyReq, funs: &Tar
                 use_dict: new_column.use_dict.unwrap_or(false),
                 dict_editable: new_column.dict_editable.unwrap_or(false),
                 multi_value: new_column.multi_value.unwrap_or(false),
+                groupable: new_column.groupable.unwrap_or(false),
                 kind_date_time_format: new_column.kind_date_time_format,
             });
             // add instance column
@@ -198,6 +202,9 @@ pub async fn modify_table(table_id: &str, modify_req: TableModifyReq, funs: &Tar
                 if let Some(dict_editable) = changed_column.dict_editable {
                     storage_column.dict_editable = dict_editable;
                 }
+                if let Some(groupable) = changed_column.groupable {
+                    storage_column.groupable = groupable;
+                }
                 if changed_column.kind_date_time_format.is_some() {
                     storage_column.kind_date_time_format = changed_column.kind_date_time_format;
                 }
@@ -226,6 +233,7 @@ pub async fn get_table(table_id: &str, funs: &TardisFunsInst, ctx: &TardisContex
             (tt_table::Entity, tt_table::Column::Id),
             (tt_table::Entity, tt_table::Column::PkColumnName),
             (tt_table::Entity, tt_table::Column::ParentPkColumnName),
+            (tt_table::Entity, tt_table::Column::FreeSortColumnName),
             (tt_table::Entity, tt_table::Column::Columns),
             (tt_table::Entity, tt_table::Column::Layouts),
             (tt_table::Entity, tt_table::Column::Styles),
@@ -257,6 +265,7 @@ pub async fn paginate_tables(
             (tt_table::Entity, tt_table::Column::Id),
             (tt_table::Entity, tt_table::Column::PkColumnName),
             (tt_table::Entity, tt_table::Column::ParentPkColumnName),
+            (tt_table::Entity, tt_table::Column::FreeSortColumnName),
             (tt_table::Entity, tt_table::Column::Owner),
             (tt_table::Entity, tt_table::Column::CreateTime),
             (tt_table::Entity, tt_table::Column::UpdateTime),

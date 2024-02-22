@@ -12,7 +12,7 @@ const props = defineProps<{
 }>()
 const modifyColumnFun = inject(FUN_MODIFY_COLUMN_TYPE)!
 const closeContextMenuFun = inject(FUN_CLOSE_CONTEXT_MENU_TYPE)!
-const iconPickerCompRef = ref()
+const iconPickerCompRef = ref<InstanceType<typeof IconPickerComp>>()
 
 async function renameColumn(event: Event) {
   const target = event.target as HTMLInputElement
@@ -25,13 +25,14 @@ async function renameColumn(event: Event) {
     useDict: props.curColumnConf.useDict,
     dictEditable: props.curColumnConf.dictEditable,
     multiValue: props.curColumnConf.multiValue,
+    groupable: props.curColumnConf.groupable,
     kindDateTimeFormat: props.curColumnConf.kindDateTimeFormat,
   })
   closeContextMenuFun()
 }
 
-async function showIconContainer(event: Event) {
-  iconPickerCompRef.value.show(event, MenuOffsetKind.MEDIUM_BOTTOM, undefined, true)
+async function showIconContainer(event: MouseEvent) {
+  iconPickerCompRef.value?.show(event, MenuOffsetKind.MEDIUM_BOTTOM)
 }
 
 async function selectIcon(icon: string) {

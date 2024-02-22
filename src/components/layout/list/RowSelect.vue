@@ -2,7 +2,7 @@
 import { onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { getChildIndex, getParentWithClass } from '../../../utils/basic'
-import { AlertKind, showAlert } from '../../common/Alert.vue'
+import { AlertKind, showAlert } from '../../common/Alert'
 
 const props = defineProps<{
   selectedPks: any[]

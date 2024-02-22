@@ -5,7 +5,7 @@ use tardis::basic::result::TardisResult;
 use tardis::serde_json::json;
 use tardis::TardisFuns;
 use task_table_kernel::dto::tt_data_dtos::{
-    TableDataAggregateKind, TableDataFilterItemReq, TableDataFilterReq, TableDataGroupReq, TableDataOperatorKind, TableDataSliceReq, TableDataSortReq,
+    TableDataAggregateKind, TableDataFilterItemProps, TableDataFilterProps, TableDataGroupProps, TableDataOperatorKind, TableDataSliceProps, TableDataSortProps,
 };
 use task_table_kernel::process::tt_data_process;
 
@@ -25,12 +25,13 @@ pub async fn test(table_id: &str) -> TardisResult<()> {
     // ----------------------------------
     // ----- test add data
     // ----------------------------------
-    let data = tt_data_process::add_or_modify_data(
+    let data = tt_data_process::new_data(
         table_id,
         vec![
             HashMap::from_iter(vec![("name".to_string(), json!("xh")), ("cate".to_string(), json!(["A", "B"])), ("age".to_string(), json!(6))].into_iter()),
             HashMap::from_iter(vec![("name".to_string(), json!("xy")), ("cate".to_string(), json!(["B"])), ("age".to_string(), json!(3))].into_iter()),
         ],
+        None,
         &funs,
         &ctx,
     )
@@ -50,7 +51,7 @@ pub async fn test(table_id: &str) -> TardisResult<()> {
     // ----------------------------------
     // ----- test modify data
     // ----------------------------------
-    let data = tt_data_process::add_or_modify_data(
+    let data = tt_data_process::modify_data(
         table_id,
         vec![HashMap::from_iter(
             vec![
@@ -72,7 +73,7 @@ pub async fn test(table_id: &str) -> TardisResult<()> {
     assert_eq!(data[0]["age"], json!(3.0));
     assert_eq!(data[0]["ts"], json!("2024-01-04T11:11:11.111Z"));
 
-    tt_data_process::add_or_modify_data(
+    tt_data_process::new_data(
         table_id,
         vec![
             HashMap::from_iter(
@@ -103,6 +104,7 @@ pub async fn test(table_id: &str) -> TardisResult<()> {
                 .into_iter(),
             ),
         ],
+        None,
         &funs,
         &ctx,
     )
@@ -138,7 +140,7 @@ pub async fn test(table_id: &str) -> TardisResult<()> {
     let data = tt_data_process::load_data_without_group(
         &table_id,
         None,
-        Some(vec![TableDataSortReq {
+        Some(vec![TableDataSortProps {
             column_name: "id".to_string(),
             order_desc: true,
         }]),
@@ -160,7 +162,7 @@ pub async fn test(table_id: &str) -> TardisResult<()> {
     let data = tt_data_process::load_data_without_group(
         &table_id,
         None,
-        Some(vec![TableDataSortReq {
+        Some(vec![TableDataSortProps {
             column_name: "id".to_string(),
             order_desc: true,
         }]),
@@ -187,14 +189,14 @@ pub async fn test(table_id: &str) -> TardisResult<()> {
     let data = tt_data_process::load_data_without_group(
         &table_id,
         None,
-        Some(vec![TableDataSortReq {
+        Some(vec![TableDataSortProps {
             column_name: "id".to_string(),
             order_desc: true,
         }]),
         Some(HashMap::from_iter(
             vec![("age".to_string(), TableDataAggregateKind::Avg), ("name".to_string(), TableDataAggregateKind::Count)].into_iter(),
         )),
-        Some(TableDataSliceReq {
+        Some(TableDataSliceProps {
             offset_number: 2,
             fetch_number: 3,
         }),
@@ -220,14 +222,14 @@ pub async fn test(table_id: &str) -> TardisResult<()> {
         // 2 xymm 3
         // 4 xymm3 5
         // 5 xymm4 6
-        Some(vec![TableDataFilterReq {
+        Some(vec![TableDataFilterProps {
             items: vec![
-                TableDataFilterItemReq {
+                TableDataFilterItemProps {
                     column_name: "id".to_string(),
                     operator: TableDataOperatorKind::Ne,
                     value: Some(json!(3)),
                 },
-                TableDataFilterItemReq {
+                TableDataFilterItemProps {
                     column_name: "name".to_string(),
                     operator: TableDataOperatorKind::StartWith,
                     value: Some(json!("xymm")),
@@ -235,14 +237,14 @@ pub async fn test(table_id: &str) -> TardisResult<()> {
             ],
             and: true,
         }]),
-        Some(vec![TableDataSortReq {
+        Some(vec![TableDataSortProps {
             column_name: "id".to_string(),
             order_desc: false,
         }]),
         Some(HashMap::from_iter(
             vec![("age".to_string(), TableDataAggregateKind::Avg), ("name".to_string(), TableDataAggregateKind::Count)].into_iter(),
         )),
-        Some(TableDataSliceReq {
+        Some(TableDataSliceProps {
             offset_number: 2,
             fetch_number: 3,
         }),
@@ -265,20 +267,21 @@ pub async fn test(table_id: &str) -> TardisResult<()> {
     // ----------------------------------
     let data = tt_data_process::load_data_with_group(
         &table_id,
-        TableDataGroupReq {
+        TableDataGroupProps {
             column_names: vec!["cate".to_string()],
             group_order_desc: true,
             hide_empty_record: true,
+            slices: HashMap::new(),
         },
         None,
-        Some(vec![TableDataSortReq {
+        Some(vec![TableDataSortProps {
             column_name: "id".to_string(),
             order_desc: true,
         }]),
         Some(HashMap::from_iter(
             vec![("age".to_string(), TableDataAggregateKind::Avg), ("name".to_string(), TableDataAggregateKind::Count)].into_iter(),
         )),
-        Some(TableDataSliceReq {
+        Some(TableDataSliceProps {
             offset_number: 1,
             fetch_number: 2,
         }),

@@ -13,6 +13,7 @@ pub struct Model {
     pub id: String,
     pub pk_column_name: String,
     pub parent_pk_column_name: Option<String>,
+    pub free_sort_column_name: Option<String>,
     pub columns: Json,
     pub layouts: Option<Json>,
     pub styles: Option<Json>,
@@ -38,6 +39,7 @@ impl TardisActiveModel for ActiveModel {
             .col(ColumnDef::new(Column::Id).not_null().string())
             .col(ColumnDef::new(Column::PkColumnName).not_null().string())
             .col(ColumnDef::new(Column::ParentPkColumnName).string())
+            .col(ColumnDef::new(Column::FreeSortColumnName).string())
             .col(ColumnDef::new(Column::Columns).not_null().json_binary())
             .col(ColumnDef::new(Column::Layouts).json_binary())
             .col(ColumnDef::new(Column::Styles).json_binary())

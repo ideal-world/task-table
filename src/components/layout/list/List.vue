@@ -45,10 +45,10 @@ const columnsConf = computed<CachedColumnConf[]>(() => {
   })
 })
 
-const rowMenuCompRef = ref()
+const rowMenuCompRef = ref<InstanceType<typeof MenuComp>>()
 
 function showRowContextMenu(event: PointerEvent) {
-  rowMenuCompRef.value && rowMenuCompRef.value.show(event)
+  rowMenuCompRef.value?.show(event)
 }
 
 function setColumnStyles(colIdx: number) {

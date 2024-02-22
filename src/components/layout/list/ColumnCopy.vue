@@ -24,6 +24,7 @@ async function copyColumn() {
     useDict: props.curColumnConf.useDict,
     dictEditable: props.curColumnConf.dictEditable,
     multiValue: props.curColumnConf.multiValue,
+    groupable: props.curColumnConf.groupable,
   }
   const newLayoutColumnConf: TableLayoutColumnConf = {
     ...props.curColumnConf,

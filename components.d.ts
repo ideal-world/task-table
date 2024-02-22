@@ -7,7 +7,6 @@ export {}
 
 declare module 'vue' {
   export interface GlobalComponents {
-    Alert: typeof import('./src/components/common/Alert.vue')['default']
     CellEdit: typeof import('./src/components/layout/list/CellEdit.vue')['default']
     CellFill: typeof import('./src/components/layout/list/CellFill.vue')['default']
     CellSelect: typeof import('./src/components/layout/list/CellSelect.vue')['default']

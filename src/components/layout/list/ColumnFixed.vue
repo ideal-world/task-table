@@ -12,14 +12,14 @@ const props = defineProps<{
 const modifyColumnFun = inject(FUN_MODIFY_COLUMN_TYPE)!
 const closeContextMenuFun = inject(FUN_CLOSE_CONTEXT_MENU_TYPE)!
 
-const fixedInputRef = ref()
+const fixedInputRef = ref<HTMLInputElement>()
 
 onMounted(() => {
-  fixedInputRef.value.checked = props.curColumnConf.fixed
+  fixedInputRef.value!.checked = props.curColumnConf.fixed
 })
 
 watch(props, () => {
-  fixedInputRef.value.checked = props.curColumnConf.fixed
+  fixedInputRef.value!.checked = props.curColumnConf.fixed
 })
 
 async function setFixedColumn() {

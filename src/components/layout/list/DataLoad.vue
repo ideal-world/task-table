@@ -15,7 +15,7 @@ const loading = ref<boolean>(false)
 
 async function loadData() {
   loading.value = true
-  await loadDataFun(undefined, props.groupValue)
+  await loadDataFun(props.groupValue)
   loading.value = false
 }
 </script>

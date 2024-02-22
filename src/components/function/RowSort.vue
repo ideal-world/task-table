@@ -5,19 +5,19 @@ import * as iconSvg from '../../assets/icon'
 import MenuComp from '../common/Menu.vue'
 import type { TableColumnConf } from '../conf'
 import { FUN_LOAD_DATA_TYPE, FUN_MODIFY_LAYOUT_TYPE } from '../events'
-import type { TableDataSortReq } from '../props'
+import type { TableDataSortProps } from '../props'
 
 const props = defineProps<{
-  sorts?: TableDataSortReq[]
+  sorts?: TableDataSortProps[]
   columnsConf: TableColumnConf[]
 }>()
 
 const modifyLayoutFun = inject(FUN_MODIFY_LAYOUT_TYPE)!
 const loadDataFun = inject(FUN_LOAD_DATA_TYPE)!
 
-const sortCompRef = ref()
-const sortColumnCompRef = ref()
-const sortAscDescCompRef = ref()
+const sortCompRef = ref<InstanceType<typeof MenuComp>>()
+const sortColumnCompRef = ref<InstanceType<typeof MenuComp>>()
+const sortAscDescCompRef = ref<InstanceType<typeof MenuComp>>()
 const tmpNewSortColumnName = ref<string | undefined>()
 const tmpNewSortOrderDesc = ref<boolean | undefined>()
 
@@ -25,25 +25,25 @@ const curModifyColumnName = ref<string | undefined>()
 
 function showRowSortContextMenu(event: MouseEvent) {
   const targetEle = event.target as HTMLElement
-  sortCompRef.value.show(targetEle)
+  sortCompRef.value?.show(targetEle)
 }
 
 function showSortColumnContextMenu(event: MouseEvent, columnName?: string) {
   curModifyColumnName.value = columnName
   const targetEle = event.target as HTMLElement
-  sortColumnCompRef.value.show(targetEle, undefined, undefined, true)
+  sortColumnCompRef.value?.show(targetEle, undefined, undefined, true)
 }
 
 function showSortAscDescContextMenu(event: MouseEvent, columnName?: string) {
   curModifyColumnName.value = columnName
   const targetEle = event.target as HTMLElement
-  sortAscDescCompRef.value.show(targetEle, undefined, undefined, true)
+  sortAscDescCompRef.value?.show(targetEle, undefined, undefined, true)
 }
 
 async function setSortColumn(event: MouseEvent) {
   const targetEle = event.target as HTMLElement
   const selectedColumnName = targetEle.dataset.columnName
-  sortColumnCompRef.value.close()
+  sortColumnCompRef.value?.close()
   if (!selectedColumnName)
     return
 
@@ -58,7 +58,7 @@ async function setSortColumn(event: MouseEvent) {
 async function setSortAscDesc(event: MouseEvent) {
   const targetEle = event.target as HTMLElement
   const selectedDesc = targetEle.dataset.desc !== undefined
-  sortAscDescCompRef.value.close()
+  sortAscDescCompRef.value?.close()
   if (curModifyColumnName.value)
     await modifySort(curModifyColumnName.value, curModifyColumnName.value, selectedDesc)
   else if (tmpNewSortColumnName.value)
@@ -93,7 +93,7 @@ async function addSort(newColumnName: string, newOrderDesc: boolean) {
 }
 
 async function modifySort(oriColumnName: string, newColumnName: string, newOrderDesc: boolean) {
-  const sorts = JSON.parse(JSON.stringify(props.sorts!)) as TableDataSortReq[]
+  const sorts = JSON.parse(JSON.stringify(props.sorts!)) as TableDataSortProps[]
   sorts.splice(sorts.findIndex(sort => sort.columnName === oriColumnName), 1, {
     columnName: newColumnName,
     orderDesc: newOrderDesc,

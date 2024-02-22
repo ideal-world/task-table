@@ -50,6 +50,10 @@
     },
     "state": {
       "selectPlaceholder": "Please select"
+    },
+    "event": {
+      "notConfigured": "Event not configured",
+      "loadDataInvalidScene": "Unable to load data: Invalid scene"
     }
   },
   "layout": {
@@ -116,18 +120,19 @@
     "columnNew": {
       "title": "New column",
       "dataKind": "Data kind",
-      "submit": "Add",
+      "submit": "New",
       "useDict": "Using dictionaries",
       "dictEditable": "Dictionary editable",
+      "groupable": "Groupable",
       "columnNamePlaceholder": "New column name",
       "multiValue": "Support multi-value"
     },
     "columnDict": {
       "dictTitle": "Dictionary configuration",
       "searchPlaceholder": "Search...",
-      "addTitle": "Add",
+      "newTitle": "New",
       "titlePlaceholder": "New name",
-      "submit": "Add"
+      "submit": "New"
     },
     "columnKindDateTime": {
       "dateTitle": "Date/Time configuration",

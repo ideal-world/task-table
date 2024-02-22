@@ -4,20 +4,20 @@ import * as iconSvg from '../../assets/icon'
 import MenuComp from '../common/Menu.vue'
 import type { TableColumnConf } from '../conf'
 import { FUN_LOAD_DATA_TYPE, FUN_MODIFY_LAYOUT_TYPE } from '../events'
-import type { TableDataGroupReq } from '../props'
+import type { TableDataGroupProps } from '../props'
 
 const props = defineProps<{
-  group?: TableDataGroupReq
+  group?: TableDataGroupProps
   columnsConf: TableColumnConf[]
 }>()
 
 const modifyLayoutFun = inject(FUN_MODIFY_LAYOUT_TYPE)!
 const loadDataFun = inject(FUN_LOAD_DATA_TYPE)!
-const groupCompRef = ref()
+const groupCompRef = ref<InstanceType<typeof MenuComp>>()
 
 function showGroupContextMenu(event: MouseEvent) {
   const targetEle = event.target as HTMLElement
-  groupCompRef.value.show(targetEle)
+  groupCompRef.value?.show(targetEle)
 }
 
 async function setGroupColumn(columnName: string) {
@@ -33,6 +33,7 @@ async function setGroupColumn(columnName: string) {
         columnNames,
         groupOrderDesc: props.group.groupOrderDesc,
         hideEmptyRecord: props.group.hideEmptyRecord,
+        slices: props.group.slices,
       },
     })
     await loadDataFun()
@@ -43,6 +44,8 @@ async function setGroupColumn(columnName: string) {
         columnNames: [columnName],
         groupOrderDesc: false,
         hideEmptyRecord: false,
+        slices: {
+        },
       },
     })
     await loadDataFun()
@@ -56,6 +59,7 @@ async function setGroupDescSort() {
         columnNames: props.group.columnNames,
         groupOrderDesc: !props.group.groupOrderDesc,
         hideEmptyRecord: props.group.hideEmptyRecord,
+        slices: props.group.slices,
       },
     })
     await loadDataFun()
@@ -69,6 +73,7 @@ async function setGroupHideEmpty() {
         columnNames: props.group.columnNames,
         groupOrderDesc: props.group.groupOrderDesc,
         hideEmptyRecord: !props.group.hideEmptyRecord,
+        slices: props.group.slices,
       },
     })
     await loadDataFun()
@@ -87,7 +92,7 @@ async function setGroupHideEmpty() {
       {{ $t('function.group.columnsTitle') }}
     </div>
     <div
-      v-for="column in props.columnsConf"
+      v-for="column in props.columnsConf.filter(columnConf => columnConf.groupable)"
       :key="column.name"
       class="iw-contextmenu__item flex justify-between w-full" :data-column-name="column.name"
     >

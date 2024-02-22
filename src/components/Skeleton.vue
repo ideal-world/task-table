@@ -6,8 +6,8 @@ import type { TableBasicConf, TableLayoutConf } from './conf'
 import { initConf } from './conf'
 import * as Event from './events'
 import FilterComp from './function/Filter.vue'
-import ResizeComp from './function/Resize.vue'
 import GroupComp from './function/Group.vue'
+import ResizeComp from './function/Resize.vue'
 import RowSortComp from './function/RowSort.vue'
 import ThemeComp from './function/Theme.vue'
 import ListComp from './layout/list/List.vue'
@@ -15,8 +15,8 @@ import type { TableProps } from './props'
 
 const props = defineProps<TableProps>()
 const [_tableBasicConf, _tableLayoutsConf] = initConf(props)
-const menuLayoutCompRef = ref()
-const menuMoreCompRef = ref()
+const menuLayoutCompRef = ref<InstanceType<typeof MenuComp>>()
+const menuMoreCompRef = ref<InstanceType<typeof MenuComp>>()
 
 const tableBasicConf = reactive<TableBasicConf>(_tableBasicConf)
 const tableLayoutsConf = reactive<TableLayoutConf[]>(_tableLayoutsConf)
@@ -37,15 +37,16 @@ onMounted(async () => {
   await Event.watch()
 })
 
-Event.init(tableBasicConf, tableLayoutsConf, currentLayoutId, props.events)
 provide(Event.FUN_LOAD_DATA_TYPE, Event.loadData)
-provide(Event.FUN_ADD_DATA_TYPE, Event.addData)
-provide(Event.FUN_UPDATE_DATA_TYPE, Event.updateData)
+provide(Event.FUN_NEW_DATA_TYPE, Event.newData)
+provide(Event.FUN_MODIFY_DATA_TYPE, Event.modifyData)
+provide(Event.FUN_COPY_DATA_TYPE, Event.copyData)
 provide(Event.FUN_DELETE_DATA_TYPE, Event.deleteData)
+provide(Event.FUN_SORT_DATA_TYPE, Event.sortData)
 provide(Event.FUN_LOAD_CELL_DICT_ITEMS_TYPE, Event.loadCellDictItems)
-provide(Event.FUN_SAVE_CELL_DICT_ITEM_TYPE, Event.saveCellDictItem)
+provide(Event.FUN_NEW_OR_MODIFY_CELL_DICT_ITEM_TYPE, Event.newOrModifyCellDictItem)
 provide(Event.FUN_DELETE_CELL_DICT_ITEM_TYPE, Event.deleteCellDictItem)
-provide(Event.FUN_SORT_CELL_DICT_ITEM_TYPE, Event.sortCellDictItem)
+provide(Event.FUN_SORT_CELL_DICT_ITEMS_TYPE, Event.sortCellDictItems)
 provide(Event.FUN_MODIFY_STYLES_TYPE, Event.modifyStyles)
 provide(Event.FUN_NEW_COLUMN_TYPE, Event.newColumn)
 provide(Event.FUN_DELETE_COLUMN_TYPE, Event.deleteColumn)
@@ -59,12 +60,12 @@ provide(Event.FUN_SORT_LAYOUTS_TYPE, Event.sortLayouts)
 function showLayoutMenu(event: MouseEvent) {
   const targetEle = event.target as HTMLElement
   const selectedLayoutEle = targetEle.parentElement as HTMLElement
-  menuLayoutCompRef.value.show(selectedLayoutEle)
+  menuLayoutCompRef.value?.show(selectedLayoutEle)
 }
 
 function showMoreMenu(event: MouseEvent) {
   const targetEle = event.target as HTMLElement
-  menuMoreCompRef.value.show(targetEle, MenuOffsetKind.RIGHT_BOTTOM)
+  menuMoreCompRef.value?.show(targetEle, MenuOffsetKind.RIGHT_BOTTOM)
 }
 </script>
 
@@ -94,7 +95,7 @@ function showMoreMenu(event: MouseEvent) {
     </div>
     <div class="iw-tt-main">
       <template v-for="layout in tableLayoutsConf" :key="layout.id">
-        <div v-if="currentLayoutId === layout.id" class="iw-tt-toolbar flex items-center h-8 p-0.5">
+        <div v-if="currentLayoutId === layout.id" :id="`iw-tt-layout-${layout.id}`" class="iw-tt-toolbar flex items-center h-8 p-0.5">
           <GroupComp :group="layout.group" :columns-conf="tableBasicConf.columns" />
           <div class="iw-divider iw-divider-horizontal m-0.5" />
           <RowSortComp :sorts="layout.sorts" :columns-conf="tableBasicConf.columns" />

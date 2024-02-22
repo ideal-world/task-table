@@ -14,7 +14,7 @@ const props = defineProps<{
 const modifyColumnFun = inject(FUN_MODIFY_COLUMN_TYPE)!
 const closeContextMenuFun = inject(FUN_CLOSE_CONTEXT_MENU_TYPE)!
 
-const wrapInputRef = ref()
+const wrapInputRef = ref<HTMLInputElement>()
 
 onMounted(() => {
   wrapInputRef.value && (wrapInputRef.value.checked = props.curColumnConf.wrap)

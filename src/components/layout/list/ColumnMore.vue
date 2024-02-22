@@ -7,7 +7,7 @@ import MenuComp, { MenuOffsetKind } from '../../common/Menu.vue'
 import type { TableColumnConf, TableLayoutColumnConf } from '../../conf'
 import { dictEnableByDataKind, getDefaultIconByDataKind, getDefaultLayoutColumnConf } from '../../conf'
 import { FUN_MODIFY_COLUMN_TYPE, FUN_MODIFY_LAYOUT_TYPE, FUN_NEW_COLUMN_TYPE } from '../../events'
-import type { TableLayoutModifyReq } from '../../props'
+import type { TableLayoutModifyProps } from '../../props'
 import { DataKind, translateDataKind } from '../../props'
 
 const props = defineProps<{
@@ -17,9 +17,9 @@ const props = defineProps<{
 const modifyColumnFun = inject(FUN_MODIFY_COLUMN_TYPE)!
 const modifyLayoutFun = inject(FUN_MODIFY_LAYOUT_TYPE)!
 const newColumnFun = inject(FUN_NEW_COLUMN_TYPE)!
-const columnMoreCompRef = ref()
-const columnDataKindCompRef = ref()
-const iconPickerCompRef = ref()
+const columnMoreCompRef = ref<InstanceType<typeof MenuComp>>()
+const columnDataKindCompRef = ref<InstanceType<typeof MenuComp>>()
+const iconPickerCompRef = ref<InstanceType<typeof MenuComp>>()
 const newColumnInfo = ref<{
   title?: string
   icon?: string
@@ -27,12 +27,13 @@ const newColumnInfo = ref<{
   useDict?: boolean
   dictEditable?: boolean
   multiValue?: boolean
+  groupable?: boolean
 }>({
 })
 
 function showNewColumnDatKindContextMenu(event: MouseEvent) {
   const targetEle = event.target as HTMLElement
-  columnDataKindCompRef.value.show(targetEle, MenuOffsetKind.RIGHT_BOTTOM, undefined, true)
+  columnDataKindCompRef.value?.show(targetEle, MenuOffsetKind.RIGHT_BOTTOM, undefined, true)
 }
 
 function setNewColumnDataKind(dataKind: DataKind) {
@@ -40,11 +41,11 @@ function setNewColumnDataKind(dataKind: DataKind) {
   if (!newColumnInfo.value.icon)
     newColumnInfo.value.icon = getDefaultIconByDataKind(dataKind)
 
-  columnDataKindCompRef.value.close()
+  columnDataKindCompRef.value?.close()
 }
 
-function showNewColumnIconContainer(event: Event) {
-  iconPickerCompRef.value.show(event, MenuOffsetKind.MEDIUM_BOTTOM, undefined, true)
+function showNewColumnIconContainer(event: MouseEvent) {
+  iconPickerCompRef.value?.show(event, MenuOffsetKind.MEDIUM_BOTTOM, undefined, true)
 }
 
 function setNewColumnIcon(icon: string) {
@@ -63,9 +64,10 @@ async function submitNewColumn() {
       useDict: newColumnInfo.value.useDict ?? false,
       dictEditable: newColumnInfo.value.useDict ?? false,
       multiValue: newColumnInfo.value.multiValue ?? false,
+      groupable: newColumnInfo.value.groupable ?? false,
     }, getDefaultLayoutColumnConf(name))
     newColumnInfo.value = {}
-    columnMoreCompRef.value.close()
+    columnMoreCompRef.value?.close()
   }
 }
 
@@ -83,7 +85,7 @@ async function setShowToggleColumn(columnConf: TableColumnConf) {
     })
   }
   else {
-    const changedLayoutReq: TableLayoutModifyReq = {
+    const changedLayoutReq: TableLayoutModifyProps = {
       newColumn: {
         name: columnConf.name,
         hide: false,
@@ -93,8 +95,8 @@ async function setShowToggleColumn(columnConf: TableColumnConf) {
   }
 }
 
-function showContainer(event: Event, offsetKind: MenuOffsetKind = MenuOffsetKind.RIGHT_BOTTOM) {
-  columnMoreCompRef.value.show(event, offsetKind)
+function showContainer(event: MouseEvent, offsetKind: MenuOffsetKind = MenuOffsetKind.RIGHT_BOTTOM) {
+  columnMoreCompRef.value?.show(event, offsetKind)
 }
 
 defineExpose({
@@ -145,6 +147,13 @@ defineExpose({
         {{ $t('list.columnNew.dictEditable') }}
       </span>
       <input v-model="newColumnInfo.dictEditable" type="checkbox" class="iw-toggle iw-toggle-xs">
+    </div>
+    <div class="iw-contextmenu__item flex justify-between items-center w-full">
+      <span>
+        <i :class="iconSvg.GROUP" />
+        {{ $t('list.columnNew.groupable') }}
+      </span>
+      <input v-model="newColumnInfo.groupable" type="checkbox" class="iw-toggle iw-toggle-xs">
     </div>
     <div class="iw-contextmenu__item flex justify-end w-full">
       <button

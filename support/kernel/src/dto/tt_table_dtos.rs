@@ -11,10 +11,11 @@ use tardis::{
 #[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct TableAddReq {
+pub struct TableNewReq {
     pub pk_column_name: String,
     pub parent_pk_column_name: Option<String>,
-    pub columns: Vec<TableColumnAddReq>,
+    pub free_sort_column_name: Option<String>,
+    pub columns: Vec<TableColumnNewReq>,
     pub styles: Option<TableStyleProps>,
 }
 
@@ -22,7 +23,7 @@ pub struct TableAddReq {
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct TableModifyReq {
-    pub new_column: Option<TableColumnAddReq>,
+    pub new_column: Option<TableColumnNewReq>,
     pub changed_column: Option<TableColumnModifyReq>,
     pub deleted_column_name: Option<String>,
     pub styles: Option<TableStyleProps>,
@@ -35,6 +36,7 @@ pub struct TableSummaryResp {
     pub id: String,
     pub pk_column_name: String,
     pub parent_pk_column_name: Option<String>,
+    pub free_sort_column_name: Option<String>,
 
     pub owner: String,
     pub create_time: DateTime<Utc>,
@@ -48,6 +50,7 @@ pub struct TableDetailResp {
     pub id: String,
     pub pk_column_name: String,
     pub parent_pk_column_name: Option<String>,
+    pub free_sort_column_name: Option<String>,
     pub columns: Value,
     pub layouts: Option<Value>,
     pub styles: Option<Value>,
@@ -84,7 +87,7 @@ impl TableDetailResp {
 #[serde(rename_all = "camelCase")]
 pub struct TableColumnsResp {
     pub pk_column_name: String,
-        pub columns: Value,
+    pub columns: Value,
 }
 
 impl TableColumnsResp {
@@ -96,7 +99,7 @@ impl TableColumnsResp {
 #[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct TableColumnAddReq {
+pub struct TableColumnNewReq {
     pub name: String,
     pub icon: Option<String>,
     pub title: Option<String>,
@@ -105,6 +108,7 @@ pub struct TableColumnAddReq {
     pub use_dict: Option<bool>,
     pub dict_editable: Option<bool>,
     pub multi_value: Option<bool>,
+    pub groupable: Option<bool>,
     pub kind_date_time_format: Option<String>,
     pub from_column_name: Option<String>,
 }
@@ -119,6 +123,7 @@ pub struct TableColumnModifyReq {
     pub data_editable: Option<bool>,
     pub use_dict: Option<bool>,
     pub dict_editable: Option<bool>,
+    pub groupable: Option<bool>,
     pub kind_date_time_format: Option<String>,
 }
 
@@ -134,6 +139,7 @@ pub struct TableColumnProps {
     pub use_dict: bool,
     pub dict_editable: bool,
     pub multi_value: bool,
+    pub groupable: bool,
     pub kind_date_time_format: Option<String>,
 }
 
@@ -180,7 +186,7 @@ pub enum TableColumnDataKind {
 #[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct TableStyleAddOrModifyReq {
+pub struct TableStyleNewOrModifyReq {
     pub size: Option<String>,
     pub theme: Option<String>,
     pub table_class: Option<String>,

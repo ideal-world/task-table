@@ -7,15 +7,15 @@ use tardis::serde_json::Value;
 #[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct TableDataFilterReq {
-    pub items: Vec<TableDataFilterItemReq>,
+pub struct TableDataFilterProps {
+    pub items: Vec<TableDataFilterItemProps>,
     pub and: bool,
 }
 
 #[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct TableDataFilterItemReq {
+pub struct TableDataFilterItemProps {
     pub column_name: String,
     pub operator: TableDataOperatorKind,
     pub value: Option<Value>,
@@ -24,7 +24,7 @@ pub struct TableDataFilterItemReq {
 #[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct TableDataSortReq {
+pub struct TableDataSortProps {
     pub column_name: String,
     pub order_desc: bool,
 }
@@ -32,16 +32,17 @@ pub struct TableDataSortReq {
 #[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct TableDataGroupReq {
+pub struct TableDataGroupProps {
     pub column_names: Vec<String>,
     pub group_order_desc: bool,
     pub hide_empty_record: bool,
+    pub slices: HashMap<String, TableDataSliceProps>,
 }
 
 #[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct TableDataSliceReq {
+pub struct TableDataSliceProps {
     pub offset_number: i32,
     pub fetch_number: i32,
 }

@@ -2,24 +2,20 @@
 import { inject, ref } from 'vue'
 import * as iconSvg from '../../../assets/icon'
 import { FUN_CLOSE_CONTEXT_MENU_TYPE } from '../../common/Menu.vue'
-import { FUN_ADD_DATA_TYPE } from '../../events'
+import { FUN_COPY_DATA_TYPE } from '../../events'
 
 const props = defineProps<{
   pkColumnName: string
   selectedPks: string[] | number[]
 }>()
 
-const addDataFun = inject(FUN_ADD_DATA_TYPE)!
+const copyDataFun = inject(FUN_COPY_DATA_TYPE)!
 const closeContextMenuFun = inject(FUN_CLOSE_CONTEXT_MENU_TYPE)!
 
 const copiedPks = ref<string[] | number[]>([])
 
 async function copyAndPasteRow() {
-  await addDataFun(props.selectedPks.slice().map((pk) => {
-    return {
-      [props.pkColumnName]: pk,
-    }
-  }), props.selectedPks[props.selectedPks.length - 1])
+  await copyDataFun(props.selectedPks.slice())
   closeContextMenuFun()
 }
 
@@ -29,11 +25,7 @@ function copyRow() {
 }
 
 async function pasteRow() {
-  await addDataFun(copiedPks.value.slice().map((pk) => {
-    return {
-      [props.pkColumnName]: pk,
-    }
-  }), props.selectedPks[props.selectedPks.length - 1])
+  await copyDataFun(copiedPks.value.slice())
   closeContextMenuFun()
 }
 </script>

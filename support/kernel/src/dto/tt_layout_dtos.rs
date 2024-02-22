@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use super::tt_data_dtos::{TableDataFilterReq, TableDataGroupReq, TableDataSortReq};
+use super::tt_data_dtos::{TableDataFilterProps, TableDataGroupProps, TableDataSliceProps, TableDataSortProps};
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
 use tardis::serde_json::Value;
@@ -8,32 +8,31 @@ use tardis::serde_json::Value;
 #[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct TableLayoutAddReq {
+pub struct TableLayoutNewReq {
     pub title: String,
     pub layout_kind: String,
     pub icon: Option<String>,
     pub columns: Vec<TableLayoutColumnProps>,
-    pub filters: Option<Vec<TableDataFilterReq>>,
-    pub sorts: Option<Vec<TableDataSortReq>>,
-    pub group: Option<TableDataGroupReq>,
+    pub filters: Option<Vec<TableDataFilterProps>>,
+    pub sorts: Option<Vec<TableDataSortProps>>,
+    pub group: Option<TableDataGroupProps>,
     pub aggs: Option<HashMap<String, String>>,
+    pub slice: Option<TableDataSliceProps>,
     pub expand_data_pks: Option<Vec<Value>>,
-    pub fetch_data_number: Option<i32>,
 }
 
 #[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct TableLayoutModifyReq {
+pub struct TableLayoutModifyProps {
     pub title: Option<String>,
     pub icon: Option<String>,
-    pub filters: Option<Vec<TableDataFilterReq>>,
-    pub sorts: Option<Vec<TableDataSortReq>>,
+    pub filters: Option<Vec<TableDataFilterProps>>,
+    pub sorts: Option<Vec<TableDataSortProps>>,
+    pub group: Option<TableDataGroupProps>,
     pub aggs: Option<HashMap<String, String>>,
-    pub fetch_data_number: Option<i32>,
+    pub slice: Option<TableDataSliceProps>,
     pub expand_data_pks: Option<Vec<Value>>,
-    pub new_group: Option<TableDataGroupReq>,
-    pub delete_group: Option<bool>,
     pub column_sorted_names: Option<Vec<String>>,
     pub new_column: Option<TableLayoutColumnProps>,
     pub changed_column: Option<TableLayoutColumnProps>,
@@ -49,12 +48,12 @@ pub struct TableLayoutProps {
     pub layout_kind: String,
     pub icon: Option<String>,
     pub columns: Vec<TableLayoutColumnProps>,
-    pub filters: Option<Vec<TableDataFilterReq>>,
-    pub sorts: Option<Vec<TableDataSortReq>>,
-    pub group: Option<TableDataGroupReq>,
+    pub filters: Option<Vec<TableDataFilterProps>>,
+    pub sorts: Option<Vec<TableDataSortProps>>,
+    pub group: Option<TableDataGroupProps>,
     pub aggs: Option<HashMap<String, String>>,
+    pub slice: Option<TableDataSliceProps>,
     pub expand_data_pks: Option<Vec<Value>>,
-    pub fetch_data_number: Option<i32>,
 }
 
 #[skip_serializing_none]

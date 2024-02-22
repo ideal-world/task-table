@@ -5,18 +5,9 @@ use tardis::{db::sea_orm, serde_json::Value};
 #[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct TableDictAddReq {
+pub struct TableDictNewOrModifyReq {
     pub title: String,
     pub value: Value,
-    pub color: Option<String>,
-    pub avatar: Option<String>,
-}
-
-#[skip_serializing_none]
-#[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
-pub struct TableDictModifyReq {
-    pub title: Option<String>,
     pub color: Option<String>,
     pub avatar: Option<String>,
 }
@@ -35,7 +26,7 @@ pub struct TableDictInfo {
 #[skip_serializing_none]
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct TableDictItemResp {
+pub struct TableDictItemsResp {
     pub records: Vec<TableDictInfo>,
     pub total_number: i32,
 }

@@ -21,6 +21,7 @@ async function setDateTimeFormat(newFormat: string) {
     dictEditable: props.curColumnConf.dictEditable,
     multiValue: props.curColumnConf.multiValue,
     kindDateTimeFormat: newFormat,
+    groupable: props.curColumnConf.groupable,
   })
 }
 </script>

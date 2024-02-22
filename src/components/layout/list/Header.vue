@@ -24,18 +24,18 @@ const props = defineProps<{
 
 const selectedColumnConf = ref<CachedColumnConf | undefined>()
 
-const headerMenuCompRef = ref()
-const headerColumnMoreCompRef = ref()
+const headerMenuCompRef = ref<InstanceType<typeof MenuComp>>()
+const headerColumnMoreCompRef = ref<InstanceType<typeof MenuComp>>()
 
 function showHeaderContextMenu(event: MouseEvent, columName: string) {
   selectedColumnConf.value = props.columnsConf.find(col => col.name === columName)
   const targetEle = event.target as HTMLElement
-  headerMenuCompRef.value.show(targetEle, undefined, MenuSizeKind.LARGE)
+  headerMenuCompRef.value?.show(targetEle, undefined, MenuSizeKind.LARGE)
 }
 
 async function showColumnMoreContextMenu(event: MouseEvent) {
   const targetEle = event.target as HTMLElement
-  await headerColumnMoreCompRef.value.show(targetEle)
+  await headerColumnMoreCompRef.value?.show(targetEle)
 }
 </script>
 

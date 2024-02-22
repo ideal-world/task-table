@@ -2,8 +2,8 @@ use tardis::basic::dto::TardisContext;
 use tardis::basic::result::TardisResult;
 use tardis::serde_json::json;
 use tardis::TardisFuns;
-use task_table_kernel::dto::tt_data_dtos::{TableDataFilterItemReq, TableDataFilterReq, TableDataOperatorKind};
-use task_table_kernel::dto::tt_layout_dtos::{TableLayoutAddReq, TableLayoutColumnProps, TableLayoutModifyReq};
+use task_table_kernel::dto::tt_data_dtos::{TableDataFilterItemProps, TableDataFilterProps, TableDataOperatorKind};
+use task_table_kernel::dto::tt_layout_dtos::{TableLayoutColumnProps, TableLayoutModifyProps, TableLayoutNewReq};
 use task_table_kernel::process::tt_layout_process;
 
 pub async fn test(table_id: &str) -> TardisResult<String> {
@@ -22,9 +22,9 @@ pub async fn test(table_id: &str) -> TardisResult<String> {
     // ----------------------------------
     // ----- test add layout
     // ----------------------------------
-    let layout_id = tt_layout_process::add_layout(
+    let layout_id = tt_layout_process::new_layout(
         table_id,
-        TableLayoutAddReq {
+        TableLayoutNewReq {
             title: "default".to_string(),
             layout_kind: "LIST".to_string(),
             icon: None,
@@ -70,8 +70,8 @@ pub async fn test(table_id: &str) -> TardisResult<String> {
             sorts: None,
             group: None,
             aggs: None,
+            slice: None,
             expand_data_pks: None,
-            fetch_data_number: None,
         },
         &funs,
         &ctx,
@@ -91,12 +91,11 @@ pub async fn test(table_id: &str) -> TardisResult<String> {
     tt_layout_process::modify_layout(
         &table_id,
         &layout_id,
-        TableLayoutModifyReq {
+        TableLayoutModifyProps {
             title: None,
-            // TODO
             icon: Some("TEXT".to_string()),
-            filters: Some(vec![TableDataFilterReq {
-                items: vec![TableDataFilterItemReq {
+            filters: Some(vec![TableDataFilterProps {
+                items: vec![TableDataFilterItemProps {
                     column_name: "name".to_string(),
                     operator: TableDataOperatorKind::Eq,
                     value: Some(json!("xh")),
@@ -105,10 +104,9 @@ pub async fn test(table_id: &str) -> TardisResult<String> {
             }]),
             sorts: None,
             aggs: None,
-            fetch_data_number: None,
+            slice: None,
+            group: None,
             expand_data_pks: None,
-            new_group: None,
-            delete_group: None,
             column_sorted_names: None,
             new_column: Some(TableLayoutColumnProps {
                 name: "ts".to_string(),
@@ -151,16 +149,15 @@ pub async fn test(table_id: &str) -> TardisResult<String> {
     tt_layout_process::modify_layout(
         &table_id,
         &layout_id,
-        TableLayoutModifyReq {
+        TableLayoutModifyProps {
             title: None,
             icon: None,
             filters: None,
             sorts: None,
             aggs: None,
-            fetch_data_number: None,
+            slice: None,
+            group: None,
             expand_data_pks: None,
-            new_group: None,
-            delete_group: None,
             column_sorted_names: Some(vec!["ts".to_string(), "name".to_string()]),
             new_column: None,
             changed_column: None,
@@ -192,9 +189,9 @@ pub async fn test(table_id: &str) -> TardisResult<String> {
     let layout_summary = tt_layout_process::find_layouts(&table_id, &funs, &ctx).await?;
     assert_eq!(layout_summary.len(), 0);
 
-    let layout_id = tt_layout_process::add_layout(
+    let layout_id = tt_layout_process::new_layout(
         table_id,
-        TableLayoutAddReq {
+        TableLayoutNewReq {
             title: "default".to_string(),
             layout_kind: "LIST".to_string(),
             icon: None,
@@ -249,8 +246,8 @@ pub async fn test(table_id: &str) -> TardisResult<String> {
             sorts: None,
             group: None,
             aggs: None,
+            slice: None,
             expand_data_pks: None,
-            fetch_data_number: None,
         },
         &funs,
         &ctx,

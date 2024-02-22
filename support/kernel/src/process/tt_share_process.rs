@@ -7,26 +7,26 @@ use tardis::{
 
 use crate::{
     domain::{tt_share, tt_table},
-    dto::tt_share_dtos::{ShareAddReq, ShareDeleteReq},
+    dto::tt_share_dtos::{ShareDeleteReq, ShareNewReq},
 };
 
 use super::{tt_basic_process, tt_table_process};
 
-pub async fn add_share(add_req: ShareAddReq, funs: &TardisFunsInst, ctx: &TardisContext) -> TardisResult<()> {
-    tt_basic_process::check_owner(&add_req.table_id, &tt_table_process::get_table_name(), funs, ctx).await?;
+pub async fn new_share(new_req: ShareNewReq, funs: &TardisFunsInst, ctx: &TardisContext) -> TardisResult<()> {
+    tt_basic_process::check_owner(&new_req.table_id, &tt_table_process::get_table_name(), funs, ctx).await?;
     delete_share(
         ShareDeleteReq {
-            table_id: add_req.table_id.clone(),
-            owner: add_req.owner.clone(),
+            table_id: new_req.table_id.clone(),
+            owner: new_req.owner.clone(),
         },
         funs,
         ctx,
     )
     .await?;
     let share_domain = tt_share::ActiveModel {
-        table_id: Set(add_req.table_id),
-        owner: Set(add_req.owner),
-        full_control: Set(add_req.full_control),
+        table_id: Set(new_req.table_id),
+        owner: Set(new_req.owner),
+        full_control: Set(new_req.full_control),
         ..Default::default()
     };
     funs.db().insert_one(share_domain, ctx).await?;

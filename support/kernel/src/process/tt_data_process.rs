@@ -15,13 +15,14 @@ use tardis::{
 };
 
 use crate::dto::tt_dict_dtos::TableDictInfo;
+use crate::dto::tt_table_dtos::TableColumnsResp;
 use crate::{
-    dto::tt_data_dtos::{TableDataFilterItemReq, TableDataOperatorKind},
+    dto::tt_data_dtos::{TableDataFilterItemProps, TableDataOperatorKind},
     process::tt_table_process,
 };
 use crate::{
     dto::{
-        tt_data_dtos::{TableDataAggregateKind, TableDataFilterReq, TableDataGroupReq, TableDataGroupResp, TableDataResp, TableDataSliceReq, TableDataSortReq},
+        tt_data_dtos::{TableDataAggregateKind, TableDataFilterProps, TableDataGroupProps, TableDataGroupResp, TableDataResp, TableDataSliceProps, TableDataSortProps},
         tt_table_dtos::{TableColumnDataKind, TableColumnProps},
     },
     process::tt_table_process::INST_PREFIX,
@@ -31,12 +32,111 @@ use super::tt_dict_process;
 
 const DATA_DICT_POSTFIX: &str = "__dict";
 
-pub async fn add_or_modify_data(
+pub async fn new_data(
     table_id: &str,
-    mut changed_records: Vec<HashMap<String, Value>>,
+    mut new_records: Vec<HashMap<String, Value>>,
+    target_sort_value: Option<&Value>,
     funs: &TardisFunsInst,
     ctx: &TardisContext,
 ) -> TardisResult<Vec<HashMap<String, Value>>> {
+    let table_columns = tt_table_process::get_table_columns(table_id, funs, ctx).await?;
+    let columns = table_columns.columns();
+    if new_records.len() == 0 {
+        return Ok(Vec::new());
+    }
+    let new_column_names = new_records[0].keys().map(|k| k.to_string()).collect::<Vec<String>>();
+
+    if new_column_names.iter().any(|column_name| !columns.iter().any(|col| &col.name == column_name)) {
+        return Err(funs.err().conflict("data", "new_data", &format!("Table.{} column name illegal", table_id), "409-keys-illegal"));
+    }
+    if new_records.len() > 1 {
+        for record in &new_records {
+            if record.len() != new_column_names.len() || record.keys().any(|k| !new_column_names.contains(k)) {
+                return Err(funs.err().conflict("data", "new_data", &format!("Table.{} column name not same", table_id), "409-keys-not-same"));
+            }
+        }
+    }
+
+    // TODO freeSort process
+    do_new_data(table_id, new_records, table_columns, funs, ctx).await
+}
+
+pub async fn copy_data(table_id: &str, target_record_pks: Vec<Value>, funs: &TardisFunsInst, ctx: &TardisContext) -> TardisResult<Vec<HashMap<String, Value>>> {
+    let table_columns = tt_table_process::get_table_columns(table_id, funs, ctx).await?;
+    if target_record_pks.len() == 0 {
+        return Ok(Vec::new());
+    }
+
+    let target_records = load_data_without_group(table_id, None, None, None, None, Some(target_record_pks), funs, ctx)
+        .await?
+        .records
+        .into_iter()
+        .map(|mut record| {
+            // delete pk
+            record.remove(&table_columns.pk_column_name);
+            record
+        })
+        .collect::<Vec<_>>();
+
+    do_new_data(table_id, target_records, table_columns, funs, ctx).await
+}
+
+async fn do_new_data(
+    table_id: &str,
+    new_records: Vec<HashMap<String, Value>>,
+    table_columns: TableColumnsResp,
+    funs: &TardisFunsInst,
+    ctx: &TardisContext,
+) -> TardisResult<Vec<HashMap<String, Value>>> {
+    let new_column_names = new_records[0].keys().map(|k| k.to_string()).collect::<Vec<String>>();
+
+    let max_seq = funs
+        .db()
+        .query_one(
+            &format!(
+                "SELECT setval('{}_{}_{}_seq', nextval('{}_{}_{}_seq') + {} -1, true)",
+                INST_PREFIX,
+                table_id,
+                table_columns.pk_column_name,
+                INST_PREFIX,
+                table_id,
+                table_columns.pk_column_name,
+                new_records.len()
+            ),
+            Vec::new(),
+        )
+        .await?
+        .expect("ignore")
+        .try_get::<i64>("", "setval")
+        .expect("ignore");
+    let min_seq = max_seq - new_records.len() as i64 + 1;
+    let pks: Vec<Value> = (min_seq..=max_seq).map(|pk| json!(pk)).collect();
+
+    let params = new_records
+        .into_iter()
+        .enumerate()
+        .map(|(idx, mut record)| {
+            let mut params: Vec<TardisResult<sea_query::Value>> = Vec::new();
+            params.push(Ok(sea_query::Value::BigInt(Some(min_seq + idx as i64))));
+            new_column_names.iter().for_each(|k| {
+                params.push(get_and_convert_to_db_value(k, &mut record, &table_columns.columns(), funs));
+            });
+            params.into_iter().collect::<TardisResult<Vec<sea_query::Value>>>()
+        })
+        .collect::<TardisResult<Vec<Vec<sea_query::Value>>>>()?;
+    let insert_sql = format!(
+        r#"INSERT INTO {}_{} ({} {}) VALUES ($1 {})"#,
+        INST_PREFIX,
+        table_id,
+        table_columns.pk_column_name,
+        new_column_names.iter().map(|name| format!(",{}", name)).collect::<String>(),
+        new_column_names.iter().enumerate().map(|(idx, _)| format!(", ${}", idx + 2)).collect::<String>(),
+    );
+    funs.db().execute_many(&insert_sql, params).await?;
+    Ok(load_data_without_group(table_id, None, None, None, None, Some(pks), funs, ctx).await?.records)
+}
+
+pub async fn modify_data(table_id: &str, changed_records: Vec<HashMap<String, Value>>, funs: &TardisFunsInst, ctx: &TardisContext) -> TardisResult<Vec<HashMap<String, Value>>> {
     let table_columns = tt_table_process::get_table_columns(table_id, funs, ctx).await?;
     let columns = table_columns.columns();
     if changed_records.len() == 0 {
@@ -44,112 +144,42 @@ pub async fn add_or_modify_data(
     }
     let mut changed_column_names = changed_records[0].keys().map(|k| k.to_string()).collect::<Vec<String>>();
 
+    if !changed_column_names.contains(&table_columns.pk_column_name) {
+        return Err(funs.err().conflict("data", "modify_data", &format!("Table.{} column private key illegal", table_id), "409-keys-illegal"));
+    }
+
     if changed_column_names.iter().any(|column_name| !columns.iter().any(|col| &col.name == column_name)) {
-        return Err(funs.err().conflict("data", "add_or_modify_data", &format!("Table.{} column name illegal", table_id), "409-keys-illegal"));
+        return Err(funs.err().conflict("data", "modify_data", &format!("Table.{} column name illegal", table_id), "409-keys-illegal"));
     }
     if changed_records.len() > 1 {
         for record in &changed_records {
             if record.len() != changed_column_names.len() || record.keys().any(|k| !changed_column_names.contains(k)) {
-                return Err(funs.err().conflict("data", "add_or_modify_data", &format!("Table.{} column name not same", table_id), "409-keys-not-same"));
+                return Err(funs.err().conflict("data", "modify_data", &format!("Table.{} column name not same", table_id), "409-keys-not-same"));
             }
         }
     }
 
-    if changed_column_names.contains(&table_columns.pk_column_name) && changed_column_names.len() == 1 {
-        // Copy
-        changed_column_names = columns.iter().filter(|column| column.name != table_columns.pk_column_name).map(|column| column.name.clone()).collect::<Vec<String>>();
+    changed_column_names.remove(changed_column_names.iter().position(|column_name| column_name == &table_columns.pk_column_name).expect("ignore"));
+    changed_column_names.insert(0, table_columns.pk_column_name.clone());
 
-        let record_pks = changed_records
-            .iter()
-            .map(|record| record.get(&table_columns.pk_column_name))
-            .filter(|value| value.is_some())
-            .map(|value| value.expect("ignore").clone())
-            .collect::<Vec<_>>();
-        changed_records = load_data_without_group(table_id, None, None, None, None, Some(record_pks), funs, ctx)
-            .await?
-            .records
-            .into_iter()
-            .map(|mut record| {
-                record.retain(|k, _| changed_column_names.contains(k));
-                record
-            })
-            .collect::<Vec<_>>();
-    }
+    let pks: Vec<Value> = changed_records.iter().map(|record| record.get(&table_columns.pk_column_name).expect("ignore").clone()).collect::<Vec<Value>>();
 
-    if changed_column_names.contains(&table_columns.pk_column_name) {
-        // modify
-        changed_column_names.remove(changed_column_names.iter().position(|column_name| column_name == &table_columns.pk_column_name).expect("ignore"));
-        changed_column_names.insert(0, table_columns.pk_column_name.clone());
+    let params = changed_records
+        .into_iter()
+        .map(|mut record| {
+            changed_column_names.iter().map(|column_name| get_and_convert_to_db_value(column_name, &mut record, &columns, funs)).collect::<TardisResult<Vec<sea_query::Value>>>()
+        })
+        .collect::<TardisResult<Vec<Vec<sea_query::Value>>>>()?;
 
-        let pks: Vec<Value> = changed_records.iter().map(|record| record.get(&table_columns.pk_column_name).expect("ignore").clone()).collect::<Vec<Value>>();
-
-        let params = changed_records
-            .into_iter()
-            .map(|mut record| {
-                changed_column_names
-                    .iter()
-                    .map(|column_name| get_and_convert_to_db_value(column_name, &mut record, &columns, funs))
-                    .collect::<TardisResult<Vec<sea_query::Value>>>()
-            })
-            .collect::<TardisResult<Vec<Vec<sea_query::Value>>>>()?;
-
-        let update_sql = format!(
-            r#"UPDATE {}_{} SET {} WHERE {} = $1"#,
-            INST_PREFIX,
-            table_id,
-            changed_column_names.iter().skip(1).enumerate().map(|(idx, column_name)| format!("{} = ${}", column_name, idx + 2)).collect::<Vec<String>>().join(", "),
-            table_columns.pk_column_name
-        );
-        funs.db().execute_many(&update_sql, params).await?;
-        let modify_records = load_data_without_group(table_id, None, None, None, None, Some(pks), funs, ctx).await?;
-        Ok(modify_records.records)
-    } else {
-        let max_seq = funs
-            .db()
-            .query_one(
-                &format!(
-                    "SELECT setval('{}_{}_{}_seq', nextval('{}_{}_{}_seq') + {} -1, true)",
-                    INST_PREFIX,
-                    table_id,
-                    table_columns.pk_column_name,
-                    INST_PREFIX,
-                    table_id,
-                    table_columns.pk_column_name,
-                    changed_records.len()
-                ),
-                Vec::new(),
-            )
-            .await?
-            .expect("ignore")
-            .try_get::<i64>("", "setval")
-            .expect("ignore");
-        let min_seq = max_seq - changed_records.len() as i64 + 1;
-        let pks: Vec<Value> = (min_seq..=max_seq).map(|pk| json!(pk)).collect();
-
-        let params = changed_records
-            .into_iter()
-            .enumerate()
-            .map(|(idx, mut record)| {
-                let mut params: Vec<TardisResult<sea_query::Value>> = Vec::new();
-                params.push(Ok(sea_query::Value::BigInt(Some(min_seq + idx as i64))));
-                changed_column_names.iter().for_each(|k| {
-                    params.push(get_and_convert_to_db_value(k, &mut record, &columns, funs));
-                });
-                params.into_iter().collect::<TardisResult<Vec<sea_query::Value>>>()
-            })
-            .collect::<TardisResult<Vec<Vec<sea_query::Value>>>>()?;
-        let insert_sql = format!(
-            r#"INSERT INTO {}_{} ({} {}) VALUES ($1 {})"#,
-            INST_PREFIX,
-            table_id,
-            table_columns.pk_column_name,
-            changed_column_names.iter().map(|name| format!(",{}", name)).collect::<String>(),
-            changed_column_names.iter().enumerate().map(|(idx, _)| format!(", ${}", idx + 2)).collect::<String>(),
-        );
-        funs.db().execute_many(&insert_sql, params).await?;
-        let modify_records = load_data_without_group(table_id, None, None, None, None, Some(pks), funs, ctx).await?;
-        Ok(modify_records.records)
-    }
+    let update_sql = format!(
+        r#"UPDATE {}_{} SET {} WHERE {} = $1"#,
+        INST_PREFIX,
+        table_id,
+        changed_column_names.iter().skip(1).enumerate().map(|(idx, column_name)| format!("{} = ${}", column_name, idx + 2)).collect::<Vec<String>>().join(", "),
+        table_columns.pk_column_name
+    );
+    funs.db().execute_many(&update_sql, params).await?;
+    Ok(load_data_without_group(table_id, None, None, None, None, Some(pks), funs, ctx).await?.records)
 }
 
 pub async fn delete_data(table_id: &str, deleted_pks: Vec<Value>, funs: &TardisFunsInst, ctx: &TardisContext) -> TardisResult<()> {
@@ -166,11 +196,11 @@ pub async fn delete_data(table_id: &str, deleted_pks: Vec<Value>, funs: &TardisF
 
 pub async fn load_data_with_group(
     table_id: &str,
-    group: TableDataGroupReq,
-    filters: Option<Vec<TableDataFilterReq>>,
-    sorts: Option<Vec<TableDataSortReq>>,
+    group: TableDataGroupProps,
+    filters: Option<Vec<TableDataFilterProps>>,
+    sorts: Option<Vec<TableDataSortProps>>,
     mut aggs: Option<HashMap<String, TableDataAggregateKind>>,
-    slice: Option<TableDataSliceReq>,
+    slice: Option<TableDataSliceProps>,
     funs: &TardisFunsInst,
     ctx: &TardisContext,
 ) -> TardisResult<Vec<TableDataGroupResp>> {
@@ -302,10 +332,10 @@ pub async fn load_data_with_group(
 
 pub async fn load_data_without_group(
     table_id: &str,
-    mut filters: Option<Vec<TableDataFilterReq>>,
-    sorts: Option<Vec<TableDataSortReq>>,
+    mut filters: Option<Vec<TableDataFilterProps>>,
+    sorts: Option<Vec<TableDataSortProps>>,
     aggs: Option<HashMap<String, TableDataAggregateKind>>,
-    slice: Option<TableDataSliceReq>,
+    slice: Option<TableDataSliceProps>,
     record_pks: Option<Vec<Value>>,
     funs: &TardisFunsInst,
     ctx: &TardisContext,
@@ -317,8 +347,8 @@ pub async fn load_data_without_group(
         if filters.is_none() {
             filters = Some(Vec::new())
         }
-        filters.as_mut().expect("ignore").push(TableDataFilterReq {
-            items: vec![TableDataFilterItemReq {
+        filters.as_mut().expect("ignore").push(TableDataFilterProps {
+            items: vec![TableDataFilterItemProps {
                 column_name: table_columns.pk_column_name.clone(),
                 operator: TableDataOperatorKind::In,
                 value: Some(json!(record_pks)),
@@ -436,7 +466,7 @@ async fn attach_dict(
             (column_name, values)
         })
         .collect::<HashMap<_, _>>();
-    let dict_values = join_all(dict_values.into_iter().map(|(column_name, values)| tt_dict_process::find_dicts(column_name, values, funs, ctx)).collect::<Vec<_>>())
+    let dict_values = join_all(dict_values.into_iter().map(|(column_name, values)| tt_dict_process::find_dict_items(column_name, values, funs, ctx)).collect::<Vec<_>>())
         .await
         .into_iter()
         .collect::<TardisResult<Vec<_>>>()?
@@ -946,7 +976,7 @@ fn package_aggs_sql(
     Ok(aggs_sql)
 }
 
-fn package_limit_sql(slice: Option<TableDataSliceReq>) -> TardisResult<String> {
+fn package_limit_sql(slice: Option<TableDataSliceProps>) -> TardisResult<String> {
     let limit_sql = if let Some(slice) = slice {
         format!("LIMIT {} OFFSET {}", slice.fetch_number, slice.offset_number)
     } else {
@@ -955,7 +985,7 @@ fn package_limit_sql(slice: Option<TableDataSliceReq>) -> TardisResult<String> {
     Ok(limit_sql)
 }
 
-fn package_sort_sql(sorts: Option<Vec<TableDataSortReq>>, columns: &Vec<TableColumnProps>, table_id: &str, funs: &TardisFunsInst) -> TardisResult<String> {
+fn package_sort_sql(sorts: Option<Vec<TableDataSortProps>>, columns: &Vec<TableColumnProps>, table_id: &str, funs: &TardisFunsInst) -> TardisResult<String> {
     let sort_sql = if let Some(sorts) = sorts {
         if sorts.iter().any(|sort| !columns.iter().any(|col| col.name == sort.column_name)) {
             return Err(funs.err().conflict(
@@ -976,7 +1006,7 @@ fn package_sort_sql(sorts: Option<Vec<TableDataSortReq>>, columns: &Vec<TableCol
 }
 
 fn package_where_sql(
-    filters: Option<Vec<TableDataFilterReq>>,
+    filters: Option<Vec<TableDataFilterProps>>,
     params: &mut Vec<TardisResult<sea_query::Value>>,
     columns: &Vec<TableColumnProps>,
     funs: &TardisFunsInst,
@@ -1072,4 +1102,9 @@ fn package_where_sql(
     } else {
         Ok(where_sql)
     }
+}
+
+pub async fn sort_data(table_id: &str, target_sort_value: &str, form_record_pk: Vec<Value>, funs: &TardisFunsInst, ctx: &TardisContext) -> TardisResult<()> {
+    // TODO
+    Ok(())
 }

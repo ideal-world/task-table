@@ -1,6 +1,6 @@
 import * as iconSvg from '../assets/icon'
 import locales from '../locales'
-import type { AggregateKind, TableDataFilterReq, TableDataGroupReq, TableDataGroupResp, TableDataResp, TableDataSortReq, TableProps } from './props'
+import type { AggregateKind, TableDataFilterProps, TableDataGroupProps, TableDataGroupResp, TableDataResp, TableDataSliceProps, TableDataSortProps, TableProps } from './props'
 import { DataKind, LayoutKind, OperatorKind, SizeKind } from './props'
 
 const { t } = locales.global
@@ -9,6 +9,7 @@ export interface TableBasicConf {
   id: string
   pkColumnName: string
   parentPkColumnName?: string
+  freeSortColumnName?: string
   columns: TableColumnConf[]
   styles: TableStyleConf
 }
@@ -22,6 +23,7 @@ export interface TableColumnConf {
   useDict: boolean
   dictEditable: boolean
   multiValue: boolean
+  groupable: boolean
   kindDateTimeFormat?: string
 }
 
@@ -30,12 +32,12 @@ export interface TableLayoutKernelConf {
   layoutKind: LayoutKind
   icon: string
   columns: TableLayoutColumnConf[]
-  filters?: TableDataFilterReq[]
-  sorts?: TableDataSortReq[]
-  group?: TableDataGroupReq
+  filters?: TableDataFilterProps[]
+  sorts?: TableDataSortProps[]
+  group?: TableDataGroupProps
   aggs?: { [key: string]: AggregateKind }
   expandDataPks: any[]
-  fetchDataNumber: number
+  slice: TableDataSliceProps
   data?: TableDataResp | TableDataGroupResp[]
 }
 
@@ -51,6 +53,18 @@ export interface TableLayoutColumnConf {
   hide: boolean
   dateStart: boolean
   dateEnd: boolean
+}
+
+export function getDefaultLayoutColumnConf(columnName: string): TableLayoutColumnConf {
+  return {
+    name: columnName,
+    wrap: true,
+    fixed: false,
+    width: 200,
+    hide: false,
+    dateStart: false,
+    dateEnd: false,
+  }
 }
 
 export interface CachedColumnConf extends TableColumnConf, TableLayoutColumnConf {
@@ -144,7 +158,7 @@ export function getDefaultIconByLayoutKind(layoutKind: LayoutKind): string {
   }
 }
 
-export function getOperatorKindsByDataKind(dataKind?: DataKind, multiValue?: bool): OperatorKind[] {
+export function getOperatorKindsByDataKind(dataKind?: DataKind, multiValue?: boolean): OperatorKind[] {
   if (multiValue) {
     return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.IN, OperatorKind.NOT_IN, OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]
   }
@@ -220,6 +234,7 @@ export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]]
     id: props.id ?? `iw-table${Math.floor(Math.random() * 1000000)}`,
     pkColumnName: props.pkColumnName,
     parentPkColumnName: props.parentPkColumnName,
+    freeSortColumnName: props.freeSortColumnName,
     columns: props.columns.map((column) => {
       return {
         name: column.name,
@@ -230,6 +245,7 @@ export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]]
         useDict: column.useDict ?? false,
         dictEditable: column.dictEditable ?? false,
         multiValue: column.multiValue ?? false,
+        groupable: column.groupable ?? false,
         kindDateTimeFormat: column.kindDateTimeFormat,
       }
     }),
@@ -266,8 +282,11 @@ export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]]
         sorts: layout.sorts,
         group: layout.group,
         aggs: layout.aggs,
+        slice: layout.slice ?? {
+          offsetNumber: 0,
+          fetchNumber: 50,
+        },
         expandDataPks: layout.expandDataPks ?? [],
-        fetchDataNumber: layout.fetchDataNumber ?? 20,
       })
     })
   }
@@ -280,10 +299,11 @@ export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]]
       columns: props.columns.map((column) => {
         return getDefaultLayoutColumnConf(column.name)
       }),
-      filters: [],
-      sorts: [],
+      slice: {
+        offsetNumber: 0,
+        fetchNumber: 50,
+      },
       expandDataPks: [],
-      fetchDataNumber: 20,
     })
   }
   layoutsConf.forEach((layout) => {
@@ -311,16 +331,4 @@ export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]]
     }
   })
   return [basicConf, layoutsConf]
-}
-
-export function getDefaultLayoutColumnConf(columnName: string): TableLayoutColumnConf {
-  return {
-    name: columnName,
-    wrap: true,
-    fixed: false,
-    width: 200,
-    hide: false,
-    dateStart: false,
-    dateEnd: false,
-  }
 }

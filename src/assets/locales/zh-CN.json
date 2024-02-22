@@ -50,6 +50,10 @@
     },
     "state": {
       "selectPlaceholder": "请选择"
+    },
+    "event":{
+      "notConfigured": "事件未配置",
+      "loadDataInvalidScene": "数据加载失败：场景不合法"
     }
   },
   "layout": {
@@ -119,13 +123,14 @@
       "submit": "添加",
       "useDict": "使用字典",
       "dictEditable": "字典可编辑",
+      "groupable": "可分组",
       "columnNamePlaceholder": "新的列名",
       "multiValue": "支持多值"
     },
     "columnDict": {
       "dictTitle": "字典配置",
       "searchPlaceholder": "搜索字典项",
-      "addTitle": "添加字典项",
+      "newTitle": "添加字典项",
       "titlePlaceholder": "新的字典项名称",
       "submit": "添加"
     },

@@ -5,21 +5,21 @@ import * as iconSvg from '../../../assets/icon'
 import { getParentWithClass, hasParentWithClass } from '../../../utils/basic'
 import MenuComp, { MenuSizeKind } from '../../common/Menu.vue'
 import type { CachedColumnConf } from '../../conf'
-import { FUN_DELETE_CELL_DICT_ITEM_TYPE, FUN_LOAD_CELL_DICT_ITEMS_TYPE, FUN_SAVE_CELL_DICT_ITEM_TYPE, FUN_SORT_CELL_DICT_ITEM_TYPE } from '../../events'
-import type { TableCellDictItem } from '../../props'
+import { FUN_DELETE_CELL_DICT_ITEM_TYPE, FUN_LOAD_CELL_DICT_ITEMS_TYPE, FUN_NEW_OR_MODIFY_CELL_DICT_ITEM_TYPE, FUN_SORT_CELL_DICT_ITEMS_TYPE } from '../../events'
+import type { TableCellDictItemProps } from '../../props'
 
 const props = defineProps<{
   curColumnConf: CachedColumnConf
   columnsConf: CachedColumnConf[]
 }>()
 const loadCellDictItemsFun = inject(FUN_LOAD_CELL_DICT_ITEMS_TYPE)!
-const saveCellDictItemFun = inject(FUN_SAVE_CELL_DICT_ITEM_TYPE)!
+const newOrModifyCellDictItemFun = inject(FUN_NEW_OR_MODIFY_CELL_DICT_ITEM_TYPE)!
 const deleteCellDictItemFun = inject(FUN_DELETE_CELL_DICT_ITEM_TYPE)!
-const sortCellDictItemFun = inject(FUN_SORT_CELL_DICT_ITEM_TYPE)!
+const sortCellDictItemsFun = inject(FUN_SORT_CELL_DICT_ITEMS_TYPE)!
 
-const modifyDictItemCompRef = ref()
-const curAllDictItems = ref<TableCellDictItem[]>([])
-const curDictItems = ref<TableCellDictItem[]>([])
+const modifyDictItemCompRef = ref<InstanceType<typeof MenuComp>>()
+const curAllDictItems = ref<TableCellDictItemProps[]>([])
+const curDictItems = ref<TableCellDictItemProps[]>([])
 
 const selectedDictItem = ref< {
   value?: string
@@ -61,7 +61,7 @@ onMounted(async () => {
       if (evt.oldIndex !== evt.newIndex) {
         const oriItem = curDictItems.value[evt.oldIndex!]
         const newItem = curDictItems.value[evt.newIndex!]
-        await sortCellDictItemFun(props.curColumnConf.name, oriItem.value, newItem.value)
+        await sortCellDictItemsFun(props.curColumnConf.name, oriItem.value, newItem.value)
         curDictItems.value[evt.oldIndex!] = newItem
         curDictItems.value[evt.newIndex!] = oriItem
         const oriAllOriItemIdx = curAllDictItems.value.findIndex(val => val.value === oriItem.value)
@@ -83,12 +83,12 @@ function showModifyDictItemContextMenu(event: MouseEvent, itemValue?: any) {
   }
 
   const targetEle = event.target as HTMLElement
-  modifyDictItemCompRef.value.show(targetEle, undefined, MenuSizeKind.SMALL, true)
+  modifyDictItemCompRef.value?.show(targetEle, undefined, MenuSizeKind.SMALL, true)
 }
 
 async function setDictItemTitle(title: string) {
   const selectedValue = selectedDictItem.value.value === undefined ? title : selectedDictItem.value.value
-  await saveCellDictItemFun(props.curColumnConf.name, {
+  await newOrModifyCellDictItemFun(props.curColumnConf.name, {
     value: selectedValue,
     title,
     color: selectedDictItem.value.color,
@@ -114,7 +114,7 @@ async function setDictItemColor(event: MouseEvent) {
   if (selectedDictItem.value.value === undefined)
     return
 
-  await saveCellDictItemFun(props.curColumnConf.name, {
+  await newOrModifyCellDictItemFun(props.curColumnConf.name, {
     value: selectedDictItem.value.value,
     title: selectedDictItem.value.title!,
     color,
@@ -157,7 +157,7 @@ async function setDictItemColor(event: MouseEvent) {
       class="cursor-pointer"
       @click="event => showModifyDictItemContextMenu(event)"
     >
-      <i :class="`${iconSvg.ADD} cursor-pointer mr-0.5`" /> {{ $t('list.columnDict.addTitle') }}
+      <i :class="`${iconSvg.NEW} cursor-pointer mr-0.5`" /> {{ $t('list.columnDict.newTitle') }}
     </div>
   </div>
   <MenuComp ref="modifyDictItemCompRef">

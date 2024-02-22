@@ -5,7 +5,7 @@ import type { CachedColumnConf, TableStyleConf } from '../../conf'
 import { FUN_MODIFY_LAYOUT_TYPE } from '../../events'
 import { showGroupAggMappingByDataKind } from '../../function/Group'
 import type { AggregateKind, TableDataResp } from '../../props'
-import { translateGroupAgg } from '../../props'
+import { translateAggregateKind } from '../../props'
 
 const props = defineProps<{
   layoutAggs: { [key: string]: AggregateKind }
@@ -18,11 +18,11 @@ const props = defineProps<{
 }>()
 
 const modifyLayoutFun = inject(FUN_MODIFY_LAYOUT_TYPE)!
-const aggsMenuCompRefs = ref()
+const aggsMenuCompRefs = ref<InstanceType<typeof MenuComp>[]>()
 
 function showAggsContextMenu(event: MouseEvent, colIdx: number) {
   const targetEle = event.target as HTMLElement
-  aggsMenuCompRefs.value[colIdx].show(targetEle, MenuOffsetKind.RIGHT_BOTTOM, MenuSizeKind.SMALL)
+  aggsMenuCompRefs.value && aggsMenuCompRefs.value[colIdx].show(targetEle, MenuOffsetKind.RIGHT_BOTTOM, MenuSizeKind.SMALL)
 }
 
 async function changeColumnAggs(aggKind: AggregateKind, colIdx: number) {
@@ -31,7 +31,7 @@ async function changeColumnAggs(aggKind: AggregateKind, colIdx: number) {
   await modifyLayoutFun({
     aggs,
   })
-  aggsMenuCompRefs.value[colIdx].close()
+  aggsMenuCompRefs.value && aggsMenuCompRefs.value[colIdx].close()
 }
 </script>
 
@@ -55,7 +55,7 @@ async function changeColumnAggs(aggKind: AggregateKind, colIdx: number) {
       >
         <template v-if="props.layoutAggs && props.layoutAggs[column.name]">
           <span class="iw-list-agg-cell__agg text-xs pr-1 self-center">{{
-            translateGroupAgg(props.layoutAggs[column.name]) }}</span>
+            translateAggregateKind(props.layoutAggs[column.name]) }}</span>
           <span class="iw-list-agg-cell__value text-info self-center">{{ props.dataBasic.aggs[column.name] }}</span>
         </template>
       </div>

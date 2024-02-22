@@ -3199,7 +3199,9 @@ checksum = "55937e1799185b12863d447f42597ed69d9928686b8d88a1df17376a097d8369"
 
 [[package]]
 name = "tardis"
-version = "0.1.0-rc.8"
+version = "0.1.0-rc.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d85b1b9ab4ed64b5cd8c6398e3cf41ce166e962529f699730aa158930c29a71c"
 dependencies = [
  "async-stream",
  "async-trait",
@@ -3239,7 +3241,9 @@ dependencies = [
 
 [[package]]
 name = "tardis-macros"
-version = "0.1.0-rc.8"
+version = "0.1.0-rc.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fd850b27aff2f968e4206ca9590d189adaba873a0e88fc73c54c5c5cc8de34f1"
 dependencies = [
  "darling 0.20.3",
  "nanoid",

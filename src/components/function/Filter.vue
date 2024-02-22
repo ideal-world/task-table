@@ -5,24 +5,24 @@ import MenuComp, { MenuSizeKind } from '../common/Menu.vue'
 import type { TableColumnConf } from '../conf'
 import { getInputTypeByDataKind, getOperatorKindsByDataKind } from '../conf'
 import { FUN_LOAD_CELL_DICT_ITEMS_TYPE, FUN_LOAD_DATA_TYPE, FUN_MODIFY_LAYOUT_TYPE } from '../events'
-import type { TableCellDictItem, TableCellDictItemResp, TableDataFilterItemReq, TableDataFilterReq } from '../props'
+import type { TableCellDictItemProps, TableCellDictItemsResp, TableDataFilterItemProps, TableDataFilterProps } from '../props'
 import { DataKind, OperatorKind, translateOperatorKind } from '../props'
 import { getParentWithClass } from '../../utils/basic'
 
 const props = defineProps<{
-  filters?: TableDataFilterReq[]
+  filters?: TableDataFilterProps[]
   columnsConf: TableColumnConf[]
 }>()
 const modifyLayoutFun = inject(FUN_MODIFY_LAYOUT_TYPE)!
 const loadDataFun = inject(FUN_LOAD_DATA_TYPE)!
 const loadCellDictItemsFun = inject(FUN_LOAD_CELL_DICT_ITEMS_TYPE)!
-const simpleFilterCompRef = ref()
-const filterColumnCompRef = ref()
-const filterOpCompRef = ref()
+const simpleFilterCompRef = ref<InstanceType<typeof MenuComp>>()
+const filterColumnCompRef = ref<InstanceType<typeof MenuComp>>()
+const filterOpCompRef = ref<InstanceType<typeof MenuComp>>()
 
-const selectedFilterItem = ref<TableDataFilterItemReq & TableColumnConf & { idx: number, values: any[] } | undefined>()
+const selectedFilterItem = ref<TableDataFilterItemProps & TableColumnConf & { idx: number, values: any[] } | undefined>()
 const usedDictValues = ref<{ [key: string | number]: string }>({})
-const selectedDictItemResp = ref<TableCellDictItemResp | undefined>()
+const selectedDictItemResp = ref<TableCellDictItemsResp | undefined>()
 const searchDictValue = ref<any | undefined>()
 
 function parseDictTitle(columnName: string, value?: any): any {
@@ -35,7 +35,7 @@ function parseDictTitle(columnName: string, value?: any): any {
     return usedDictValues.value[`${columnName}-${value}`] ?? value
 }
 
-const selectedDictItems = computed<TableCellDictItem[]>(() => {
+const selectedDictItems = computed<TableCellDictItemProps[]>(() => {
   if (!selectedDictItemResp.value)
     return []
 
@@ -55,7 +55,7 @@ const selectedDictItems = computed<TableCellDictItem[]>(() => {
   return dictItems
 })
 
-const simpleFilterItems = computed<TableDataFilterItemReq[]>(() => {
+const simpleFilterItems = computed<TableDataFilterItemProps[]>(() => {
   // Simple mode supports only one group of and conditions
   if (props.filters && props.filters.length === 1 && props.filters[0].and)
     return props.filters[0].items
@@ -63,7 +63,7 @@ const simpleFilterItems = computed<TableDataFilterItemReq[]>(() => {
   return []
 })
 
-function showSimpleFilterItem(event: MouseEvent, filterItem?: TableDataFilterItemReq, idx?: number) {
+function showSimpleFilterItem(event: MouseEvent, filterItem?: TableDataFilterItemProps, idx?: number) {
   const targetEle = event.target as HTMLElement
   if (filterItem) {
     const selectedColumnConf = props.columnsConf.find(col => col.name === filterItem?.columnName)!
@@ -77,23 +77,23 @@ function showSimpleFilterItem(event: MouseEvent, filterItem?: TableDataFilterIte
   else {
     selectedFilterItem.value = undefined
   }
-  simpleFilterCompRef.value.show(targetEle, undefined, MenuSizeKind.LARGE, false)
+  simpleFilterCompRef.value?.show(targetEle, undefined, MenuSizeKind.LARGE, false)
 }
 
 function showFilterColumns(event: MouseEvent) {
   const targetEle = event.target as HTMLElement
-  filterColumnCompRef.value.show(targetEle, undefined, undefined, true)
+  filterColumnCompRef.value?.show(targetEle, undefined, undefined, true)
 }
 
 function showFilterOps(event: MouseEvent) {
   const targetEle = event.target as HTMLElement
-  filterOpCompRef.value.show(targetEle, undefined, MenuSizeKind.MINI, true)
+  filterOpCompRef.value?.show(targetEle, undefined, MenuSizeKind.MINI, true)
 }
 
 async function setFilterColumn(event: MouseEvent) {
   const targetEle = event.target as HTMLElement
   const selectedColumnName = targetEle.dataset.columnName
-  filterColumnCompRef.value.close()
+  filterColumnCompRef.value?.close()
   if (!selectedColumnName)
     return
 
@@ -119,10 +119,10 @@ async function setFilterColumn(event: MouseEvent) {
     }
   }
   if (selectedFilterItem.value.value !== undefined || selectedFilterItem.value.operator === OperatorKind.IS_EMPTY || selectedFilterItem.value.operator === OperatorKind.NOT_EMPTY)
-    await addOrModifySimpleFilterItem(selectedFilterItem.value)
+    await newOrModifySimpleFilterItem(selectedFilterItem.value)
 
   if (selectedFilterItem.value && selectedFilterItem.value.useDict) {
-    const values = await loadCellDictItemsFun(selectedFilterItem.value.columnName)
+    const values = await loadCellDictItemsFun(selectedFilterItem.value.columnName as string)
     selectedDictItemResp.value = values
   }
   else {
@@ -134,18 +134,18 @@ async function setFilterColumn(event: MouseEvent) {
 async function setFilterOp(event: MouseEvent) {
   const targetEle = event.target as HTMLElement
   const selectedOp = targetEle.dataset.op as OperatorKind
-  filterOpCompRef.value.close()
+  filterOpCompRef.value?.close()
   selectedFilterItem.value!.operator = selectedOp
   if (!selectedFilterItem.value)
     return
 
   if (selectedFilterItem.value.value !== undefined || selectedFilterItem.value.operator === OperatorKind.IS_EMPTY || selectedFilterItem.value.operator === OperatorKind.NOT_EMPTY)
-    await addOrModifySimpleFilterItem(selectedFilterItem.value)
+    await newOrModifySimpleFilterItem(selectedFilterItem.value)
 }
 
 async function deleteSelectedAValue(val: any) {
   selectedFilterItem.value!.values = selectedFilterItem.value!.values.filter(item => item !== val)
-  await addOrModifySimpleFilterItem(selectedFilterItem.value!)
+  await newOrModifySimpleFilterItem(selectedFilterItem.value!)
 }
 
 async function setFilterValue(value: any) {
@@ -155,9 +155,9 @@ async function setFilterValue(value: any) {
     selectedFilterItem.value!.value = value
 
   if (!Array.isArray(selectedFilterItem.value?.value))
-    simpleFilterCompRef.value.close()
+    simpleFilterCompRef.value?.close()
 
-  await addOrModifySimpleFilterItem(selectedFilterItem.value!)
+  await newOrModifySimpleFilterItem(selectedFilterItem.value!)
 }
 
 async function setFilterDictItem(event: Event) {
@@ -176,12 +176,12 @@ async function setFilterDictItem(event: Event) {
 
   usedDictValues.value[`${selectedFilterItem.value?.columnName}-${value}`] = title
   if (!Array.isArray(selectedFilterItem.value?.value))
-    simpleFilterCompRef.value.close()
+    simpleFilterCompRef.value?.close()
 
-  await addOrModifySimpleFilterItem(selectedFilterItem.value!)
+  await newOrModifySimpleFilterItem(selectedFilterItem.value!)
 }
 
-async function addOrModifySimpleFilterItem(changedFilterItem: TableDataFilterItemReq & { idx: number, values: any[] }) {
+async function newOrModifySimpleFilterItem(changedFilterItem: TableDataFilterItemProps & { idx: number, values: any[] }) {
   if (changedFilterItem.operator === OperatorKind.IN || changedFilterItem.operator === OperatorKind.NOT_IN)
     changedFilterItem.value = changedFilterItem.values
 
@@ -243,12 +243,12 @@ async function deleteSimpleFilterItem(idx: number) {
         <span class="mr-0.5">{{ props.columnsConf.find(col => col.name === item.columnName)?.title }}</span>
         <span class="mr-0.5">{{ translateOperatorKind(item.operator) }}</span>
         <span class="mr-0.5 max-w-[100px] whitespace-nowrap overflow-hidden text-ellipsis">{{
-          parseDictTitle(item.columnName, item.value) }}</span>
+          parseDictTitle(item.columnName as string, item.value) }}</span>
       </span>
       <i :class="`${iconSvg.DELETE} hover:text-secondary hover:font-bold`" @click="deleteSimpleFilterItem(idx)" />
     </button>
     <div class="self-center cursor-pointer" @click="showSimpleFilterItem">
-      <i :class="iconSvg.ADD" />
+      <i :class="iconSvg.NEW" />
       <span>{{ $t('function.filter.new') }}</span>
     </div>
   </div>
@@ -267,7 +267,7 @@ async function deleteSimpleFilterItem(idx: number) {
     </div>
     <div v-if="selectedFilterItem" class="iw-contextmenu__item flex flex-wrap w-48">
       <div
-        v-for="(val, idx) in parseDictTitle(selectedFilterItem.columnName, selectedFilterItem?.values)" :key="idx"
+        v-for="(val, idx) in parseDictTitle(selectedFilterItem.columnName as string, selectedFilterItem?.values)" :key="idx"
         class="iw-badge gap-2 m-1"
       >
         {{ val }}

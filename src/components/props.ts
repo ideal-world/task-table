@@ -102,7 +102,7 @@ export enum AggregateKind {
   // TODO
 }
 
-export function translateGroupAgg(aggKind: AggregateKind): string {
+export function translateAggregateKind(aggKind: AggregateKind): string {
   switch (aggKind) {
     case AggregateKind.SUM:
       return t('_.agg.sum')
@@ -135,6 +135,7 @@ export interface TableProps {
   id?: string
   pkColumnName: string
   parentPkColumnName?: string
+  freeSortColumnName?: string
   columns: TableColumnProps[]
   layouts?: TableLayoutProps[]
   events: TableEventProps
@@ -151,6 +152,7 @@ export interface TableColumnProps {
   dictEditable?: boolean
   multiValue?: boolean
   kindDateTimeFormat?: string
+  groupable?: boolean
 }
 
 export interface TableLayoutKernelProps {
@@ -159,12 +161,12 @@ export interface TableLayoutKernelProps {
   icon?: string
   columns: TableLayoutColumnProps[]
   // And relationship between groups
-  filters?: TableDataFilterReq[]
-  sorts?: TableDataSortReq[]
-  group?: TableDataGroupReq
+  filters?: TableDataFilterProps[]
+  sorts?: TableDataSortProps[]
+  group?: TableDataGroupProps
   aggs?: { [key: string]: AggregateKind }
+  slice?: TableDataSliceProps
   expandDataPks?: any[]
-  fetchDataNumber?: number
 }
 
 export interface TableLayoutProps extends TableLayoutKernelProps {
@@ -192,72 +194,80 @@ export interface TableStyleProps {
 }
 
 export interface TableEventProps {
-  loadData: (filters?: TableDataFilterReq[],
-    sorts?: TableDataSortReq[],
-    group?: TableDataGroupReq,
+  loadData: (filters?: TableDataFilterProps[],
+    sorts?: TableDataSortProps[],
+    group?: TableDataGroupProps,
     aggs?: { [key: string]: AggregateKind },
-    slice?: TableDataSliceReq) => Promise<TableDataResp | TableDataGroupResp[]>
-  saveData?: (changedRecords: { [key: string]: any }[]) => Promise<{ [key: string]: any }[]>
+    // Load only the data of the corresponding group
+    byGroupValue?: any,
+    // Do not use this slice if it exists in group.slices
+    defaultGroupSlice?: TableDataSliceProps) => Promise<TableDataResp | TableDataGroupResp[]>
+  newData?: (newRecords: { [key: string]: any }[], targetSortValue?: any) => Promise<{ [key: string]: any }[]>
+  copyData?: (targetRecordPks: any[]) => Promise<{ [key: string]: any }[]>
+  modifyData?: (changedRecords: { [key: string]: any }[]) => Promise<{ [key: string]: any }[]>
   // Need to delete child node
-  deleteData?: (deletedPks: any[]) => Promise<boolean>
+  deleteData?: (deletedRecordPks: any[]) => Promise<boolean>
+  sortData?: (formRecordPk: any[], targetSortValue: string) => Promise<boolean>
 
   newColumn?: (newColumnProps: TableColumnProps, fromColumnName?: string) => Promise<boolean>
   modifyColumn?: (changedColumnProps: TableColumnProps) => Promise<boolean>
   deleteColumn?: (deletedColumnName: string) => Promise<boolean>
 
-  loadCellDictItems?: (columnName: string, filterValue?: any, slice?: TableDataSliceReq) => Promise<TableCellDictItemResp>
-  saveCellDictItem?: (columnName: string, changedItem: TableCellDictItem) => Promise<boolean>
+  loadCellDictItems?: (columnName: string, filterValue?: any, slice?: TableDataSliceProps) => Promise<TableCellDictItemsResp>
+  newOrModifyCellDictItem?: (columnName: string, changedItem: TableCellDictItemProps) => Promise<boolean>
   deleteCellDictItem?: (columnName: string, value: any) => Promise<boolean>
-  sortCellDictItem?: (columnName: string, leftItemValue: any, rightItemValue: any) => Promise<boolean>
+  sortCellDictItems?: (columnName: string, leftItemValue: any, rightItemValue: any) => Promise<boolean>
 
   modifyStyles?: (changedStyleProps: TableStyleProps) => Promise<boolean>
 
   newLayout?: (newLayoutProps: TableLayoutKernelProps) => Promise<string>
-  modifyLayout?: (changedLayoutId: string, changedLayoutProps: TableLayoutModifyReq) => Promise<boolean>
+  modifyLayout?: (changedLayoutId: string, changedLayoutProps: TableLayoutModifyProps) => Promise<boolean>
   deleteLayout?: (deletedLayoutId: string) => Promise<boolean>
   sortLayouts?: (leftLayoutId: string, rightLayoutId: string) => Promise<boolean>
 }
 
-export interface TableLayoutModifyReq {
+export interface TableLayoutModifyProps {
   title?: string
   icon?: string
-  filters?: TableDataFilterReq[]
-  sorts?: TableDataSortReq[]
-  group?: TableDataGroupReq
+  filters?: TableDataFilterProps[]
+  sorts?: TableDataSortProps[]
+  group?: TableDataGroupProps
   aggs?: { [key: string]: AggregateKind }
+  slice?: TableDataSliceProps
   newExpandDataPk?: any
   deleteExpandDataPk?: any
-  fetchDataNumber?: number
   columnSortedNames?: [string, string]
   newColumn?: TableLayoutColumnProps
   changedColumn?: TableLayoutColumnProps
   deletedColumnName?: string
 }
 
-export interface TableDataSortReq {
+export interface TableDataSortProps {
   columnName: string
   orderDesc: boolean
 }
 
-export interface TableDataFilterReq {
-  items: TableDataFilterItemReq[]
+export interface TableDataFilterProps {
+  items: TableDataFilterItemProps[]
   and: boolean
 }
 
-export interface TableDataFilterItemReq {
+export interface TableDataFilterItemProps {
   columnName: string
   operator: OperatorKind
   value?: any
 }
 
-export interface TableDataGroupReq {
+export interface TableDataGroupProps {
   columnNames: string[]
   groupOrderDesc: boolean
   // useDict: boolean
   hideEmptyRecord: boolean
+  // key=group value
+  slices: { [key: string]: TableDataSliceProps }
 }
 
-export interface TableDataSliceReq {
+export interface TableDataSliceProps {
   offsetNumber: number
   fetchNumber: number
 }
@@ -272,14 +282,14 @@ export interface TableDataGroupResp extends TableDataResp {
   groupValue: string
 }
 
-export interface TableCellDictItem {
+export interface TableCellDictItemProps {
   title: string
   value: any
   color?: string
   avatar?: string
 }
 
-export interface TableCellDictItemResp {
-  records: TableCellDictItem[]
+export interface TableCellDictItemsResp {
+  records: TableCellDictItemProps[]
   totalNumber: number
 }

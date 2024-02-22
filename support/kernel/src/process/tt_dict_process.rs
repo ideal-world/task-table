@@ -8,9 +8,9 @@ use tardis::{
 };
 
 use crate::domain::tt_dict;
-use crate::dto::tt_dict_dtos::{TableDictAddReq, TableDictInfo, TableDictItemResp, TableDictModifyReq};
+use crate::dto::tt_dict_dtos::{TableDictInfo, TableDictItemsResp, TableDictNewOrModifyReq};
 
-pub async fn add_dict(dict_code: &str, add_req: TableDictAddReq, funs: &TardisFunsInst, ctx: &TardisContext) -> TardisResult<()> {
+pub async fn new_or_modify_dict_item(dict_code: &str, new_or_modify_req: TableDictNewOrModifyReq, funs: &TardisFunsInst, ctx: &TardisContext) -> TardisResult<()> {
     if funs
         .db()
         .count(
@@ -18,51 +18,39 @@ pub async fn add_dict(dict_code: &str, add_req: TableDictAddReq, funs: &TardisFu
                 .columns(vec![tt_dict::Column::Value])
                 .from(tt_dict::Entity)
                 .and_where(Expr::col(tt_dict::Column::DictCode).eq(dict_code))
-                .and_where(Expr::col(tt_dict::Column::Value).eq(add_req.value.clone())),
+                .and_where(Expr::col(tt_dict::Column::Value).eq(new_or_modify_req.value.clone())),
         )
         .await?
-        > 0
+        == 0
     {
-        return Err(funs.err().conflict(
-            "dict",
-            "add",
-            &format!("dict.{}.{} already exist by {}", dict_code, add_req.value, ctx.owner),
-            "409-already-exist",
-        ));
+        let dict_domain = tt_dict::ActiveModel {
+            title: Set(new_or_modify_req.title),
+            value: Set(new_or_modify_req.value),
+            color: Set(new_or_modify_req.color.unwrap_or("".to_string())),
+            avatar: Set(new_or_modify_req.avatar.unwrap_or("".to_string())),
+            dict_code: Set(dict_code.to_string()),
+            ..Default::default()
+        };
+        funs.db().insert_one(dict_domain, ctx).await?;
+    } else {
+        let mut dict_domain = tt_dict::ActiveModel {
+            dict_code: Set(dict_code.to_string()),
+            value: Set(new_or_modify_req.value),
+            title: Set(new_or_modify_req.title),
+            ..Default::default()
+        };
+        if let Some(color) = new_or_modify_req.color {
+            dict_domain.color = Set(color);
+        }
+        if let Some(avatar) = new_or_modify_req.avatar {
+            dict_domain.avatar = Set(avatar);
+        }
+        funs.db().update_one(dict_domain, ctx).await?;
     }
-
-    let dict_domain = tt_dict::ActiveModel {
-        title: Set(add_req.title),
-        value: Set(add_req.value),
-        color: Set(add_req.color.unwrap_or("".to_string())),
-        avatar: Set(add_req.avatar.unwrap_or("".to_string())),
-        dict_code: Set(dict_code.to_string()),
-        ..Default::default()
-    };
-    funs.db().insert_one(dict_domain, ctx).await?;
     Ok(())
 }
 
-pub async fn modify_dict(dict_code: &str, value: Value, modify_req: TableDictModifyReq, funs: &TardisFunsInst, ctx: &TardisContext) -> TardisResult<()> {
-    let mut dict_domain = tt_dict::ActiveModel {
-        value: Set(value),
-        dict_code: Set(dict_code.to_string()),
-        ..Default::default()
-    };
-    if let Some(title) = modify_req.title {
-        dict_domain.title = Set(title);
-    }
-    if let Some(color) = modify_req.color {
-        dict_domain.color = Set(color);
-    }
-    if let Some(avatar) = modify_req.avatar {
-        dict_domain.avatar = Set(avatar);
-    }
-    funs.db().update_one(dict_domain, ctx).await?;
-    Ok(())
-}
-
-pub async fn delete_dict(dict_code: &str, value: &Value, funs: &TardisFunsInst, _ctx: &TardisContext) -> TardisResult<()> {
+pub async fn delete_dict_item(dict_code: &str, value: &Value, funs: &TardisFunsInst, _ctx: &TardisContext) -> TardisResult<()> {
     funs.db()
         .execute(
             Query::delete()
@@ -74,7 +62,7 @@ pub async fn delete_dict(dict_code: &str, value: &Value, funs: &TardisFunsInst, 
     Ok(())
 }
 
-pub async fn get_dict(dict_code: &str, value: &Value, funs: &TardisFunsInst, ctx: &TardisContext) -> TardisResult<TableDictInfo> {
+pub async fn get_dict_item(dict_code: &str, value: &Value, funs: &TardisFunsInst, ctx: &TardisContext) -> TardisResult<TableDictInfo> {
     let mut query_statement = Query::select();
     query_statement
         .columns(vec![
@@ -94,7 +82,7 @@ pub async fn get_dict(dict_code: &str, value: &Value, funs: &TardisFunsInst, ctx
     }
 }
 
-pub async fn find_dicts(dict_code: String, values: Vec<Value>, funs: &TardisFunsInst, _ctx: &TardisContext) -> TardisResult<Vec<TableDictInfo>> {
+pub async fn find_dict_items(dict_code: String, values: Vec<Value>, funs: &TardisFunsInst, _ctx: &TardisContext) -> TardisResult<Vec<TableDictInfo>> {
     let mut query_statement = Query::select();
     query_statement
         .columns(vec![
@@ -110,7 +98,7 @@ pub async fn find_dicts(dict_code: String, values: Vec<Value>, funs: &TardisFuns
     funs.db().find_dtos::<TableDictInfo>(&query_statement).await
 }
 
-pub async fn find_all_dicts(dict_code: &str, funs: &TardisFunsInst, _ctx: &TardisContext) -> TardisResult<Vec<TableDictInfo>> {
+pub async fn find_all_dict_items(dict_code: &str, funs: &TardisFunsInst, _ctx: &TardisContext) -> TardisResult<Vec<TableDictInfo>> {
     let mut query_statement = Query::select();
     query_statement
         .columns([
@@ -125,7 +113,7 @@ pub async fn find_all_dicts(dict_code: &str, funs: &TardisFunsInst, _ctx: &Tardi
     funs.db().find_dtos::<TableDictInfo>(&query_statement).await
 }
 
-pub async fn paginate_dicts(
+pub async fn paginate_dict_items(
     dict_code: Option<&str>,
     value: Option<&Value>,
     page_number: Option<u64>,
@@ -134,7 +122,7 @@ pub async fn paginate_dicts(
     desc_sort_by_update: Option<bool>,
     funs: &TardisFunsInst,
     _ctx: &TardisContext,
-) -> TardisResult<TableDictItemResp> {
+) -> TardisResult<TableDictItemsResp> {
     let mut query_statement: sea_query::SelectStatement = Query::select();
     query_statement
         .columns([
@@ -159,15 +147,20 @@ pub async fn paginate_dicts(
     }
     if page_number.is_some() && page_size.is_some() {
         let resp = funs.db().paginate_dtos(&query_statement, page_number.expect("ignore"), page_size.expect("ignore")).await?;
-        Ok(TableDictItemResp {
+        Ok(TableDictItemsResp {
             total_number: resp.1 as i32,
             records: resp.0,
         })
     } else {
         let resp = funs.db().find_dtos(&query_statement).await?;
-        Ok(TableDictItemResp {
+        Ok(TableDictItemsResp {
             total_number: resp.len() as i32,
             records: resp,
         })
     }
+}
+
+pub async fn sort_dict_items(dict_code: &str, left_item_value: &str, right_item_value: &str, funs: &TardisFunsInst, ctx: &TardisContext) -> TardisResult<()> {
+    // TODO
+    Ok(())
 }
