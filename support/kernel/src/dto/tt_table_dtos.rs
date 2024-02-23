@@ -9,7 +9,7 @@ use tardis::{
 };
 
 #[skip_serializing_none]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct TableNewReq {
     pub pk_column_name: String,
@@ -20,7 +20,7 @@ pub struct TableNewReq {
 }
 
 #[skip_serializing_none]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct TableModifyReq {
     pub new_column: Option<TableColumnNewReq>,
@@ -30,7 +30,7 @@ pub struct TableModifyReq {
 }
 
 #[skip_serializing_none]
-#[derive(Serialize, Deserialize, Debug, sea_orm::FromQueryResult)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, sea_orm::FromQueryResult)]
 #[serde(rename_all = "camelCase")]
 pub struct TableSummaryResp {
     pub id: String,
@@ -44,46 +44,24 @@ pub struct TableSummaryResp {
 }
 
 #[skip_serializing_none]
-#[derive(Serialize, Deserialize, Debug, sea_orm::FromQueryResult)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, sea_orm::FromQueryResult)]
 #[serde(rename_all = "camelCase")]
 pub struct TableDetailResp {
     pub id: String,
     pub pk_column_name: String,
     pub parent_pk_column_name: Option<String>,
     pub free_sort_column_name: Option<String>,
-    pub columns: Value,
-    pub layouts: Option<Value>,
-    pub styles: Option<Value>,
+    pub columns: Vec<TableColumnProps>,
+    pub layouts: Option<Vec<TableLayoutProps>>,
+    pub styles: Option<TableStyleProps>,
 
     pub owner: String,
     pub create_time: DateTime<Utc>,
     pub update_time: DateTime<Utc>,
 }
 
-impl TableDetailResp {
-    pub fn columns(&self) -> Vec<TableColumnProps> {
-        TardisFuns::json.json_to_obj(self.columns.clone()).expect("ignore")
-    }
-
-    pub fn layouts(&self) -> Option<Vec<TableLayoutProps>> {
-        if let Some(layouts) = &self.layouts {
-            Some(TardisFuns::json.json_to_obj(layouts.clone()).expect("ignore"))
-        } else {
-            None
-        }
-    }
-
-    pub fn styles(&self) -> Option<TableStyleProps> {
-        if let Some(styles) = &self.styles {
-            Some(TardisFuns::json.json_to_obj(styles.clone()).expect("ignore"))
-        } else {
-            None
-        }
-    }
-}
-
 #[skip_serializing_none]
-#[derive(Serialize, Deserialize, Debug, sea_orm::FromQueryResult)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, sea_orm::FromQueryResult)]
 #[serde(rename_all = "camelCase")]
 pub struct TableColumnsResp {
     pub pk_column_name: String,
@@ -97,7 +75,7 @@ impl TableColumnsResp {
 }
 
 #[skip_serializing_none]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct TableColumnNewReq {
     pub name: String,
@@ -114,7 +92,7 @@ pub struct TableColumnNewReq {
 }
 
 #[skip_serializing_none]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct TableColumnModifyReq {
     pub name: String,
@@ -128,7 +106,7 @@ pub struct TableColumnModifyReq {
 }
 
 #[skip_serializing_none]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, sea_orm::FromJsonQueryResult)]
 #[serde(rename_all = "camelCase")]
 pub struct TableColumnProps {
     pub name: String,
@@ -143,7 +121,7 @@ pub struct TableColumnProps {
     pub kind_date_time_format: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 pub enum TableColumnDataKind {
     #[serde(rename = "TEXT")]
     Text,
@@ -184,7 +162,7 @@ pub enum TableColumnDataKind {
 }
 
 #[skip_serializing_none]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct TableStyleNewOrModifyReq {
     pub size: Option<String>,
@@ -197,7 +175,7 @@ pub struct TableStyleNewOrModifyReq {
 }
 
 #[skip_serializing_none]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, sea_orm::FromJsonQueryResult)]
 #[serde(rename_all = "camelCase")]
 pub struct TableStyleProps {
     pub size: Option<String>,

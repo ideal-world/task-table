@@ -6,6 +6,10 @@ use tardis::db::sea_orm::sea_query::{ColumnDef, Index};
 use tardis::db::sea_orm::sea_query::{IndexCreateStatement, Table, TableCreateStatement};
 use tardis::db::sea_orm::{self, DbBackend};
 use tardis::db::sea_orm::{prelude::*, Set};
+use crate::dto::tt_layout_dtos::TableLayoutProps;
+use crate::dto::tt_table_dtos::TableColumnProps;
+use crate::dto::tt_table_dtos::TableStyleProps;
+
 #[derive(Clone, Debug, PartialEq, DeriveEntityModel)]
 #[sea_orm(table_name = "tt_table")]
 pub struct Model {
@@ -14,9 +18,12 @@ pub struct Model {
     pub pk_column_name: String,
     pub parent_pk_column_name: Option<String>,
     pub free_sort_column_name: Option<String>,
-    pub columns: Json,
-    pub layouts: Option<Json>,
-    pub styles: Option<Json>,
+    #[sea_orm(column_type = "JsonBinary")]
+    pub columns: Vec<TableColumnProps>,
+    #[sea_orm(column_type = "JsonBinary")]
+    pub layouts: Option<Vec<TableLayoutProps>>,
+    #[sea_orm(column_type = "JsonBinary")]
+    pub styles: Option<TableStyleProps>,
 
     pub create_time: chrono::DateTime<Utc>,
     pub update_time: chrono::DateTime<Utc>,

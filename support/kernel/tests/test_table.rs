@@ -46,9 +46,9 @@ pub async fn test() -> TardisResult<String> {
     // ----- test get table
     // ----------------------------------
     let table_detail = tt_table_process::get_table(&table_id, &funs, &ctx).await?;
-    assert_eq!(table_detail.columns().len(), 2);
-    assert_eq!(table_detail.columns()[0].title, "ID");
-    assert_eq!(table_detail.styles.unwrap().as_object().unwrap().get("size").unwrap().as_str().unwrap(), "medium");
+    assert_eq!(table_detail.columns.len(), 2);
+    assert_eq!(table_detail.columns[0].title, "ID");
+    assert_eq!(table_detail.styles.unwrap().size.unwrap(), "medium");
 
     // ----------------------------------
     // ----- test modify table
@@ -172,13 +172,13 @@ pub async fn test() -> TardisResult<String> {
     .await?;
 
     let table_detail = tt_table_process::get_table(&table_id, &funs, &ctx).await?;
-    assert_eq!(table_detail.columns().len(), 4);
-    assert_eq!(table_detail.columns()[0].title, "ID");
-    assert_eq!(table_detail.columns()[1].title, "Parent ID");
-    assert_eq!(table_detail.columns()[2].title, "字段1");
-    assert_eq!(table_detail.columns()[3].title, "col_2");
-    assert_eq!(table_detail.columns()[3].data_kind, TableColumnDataKind::Number);
-    assert_eq!(table_detail.styles.unwrap().as_object().unwrap().get("size").unwrap().as_str().unwrap(), "mini");
+    assert_eq!(table_detail.columns.len(), 4);
+    assert_eq!(table_detail.columns[0].title, "ID");
+    assert_eq!(table_detail.columns[1].title, "Parent ID");
+    assert_eq!(table_detail.columns[2].title, "字段1");
+    assert_eq!(table_detail.columns[3].title, "col_2");
+    assert_eq!(table_detail.columns[3].data_kind, TableColumnDataKind::Number);
+    assert_eq!(table_detail.styles.unwrap().size.unwrap(), "mini");
 
     // ----------------------------------
     // ----- test paginate table

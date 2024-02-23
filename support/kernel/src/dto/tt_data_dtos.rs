@@ -5,7 +5,7 @@ use serde_with::skip_serializing_none;
 use tardis::serde_json::Value;
 
 #[skip_serializing_none]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct TableDataFilterProps {
     pub items: Vec<TableDataFilterItemProps>,
@@ -13,7 +13,7 @@ pub struct TableDataFilterProps {
 }
 
 #[skip_serializing_none]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct TableDataFilterItemProps {
     pub column_name: String,
@@ -22,7 +22,7 @@ pub struct TableDataFilterItemProps {
 }
 
 #[skip_serializing_none]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct TableDataSortProps {
     pub column_name: String,
@@ -30,7 +30,7 @@ pub struct TableDataSortProps {
 }
 
 #[skip_serializing_none]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct TableDataGroupProps {
     pub column_names: Vec<String>,
@@ -40,7 +40,7 @@ pub struct TableDataGroupProps {
 }
 
 #[skip_serializing_none]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct TableDataSliceProps {
     pub offset_number: i32,
@@ -48,7 +48,7 @@ pub struct TableDataSliceProps {
 }
 
 #[skip_serializing_none]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct TableDataResp {
     pub records: Vec<HashMap<String, Value>>,
@@ -57,7 +57,7 @@ pub struct TableDataResp {
 }
 
 #[skip_serializing_none]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct TableDataGroupResp {
     pub records: Vec<HashMap<String, Value>>,
@@ -66,7 +66,7 @@ pub struct TableDataGroupResp {
     pub group_value: String,
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 pub enum TableDataAggregateKind {
     #[serde(rename = "SUM")]
     Sum,
@@ -84,7 +84,7 @@ pub enum TableDataAggregateKind {
     Distinct,
 }
 
-#[derive(Serialize, Deserialize, PartialEq, Eq, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 pub enum TableDataOperatorKind {
     #[serde(rename = "=")]
     Eq,

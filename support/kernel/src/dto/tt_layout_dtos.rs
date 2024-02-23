@@ -3,10 +3,10 @@ use std::collections::HashMap;
 use super::tt_data_dtos::{TableDataFilterProps, TableDataGroupProps, TableDataSliceProps, TableDataSortProps};
 use serde::{Deserialize, Serialize};
 use serde_with::skip_serializing_none;
-use tardis::serde_json::Value;
+use tardis::{db::sea_orm, serde_json::Value};
 
 #[skip_serializing_none]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct TableLayoutNewReq {
     pub title: String,
@@ -22,7 +22,7 @@ pub struct TableLayoutNewReq {
 }
 
 #[skip_serializing_none]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct TableLayoutModifyProps {
     pub title: Option<String>,
@@ -40,7 +40,7 @@ pub struct TableLayoutModifyProps {
 }
 
 #[skip_serializing_none]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone, sea_orm::FromJsonQueryResult)]
 #[serde(rename_all = "camelCase")]
 pub struct TableLayoutProps {
     pub id: String,
@@ -57,7 +57,7 @@ pub struct TableLayoutProps {
 }
 
 #[skip_serializing_none]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct TableLayoutColumnProps {
     pub name: String,

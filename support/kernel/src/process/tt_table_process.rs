@@ -84,30 +84,28 @@ pub async fn new_table(mut new_req: TableNewReq, funs: &TardisFunsInst, ctx: &Ta
         })
         .collect::<Vec<_>>();
 
-    let table_domain = tt_table::ActiveModel {
-        id: Set(table_id.clone()),
-        pk_column_name: Set(new_req.pk_column_name),
-        parent_pk_column_name: Set(new_req.parent_pk_column_name),
-        columns: Set(TardisFuns::json.obj_to_json(&columns).expect("ignore")),
-        styles: Set(if new_req.styles.is_some() {
-            Some(TardisFuns::json.obj_to_json(&new_req.styles).expect("ignore"))
-        } else {
-            None
-        }),
-        ..Default::default()
-    };
-    funs.db().insert_one(table_domain, ctx).await?;
-    // create instance table
-    let columns = columns
+        let column_ddl = columns
         .iter()
         .map(|column| format!("{} {}", column.name, covert_column_data_kind_to_postgres_type(&column.data_kind, column.multi_value)))
         .collect::<Vec<String>>()
         .join(",\r\n");
+
+    let table_domain = tt_table::ActiveModel {
+        id: Set(table_id.clone()),
+        pk_column_name: Set(new_req.pk_column_name),
+        parent_pk_column_name: Set(new_req.parent_pk_column_name),
+        columns: Set(columns),
+        styles: Set(new_req.styles),
+        ..Default::default()
+    };
+    funs.db().insert_one(table_domain, ctx).await?;
+    
+    // create instance table
     funs.db()
         .execute_one(
             &format!(
                 r#"CREATE TABLE {INST_PREFIX}_{table_id}(
-            {columns}
+            {column_ddl}
         )"#
             ),
             vec![],
@@ -132,19 +130,19 @@ pub async fn modify_table(table_id: &str, modify_req: TableModifyReq, funs: &Tar
         id: Set(table_id.to_string()),
         ..Default::default()
     };
-    if let Some(styles) = &modify_req.styles {
-        table_domain.styles = Set(Some(TardisFuns::json.obj_to_json(styles).expect("ignore")));
+    if let Some(styles) = modify_req.styles {
+        table_domain.styles = Set(Some(styles));
     }
     // column
     if modify_req.new_column.is_some() || modify_req.deleted_column_name.is_some() || modify_req.changed_column.is_some() {
         let storage_table_detail = get_table(table_id, funs, ctx).await?;
-        let mut storage_columns = storage_table_detail.columns();
+        let mut storage_columns = storage_table_detail.columns;
 
         if let Some(new_column) = modify_req.new_column {
             if !R_COLUMN_NAME.is_match(&new_column.name) {
                 return Err(funs.err().bad_request("table", "modify_table", "Column name is illegal", "400-column-name-is-illegal"));
             }
-            if storage_table_detail.columns().iter().any(|column| column.name == new_column.name) {
+            if storage_columns.iter().any(|column| column.name == new_column.name) {
                 return Err(funs.err().bad_request("table", "modify_table", "Column name already exist", "400-column-name-already-exist"));
             }
 
@@ -210,7 +208,7 @@ pub async fn modify_table(table_id: &str, modify_req: TableModifyReq, funs: &Tar
                 }
             }
         }
-        table_domain.columns = Set(TardisFuns::json.obj_to_json(&storage_columns).expect("ignore"));
+        table_domain.columns = Set(storage_columns);
     }
 
     funs.db().update_one(table_domain, ctx).await?;

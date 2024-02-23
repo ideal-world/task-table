@@ -16,7 +16,7 @@ async fn test_all() -> TardisResult<()> {
     let docker = testcontainers::clients::Cli::default();
     let reldb_container = TardisTestContainer::postgres_custom(None, &docker);
     let port = reldb_container.get_host_port_ipv4(5432);
-    let url = format!("postgres://postgres:123456@localhost:{port}/test");
+    let url = format!("postgres://postgres:123456@127.0.0.1:{port}/test");
     env::set_var("TARDIS_FW.DB.URL", url);
 
     TardisFuns::init(Some("tests/config")).await?;

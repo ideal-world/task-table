@@ -12,7 +12,7 @@ use tardis::{
 pub async fn new_layout(table_id: &str, new_req: TableLayoutNewReq, funs: &TardisFunsInst, ctx: &TardisContext) -> TardisResult<String> {
     tt_share_process::check_share_full_control(table_id, funs, ctx).await?;
     let storage_table_detail = tt_table_process::get_table(table_id, funs, ctx).await?;
-    let storage_columns = storage_table_detail.columns();
+    let storage_columns = storage_table_detail.columns;
 
     if new_req.columns.iter().any(|req_column| !storage_columns.iter().any(|column| column.name == req_column.name)) {
         return Err(funs.err().not_found("layout", "new", &format!("Table.{} column not found by {}", table_id, ctx.owner), "404-column-not-found"));
@@ -32,7 +32,7 @@ pub async fn new_layout(table_id: &str, new_req: TableLayoutNewReq, funs: &Tardi
         slice: new_req.slice,
         expand_data_pks: new_req.expand_data_pks,
     };
-    let storage_layouts = tt_table_process::get_table(table_id, funs, ctx).await?.layouts();
+    let storage_layouts = tt_table_process::get_table(table_id, funs, ctx).await?.layouts;
     let layouts = if let Some(mut storage_layouts) = storage_layouts {
         storage_layouts.push(layout_props);
         storage_layouts
@@ -41,7 +41,7 @@ pub async fn new_layout(table_id: &str, new_req: TableLayoutNewReq, funs: &Tardi
     };
     let table_domain: tt_table::ActiveModel = tt_table::ActiveModel {
         id: Set(table_id.to_string()),
-        layouts: Set(Some(TardisFuns::json.obj_to_json(&layouts).expect("ignore"))),
+        layouts: Set(Some(layouts)),
         ..Default::default()
     };
     funs.db().update_one(table_domain, ctx).await?;
@@ -85,7 +85,7 @@ pub async fn modify_layout(table_id: &str, layout_id: &str, modify_req: TableLay
         // column
         if let Some(new_column) = modify_req.new_column {
             let storage_table_detail = tt_table_process::get_table(table_id, funs, ctx).await?;
-            let storage_columns = storage_table_detail.columns();
+            let storage_columns = storage_table_detail.columns;
             if !storage_columns.iter().any(|column| column.name == new_column.name) {
                 return Err(funs.err().not_found("layout", "modify", &format!("Table.{} column not found by {}", table_id, ctx.owner), "404-column-not-found"));
             }
@@ -115,7 +115,7 @@ pub async fn modify_layout(table_id: &str, layout_id: &str, modify_req: TableLay
 
         let table_domain = tt_table::ActiveModel {
             id: Set(table_id.to_string()),
-            layouts: Set(Some(TardisFuns::json.obj_to_json(&storage_layouts).expect("ignore"))),
+            layouts: Set(Some(storage_layouts)),
             ..Default::default()
         };
         funs.db().update_one(table_domain, ctx).await?;
@@ -145,7 +145,7 @@ pub async fn delete_layout(table_id: &str, layout_id: &str, funs: &TardisFunsIns
 
     let table_domain = tt_table::ActiveModel {
         id: Set(table_id.to_string()),
-        layouts: Set(Some(TardisFuns::json.obj_to_json(&storage_layouts).expect("ignore"))),
+        layouts: Set(Some(storage_layouts)),
         ..Default::default()
     };
     funs.db().update_one(table_domain, ctx).await?;
@@ -168,7 +168,7 @@ pub async fn get_layout(table_id: &str, layout_id: &str, funs: &TardisFunsInst, 
 
 pub async fn find_layouts(table_id: &str, funs: &TardisFunsInst, ctx: &TardisContext) -> TardisResult<Vec<TableLayoutProps>> {
     tt_share_process::check_share_full_control(table_id, funs, ctx).await?;
-    let storage_layouts = tt_table_process::get_table(table_id, funs, ctx).await?.layouts();
+    let storage_layouts = tt_table_process::get_table(table_id, funs, ctx).await?.layouts;
     if storage_layouts.is_none() {
         return Err(funs.err().not_found("layout", "find", &format!("Table.{} not found by {}", table_id, ctx.owner), "404-layout-not-found"));
     }
