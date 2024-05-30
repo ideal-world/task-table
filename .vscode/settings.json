@@ -94,4 +94,7 @@
   "[rust]": {
     "editor.defaultFormatter": "rust-lang.rust-analyzer"
   },
+  "i18n-ally.localesPaths": [
+    "src/assets/locales"
+  ],
 }
