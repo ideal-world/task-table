@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
 import type { TableCellDictItemProps, TableCellDictItemsResp, TableColumnProps, TableDataFilterProps, TableDataGroupProps, TableDataGroupResp, TableDataResp, TableDataSliceProps, TableDataSortProps, TableEventProps, TableLayoutColumnProps, TableLayoutKernelProps, TableLayoutModifyProps, TableLayoutProps, TableProps, TableStyleProps } from '../src/components/props'
-import { AggregateKind, DATA_DICT_POSTFIX, DataKind, LayoutKind } from '../src/components/props'
+import { AggregateKind, DATA_DICT_POSTFIX, DataKind, LayoutKind, OperatorKind } from '../src/components/props'
+import { IwUtils } from '../src/utils'
 
 const nameDict = [{ title: '星航', value: 'xh', avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg' }, { title: '星杨', value: 'xy', avatar: 'https://pic1.zhimg.com/v2-770e9580d5febfb49cbb23c409cea85d_r.jpg?source=1def8aca' }, { title: '星辰', value: 'xc' }]
 const statsDict = [{ title: '初始化', value: 'init', color: '#43ad7f7f' }, { title: '进行中', value: 'progress' }, { title: '有风险', value: 'risk', color: '#be14807f' }, { title: '已完成', value: 'finish' }, { title: '已关闭', value: 'close' }]
 
-const data = [
+const DATA = [
   { no: 1, pno: null, name: 'xh', stats: ['init'], phone: 'Phone1', addr: 'Addr1 Addr1 Addr1 Addr1 Addr1 Addr1', time: Date.now() },
   { no: 2, pno: null, name: 'xh', stats: ['init'], phone: 'Phone2', addr: 'Addr2', time: '2023-10-24' },
   { no: 3, pno: 1, name: 'xh', stats: ['progress', 'risk'], phone: 'Phone3', addr: 'Addr3', time: '2023-10-25' },
@@ -38,8 +38,6 @@ const data = [
   { no: 29, pno: null, name: 'xh', stats: ['close'], phone: 'Phone29', addr: 'Addr29', time: '2023-11-20' },
 ]
 
-
-const tableId = ref<string>('')
 const columns = [{ name: 'no', dataKind: DataKind.NUMBER, dataEditable: false }, { name: 'pno', dataKind: DataKind.NUMBER, dataEditable: false }, { name: 'name', useDict: true, dictEditable: true }, { name: 'phone' }, { name: 'stats', useDict: true, dictEditable: true, multiValue: true }, { name: 'addr' }, { name: 'time', dataKind: DataKind.DATETIME }]
 const layouts = [{
   id: 'hi',
@@ -76,24 +74,108 @@ function attachDict(data: { [key: string]: any }[]) {
   })
 }
 
+const ss = ''
+
+ss.includes('')
+
 const events: TableEventProps = {
   loadData: async (filters?: TableDataFilterProps[], sorts?: TableDataSortProps[], group?: TableDataGroupProps, aggs?: { [key: string]: AggregateKind }, byGroupValue?: any, slice?: TableDataSliceProps): Promise<TableDataResp | TableDataGroupResp[]> => {
-    // const params: { [k: string]: any } = {
-    //   table_id: tableId.value,
-    // }
-    // if (filters)
-    //   params.filters = filters
-    // if (sorts)
-    //   params.sorts = sorts
-    // if (group)
-    //   params.group = group
-    // if (aggs)
-    //   params.aggs = aggs
+    let data = JSON.parse(JSON.stringify(DATA))
+    if (filters) {
+      // TODO 支持多组
+      filters.forEach((filter) => {
+        data = data.filter((d) => {
+          return filter.items.every((item) => {
+            switch (item.operator) {
+              case OperatorKind.EQ:
+                return d[item.columnName] === item.value
+              case OperatorKind.NE:
+                return d[item.columnName] !== item.value
+              case OperatorKind.LT:
+                return d[item.columnName] < item.value
+              case OperatorKind.LE:
+                return d[item.columnName] <= item.value
+              case OperatorKind.GT:
+                return d[item.columnName] > item.value
+              case OperatorKind.GE:
+                return d[item.columnName] >= item.value
+              case OperatorKind.IN:
+                return d[item.columnName].includes(item.value)
+              case OperatorKind.NOT_IN:
+                return !d[item.columnName].includes(item.value)
+              case OperatorKind.CONTAINS:
+                return d[item.columnName].includes(item.value)
+              case OperatorKind.NOT_CONTAINS:
+                return !d[item.columnName].includes(item.value)
+              case OperatorKind.STARTWITH:
+                return d[item.columnName].startsWith(item.value)
+              case OperatorKind.NOT_STARTWITH:
+                return !d[item.columnName].startsWith(item.value)
+              case OperatorKind.ENDWITH:
+                return d[item.columnName].endsWith(item.value)
+              case OperatorKind.NOT_ENDWITH:
+                return !d[item.columnName].endsWith(item.value)
+              case OperatorKind.IS_EMPTY:
+                return d[item.columnName] === ''
+              case OperatorKind.NOT_EMPTY:
+                return d[item.columnName] !== ''
+              default:
+                return false
+            }
+          })
+        })
+      })
+    }
+    if (sorts) {
+      sorts.forEach((sort) => {
+        data.sort((a, b) => {
+          if (sort.orderDesc) {
+            return a[sort.columnName] - b[sort.columnName]
+          }
+          else {
+            return b[sort.columnName] - a[sort.columnName]
+          }
+        })
+      })
+    }
+    // TODO groupOrderDesc: boolean
+    // TODO hideEmptyRecord: boolean
+    // TODO slices: { [key: string]: TableDataSliceProps }
+    if (group) {
+      data = IwUtils.groupBy(data, (d) => { return group.columnNames.map((col) => { return d[col] }).join('_') })
+    }
+    if (aggs) {
+      data = data.map((d) => {
+        const agg = {}
+        for (const [key, value] of Object.entries(aggs)) {
+          switch (value) {
+            case AggregateKind.COUNT:
+              agg[key] = d[key].length
+              break
+            case AggregateKind.SUM:
+              agg[key] = d[key].reduce((acc, cur) => acc + cur, 0)
+              break
+            case AggregateKind.AVG:
+              agg[key] = d[key].reduce((acc, cur) => acc + cur, 0) / d[key].length
+              break
+            case AggregateKind.MAX:
+              agg[key] = Math.max(...d[key])
+              break
+            case AggregateKind.MIN:
+              agg[key] = Math.min(...d[key])
+              break
+            default:
+              break
+          }
+        }
+        return { ...d, ...agg }
+      })
+    }
+
     // if (byGroupValue)
     //   params.byGroupValue = byGroupValue
     // if (slice)
     //   params.slice = slice
-    // return await ws.reqOk<TableDataResp | TableDataGroupResp[]>('LoadData', {}, params)
 
     return {
       records: attachDict(data),
@@ -245,7 +327,7 @@ const events: TableEventProps = {
   <div style="height: 600px">
     <iw-task-table
       pk-column-name="no" parent-pk-column-name="pno" :columns="columns" :events="events" :layouts="layouts"
-     :styles="styles"
+      :styles="styles"
     />
   </div>
 </template>

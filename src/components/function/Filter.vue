@@ -57,7 +57,7 @@ const selectedDictItems = computed<TableCellDictItemProps[]>(() => {
 
 const simpleFilterItems = computed<TableDataFilterItemProps[]>(() => {
   // Simple mode supports only one group of and conditions
-  if (props.filters && props.filters.length === 1 && props.filters[0].and)
+  if (props.filters && props.filters.length === 1)
     return props.filters[0].items
 
   return []
@@ -210,7 +210,6 @@ async function newOrModifySimpleFilterItem(changedFilterItem: TableDataFilterIte
     await modifyLayoutFun({
       filters: [
         {
-          and: true,
           items: [{
             columnName: changedFilterItem.columnName,
             operator: changedFilterItem.operator,

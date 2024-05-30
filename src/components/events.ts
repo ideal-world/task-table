@@ -265,8 +265,9 @@ export async function modifyStyles(changedStyles: TableStyleConf): Promise<boole
     rowClass: changedStyles.rowClass,
     cellClass: changedStyles.cellClass,
     aggClass: changedStyles.aggClass,
-  }))
+  })) {
     return false
+  }
 
   tableBasicConf.styles = changedStyles
   return true
@@ -302,8 +303,9 @@ export async function newColumn(newColumnConf: TableColumnConf, newLayoutColumnC
       dateStart: newLayoutColumnConf.dateStart,
       dateEnd: newLayoutColumnConf.dateEnd,
     },
-  }))
+  })) {
     return false
+  }
 
   tableBasicConf.columns.push(newColumnConf)
   if (fromColumnName) {
@@ -335,8 +337,9 @@ export async function modifyColumn(changedColumnConf?: TableColumnConf, changedL
     dataEditable: changedColumnConf.dataEditable,
     groupable: changedColumnConf.groupable,
     kindDateTimeFormat: changedColumnConf.kindDateTimeFormat,
-  }))
+  })) {
     return false
+  }
 
   if (changedLayoutColumnConf && !await events.modifyLayout(layout.id, {
     changedColumn: {
@@ -348,8 +351,9 @@ export async function modifyColumn(changedColumnConf?: TableColumnConf, changedL
       dateStart: changedLayoutColumnConf.dateStart,
       dateEnd: changedLayoutColumnConf.dateEnd,
     },
-  }))
+  })) {
     return false
+  }
 
   if (changedColumnConf) {
     const oldColumnIdx = tableBasicConf.columns.findIndex(column => column.name === changedColumnConf.name)
@@ -375,8 +379,9 @@ export async function deleteColumn(deletedColumnName: string): Promise<boolean> 
 
   if (!await events.deleteColumn(deletedColumnName) || !await events.modifyLayout(layout.id, {
     deletedColumnName,
-  }))
+  })) {
     return false
+  }
 
   const oldColumnIdx = tableBasicConf.columns.findIndex(column => column.name === deletedColumnName)
   tableBasicConf.columns.splice(oldColumnIdx, 1)

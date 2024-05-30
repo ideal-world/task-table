@@ -249,7 +249,6 @@ export interface TableDataSortProps {
 
 export interface TableDataFilterProps {
   items: TableDataFilterItemProps[]
-  and: boolean
 }
 
 export interface TableDataFilterItemProps {
