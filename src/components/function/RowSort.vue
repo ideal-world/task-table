@@ -5,7 +5,7 @@ import * as iconSvg from '../../assets/icon'
 import MenuComp from '../common/Menu.vue'
 import type { TableColumnConf } from '../conf'
 import { FUN_LOAD_DATA_TYPE, FUN_MODIFY_LAYOUT_TYPE } from '../events'
-import type { TableDataSortProps } from '../props'
+import type { TableDataSortProps } from '../../props'
 
 const props = defineProps<{
   sorts?: TableDataSortProps[]
@@ -146,14 +146,14 @@ onMounted(() => {
       >
         <span>
           <i :class="`${iconSvg.GRABBER} cursor-pointer mr-0.5`" />
-          <button class="iw-btn iw-btn-outline iw-btn-xs" @click="event => showSortColumnContextMenu(event, sort.columnName)">
+          <button class="iw-btn iw-btn-outline iw-btn-xs" @click="(event:PointerEvent) => showSortColumnContextMenu(event, sort.columnName)">
             <i :class="props.columnsConf.find(col => col.name === sort.columnName)?.icon" />
             <span class="mr-0.5">{{ props.columnsConf.find(col => col.name === sort.columnName)?.title }}</span>
             <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />
           </button>
         </span>
         <span class="ml-1">
-          <button class="iw-btn iw-btn-outline iw-btn-xs" @click="event => showSortAscDescContextMenu(event, sort.columnName)">
+          <button class="iw-btn iw-btn-outline iw-btn-xs" @click="(event:PointerEvent) => showSortAscDescContextMenu(event, sort.columnName)">
             {{ $t(sort.orderDesc ? 'function.rowSort.desc' : 'function.rowSort.asc') }}
             <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />
           </button>

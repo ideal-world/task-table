@@ -14,7 +14,7 @@ const modifyColumnFun = inject(FUN_MODIFY_COLUMN_TYPE)!
 const closeContextMenuFun = inject(FUN_CLOSE_CONTEXT_MENU_TYPE)!
 
 async function setHidedColumn() {
-  await modifyColumnFun(undefined, {
+  await modifyColumnFun({
     name: props.curColumnConf.name,
     wrap: props.curColumnConf.wrap,
     fixed: props.curColumnConf.fixed,

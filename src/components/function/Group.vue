@@ -4,7 +4,7 @@ import * as iconSvg from '../../assets/icon'
 import MenuComp from '../common/Menu.vue'
 import type { TableColumnConf } from '../conf'
 import { FUN_LOAD_DATA_TYPE, FUN_MODIFY_LAYOUT_TYPE } from '../events'
-import type { TableDataGroupProps } from '../props'
+import type { TableDataGroupProps } from '../../props'
 
 const props = defineProps<{
   group?: TableDataGroupProps

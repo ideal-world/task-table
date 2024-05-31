@@ -1,11 +1,11 @@
 import type { InjectionKey, Ref } from 'vue'
 import { toRaw } from 'vue'
 import locales from '../locales'
+import type { TableCellDictItemsResp, TableDataSliceProps, TableEventProps, TableLayoutModifyProps } from '../props'
 import { getParentWithClass } from '../utils/basic'
 import { AlertKind, showAlert } from './common/Alert'
-import type { TableBasicConf, TableColumnConf, TableLayoutColumnConf, TableLayoutConf, TableLayoutKernelConf, TableStyleConf } from './conf'
-import { filterTreeDataPks, sortByTree } from './function/RowTree'
-import type { TableCellDictItemProps, TableCellDictItemsResp, TableDataResp, TableDataSliceProps, TableEventProps, TableLayoutModifyProps } from './props'
+import type { TableBasicConf, TableLayoutColumnConf, TableLayoutConf, TableLayoutKernelConf, TableStyleConf } from './conf'
+import { sortByTree } from './function/RowTree'
 
 const { t } = locales.global
 
@@ -110,8 +110,8 @@ export async function loadData(moreForGroupedValue?: any, offsetNumber?: number,
   }
 }
 
-export const FUN_NEW_DATA_TYPE = Symbol('FUN_NEW_DATA_TYPE') as InjectionKey<(newRecords: { [key: string]: any }[], afterRecordPk?: any) => Promise<boolean>>
-export async function newData(newRecords: { [key: string]: any }[], afterRecordPk?: any): Promise<boolean> {
+export const FUN_NEW_DATA_TYPE = Symbol('FUN_NEW_DATA_TYPE') as InjectionKey<(newRecords: { [key: string]: any }[]) => Promise<boolean>>
+export async function newData(newRecords: { [key: string]: any }[]): Promise<boolean> {
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.newData) {
@@ -119,24 +119,7 @@ export async function newData(newRecords: { [key: string]: any }[], afterRecordP
     throw new Error('[events.newData] Event not Configured')
   }
 
-  let targetSortValue
-
-  if (tableBasicConf.freeSortColumnName && afterRecordPk) {
-    if (Array.isArray(layout.data)) {
-      for (const layoutData of layout.data) {
-        const targetRecord = layoutData.records.find(record => record[tableBasicConf.pkColumnName] === afterRecordPk)
-        targetRecord && (targetSortValue = targetRecord[tableBasicConf.freeSortColumnName])
-        if (targetSortValue !== undefined)
-          break
-      }
-    }
-    else if (layout.data && !Array.isArray(layout.data)) {
-      const targetRecord = layout.data.records.find(record => record[tableBasicConf.pkColumnName] === afterRecordPk)
-      targetRecord && (targetSortValue = targetRecord[tableBasicConf.freeSortColumnName])
-    }
-  }
-
-  await events.newData(newRecords, targetSortValue)
+  await events.newData(newRecords)
   await loadData()
   return true
 }
@@ -185,22 +168,6 @@ export async function deleteData(deletedRecordPks: any[]): Promise<boolean> {
   return true
 }
 
-export const FUN_SORT_DATA_TYPE = Symbol('FUN_SORT_DATA_TYPE') as InjectionKey<(formRecordPk: any[], targetSortValue: string) => Promise<boolean>>
-export async function sortData(formRecordPk: any[], targetSortValue: string): Promise<boolean> {
-  const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
-
-  if (!events.sortData) {
-    showAlert(t('_.event.notConfigured', { name: 'sortData' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
-    throw new Error('[events.sortData] Event not Configured')
-  }
-
-  if (!await events.sortData(formRecordPk, targetSortValue))
-    return false
-
-  await loadData()
-  return true
-}
-
 export const FUN_LOAD_CELL_DICT_ITEMS_TYPE = Symbol('FUN_LOAD_CELL_DICT_ITEMS_TYPE') as InjectionKey<(columnName: string, filterValue?: any, slice?: TableDataSliceProps) => Promise<TableCellDictItemsResp>>
 export async function loadCellDictItems(columnName: string, filterValue?: any, slice?: TableDataSliceProps): Promise<TableCellDictItemsResp> {
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
@@ -211,42 +178,6 @@ export async function loadCellDictItems(columnName: string, filterValue?: any, s
   }
 
   return await events.loadCellDictItems(columnName, filterValue, slice)
-}
-
-export const FUN_NEW_OR_MODIFY_CELL_DICT_ITEM_TYPE = Symbol('FUN_NEW_OR_MODIFY_CELL_DICT_ITEM_TYPE') as InjectionKey<(columnName: string, changedItem: TableCellDictItemProps) => Promise<boolean>>
-export async function newOrModifyCellDictItem(columnName: string, changedItem: TableCellDictItemProps): Promise<boolean> {
-  const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
-
-  if (!events.newOrModifyCellDictItem) {
-    showAlert(t('_.event.notConfigured', { name: 'newOrModifyCellDictItem' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
-    throw new Error('[events.newOrModifyCellDictItem] Event not Configured')
-  }
-
-  return await events.newOrModifyCellDictItem(columnName, changedItem)
-}
-
-export const FUN_DELETE_CELL_DICT_ITEM_TYPE = Symbol('FUN_DELETE_CELL_DICT_ITEM_TYPE') as InjectionKey<(columnName: string, value: any) => Promise<boolean>>
-export async function deleteCellDictItem(columnName: string, value: any): Promise<boolean> {
-  const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
-
-  if (!events.deleteCellDictItem) {
-    showAlert(t('_.event.notConfigured', { name: 'deleteCellDictItem' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
-    throw new Error('[events.deleteCellDictItem] Event not Configured')
-  }
-
-  return await events.deleteCellDictItem(columnName, value)
-}
-
-export const FUN_SORT_CELL_DICT_ITEMS_TYPE = Symbol('FUN_SORT_CELL_DICT_ITEMS_TYPE') as InjectionKey<(columnName: string, leftItemValue: any, rightItemValue: any) => Promise<boolean>>
-export async function sortCellDictItems(columnName: string, leftItemValue: any, rightItemValue: any): Promise<boolean> {
-  const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
-
-  if (!events.sortCellDictItems) {
-    showAlert(t('_.event.notConfigured', { name: 'sortCellDictItems' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
-    throw new Error('[events.sortCellDictItems] Event not Configured')
-  }
-
-  return await events.sortCellDictItems(columnName, leftItemValue, rightItemValue)
 }
 
 export const FUN_MODIFY_STYLES_TYPE = Symbol('FUN_MODIFY_STYLES_TYPE') as InjectionKey<(changedStyles: TableStyleConf) => Promise<boolean>>
@@ -273,27 +204,16 @@ export async function modifyStyles(changedStyles: TableStyleConf): Promise<boole
   return true
 }
 
-export const FUN_NEW_COLUMN_TYPE = Symbol('FUN_NEW_COLUMN_TYPE') as InjectionKey<(newColumnConf: TableColumnConf, newLayoutColumnConf: TableLayoutColumnConf, fromColumnName?: string) => Promise<boolean>>
-export async function newColumn(newColumnConf: TableColumnConf, newLayoutColumnConf: TableLayoutColumnConf, fromColumnName?: string): Promise<boolean> {
+export const FUN_NEW_COLUMN_TYPE = Symbol('FUN_NEW_COLUMN_TYPE') as InjectionKey<(newLayoutColumnConf: TableLayoutColumnConf) => Promise<boolean>>
+export async function newColumn(newLayoutColumnConf: TableLayoutColumnConf): Promise<boolean> {
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
-  if (!events.newColumn || !events.modifyLayout) {
-    showAlert(t('_.event.notConfigured', { name: 'newColumn|modifyLayout' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
-    throw new Error('[events.newColumn/modifyLayout] Event not Configured')
+  if (!events.modifyLayout) {
+    showAlert(t('_.event.notConfigured', { name: 'modifyLayout' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    throw new Error('[events.modifyLayout] Event not Configured')
   }
 
-  if (!await events.newColumn({
-    name: newColumnConf.name,
-    title: newColumnConf.title,
-    icon: newColumnConf.icon,
-    dataKind: newColumnConf.dataKind,
-    dataEditable: newColumnConf.dataEditable,
-    useDict: newColumnConf.useDict,
-    dictEditable: newColumnConf.dictEditable,
-    multiValue: newColumnConf.multiValue,
-    groupable: newColumnConf.groupable,
-    kindDateTimeFormat: newColumnConf.kindDateTimeFormat,
-  }, fromColumnName) || !await events.modifyLayout(layout.id, {
+  if (!await events.modifyLayout(layout.id, {
     newColumn: {
       name: newLayoutColumnConf.name,
       wrap: newLayoutColumnConf.wrap,
@@ -306,39 +226,18 @@ export async function newColumn(newColumnConf: TableColumnConf, newLayoutColumnC
   })) {
     return false
   }
-
-  tableBasicConf.columns.push(newColumnConf)
-  if (fromColumnName) {
-    const fromColumnIdx = layout.columns.findIndex(column => column.name === fromColumnName)!
-    layout.columns.splice(fromColumnIdx + 1, 0, newLayoutColumnConf)
-  }
-  else {
-    layout.columns.push(newLayoutColumnConf)
-  }
-
+  layout.columns.push(newLayoutColumnConf)
   await loadData()
   return true
 }
 
-export const FUN_MODIFY_COLUMN_TYPE = Symbol('FUN_MODIFY_COLUMN_TYPE') as InjectionKey<(changedColumnConf?: TableColumnConf, changedLayoutColumnConf?: TableLayoutColumnConf) => Promise<boolean>>
-export async function modifyColumn(changedColumnConf?: TableColumnConf, changedLayoutColumnConf?: TableLayoutColumnConf): Promise<boolean> {
+export const FUN_MODIFY_COLUMN_TYPE = Symbol('FUN_MODIFY_COLUMN_TYPE') as InjectionKey<(changedLayoutColumnConf?: TableLayoutColumnConf) => Promise<boolean>>
+export async function modifyColumn(changedLayoutColumnConf?: TableLayoutColumnConf): Promise<boolean> {
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
-  if (!events.modifyColumn || !events.modifyLayout) {
-    showAlert(t('_.event.notConfigured', { name: 'modifyColumn|modifyLayout' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
-    throw new Error('[events.modifyColumn/modifyLayout] Event not Configured')
-  }
-
-  if (changedColumnConf && !await events.modifyColumn({
-    name: changedColumnConf.name,
-    title: changedColumnConf.title,
-    icon: changedColumnConf.icon,
-    dataKind: changedColumnConf.dataKind,
-    dataEditable: changedColumnConf.dataEditable,
-    groupable: changedColumnConf.groupable,
-    kindDateTimeFormat: changedColumnConf.kindDateTimeFormat,
-  })) {
-    return false
+  if (!events.modifyLayout) {
+    showAlert(t('_.event.notConfigured', { name: 'modifyLayout' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    throw new Error('[events.modifyLayout] Event not Configured')
   }
 
   if (changedLayoutColumnConf && !await events.modifyLayout(layout.id, {
@@ -355,10 +254,6 @@ export async function modifyColumn(changedColumnConf?: TableColumnConf, changedL
     return false
   }
 
-  if (changedColumnConf) {
-    const oldColumnIdx = tableBasicConf.columns.findIndex(column => column.name === changedColumnConf.name)
-    tableBasicConf.columns.splice(oldColumnIdx, 1, changedColumnConf)
-  }
   if (changedLayoutColumnConf) {
     const oldColumnIdx = layout.columns.findIndex(column => column.name === changedLayoutColumnConf.name)
     layout.columns.splice(oldColumnIdx, 1, changedLayoutColumnConf)
@@ -372,19 +267,17 @@ export const FUN_DELETE_COLUMN_TYPE = Symbol('FUN_DELETE_COLUMN_TYPE') as Inject
 export async function deleteColumn(deletedColumnName: string): Promise<boolean> {
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
-  if (!events.deleteColumn || !events.modifyLayout) {
-    showAlert(t('_.event.notConfigured', { name: 'deleteColumn|modifyLayout' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
-    throw new Error('[events.deleteColumn/modifyLayout] Event not Configured')
+  if (!events.modifyLayout) {
+    showAlert(t('_.event.notConfigured', { name: 'modifyLayout' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    throw new Error('[events.modifyLayout] Event not Configured')
   }
 
-  if (!await events.deleteColumn(deletedColumnName) || !await events.modifyLayout(layout.id, {
+  if (!await events.modifyLayout(layout.id, {
     deletedColumnName,
   })) {
     return false
   }
 
-  const oldColumnIdx = tableBasicConf.columns.findIndex(column => column.name === deletedColumnName)
-  tableBasicConf.columns.splice(oldColumnIdx, 1)
   const oldLayoutColumnIdx = layout.columns.findIndex(column => column.name === deletedColumnName)
   layout.columns.splice(oldLayoutColumnIdx, 1)
   if (Array.isArray(layout.data)) {
@@ -430,7 +323,6 @@ export async function newLayout(newLayoutConf: TableLayoutKernelConf): Promise<b
     sorts: newLayoutConf.sorts,
     group: newLayoutConf.group,
     aggs: newLayoutConf.aggs,
-    expandDataPks: newLayoutConf.expandDataPks,
     slice: newLayoutConf.slice,
   })
   tableLayoutsConf.push({
@@ -461,27 +353,6 @@ export async function modifyLayout(changedLayoutReq: TableLayoutModifyProps): Pr
   changedLayoutReq.group && (layout.group = changedLayoutReq.group)
   changedLayoutReq.aggs && (layout.aggs = changedLayoutReq.aggs)
   changedLayoutReq.slice && (layout.slice = changedLayoutReq.slice)
-  if (changedLayoutReq.newExpandDataPk) {
-    const idx = layout.expandDataPks.indexOf(changedLayoutReq.newExpandDataPk)
-    if (idx === -1)
-      layout.expandDataPks.push(changedLayoutReq.newExpandDataPk)
-  }
-  if (changedLayoutReq.deleteExpandDataPk) {
-    let deleteExpandDataPks = []
-    if (Array.isArray(layout.data)) {
-      layout.data.forEach((groupData) => {
-        deleteExpandDataPks.push(...filterTreeDataPks([changedLayoutReq.deleteExpandDataPk], groupData.records, tableBasicConf.pkColumnName, tableBasicConf.parentPkColumnName))
-      })
-    }
-    else {
-      deleteExpandDataPks = filterTreeDataPks([changedLayoutReq.deleteExpandDataPk], (layout.data as TableDataResp).records, tableBasicConf.pkColumnName, tableBasicConf.parentPkColumnName)
-    }
-    deleteExpandDataPks.forEach((deleteExpandDataPk) => {
-      const idx = layout.expandDataPks.indexOf(deleteExpandDataPk)
-      if (idx !== -1)
-        layout.expandDataPks.splice(idx, 1)
-    })
-  }
   if (changedLayoutReq.deletedColumnName) {
     const oldLayoutColumnIdx = layout.columns.findIndex(column => column.name === changedLayoutReq.deletedColumnName)
     layout.columns.splice(oldLayoutColumnIdx, 1)
@@ -533,25 +404,5 @@ export async function deleteLayout(deletedLayoutId: string): Promise<boolean> {
 
   const oldColumnIdx = tableLayoutsConf.findIndex(layout => layout.id === deletedLayoutId)!
   tableLayoutsConf.splice(oldColumnIdx, 1)
-  return true
-}
-
-export const FUN_SORT_LAYOUTS_TYPE = Symbol('FUN_SORT_LAYOUTS_TYPE') as InjectionKey<(leftLayoutId: string, rightLayoutId: string) => Promise<boolean>>
-export async function sortLayouts(leftLayoutId: string, rightLayoutId: string): Promise<boolean> {
-  const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
-
-  if (!events.sortLayouts) {
-    showAlert(t('_.event.notConfigured', { name: 'sortLayouts' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
-    throw new Error('[events.sortLayouts] Event not Configured')
-  }
-
-  if (!await events.sortLayouts(leftLayoutId, rightLayoutId))
-    return false
-
-  const leftLayout = tableLayoutsConf.findIndex(layout => layout.id === leftLayoutId)
-  const rightLayout = tableLayoutsConf.findIndex(layout => layout.id === rightLayoutId)
-  const tmpLayout = tableLayoutsConf[leftLayout]
-  tableLayoutsConf.splice(leftLayout, 1, tableLayoutsConf[rightLayout])
-  tableLayoutsConf.splice(rightLayout, 1, tmpLayout)
   return true
 }

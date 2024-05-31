@@ -26,7 +26,7 @@ watch(props, () => {
 
 async function setWrapColumn() {
   if (props.curColumnConf) {
-    await modifyColumnFun(undefined, {
+    await modifyColumnFun({
       name: props.curColumnConf.name,
       wrap: !props.curColumnConf.wrap,
       fixed: props.curColumnConf.fixed,

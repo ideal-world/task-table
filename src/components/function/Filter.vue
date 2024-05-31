@@ -5,8 +5,8 @@ import MenuComp, { MenuSizeKind } from '../common/Menu.vue'
 import type { TableColumnConf } from '../conf'
 import { getInputTypeByDataKind, getOperatorKindsByDataKind } from '../conf'
 import { FUN_LOAD_CELL_DICT_ITEMS_TYPE, FUN_LOAD_DATA_TYPE, FUN_MODIFY_LAYOUT_TYPE } from '../events'
-import type { TableCellDictItemProps, TableCellDictItemsResp, TableDataFilterItemProps, TableDataFilterProps } from '../props'
-import { DataKind, OperatorKind, translateOperatorKind } from '../props'
+import type { TableCellDictItemProps, TableCellDictItemsResp, TableDataFilterItemProps, TableDataFilterProps } from '../../props'
+import { DataKind, OperatorKind, translateOperatorKind } from '../../props'
 import { getParentWithClass } from '../../utils/basic'
 
 const props = defineProps<{
@@ -237,7 +237,7 @@ async function deleteSimpleFilterItem(idx: number) {
 <template>
   <div class="flex justify-center overflow-x-auto">
     <button v-for="(item, idx) in simpleFilterItems" :key="idx" class="iw-btn iw-btn-outline iw-btn-xs flex-none mr-1">
-      <span @click="event => showSimpleFilterItem(event, item, idx)">
+      <span @click="(event:PointerEvent) => showSimpleFilterItem(event, item, idx)">
         <i :class="props.columnsConf.find(col => col.name === item.columnName)?.icon" />
         <span class="mr-0.5">{{ props.columnsConf.find(col => col.name === item.columnName)?.title }}</span>
         <span class="mr-0.5">{{ translateOperatorKind(item.operator) }}</span>
@@ -282,13 +282,13 @@ async function deleteSimpleFilterItem(idx: number) {
       <div v-if="selectedFilterItem?.dataKind === DataKind.BOOLEAN" class="iw-contextmenu__item w-full">
         <input
           class="iw-toggle iw-toggle-xs" type="checkbox" :checked="selectedFilterItem.value"
-          @click="event => setFilterValue((event.target as HTMLInputElement).checked)"
+          @click="(event:PointerEvent) => setFilterValue((event.target as HTMLInputElement).checked)"
         >
       </div>
       <div v-else class="iw-contextmenu__item w-full">
         <input
           class="iw-input iw-input-bordered iw-input-xs w-full" :type="getInputTypeByDataKind(selectedFilterItem?.dataKind)"
-          :value="selectedFilterItem.value" @change="event => setFilterValue((event.target as HTMLInputElement).value)"
+          :value="selectedFilterItem.value" @change="(event:InputEvent) => setFilterValue((event.target as HTMLInputElement).value)"
         >
       </div>
     </template>

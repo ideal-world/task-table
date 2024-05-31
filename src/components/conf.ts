@@ -1,7 +1,7 @@
 import * as iconSvg from '../assets/icon'
 import locales from '../locales'
-import type { AggregateKind, TableDataFilterProps, TableDataGroupProps, TableDataGroupResp, TableDataResp, TableDataSliceProps, TableDataSortProps, TableProps } from './props'
-import { DataKind, LayoutKind, OperatorKind, SizeKind } from './props'
+import type { AggregateKind, TableDataFilterProps, TableDataGroupProps, TableDataGroupResp, TableDataResp, TableDataSliceProps, TableDataSortProps, TableProps } from '../props'
+import { DataKind, LayoutKind, OperatorKind, SizeKind } from '../props'
 
 const { t } = locales.global
 
@@ -9,7 +9,6 @@ export interface TableBasicConf {
   id: string
   pkColumnName: string
   parentPkColumnName?: string
-  freeSortColumnName?: string
   columns: TableColumnConf[]
   styles: TableStyleConf
 }
@@ -23,8 +22,8 @@ export interface TableColumnConf {
   useDict: boolean
   dictEditable: boolean
   multiValue: boolean
-  groupable: boolean
   kindDateTimeFormat?: string
+  groupable: boolean
 }
 
 export interface TableLayoutKernelConf {
@@ -36,8 +35,13 @@ export interface TableLayoutKernelConf {
   sorts?: TableDataSortProps[]
   group?: TableDataGroupProps
   aggs?: { [key: string]: AggregateKind }
-  expandDataPks: any[]
   slice: TableDataSliceProps
+  showSelectColumn: boolean
+  // TODO 调用事件
+  actionColumnRender?: (record: { [key: string]: any }) => any
+
+  expandDataPks: any[]
+
   data?: TableDataResp | TableDataGroupResp[]
 }
 
@@ -53,6 +57,7 @@ export interface TableLayoutColumnConf {
   hide: boolean
   dateStart: boolean
   dateEnd: boolean
+  customRender?: (record: { [key: string]: any }, columnName: string) => any
 }
 
 export function getDefaultLayoutColumnConf(columnName: string): TableLayoutColumnConf {
@@ -149,8 +154,8 @@ export function getDefaultIconByLayoutKind(layoutKind: LayoutKind): string {
       return iconSvg.CHART
     case LayoutKind.CALENDAR:
       return iconSvg.CALENDAR
-    case LayoutKind.BOARD:
-      return iconSvg.BOARD
+    case LayoutKind.KANBAN:
+      return iconSvg.KANBAN
     case LayoutKind.GANTT:
       return iconSvg.GANTT
     default:
@@ -234,11 +239,10 @@ export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]]
     id: props.id ?? `iw-table${Math.floor(Math.random() * 1000000)}`,
     pkColumnName: props.pkColumnName,
     parentPkColumnName: props.parentPkColumnName,
-    freeSortColumnName: props.freeSortColumnName,
     columns: props.columns.map((column) => {
       return {
         name: column.name,
-        title: column.title ?? column.name,
+        title: column.title,
         dataKind: column.dataKind ?? DataKind.TEXT,
         icon: column.icon ?? getDefaultIconByDataKind(column.dataKind ?? DataKind.TEXT),
         dataEditable: column.dataEditable ?? true,
@@ -286,7 +290,8 @@ export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]]
           offsetNumber: 0,
           fetchNumber: 50,
         },
-        expandDataPks: layout.expandDataPks ?? [],
+        showSelectColumn: layout.showSelectColumn ?? true,
+        expandDataPks: [],
       })
     })
   }
@@ -303,6 +308,7 @@ export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]]
         offsetNumber: 0,
         fetchNumber: 50,
       },
+      showSelectColumn: true,
       expandDataPks: [],
     })
   }

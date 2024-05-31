@@ -4,8 +4,8 @@ import MenuComp, { MenuOffsetKind, MenuSizeKind } from '../../common/Menu.vue'
 import type { CachedColumnConf, TableStyleConf } from '../../conf'
 import { FUN_MODIFY_LAYOUT_TYPE } from '../../events'
 import { showGroupAggMappingByDataKind } from '../../function/Group'
-import type { AggregateKind, TableDataResp } from '../../props'
-import { translateAggregateKind } from '../../props'
+import type { AggregateKind, TableDataResp } from '../../../props'
+import { translateAggregateKind } from '../../../props'
 
 const props = defineProps<{
   layoutAggs: { [key: string]: AggregateKind }

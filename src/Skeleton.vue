@@ -1,20 +1,20 @@
 <script setup lang="ts">
 import { onMounted, provide, reactive, ref } from 'vue'
-import * as iconSvg from '../assets/icon'
-import MenuComp, { MenuOffsetKind } from './common/Menu.vue'
-import type { TableBasicConf, TableLayoutConf } from './conf'
-import { initConf } from './conf'
-import * as Event from './events'
-import FilterComp from './function/Filter.vue'
-import GroupComp from './function/Group.vue'
-import ResizeComp from './function/Resize.vue'
-import RowSortComp from './function/RowSort.vue'
-import ThemeComp from './function/Theme.vue'
-import ListComp from './layout/list/List.vue'
+import * as iconSvg from './assets/icon'
+import MenuComp, { MenuOffsetKind } from './components/common/Menu.vue'
+import type { TableBasicConf, TableLayoutConf } from './components/conf'
+import { initConf } from './components/conf'
+import * as Event from './components/events'
+import FilterComp from './components/function/Filter.vue'
+import GroupComp from './components/function/Group.vue'
+import ResizeComp from './components/function/Resize.vue'
+import ThemeComp from './components/function/Theme.vue'
+import ListComp from './components/layout/list/List.vue'
 import type { TableProps } from './props'
 
 const props = defineProps<TableProps>()
 const [_tableBasicConf, _tableLayoutsConf] = initConf(props)
+
 const menuLayoutCompRef = ref<InstanceType<typeof MenuComp>>()
 const menuMoreCompRef = ref<InstanceType<typeof MenuComp>>()
 
@@ -42,11 +42,7 @@ provide(Event.FUN_NEW_DATA_TYPE, Event.newData)
 provide(Event.FUN_MODIFY_DATA_TYPE, Event.modifyData)
 provide(Event.FUN_COPY_DATA_TYPE, Event.copyData)
 provide(Event.FUN_DELETE_DATA_TYPE, Event.deleteData)
-provide(Event.FUN_SORT_DATA_TYPE, Event.sortData)
 provide(Event.FUN_LOAD_CELL_DICT_ITEMS_TYPE, Event.loadCellDictItems)
-provide(Event.FUN_NEW_OR_MODIFY_CELL_DICT_ITEM_TYPE, Event.newOrModifyCellDictItem)
-provide(Event.FUN_DELETE_CELL_DICT_ITEM_TYPE, Event.deleteCellDictItem)
-provide(Event.FUN_SORT_CELL_DICT_ITEMS_TYPE, Event.sortCellDictItems)
 provide(Event.FUN_MODIFY_STYLES_TYPE, Event.modifyStyles)
 provide(Event.FUN_NEW_COLUMN_TYPE, Event.newColumn)
 provide(Event.FUN_DELETE_COLUMN_TYPE, Event.deleteColumn)
@@ -54,7 +50,6 @@ provide(Event.FUN_MODIFY_COLUMN_TYPE, Event.modifyColumn)
 provide(Event.FUN_NEW_LAYOUT_TYPE, Event.newLayout)
 provide(Event.FUN_MODIFY_LAYOUT_TYPE, Event.modifyLayout)
 provide(Event.FUN_DELETE_LAYOUT_TYPE, Event.deleteLayout)
-provide(Event.FUN_SORT_LAYOUTS_TYPE, Event.sortLayouts)
 
 // ------------- Layout Process -------------
 function showLayoutMenu(event: MouseEvent) {
@@ -98,7 +93,6 @@ function showMoreMenu(event: MouseEvent) {
         <div v-if="currentLayoutId === layout.id" :id="`iw-tt-layout-${layout.id}`" class="iw-tt-toolbar flex items-center h-8 p-0.5">
           <GroupComp :group="layout.group" :columns-conf="tableBasicConf.columns" />
           <div class="iw-divider iw-divider-horizontal m-0.5" />
-          <RowSortComp :sorts="layout.sorts" :columns-conf="tableBasicConf.columns" />
           <div class="iw-divider iw-divider-horizontal m-0.5" />
           <FilterComp :filters="layout.filters" :columns-conf="tableBasicConf.columns" />
         </div>

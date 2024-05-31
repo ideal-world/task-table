@@ -21,7 +21,7 @@ export const PASSWORD = 'octicon-passkey-fill-24'
 export const CHART = 'octicon-graph-24'
 export const LIST = 'octicon-list-unordered-24'
 export const CALENDAR = 'octicon-calendar-24'
-export const BOARD = 'octicon-project-24'
+export const KANBAN = 'octicon-project-24'
 export const GANTT = 'octicon-workflow-24'
 
 export const NEW = 'octicon-plus-24'

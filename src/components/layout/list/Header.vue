@@ -4,16 +4,9 @@ import * as iconSvg from '../../../assets/icon'
 import MenuComp, { MenuSizeKind } from '../../common/Menu.vue'
 import type { CachedColumnConf, TableBasicConf, TableLayoutConf } from '../../conf'
 import ColumnWrapComp from './ColumnWrap.vue'
-import ColumnCopyComp from './ColumnCopy.vue'
-import ColumnDeleteComp from './ColumnDelete.vue'
-import ColumnDictComp from './ColumnDict.vue'
 import ColumnFixedComp from './ColumnFixed.vue'
 import ColumnHideComp from './ColumnHide.vue'
 import ColumnMoreComp from './ColumnMore.vue'
-import ColumnRenameComp from './ColumnRename.vue'
-import ColumnResizeComp from './ColumnResize.vue'
-import ColumnSortComp from './ColumnSort.vue'
-import ColumnKindDateTimeComp from './ColumnKindDateTime.vue'
 
 const props = defineProps<{
   columnsConf: CachedColumnConf[]
@@ -59,23 +52,12 @@ async function showColumnMoreContextMenu(event: MouseEvent) {
       <i :class="iconSvg.MORE" @click="showColumnMoreContextMenu" />
     </div>
   </div>
-  <ColumnSortComp :columns-conf="columnsConf" />
-  <ColumnResizeComp :columns-conf="columnsConf" />
   <MenuComp ref="headerMenuCompRef">
     <template v-if="selectedColumnConf">
-      <ColumnRenameComp
-        :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf"
-        :pk-column-name="props.basic.pkColumnName"
-      />
       <div
         class="iw-contextmenu__item flex justify-between w-full p-1 mb-1 mt-1"
       >
-        <ColumnCopyComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
         <ColumnHideComp :cur-column-conf="selectedColumnConf" :pk-column-name="props.basic.pkColumnName" :columns-conf="columnsConf" />
-        <ColumnDeleteComp
-          :cur-column-conf="selectedColumnConf"
-          :pk-column-name="props.basic.pkColumnName"
-        />
       </div>
       <div
         class="iw-contextmenu__item flex justify-between w-full p-1"
@@ -83,8 +65,6 @@ async function showColumnMoreContextMenu(event: MouseEvent) {
         <ColumnFixedComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
         <ColumnWrapComp :cur-column-conf="selectedColumnConf!" :pk-column-name="props.basic.pkColumnName" :columns-conf="columnsConf" />
       </div>
-      <ColumnDictComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
-      <ColumnKindDateTimeComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
     </template>
   </MenuComp>
   <ColumnMoreComp

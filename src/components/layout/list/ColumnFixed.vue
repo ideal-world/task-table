@@ -26,9 +26,9 @@ async function setFixedColumn() {
   const oldFixedColumnConf = props.columnsConf.find(col => col.fixed)
   if (oldFixedColumnConf && oldFixedColumnConf.name !== props.curColumnConf.name) {
     oldFixedColumnConf.fixed = false
-    await modifyColumnFun(undefined, oldFixedColumnConf)
+    await modifyColumnFun(oldFixedColumnConf)
   }
-  await modifyColumnFun(undefined, {
+  await modifyColumnFun({
     name: props.curColumnConf.name,
     wrap: props.curColumnConf.wrap,
     fixed: !props.curColumnConf.fixed,

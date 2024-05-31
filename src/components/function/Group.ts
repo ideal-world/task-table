@@ -1,4 +1,4 @@
-import { AggregateKind, DataKind, translateAggregateKind } from '../props'
+import { AggregateKind, DataKind, translateAggregateKind } from '../../props'
 
 export interface GroupAggItem {
   kind: AggregateKind

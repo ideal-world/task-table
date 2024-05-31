@@ -3,7 +3,7 @@ import { computed } from 'vue'
 import dayjs from 'dayjs'
 import type { CachedColumnConf, TableStyleConf } from '../../conf'
 import RowTreeComp from '../../function/RowTree.vue'
-import { DATA_DICT_POSTFIX, DataKind } from '../../props'
+import { DATA_DICT_POSTFIX, DataKind } from '../../../props'
 
 const props = defineProps<{
   records: { [key: string]: any }[]

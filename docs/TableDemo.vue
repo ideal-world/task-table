@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { Ref } from 'vue'
 import { ref } from 'vue'
-import type { TableCellDictItemProps, TableCellDictItemsResp, TableColumnProps, TableDataFilterProps, TableDataGroupProps, TableDataGroupResp, TableDataResp, TableDataSliceProps, TableDataSortProps, TableEventProps, TableLayoutKernelProps, TableLayoutModifyProps, TableLayoutProps, TableStyleProps } from '../src/components/props'
-import { AggregateKind, DATA_DICT_POSTFIX, DataKind, LayoutKind, OperatorKind } from '../src/components/props'
+import type { TableCellDictItemProps, TableCellDictItemsResp, TableColumnProps, TableDataFilterProps, TableDataGroupProps, TableDataGroupResp, TableDataResp, TableDataSliceProps, TableDataSortProps, TableEventProps, TableLayoutKernelProps, TableLayoutModifyProps, TableLayoutProps, TableStyleProps } from '../src/props'
+import { AggregateKind, DATA_DICT_POSTFIX, DataKind, LayoutKind, OperatorKind } from '../src/props'
 import { IwUtils } from '../src/utils'
 
 const NAME_DICT = [{ title: '星航', value: 'xh', avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg' }, { title: '星杨', value: 'xy', avatar: 'https://pic1.zhimg.com/v2-770e9580d5febfb49cbb23c409cea85d_r.jpg?source=1def8aca' }, { title: '星辰', value: 'xc' }]
@@ -40,7 +40,7 @@ const DATA: { [key: string]: any }[] = [
   { no: 29, pno: null, name: 'xh', stats: ['close'], phone: 'Phone29', addr: 'Addr29', time: '2023-11-20' },
 ]
 
-const COLUMNS: Ref<TableColumnProps[]> = ref([{ name: 'no', dataKind: DataKind.NUMBER, dataEditable: false }, { name: 'pno', dataKind: DataKind.NUMBER, dataEditable: false }, { name: 'name', useDict: true, dictEditable: true }, { name: 'phone' }, { name: 'stats', useDict: true, dictEditable: true, multiValue: true }, { name: 'addr' }, { name: 'time', dataKind: DataKind.DATETIME }])
+const COLUMNS: Ref<TableColumnProps[]> = ref([{ name: 'no', title: '序号', dataKind: DataKind.NUMBER, dataEditable: false }, { name: 'pno', title: '父序号', dataKind: DataKind.NUMBER, dataEditable: false }, { name: 'name', title: '姓名', useDict: true, dictEditable: true }, { name: 'phone', title: '手机' }, { name: 'stats', title: '状态', useDict: true, dictEditable: true, multiValue: true }, { name: 'addr', title: '地址' }, { name: 'time', title: '时间', dataKind: DataKind.DATETIME }])
 const LAYOUTS: Ref<TableLayoutProps[]> = ref([{
   id: 'hi',
   title: 'HI',
@@ -223,7 +223,7 @@ const events: TableEventProps = {
     }
   },
 
-  newData: async (newRecords: { [key: string]: any }[], targetSortValue?: any): Promise<{ [key: string]: any }[]> => {
+  newData: async (newRecords: { [key: string]: any }[]): Promise<{ [key: string]: any }[]> => {
     // TODO targetSortValue
     DATA.push(...newRecords)
     return JSON.parse(JSON.stringify(DATA))
@@ -254,34 +254,8 @@ const events: TableEventProps = {
     return true
   },
 
-  // sortData: async (formRecordPk: any[], targetSortValue: string): Promise<boolean> => {
-
-  // },
-
   modifyStyles: async (changedStyleProps: TableStyleProps): Promise<boolean> => {
     STYLES.value = changedStyleProps
-    return true
-  },
-
-  newColumn: async (newColumnProps: TableColumnProps, fromColumnName?: string): Promise<boolean> => {
-    COLUMNS.value.push(newColumnProps)
-    if (fromColumnName) {
-      DATA.forEach((d) => {
-        d[newColumnProps.name] = d[fromColumnName]
-        // TODO fill dict
-      })
-    }
-    return true
-  },
-
-  modifyColumn: async (changedColumnProps: TableColumnProps): Promise<boolean> => {
-    const col = COLUMNS.value.find((col) => { return col.name === changedColumnProps.name })!
-    Object.assign(col, changedColumnProps)
-    return true
-  },
-
-  deleteColumn: async (deletedColumnName: string): Promise<boolean> => {
-    COLUMNS.value.splice(COLUMNS.value.findIndex((col) => { return col.name === deletedColumnName }), 1)
     return true
   },
 
@@ -317,17 +291,6 @@ const events: TableEventProps = {
     if (changedLayoutProps.slice) {
       currLayout.slice = changedLayoutProps.slice
     }
-    if (changedLayoutProps.newExpandDataPk) {
-      if (currLayout.expandDataPks) {
-        currLayout.expandDataPks.push(changedLayoutProps.newExpandDataPk)
-      }
-      else {
-        currLayout.expandDataPks = [changedLayoutProps.newExpandDataPk]
-      }
-    }
-    if (changedLayoutProps.deleteExpandDataPk) {
-      currLayout.expandDataPks = currLayout.expandDataPks?.filter((pk) => { return pk !== changedLayoutProps.deleteExpandDataPk })
-    }
     if (changedLayoutProps.columnSortedNames) {
       const leftColumnName = changedLayoutProps.columnSortedNames[0]
       const rightColumnName = changedLayoutProps.columnSortedNames[1]
@@ -350,13 +313,6 @@ const events: TableEventProps = {
 
   deleteLayout: async (deletedLayoutId: string): Promise<boolean> => {
     LAYOUTS.value.splice(LAYOUTS.value.findIndex((layout) => { return layout.id === deletedLayoutId }), 1)
-    return true
-  },
-
-  sortLayouts: async (leftLayoutId: string, rightLayoutId: string): Promise<boolean> => {
-    const leftIndex = LAYOUTS.value.findIndex((layout) => { return layout.id === leftLayoutId })
-    const rightIndex = LAYOUTS.value.findIndex((layout) => { return layout.id === rightLayoutId })
-    LAYOUTS.value.splice(rightIndex, 0, LAYOUTS.value.splice(leftIndex, 1)[0])
     return true
   },
 

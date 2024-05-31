@@ -1,4 +1,4 @@
-import locales from '../locales'
+import locales from './locales'
 
 const { t } = locales.global
 
@@ -127,7 +127,7 @@ export enum LayoutKind {
   LIST = 'LIST',
   GANTT = 'GANTT',
   CALENDAR = 'CALENDAR',
-  BOARD = 'BOARD',
+  KANBAN = 'KANBAN',
   CHART = 'CHART',
 }
 
@@ -135,7 +135,6 @@ export interface TableProps {
   id?: string
   pkColumnName: string
   parentPkColumnName?: string
-  freeSortColumnName?: string
   columns: TableColumnProps[]
   layouts?: TableLayoutProps[]
   events: TableEventProps
@@ -144,8 +143,8 @@ export interface TableProps {
 
 export interface TableColumnProps {
   name: string
+  title: string
   icon?: string
-  title?: string
   dataKind?: DataKind
   dataEditable?: boolean
   useDict?: boolean
@@ -160,13 +159,15 @@ export interface TableLayoutKernelProps {
   layoutKind: LayoutKind
   icon?: string
   columns: TableLayoutColumnProps[]
-  // And relationship between groups
+  // OR relationship between groups
   filters?: TableDataFilterProps[]
   sorts?: TableDataSortProps[]
   group?: TableDataGroupProps
   aggs?: { [key: string]: AggregateKind }
   slice?: TableDataSliceProps
-  expandDataPks?: any[]
+  showSelectColumn?: boolean
+  // TODO 调用事件
+  actionColumnRender?: (record: { [key: string]: any }) => any
 }
 
 export interface TableLayoutProps extends TableLayoutKernelProps {
@@ -181,6 +182,7 @@ export interface TableLayoutColumnProps {
   hide?: boolean
   dateStart?: boolean
   dateEnd?: boolean
+  customRender?: (record: { [key: string]: any }, columnName: string) => any
 }
 
 export interface TableStyleProps {
@@ -202,29 +204,21 @@ export interface TableEventProps {
     byGroupValue?: any,
     // Do not use this slice if it exists in group.slices
     defaultGroupSlice?: TableDataSliceProps) => Promise<TableDataResp | TableDataGroupResp[]>
-    // TODO remove targetSortValue
-  newData?: (newRecords: { [key: string]: any }[], targetSortValue?: any) => Promise<{ [key: string]: any }[]>
+  newData?: (newRecords: { [key: string]: any }[]) => Promise<{ [key: string]: any }[]>
   copyData?: (targetRecordPks: any[]) => Promise<{ [key: string]: any }[]>
   modifyData?: (changedRecords: { [key: string]: any }[]) => Promise<{ [key: string]: any }[]>
   // Need to delete child node
   deleteData?: (deletedRecordPks: any[]) => Promise<boolean>
-  sortData?: (formRecordPk: any[], targetSortValue: string) => Promise<boolean>
-
-  newColumn?: (newColumnProps: TableColumnProps, fromColumnName?: string) => Promise<boolean>
-  modifyColumn?: (changedColumnProps: TableColumnProps) => Promise<boolean>
-  deleteColumn?: (deletedColumnName: string) => Promise<boolean>
+  selectData?: (selectedRecordPks: any[]) => Promise<boolean>
+  clickCell?: (recordPk: any, columnName: string) => Promise<boolean>
 
   loadCellDictItems?: (columnName: string, filterValue?: any, slice?: TableDataSliceProps) => Promise<TableCellDictItemsResp>
-  newOrModifyCellDictItem?: (columnName: string, changedItem: TableCellDictItemProps) => Promise<boolean>
-  deleteCellDictItem?: (columnName: string, value: any) => Promise<boolean>
-  sortCellDictItems?: (columnName: string, leftItemValue: any, rightItemValue: any) => Promise<boolean>
 
   modifyStyles?: (changedStyleProps: TableStyleProps) => Promise<boolean>
 
   newLayout?: (newLayoutProps: TableLayoutKernelProps) => Promise<string>
   modifyLayout?: (changedLayoutId: string, changedLayoutProps: TableLayoutModifyProps) => Promise<boolean>
   deleteLayout?: (deletedLayoutId: string) => Promise<boolean>
-  sortLayouts?: (leftLayoutId: string, rightLayoutId: string) => Promise<boolean>
 }
 
 export interface TableLayoutModifyProps {
@@ -235,8 +229,6 @@ export interface TableLayoutModifyProps {
   group?: TableDataGroupProps
   aggs?: { [key: string]: AggregateKind }
   slice?: TableDataSliceProps
-  newExpandDataPk?: any
-  deleteExpandDataPk?: any
   columnSortedNames?: [string, string]
   newColumn?: TableLayoutColumnProps
   changedColumn?: TableLayoutColumnProps
@@ -249,6 +241,7 @@ export interface TableDataSortProps {
 }
 
 export interface TableDataFilterProps {
+  // AND relationship between items
   items: TableDataFilterItemProps[]
 }
 

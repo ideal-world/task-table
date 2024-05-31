@@ -41,7 +41,7 @@ onMounted(() => {
 
     const curColumnConf = props.columnsConf.find(item => item.name === currColumnName)
     if (curColumnConf) {
-      await modifyColumnFun(undefined, {
+      await modifyColumnFun({
         name: curColumnConf.name,
         wrap: curColumnConf.wrap,
         fixed: curColumnConf.fixed,

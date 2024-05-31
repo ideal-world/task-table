@@ -3,10 +3,9 @@ import { computed, onMounted, ref } from 'vue'
 import { getParentWithClass } from '../../../utils/basic'
 import MenuComp from '../../common/Menu.vue'
 import type { CachedColumnConf, TableBasicConf, TableLayoutConf } from '../../conf'
-import type { TableDataResp } from '../../props'
-import { DataKind } from '../../props'
+import type { TableDataResp } from '../../../props'
+import { DataKind } from '../../../props'
 import CellEditComp from './CellEdit.vue'
-import CellFillComp from './CellFill.vue'
 import type { CellSelectedInfo } from './CellSelect.vue'
 import CellSelectComp from './CellSelect.vue'
 import ColumnAggsComp from './ColumnAggs.vue'
@@ -16,7 +15,6 @@ import HeaderComp from './Header.vue'
 import RowCopyPasteComp from './RowCopyPaste.vue'
 import RowDeleteComp from './RowDelete.vue'
 import RowNewComp from './RowNew.vue'
-import RowSelectComp from './RowSelect.vue'
 import RowsComp from './Rows.vue'
 
 const listConf = defineProps<
@@ -126,12 +124,6 @@ onMounted(() => {
       :pk-column-name="listConf.basic.pkColumnName"
       :pk-kind-is-number="pkKindIsNumber"
     />
-    <CellFillComp
-      :columns-conf="columnsConf" :data="listConf.layout.data!"
-      :pk-column-name="listConf.basic.pkColumnName"
-      :pk-kind-is-number="pkKindIsNumber"
-      :selected-cell-info="selectedCellWrap.cellSelectedInfo"
-    />
     <CellEditComp
       :columns-conf="columnsConf" :data="listConf.layout.data!"
       :pk-column-name="listConf.basic.pkColumnName"
@@ -141,12 +133,8 @@ onMounted(() => {
   <MenuComp v-if="selectedDataPks.length > 0" ref="rowMenuCompRef">
     <RowCopyPasteComp :selected-pks="selectedDataPks" :pk-column-name="listConf.basic.pkColumnName" />
     <RowDeleteComp :selected-pks="selectedDataPks" />
-    <RowNewComp :selected-pks="selectedDataPks" />
+    <RowNewComp />
   </MenuComp>
-  <RowSelectComp
-    :selected-pks="selectedDataPks" :pk-column-name="listConf.basic.pkColumnName"
-    :pk-kind-is-number="pkKindIsNumber"
-  />
 </template>
 
 <style lang="css">

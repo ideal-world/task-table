@@ -2,7 +2,6 @@
 import { onMounted } from 'vue'
 import { getParentWithClass } from '../../../utils/basic'
 import type { CachedColumnConf } from '../../conf'
-import { DataKind } from '../../props'
 
 const props = defineProps<{
   columnsConf: CachedColumnConf[]

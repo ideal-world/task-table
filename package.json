@@ -48,7 +48,6 @@
   "dependencies": {
     "dayjs": "^1.11.11",
     "octicons-css": "^19.8.0",
-    "sortablejs": "^1.15.2",
     "vue-i18n": "^9.13.1"
   },
   "devDependencies": {

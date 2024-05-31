@@ -6,8 +6,8 @@ import MenuComp, { MenuOffsetKind } from '../../common/Menu.vue'
 import type { CachedColumnConf } from '../../conf'
 import { getInputTypeByDataKind } from '../../conf'
 import { FUN_LOAD_CELL_DICT_ITEMS_TYPE, FUN_MODIFY_DATA_TYPE } from '../../events'
-import type { TableCellDictItemProps, TableDataGroupResp, TableDataResp } from '../../props'
-import { DataKind } from '../../props'
+import type { TableCellDictItemProps, TableDataGroupResp, TableDataResp } from '../../../props'
+import { DataKind } from '../../../props'
 import type { CellSelectedInfo } from './CellSelect.vue'
 
 const props = defineProps<{
@@ -189,13 +189,13 @@ async function setCellValue(value: any) {
     <template v-if="curColumnConf?.dataKind === DataKind.BOOLEAN">
       <input
         class="iw-toggle ml-1" type="checkbox" :checked="curCellValue"
-        @click="event => setCellValue((event.target as HTMLInputElement).checked)"
+        @click="(event:PointerEvent) => setCellValue((event.target as HTMLInputElement).checked)"
       >
     </template>
     <template v-else>
       <input
         class="iw-input iw-input-bordered rounded-none border-2 pl-0.5 pr-0.5 h-full w-full" :type="getInputTypeByDataKind(curColumnConf?.dataKind)"
-        :value="curCellValue" @change="event => setCellValue((event.target as HTMLInputElement).value)"
+        :value="curCellValue" @change="(event:InputEvent) => setCellValue((event.target as HTMLInputElement).value)"
       >
     </template>
   </div>
@@ -227,7 +227,7 @@ async function setCellValue(value: any) {
           type="search"
           :placeholder="$t('list.cellEdit.searchPlaceholder') "
           class="iw-input iw-input-bordered iw-input-xs w-full max-w-xs"
-          @input="(event) => searchDictItems((event.target as HTMLInputElement).value)"
+          @input="(event:InputEvent) => searchDictItems((event.target as HTMLInputElement).value)"
         >
       </div>
       <div class="iw-column-dict-list" @click="selectDictItem">
