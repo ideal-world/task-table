@@ -202,6 +202,7 @@ export interface TableEventProps {
     byGroupValue?: any,
     // Do not use this slice if it exists in group.slices
     defaultGroupSlice?: TableDataSliceProps) => Promise<TableDataResp | TableDataGroupResp[]>
+    // TODO remove targetSortValue
   newData?: (newRecords: { [key: string]: any }[], targetSortValue?: any) => Promise<{ [key: string]: any }[]>
   copyData?: (targetRecordPks: any[]) => Promise<{ [key: string]: any }[]>
   modifyData?: (changedRecords: { [key: string]: any }[]) => Promise<{ [key: string]: any }[]>

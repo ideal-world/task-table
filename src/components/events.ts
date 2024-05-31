@@ -115,7 +115,7 @@ export async function newData(newRecords: { [key: string]: any }[], afterRecordP
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.newData) {
-    showAlert(t('_.event.notConfigured'), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    showAlert(t('_.event.notConfigured', { name: 'newData' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
     throw new Error('[events.newData] Event not Configured')
   }
 
@@ -146,7 +146,7 @@ export async function copyData(targetRecordPks: any[]): Promise<boolean> {
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.copyData) {
-    showAlert(t('_.event.notConfigured'), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    showAlert(t('_.event.notConfigured', { name: 'copyData' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
     throw new Error('[events.copyData] Event not Configured')
   }
 
@@ -160,7 +160,7 @@ export async function modifyData(changedRecords: { [key: string]: any }[]): Prom
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.modifyData) {
-    showAlert(t('_.event.notConfigured'), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    showAlert(t('_.event.notConfigured', { name: 'modifyData' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
     throw new Error('[events.modifyData] Event not Configured')
   }
 
@@ -174,7 +174,7 @@ export async function deleteData(deletedRecordPks: any[]): Promise<boolean> {
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.deleteData) {
-    showAlert(t('_.event.notConfigured'), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    showAlert(t('_.event.notConfigured', { name: 'deleteData' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
     throw new Error('[events.deleteData] Event not Configured')
   }
 
@@ -190,7 +190,7 @@ export async function sortData(formRecordPk: any[], targetSortValue: string): Pr
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.sortData) {
-    showAlert(t('_.event.notConfigured'), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    showAlert(t('_.event.notConfigured', { name: 'sortData' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
     throw new Error('[events.sortData] Event not Configured')
   }
 
@@ -206,7 +206,7 @@ export async function loadCellDictItems(columnName: string, filterValue?: any, s
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.loadCellDictItems) {
-    showAlert(t('_.event.notConfigured'), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    showAlert(t('_.event.notConfigured', { name: 'loadCellDictItems' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
     throw new Error('[events.loadCellDictItems] Event not Configured')
   }
 
@@ -218,7 +218,7 @@ export async function newOrModifyCellDictItem(columnName: string, changedItem: T
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.newOrModifyCellDictItem) {
-    showAlert(t('_.event.notConfigured'), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    showAlert(t('_.event.notConfigured', { name: 'newOrModifyCellDictItem' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
     throw new Error('[events.newOrModifyCellDictItem] Event not Configured')
   }
 
@@ -230,7 +230,7 @@ export async function deleteCellDictItem(columnName: string, value: any): Promis
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.deleteCellDictItem) {
-    showAlert(t('_.event.notConfigured'), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    showAlert(t('_.event.notConfigured', { name: 'deleteCellDictItem' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
     throw new Error('[events.deleteCellDictItem] Event not Configured')
   }
 
@@ -242,7 +242,7 @@ export async function sortCellDictItems(columnName: string, leftItemValue: any, 
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.sortCellDictItems) {
-    showAlert(t('_.event.notConfigured'), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    showAlert(t('_.event.notConfigured', { name: 'sortCellDictItems' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
     throw new Error('[events.sortCellDictItems] Event not Configured')
   }
 
@@ -254,7 +254,7 @@ export async function modifyStyles(changedStyles: TableStyleConf): Promise<boole
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.modifyStyles) {
-    showAlert(t('_.event.notConfigured'), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    showAlert(t('_.event.notConfigured', { name: 'modifyStyles' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
     throw new Error('[events.modifyStyles] Event not Configured')
   }
 
@@ -278,7 +278,7 @@ export async function newColumn(newColumnConf: TableColumnConf, newLayoutColumnC
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.newColumn || !events.modifyLayout) {
-    showAlert(t('_.event.notConfigured'), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    showAlert(t('_.event.notConfigured', { name: 'newColumn|modifyLayout' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
     throw new Error('[events.newColumn/modifyLayout] Event not Configured')
   }
 
@@ -325,7 +325,7 @@ export async function modifyColumn(changedColumnConf?: TableColumnConf, changedL
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.modifyColumn || !events.modifyLayout) {
-    showAlert(t('_.event.notConfigured'), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    showAlert(t('_.event.notConfigured', { name: 'modifyColumn|modifyLayout' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
     throw new Error('[events.modifyColumn/modifyLayout] Event not Configured')
   }
 
@@ -373,7 +373,7 @@ export async function deleteColumn(deletedColumnName: string): Promise<boolean> 
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.deleteColumn || !events.modifyLayout) {
-    showAlert(t('_.event.notConfigured'), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    showAlert(t('_.event.notConfigured', { name: 'deleteColumn|modifyLayout' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
     throw new Error('[events.deleteColumn/modifyLayout] Event not Configured')
   }
 
@@ -407,7 +407,7 @@ export async function newLayout(newLayoutConf: TableLayoutKernelConf): Promise<b
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.newLayout) {
-    showAlert(t('_.event.notConfigured'), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    showAlert(t('_.event.notConfigured', { name: 'newLayout' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
     throw new Error('[events.newLayout] Event not Configured')
   }
 
@@ -447,7 +447,7 @@ export async function modifyLayout(changedLayoutReq: TableLayoutModifyProps): Pr
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.modifyLayout) {
-    showAlert(t('_.event.notConfigured'), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    showAlert(t('_.event.notConfigured', { name: 'modifyLayout' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
     throw new Error('[events.modifyLayout] Event not Configured')
   }
 
@@ -524,7 +524,7 @@ export async function deleteLayout(deletedLayoutId: string): Promise<boolean> {
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.deleteLayout) {
-    showAlert(t('_.event.notConfigured'), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    showAlert(t('_.event.notConfigured', { name: 'deleteLayout' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
     throw new Error('[events.deleteLayout] Event not Configured')
   }
 
@@ -541,7 +541,7 @@ export async function sortLayouts(leftLayoutId: string, rightLayoutId: string): 
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.sortLayouts) {
-    showAlert(t('_.event.notConfigured'), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    showAlert(t('_.event.notConfigured', { name: 'sortLayouts' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
     throw new Error('[events.sortLayouts] Event not Configured')
   }
 

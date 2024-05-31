@@ -52,7 +52,7 @@
       "selectPlaceholder": "Please select"
     },
     "event": {
-      "notConfigured": "Event not configured",
+      "notConfigured": "Event[{name}]not configured",
       "loadDataInvalidScene": "Unable to load data: Invalid scene"
     }
   },

@@ -52,7 +52,7 @@
       "selectPlaceholder": "请选择"
     },
     "event":{
-      "notConfigured": "事件未配置",
+      "notConfigured": "事件[{name}]未配置",
       "loadDataInvalidScene": "数据加载失败：场景不合法"
     }
   },
