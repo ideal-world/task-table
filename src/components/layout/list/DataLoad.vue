@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { inject, ref } from 'vue'
+import { ref } from 'vue'
 import * as iconSvg from '../../../assets/icon'
-import { FUN_LOAD_DATA_TYPE } from '../../events'
+import * as eb from '../../eventbus'
 
 const props = defineProps<{
   totalNumber: number
@@ -9,13 +9,11 @@ const props = defineProps<{
   groupValue: any | undefined
 }>()
 
-const loadDataFun = inject(FUN_LOAD_DATA_TYPE)!
-
 const loading = ref<boolean>(false)
 
 async function loadData() {
   loading.value = true
-  await loadDataFun(props.groupValue)
+  await eb.loadData(props.groupValue)
   loading.value = false
 }
 </script>

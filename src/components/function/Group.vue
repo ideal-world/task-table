@@ -1,18 +1,16 @@
 <script setup lang="ts">
-import { inject, ref } from 'vue'
+import { ref } from 'vue'
 import * as iconSvg from '../../assets/icon'
+import type { TableDataGroupProps } from '../../props'
 import MenuComp from '../common/Menu.vue'
 import type { TableColumnConf } from '../conf'
-import { FUN_LOAD_DATA_TYPE, FUN_MODIFY_LAYOUT_TYPE } from '../events'
-import type { TableDataGroupProps } from '../../props'
+import * as eb from '../eventbus'
 
 const props = defineProps<{
   group?: TableDataGroupProps
   columnsConf: TableColumnConf[]
 }>()
 
-const modifyLayoutFun = inject(FUN_MODIFY_LAYOUT_TYPE)!
-const loadDataFun = inject(FUN_LOAD_DATA_TYPE)!
 const groupCompRef = ref<InstanceType<typeof MenuComp>>()
 
 function showGroupContextMenu(event: MouseEvent) {
@@ -28,7 +26,7 @@ async function setGroupColumn(columnName: string) {
       columnNames.splice(idx, 1)
     else
       columnNames.push(columnName)
-    await modifyLayoutFun({
+    await eb.modifyLayout({
       group: {
         columnNames,
         groupOrderDesc: props.group.groupOrderDesc,
@@ -36,10 +34,10 @@ async function setGroupColumn(columnName: string) {
         slices: props.group.slices,
       },
     })
-    await loadDataFun()
+    await eb.loadData()
   }
   else {
-    await modifyLayoutFun({
+    await eb.modifyLayout({
       group: {
         columnNames: [columnName],
         groupOrderDesc: false,
@@ -48,13 +46,13 @@ async function setGroupColumn(columnName: string) {
         },
       },
     })
-    await loadDataFun()
+    await eb.loadData()
   }
 }
 
 async function setGroupDescSort() {
   if (props.group) {
-    await modifyLayoutFun({
+    await eb.modifyLayout({
       group: {
         columnNames: props.group.columnNames,
         groupOrderDesc: !props.group.groupOrderDesc,
@@ -62,13 +60,13 @@ async function setGroupDescSort() {
         slices: props.group.slices,
       },
     })
-    await loadDataFun()
+    await eb.loadData()
   }
 }
 
 async function setGroupHideEmpty() {
   if (props.group) {
-    await modifyLayoutFun({
+    await eb.modifyLayout({
       group: {
         columnNames: props.group.columnNames,
         groupOrderDesc: props.group.groupOrderDesc,
@@ -76,7 +74,7 @@ async function setGroupHideEmpty() {
         slices: props.group.slices,
       },
     })
-    await loadDataFun()
+    await eb.loadData()
   }
 }
 </script>

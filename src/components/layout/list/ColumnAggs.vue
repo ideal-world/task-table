@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { inject, ref } from 'vue'
-import MenuComp, { MenuOffsetKind, MenuSizeKind } from '../../common/Menu.vue'
-import type { CachedColumnConf, TableStyleConf } from '../../conf'
-import { FUN_MODIFY_LAYOUT_TYPE } from '../../events'
-import { showGroupAggMappingByDataKind } from '../../function/Group'
+import { ref } from 'vue'
 import type { AggregateKind, TableDataResp } from '../../../props'
 import { translateAggregateKind } from '../../../props'
+import MenuComp, { MenuOffsetKind, MenuSizeKind } from '../../common/Menu.vue'
+import type { CachedColumnConf, TableStyleConf } from '../../conf'
+import * as eb from '../../eventbus'
+import { showGroupAggMappingByDataKind } from '../../function/Group'
 
 const props = defineProps<{
   layoutAggs: { [key: string]: AggregateKind }
@@ -17,7 +17,6 @@ const props = defineProps<{
   setColumnStyles: (colIdx: number) => any
 }>()
 
-const modifyLayoutFun = inject(FUN_MODIFY_LAYOUT_TYPE)!
 const aggsMenuCompRefs = ref<InstanceType<typeof MenuComp>[]>()
 
 function showAggsContextMenu(event: MouseEvent, colIdx: number) {
@@ -28,7 +27,7 @@ function showAggsContextMenu(event: MouseEvent, colIdx: number) {
 async function changeColumnAggs(aggKind: AggregateKind, colIdx: number) {
   const aggs = JSON.parse(JSON.stringify(props.layoutAggs))
   aggs[props.columnsConf[colIdx].name] = aggKind
-  await modifyLayoutFun({
+  await eb.modifyLayout({
     aggs,
   })
   aggsMenuCompRefs.value && aggsMenuCompRefs.value[colIdx].close()

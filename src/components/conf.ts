@@ -1,6 +1,6 @@
 import * as iconSvg from '../assets/icon'
 import locales from '../locales'
-import type { AggregateKind, TableDataFilterProps, TableDataGroupProps, TableDataGroupResp, TableDataResp, TableDataSliceProps, TableDataSortProps, TableProps } from '../props'
+import type { AggregateKind, TableColumnProps, TableDataFilterProps, TableDataGroupProps, TableDataGroupResp, TableDataResp, TableDataSliceProps, TableDataSortProps, TableLayoutColumnProps, TableLayoutKernelProps, TableProps, TableStyleProps } from '../props'
 import { DataKind, LayoutKind, OperatorKind, SizeKind } from '../props'
 
 const { t } = locales.global
@@ -26,6 +26,21 @@ export interface TableColumnConf {
   groupable: boolean
 }
 
+export function convertTableColumnPropsToTableColumnConf(props: TableColumnProps): TableColumnConf {
+  return {
+    name: props.name,
+    title: props.title,
+    dataKind: props.dataKind ?? DataKind.TEXT,
+    icon: props.icon ?? getDefaultIconByDataKind(props.dataKind ?? DataKind.TEXT),
+    dataEditable: props.dataEditable ?? true,
+    useDict: props.useDict ?? false,
+    dictEditable: props.dictEditable ?? false,
+    multiValue: props.multiValue ?? false,
+    groupable: props.groupable ?? false,
+    kindDateTimeFormat: props.kindDateTimeFormat,
+  }
+}
+
 export interface TableLayoutKernelConf {
   title: string
   layoutKind: LayoutKind
@@ -45,6 +60,27 @@ export interface TableLayoutKernelConf {
   data?: TableDataResp | TableDataGroupResp[]
 }
 
+export function convertTableLayoutKernelPropsToTableLayoutKernelConf(props: TableLayoutKernelProps): TableLayoutKernelConf {
+  return {
+    title: props.title,
+    layoutKind: props.layoutKind,
+    icon: props.icon ?? getDefaultIconByLayoutKind(props.layoutKind),
+    columns: props.columns.map((column) => {
+      return convertTableLayoutColumnPropsToTableLayoutColumnConf(column)
+    }),
+    filters: props.filters,
+    sorts: props.sorts,
+    group: props.group,
+    aggs: props.aggs,
+    slice: props.slice ?? {
+      offsetNumber: 0,
+      fetchNumber: 50,
+    },
+    showSelectColumn: props.showSelectColumn ?? true,
+    expandDataPks: [],
+  }
+}
+
 export interface TableLayoutConf extends TableLayoutKernelConf {
   id: string
 }
@@ -58,6 +94,18 @@ export interface TableLayoutColumnConf {
   dateStart: boolean
   dateEnd: boolean
   customRender?: (record: { [key: string]: any }, columnName: string) => any
+}
+
+export function convertTableLayoutColumnPropsToTableLayoutColumnConf(props: TableLayoutColumnProps): TableLayoutColumnConf {
+  return {
+    name: props.name,
+    wrap: props.wrap ?? true,
+    fixed: props.fixed ?? false,
+    width: props.width ?? 200,
+    hide: props.hide ?? false,
+    dateStart: props.dateStart ?? false,
+    dateEnd: props.dateEnd ?? false,
+  }
 }
 
 export function getDefaultLayoutColumnConf(columnName: string): TableLayoutColumnConf {
@@ -84,6 +132,18 @@ export interface TableStyleConf {
   rowClass: string
   cellClass: string
   aggClass: string
+}
+
+export function convertTableStylePropsToTableStyleConf(props?: TableStyleProps): TableStyleConf {
+  return {
+    tableClass: props?.tableClass ?? '',
+    headerClass: props?.headerClass ?? '',
+    rowClass: props?.rowClass ?? '',
+    cellClass: props?.cellClass ?? '',
+    aggClass: props?.aggClass ?? '',
+    size: props?.size ?? SizeKind.MEDIUM,
+    theme: '',
+  }
 }
 
 export function getDefaultValueByDataKind(dataKind: DataKind): any {
@@ -240,58 +300,16 @@ export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]]
     pkColumnName: props.pkColumnName,
     parentPkColumnName: props.parentPkColumnName,
     columns: props.columns.map((column) => {
-      return {
-        name: column.name,
-        title: column.title,
-        dataKind: column.dataKind ?? DataKind.TEXT,
-        icon: column.icon ?? getDefaultIconByDataKind(column.dataKind ?? DataKind.TEXT),
-        dataEditable: column.dataEditable ?? true,
-        useDict: column.useDict ?? false,
-        dictEditable: column.dictEditable ?? false,
-        multiValue: column.multiValue ?? false,
-        groupable: column.groupable ?? false,
-        kindDateTimeFormat: column.kindDateTimeFormat,
-      }
+      return convertTableColumnPropsToTableColumnConf(column)
     }),
-    styles: {
-      tableClass: props.styles?.tableClass ?? '',
-      headerClass: props.styles?.headerClass ?? '',
-      rowClass: props.styles?.rowClass ?? '',
-      cellClass: props.styles?.cellClass ?? '',
-      aggClass: props.styles?.aggClass ?? '',
-      size: props.styles?.size ?? SizeKind.MEDIUM,
-      theme: '',
-    },
+    styles: convertTableStylePropsToTableStyleConf(props.styles),
   }
   const layoutsConf: TableLayoutConf[] = []
   if (props.layouts) {
     props.layouts.forEach((layout) => {
       layoutsConf.push({
         id: layout.id,
-        title: layout.title,
-        layoutKind: layout.layoutKind,
-        icon: layout.icon ?? getDefaultIconByLayoutKind(layout.layoutKind),
-        columns: layout.columns.map((column) => {
-          return {
-            name: column.name,
-            wrap: column.wrap ?? true,
-            fixed: column.fixed ?? false,
-            width: column.width ?? 200,
-            hide: column.hide ?? false,
-            dateStart: column.dateStart ?? false,
-            dateEnd: column.dateEnd ?? false,
-          }
-        }),
-        filters: layout.filters,
-        sorts: layout.sorts,
-        group: layout.group,
-        aggs: layout.aggs,
-        slice: layout.slice ?? {
-          offsetNumber: 0,
-          fetchNumber: 50,
-        },
-        showSelectColumn: layout.showSelectColumn ?? true,
-        expandDataPks: [],
+        ...convertTableLayoutKernelPropsToTableLayoutKernelConf(layout),
       })
     })
   }

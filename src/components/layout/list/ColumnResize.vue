@@ -1,12 +1,11 @@
 <script setup lang="ts">
-import { inject, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import type { CachedColumnConf } from '../../conf'
-import { FUN_MODIFY_COLUMN_TYPE } from '../../events'
+import * as eb from '../../eventbus'
 
 const props = defineProps<{
   columnsConf: CachedColumnConf[]
 }>()
-const modifyColumnFun = inject(FUN_MODIFY_COLUMN_TYPE)!
 
 let currColumnName = ''
 let currCellRect: DOMRect
@@ -33,15 +32,15 @@ onMounted(() => {
     targetEle.setPointerCapture(event.pointerId)
   })
 
-  dragDiv.addEventListener('pointerup', async (event: PointerEvent) => {
+  dragDiv.addEventListener('pointerup', async (e: PointerEvent) => {
     isDragging = false
     dragDiv.style.display = 'none'
-    const targetEle = event.target as HTMLElement
-    targetEle.releasePointerCapture(event.pointerId)
+    const targetEle = e.target as HTMLElement
+    targetEle.releasePointerCapture(e.pointerId)
 
     const curColumnConf = props.columnsConf.find(item => item.name === currColumnName)
     if (curColumnConf) {
-      await modifyColumnFun({
+      await eb.modifyColumn({
         name: curColumnConf.name,
         wrap: curColumnConf.wrap,
         fixed: curColumnConf.fixed,

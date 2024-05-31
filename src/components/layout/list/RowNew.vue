@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import { inject } from 'vue';
-import * as iconSvg from '../../../assets/icon';
-import { FUN_CLOSE_CONTEXT_MENU_TYPE } from '../../common/Menu.vue';
-import { FUN_NEW_DATA_TYPE } from '../../events';
+import { inject } from 'vue'
+import * as iconSvg from '../../../assets/icon'
+import { FUN_CLOSE_CONTEXT_MENU_TYPE } from '../../common/Menu.vue'
+import * as eb from '../../eventbus'
 
-const newDataFun = inject(FUN_NEW_DATA_TYPE)!
 const closeContextMenuFun = inject(FUN_CLOSE_CONTEXT_MENU_TYPE)!
 
 async function newRow() {
-  await newDataFun([{
+  await eb.newData([{
 
   }])
   closeContextMenuFun()

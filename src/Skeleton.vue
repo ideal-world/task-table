@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { onMounted, provide, reactive, ref } from 'vue'
+import { onMounted, reactive, ref } from 'vue'
 import * as iconSvg from './assets/icon'
 import MenuComp, { MenuOffsetKind } from './components/common/Menu.vue'
 import type { TableBasicConf, TableLayoutConf } from './components/conf'
 import { initConf } from './components/conf'
-import * as Event from './components/events'
+import * as Event from './components/eventbus'
 import FilterComp from './components/function/Filter.vue'
 import GroupComp from './components/function/Group.vue'
 import ResizeComp from './components/function/Resize.vue'
@@ -36,20 +36,6 @@ onMounted(async () => {
   })
   await Event.watch()
 })
-
-provide(Event.FUN_LOAD_DATA_TYPE, Event.loadData)
-provide(Event.FUN_NEW_DATA_TYPE, Event.newData)
-provide(Event.FUN_MODIFY_DATA_TYPE, Event.modifyData)
-provide(Event.FUN_COPY_DATA_TYPE, Event.copyData)
-provide(Event.FUN_DELETE_DATA_TYPE, Event.deleteData)
-provide(Event.FUN_LOAD_CELL_DICT_ITEMS_TYPE, Event.loadCellDictItems)
-provide(Event.FUN_MODIFY_STYLES_TYPE, Event.modifyStyles)
-provide(Event.FUN_NEW_COLUMN_TYPE, Event.newColumn)
-provide(Event.FUN_DELETE_COLUMN_TYPE, Event.deleteColumn)
-provide(Event.FUN_MODIFY_COLUMN_TYPE, Event.modifyColumn)
-provide(Event.FUN_NEW_LAYOUT_TYPE, Event.newLayout)
-provide(Event.FUN_MODIFY_LAYOUT_TYPE, Event.modifyLayout)
-provide(Event.FUN_DELETE_LAYOUT_TYPE, Event.deleteLayout)
 
 // ------------- Layout Process -------------
 function showLayoutMenu(event: MouseEvent) {

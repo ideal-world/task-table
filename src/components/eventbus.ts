@@ -1,10 +1,10 @@
-import type { InjectionKey, Ref } from 'vue'
+import type { Ref } from 'vue'
 import { toRaw } from 'vue'
 import locales from '../locales'
-import type { TableCellDictItemsResp, TableDataSliceProps, TableEventProps, TableLayoutModifyProps } from '../props'
+import type { TableCellDictItemsResp, TableDataSliceProps, TableEventProps, TableLayoutKernelProps, TableLayoutModifyProps } from '../props'
 import { getParentWithClass } from '../utils/basic'
 import { AlertKind, showAlert } from './common/Alert'
-import type { TableBasicConf, TableLayoutColumnConf, TableLayoutConf, TableLayoutKernelConf, TableStyleConf } from './conf'
+import { type TableBasicConf, type TableLayoutColumnConf, type TableLayoutConf, type TableStyleConf, convertTableLayoutKernelPropsToTableLayoutKernelConf } from './conf'
 import { sortByTree } from './function/RowTree'
 
 const { t } = locales.global
@@ -27,7 +27,6 @@ export async function watch() {
   })
 }
 
-export const FUN_LOAD_DATA_TYPE = Symbol('FUN_LOAD_DATA_TYPE') as InjectionKey<(moreForGroupedValue?: any, offsetNumber?: number, fetchNumber?: number, layoutId?: string) => Promise<void>>
 export async function loadData(moreForGroupedValue?: any, offsetNumber?: number, fetchNumber?: number, layoutId?: string) {
   const layout = layoutId ? tableLayoutsConf.find(layout => layout.id === layoutId)! : tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
@@ -110,7 +109,6 @@ export async function loadData(moreForGroupedValue?: any, offsetNumber?: number,
   }
 }
 
-export const FUN_NEW_DATA_TYPE = Symbol('FUN_NEW_DATA_TYPE') as InjectionKey<(newRecords: { [key: string]: any }[]) => Promise<boolean>>
 export async function newData(newRecords: { [key: string]: any }[]): Promise<boolean> {
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
@@ -124,7 +122,6 @@ export async function newData(newRecords: { [key: string]: any }[]): Promise<boo
   return true
 }
 
-export const FUN_COPY_DATA_TYPE = Symbol('FUN_COPY_DATA_TYPE') as InjectionKey<(targetRecordPks: any[]) => Promise<boolean>>
 export async function copyData(targetRecordPks: any[]): Promise<boolean> {
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
@@ -138,7 +135,6 @@ export async function copyData(targetRecordPks: any[]): Promise<boolean> {
   return true
 }
 
-export const FUN_MODIFY_DATA_TYPE = Symbol('FUN_MODIFY_DATA_TYPE') as InjectionKey<(changedRecords: { [key: string]: any }[]) => Promise<boolean>>
 export async function modifyData(changedRecords: { [key: string]: any }[]): Promise<boolean> {
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
@@ -152,7 +148,6 @@ export async function modifyData(changedRecords: { [key: string]: any }[]): Prom
   return true
 }
 
-export const FUN_DELETE_DATA_TYPE = Symbol('FUN_DELETE_DATA_TYPE') as InjectionKey<(deletedRecordPks: any[]) => Promise<boolean>>
 export async function deleteData(deletedRecordPks: any[]): Promise<boolean> {
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
@@ -168,7 +163,6 @@ export async function deleteData(deletedRecordPks: any[]): Promise<boolean> {
   return true
 }
 
-export const FUN_LOAD_CELL_DICT_ITEMS_TYPE = Symbol('FUN_LOAD_CELL_DICT_ITEMS_TYPE') as InjectionKey<(columnName: string, filterValue?: any, slice?: TableDataSliceProps) => Promise<TableCellDictItemsResp>>
 export async function loadCellDictItems(columnName: string, filterValue?: any, slice?: TableDataSliceProps): Promise<TableCellDictItemsResp> {
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
@@ -180,7 +174,6 @@ export async function loadCellDictItems(columnName: string, filterValue?: any, s
   return await events.loadCellDictItems(columnName, filterValue, slice)
 }
 
-export const FUN_MODIFY_STYLES_TYPE = Symbol('FUN_MODIFY_STYLES_TYPE') as InjectionKey<(changedStyles: TableStyleConf) => Promise<boolean>>
 export async function modifyStyles(changedStyles: TableStyleConf): Promise<boolean> {
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
@@ -204,7 +197,6 @@ export async function modifyStyles(changedStyles: TableStyleConf): Promise<boole
   return true
 }
 
-export const FUN_NEW_COLUMN_TYPE = Symbol('FUN_NEW_COLUMN_TYPE') as InjectionKey<(newLayoutColumnConf: TableLayoutColumnConf) => Promise<boolean>>
 export async function newColumn(newLayoutColumnConf: TableLayoutColumnConf): Promise<boolean> {
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
@@ -231,8 +223,7 @@ export async function newColumn(newLayoutColumnConf: TableLayoutColumnConf): Pro
   return true
 }
 
-export const FUN_MODIFY_COLUMN_TYPE = Symbol('FUN_MODIFY_COLUMN_TYPE') as InjectionKey<(changedLayoutColumnConf?: TableLayoutColumnConf) => Promise<boolean>>
-export async function modifyColumn(changedLayoutColumnConf?: TableLayoutColumnConf): Promise<boolean> {
+export async function modifyColumn(changedLayoutColumnConf: TableLayoutColumnConf): Promise<boolean> {
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.modifyLayout) {
@@ -240,7 +231,7 @@ export async function modifyColumn(changedLayoutColumnConf?: TableLayoutColumnCo
     throw new Error('[events.modifyLayout] Event not Configured')
   }
 
-  if (changedLayoutColumnConf && !await events.modifyLayout(layout.id, {
+  if (!await events.modifyLayout(layout.id, {
     changedColumn: {
       name: changedLayoutColumnConf.name,
       wrap: changedLayoutColumnConf.wrap,
@@ -254,16 +245,13 @@ export async function modifyColumn(changedLayoutColumnConf?: TableLayoutColumnCo
     return false
   }
 
-  if (changedLayoutColumnConf) {
-    const oldColumnIdx = layout.columns.findIndex(column => column.name === changedLayoutColumnConf.name)
-    layout.columns.splice(oldColumnIdx, 1, changedLayoutColumnConf)
-  }
+  const oldColumnIdx = layout.columns.findIndex(column => column.name === changedLayoutColumnConf.name)
+  layout.columns.splice(oldColumnIdx, 1, changedLayoutColumnConf)
 
   await loadData()
   return true
 }
 
-export const FUN_DELETE_COLUMN_TYPE = Symbol('FUN_DELETE_COLUMN_TYPE') as InjectionKey<(deletedColumnName: string) => Promise<boolean>>
 export async function deleteColumn(deletedColumnName: string): Promise<boolean> {
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
@@ -295,8 +283,7 @@ export async function deleteColumn(deletedColumnName: string): Promise<boolean> 
   return true
 }
 
-export const FUN_NEW_LAYOUT_TYPE = Symbol('FUN_NEW_LAYOUT_TYPE') as InjectionKey<(newLayoutConf: TableLayoutKernelConf) => Promise<boolean>>
-export async function newLayout(newLayoutConf: TableLayoutKernelConf): Promise<boolean> {
+export async function newLayout(newLayoutProps: TableLayoutKernelProps): Promise<boolean> {
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.newLayout) {
@@ -305,10 +292,10 @@ export async function newLayout(newLayoutConf: TableLayoutKernelConf): Promise<b
   }
 
   const layoutId = await events.newLayout({
-    title: newLayoutConf.title,
-    layoutKind: newLayoutConf.layoutKind,
-    icon: newLayoutConf.icon,
-    columns: Object.entries(newLayoutConf.columns).map(([name, column]) => {
+    title: newLayoutProps.title,
+    layoutKind: newLayoutProps.layoutKind,
+    icon: newLayoutProps.icon,
+    columns: Object.entries(newLayoutProps.columns).map(([name, column]) => {
       return {
         name,
         wrap: column.wrap,
@@ -319,23 +306,22 @@ export async function newLayout(newLayoutConf: TableLayoutKernelConf): Promise<b
         dateEnd: column.dateEnd,
       }
     }),
-    filters: newLayoutConf.filters,
-    sorts: newLayoutConf.sorts,
-    group: newLayoutConf.group,
-    aggs: newLayoutConf.aggs,
-    slice: newLayoutConf.slice,
+    filters: newLayoutProps.filters,
+    sorts: newLayoutProps.sorts,
+    group: newLayoutProps.group,
+    aggs: newLayoutProps.aggs,
+    slice: newLayoutProps.slice,
   })
   tableLayoutsConf.push({
     id: layoutId,
-    ...newLayoutConf,
+    ...convertTableLayoutKernelPropsToTableLayoutKernelConf(newLayoutProps),
   })
 
   await loadData(undefined, undefined, undefined, layoutId)
   return true
 }
 
-export const FUN_MODIFY_LAYOUT_TYPE = Symbol('FUN_MODIFY_LAYOUT_TYPE') as InjectionKey<(changedLayoutReq: TableLayoutModifyProps) => Promise<boolean>>
-export async function modifyLayout(changedLayoutReq: TableLayoutModifyProps): Promise<boolean> {
+export async function modifyLayout(changedLayoutProps: TableLayoutModifyProps): Promise<boolean> {
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.modifyLayout) {
@@ -343,44 +329,44 @@ export async function modifyLayout(changedLayoutReq: TableLayoutModifyProps): Pr
     throw new Error('[events.modifyLayout] Event not Configured')
   }
 
-  if (!await events.modifyLayout(layout.id, changedLayoutReq))
+  if (!await events.modifyLayout(layout.id, changedLayoutProps))
     return false
 
-  changedLayoutReq.title && (layout.title = changedLayoutReq.title)
-  changedLayoutReq.icon && (layout.icon = changedLayoutReq.icon)
-  changedLayoutReq.filters && (layout.filters = changedLayoutReq.filters)
-  changedLayoutReq.sorts && (layout.sorts = changedLayoutReq.sorts)
-  changedLayoutReq.group && (layout.group = changedLayoutReq.group)
-  changedLayoutReq.aggs && (layout.aggs = changedLayoutReq.aggs)
-  changedLayoutReq.slice && (layout.slice = changedLayoutReq.slice)
-  if (changedLayoutReq.deletedColumnName) {
-    const oldLayoutColumnIdx = layout.columns.findIndex(column => column.name === changedLayoutReq.deletedColumnName)
+  changedLayoutProps.title && (layout.title = changedLayoutProps.title)
+  changedLayoutProps.icon && (layout.icon = changedLayoutProps.icon)
+  changedLayoutProps.filters && (layout.filters = changedLayoutProps.filters)
+  changedLayoutProps.sorts && (layout.sorts = changedLayoutProps.sorts)
+  changedLayoutProps.group && (layout.group = changedLayoutProps.group)
+  changedLayoutProps.aggs && (layout.aggs = changedLayoutProps.aggs)
+  changedLayoutProps.slice && (layout.slice = changedLayoutProps.slice)
+  if (changedLayoutProps.deletedColumnName) {
+    const oldLayoutColumnIdx = layout.columns.findIndex(column => column.name === changedLayoutProps.deletedColumnName)
     layout.columns.splice(oldLayoutColumnIdx, 1)
   }
-  changedLayoutReq.newColumn && (layout.columns.push({
-    name: changedLayoutReq.newColumn.name,
-    wrap: changedLayoutReq.newColumn.wrap ?? true,
-    fixed: changedLayoutReq.newColumn.fixed ?? false,
-    width: changedLayoutReq.newColumn.width ?? 200,
-    hide: changedLayoutReq.newColumn.hide ?? false,
-    dateStart: changedLayoutReq.newColumn.dateStart ?? false,
-    dateEnd: changedLayoutReq.newColumn.dateEnd ?? false,
+  changedLayoutProps.newColumn && (layout.columns.push({
+    name: changedLayoutProps.newColumn.name,
+    wrap: changedLayoutProps.newColumn.wrap ?? true,
+    fixed: changedLayoutProps.newColumn.fixed ?? false,
+    width: changedLayoutProps.newColumn.width ?? 200,
+    hide: changedLayoutProps.newColumn.hide ?? false,
+    dateStart: changedLayoutProps.newColumn.dateStart ?? false,
+    dateEnd: changedLayoutProps.newColumn.dateEnd ?? false,
   }))
-  if (changedLayoutReq.changedColumn) {
-    const oldLayoutColumnIdx = layout.columns.findIndex(column => column.name === changedLayoutReq.changedColumn?.name)
+  if (changedLayoutProps.changedColumn) {
+    const oldLayoutColumnIdx = layout.columns.findIndex(column => column.name === changedLayoutProps.changedColumn?.name)
     layout.columns.splice(oldLayoutColumnIdx, 1, {
-      name: changedLayoutReq.changedColumn.name,
-      wrap: changedLayoutReq.changedColumn.wrap ?? true,
-      fixed: changedLayoutReq.changedColumn.fixed ?? false,
-      width: changedLayoutReq.changedColumn.width ?? 200,
-      hide: changedLayoutReq.changedColumn.hide ?? false,
-      dateStart: changedLayoutReq.changedColumn.dateStart ?? false,
-      dateEnd: changedLayoutReq.changedColumn.dateEnd ?? false,
+      name: changedLayoutProps.changedColumn.name,
+      wrap: changedLayoutProps.changedColumn.wrap ?? true,
+      fixed: changedLayoutProps.changedColumn.fixed ?? false,
+      width: changedLayoutProps.changedColumn.width ?? 200,
+      hide: changedLayoutProps.changedColumn.hide ?? false,
+      dateStart: changedLayoutProps.changedColumn.dateStart ?? false,
+      dateEnd: changedLayoutProps.changedColumn.dateEnd ?? false,
     })
   }
-  if (changedLayoutReq.columnSortedNames) {
-    const leftColumnIdx = layout.columns.findIndex(column => column.name === changedLayoutReq.columnSortedNames![0])
-    const rightColumnIdx = layout.columns.findIndex(column => column.name === changedLayoutReq.columnSortedNames![1])
+  if (changedLayoutProps.columnSortedNames) {
+    const leftColumnIdx = layout.columns.findIndex(column => column.name === changedLayoutProps.columnSortedNames![0])
+    const rightColumnIdx = layout.columns.findIndex(column => column.name === changedLayoutProps.columnSortedNames![1])
     const tmpColumn = layout.columns[leftColumnIdx]
     layout.columns.splice(leftColumnIdx, 1, layout.columns[rightColumnIdx])
     layout.columns.splice(rightColumnIdx, 1, tmpColumn)
@@ -390,7 +376,6 @@ export async function modifyLayout(changedLayoutReq: TableLayoutModifyProps): Pr
   return true
 }
 
-export const FUN_DELETE_LAYOUT_TYPE = Symbol('FUN_DELETE_LAYOUT_TYPE') as InjectionKey<(deletedLayoutId: string) => Promise<boolean>>
 export async function deleteLayout(deletedLayoutId: string): Promise<boolean> {
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 

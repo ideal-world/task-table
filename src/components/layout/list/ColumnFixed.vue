@@ -3,13 +3,12 @@ import { inject, onMounted, ref, watch } from 'vue'
 import * as iconSvg from '../../../assets/icon'
 import { FUN_CLOSE_CONTEXT_MENU_TYPE } from '../../common/Menu.vue'
 import type { CachedColumnConf } from '../../conf'
-import { FUN_MODIFY_COLUMN_TYPE } from '../../events'
+import * as eb from '../../eventbus'
 
 const props = defineProps<{
   curColumnConf: CachedColumnConf
   columnsConf: CachedColumnConf[]
 }>()
-const modifyColumnFun = inject(FUN_MODIFY_COLUMN_TYPE)!
 const closeContextMenuFun = inject(FUN_CLOSE_CONTEXT_MENU_TYPE)!
 
 const fixedInputRef = ref<HTMLInputElement>()
@@ -26,9 +25,9 @@ async function setFixedColumn() {
   const oldFixedColumnConf = props.columnsConf.find(col => col.fixed)
   if (oldFixedColumnConf && oldFixedColumnConf.name !== props.curColumnConf.name) {
     oldFixedColumnConf.fixed = false
-    await modifyColumnFun(oldFixedColumnConf)
+    await eb.modifyColumn(oldFixedColumnConf)
   }
-  await modifyColumnFun({
+  await eb.modifyColumn({
     name: props.curColumnConf.name,
     wrap: props.curColumnConf.wrap,
     fixed: !props.curColumnConf.fixed,

@@ -1,21 +1,18 @@
 <script setup lang="ts">
-import { computed, inject, ref } from 'vue'
+import { computed, ref } from 'vue'
 import * as iconSvg from '../../assets/icon'
-import MenuComp, { MenuSizeKind } from '../common/Menu.vue'
-import type { TableColumnConf } from '../conf'
-import { getInputTypeByDataKind, getOperatorKindsByDataKind } from '../conf'
-import { FUN_LOAD_CELL_DICT_ITEMS_TYPE, FUN_LOAD_DATA_TYPE, FUN_MODIFY_LAYOUT_TYPE } from '../events'
 import type { TableCellDictItemProps, TableCellDictItemsResp, TableDataFilterItemProps, TableDataFilterProps } from '../../props'
 import { DataKind, OperatorKind, translateOperatorKind } from '../../props'
 import { getParentWithClass } from '../../utils/basic'
+import MenuComp, { MenuSizeKind } from '../common/Menu.vue'
+import type { TableColumnConf } from '../conf'
+import { getInputTypeByDataKind, getOperatorKindsByDataKind } from '../conf'
+import * as eb from '../eventbus'
 
 const props = defineProps<{
   filters?: TableDataFilterProps[]
   columnsConf: TableColumnConf[]
 }>()
-const modifyLayoutFun = inject(FUN_MODIFY_LAYOUT_TYPE)!
-const loadDataFun = inject(FUN_LOAD_DATA_TYPE)!
-const loadCellDictItemsFun = inject(FUN_LOAD_CELL_DICT_ITEMS_TYPE)!
 const simpleFilterCompRef = ref<InstanceType<typeof MenuComp>>()
 const filterColumnCompRef = ref<InstanceType<typeof MenuComp>>()
 const filterOpCompRef = ref<InstanceType<typeof MenuComp>>()
@@ -63,8 +60,8 @@ const simpleFilterItems = computed<TableDataFilterItemProps[]>(() => {
   return []
 })
 
-function showSimpleFilterItem(event: MouseEvent, filterItem?: TableDataFilterItemProps, idx?: number) {
-  const targetEle = event.target as HTMLElement
+function showSimpleFilterItem(e: MouseEvent, filterItem?: TableDataFilterItemProps, idx?: number) {
+  const targetEle = e.target as HTMLElement
   if (filterItem) {
     const selectedColumnConf = props.columnsConf.find(col => col.name === filterItem?.columnName)!
     selectedFilterItem.value = {
@@ -80,18 +77,18 @@ function showSimpleFilterItem(event: MouseEvent, filterItem?: TableDataFilterIte
   simpleFilterCompRef.value?.show(targetEle, undefined, MenuSizeKind.LARGE, false)
 }
 
-function showFilterColumns(event: MouseEvent) {
-  const targetEle = event.target as HTMLElement
+function showFilterColumns(e: MouseEvent) {
+  const targetEle = e.target as HTMLElement
   filterColumnCompRef.value?.show(targetEle, undefined, undefined, true)
 }
 
-function showFilterOps(event: MouseEvent) {
-  const targetEle = event.target as HTMLElement
+function showFilterOps(e: MouseEvent) {
+  const targetEle = e.target as HTMLElement
   filterOpCompRef.value?.show(targetEle, undefined, MenuSizeKind.MINI, true)
 }
 
-async function setFilterColumn(event: MouseEvent) {
-  const targetEle = event.target as HTMLElement
+async function setFilterColumn(e: MouseEvent) {
+  const targetEle = e.target as HTMLElement
   const selectedColumnName = targetEle.dataset.columnName
   filterColumnCompRef.value?.close()
   if (!selectedColumnName)
@@ -122,7 +119,7 @@ async function setFilterColumn(event: MouseEvent) {
     await newOrModifySimpleFilterItem(selectedFilterItem.value)
 
   if (selectedFilterItem.value && selectedFilterItem.value.useDict) {
-    const values = await loadCellDictItemsFun(selectedFilterItem.value.columnName as string)
+    const values = await eb.loadCellDictItems(selectedFilterItem.value.columnName as string)
     selectedDictItemResp.value = values
   }
   else {
@@ -131,8 +128,8 @@ async function setFilterColumn(event: MouseEvent) {
   searchDictValue.value = undefined
 }
 
-async function setFilterOp(event: MouseEvent) {
-  const targetEle = event.target as HTMLElement
+async function setFilterOp(e: MouseEvent) {
+  const targetEle = e.target as HTMLElement
   const selectedOp = targetEle.dataset.op as OperatorKind
   filterOpCompRef.value?.close()
   selectedFilterItem.value!.operator = selectedOp
@@ -160,8 +157,8 @@ async function setFilterValue(value: any) {
   await newOrModifySimpleFilterItem(selectedFilterItem.value!)
 }
 
-async function setFilterDictItem(event: Event) {
-  const targetEle = getParentWithClass(event.target as HTMLElement, 'iw-contextmenu__item')
+async function setFilterDictItem(e: Event) {
+  const targetEle = getParentWithClass(e.target as HTMLElement, 'iw-contextmenu__item')
   if (!targetEle)
     return
 
@@ -201,13 +198,13 @@ async function newOrModifySimpleFilterItem(changedFilterItem: TableDataFilterIte
         value: changedFilterItem.value,
       })
     }
-    await modifyLayoutFun({
+    await eb.modifyLayout({
       filters: [filters],
     })
-    await loadDataFun()
+    await eb.loadData()
   }
   else if (props.filters === undefined || props.filters.length === 0) {
-    await modifyLayoutFun({
+    await eb.modifyLayout({
       filters: [
         {
           items: [{
@@ -218,7 +215,7 @@ async function newOrModifySimpleFilterItem(changedFilterItem: TableDataFilterIte
         },
       ],
     })
-    await loadDataFun()
+    await eb.loadData()
   }
 }
 
@@ -226,10 +223,10 @@ async function deleteSimpleFilterItem(idx: number) {
   if (props.filters && props.filters.length === 1) {
     const filters = JSON.parse(JSON.stringify(props.filters[0]))
     filters.items.splice(idx, 1)
-    await modifyLayoutFun({
+    await eb.modifyLayout({
       filters: [filters],
     })
-    await loadDataFun()
+    await eb.loadData()
   }
 }
 </script>
@@ -237,7 +234,7 @@ async function deleteSimpleFilterItem(idx: number) {
 <template>
   <div class="flex justify-center overflow-x-auto">
     <button v-for="(item, idx) in simpleFilterItems" :key="idx" class="iw-btn iw-btn-outline iw-btn-xs flex-none mr-1">
-      <span @click="(event:PointerEvent) => showSimpleFilterItem(event, item, idx)">
+      <span @click="(e:PointerEvent) => showSimpleFilterItem(e, item, idx)">
         <i :class="props.columnsConf.find(col => col.name === item.columnName)?.icon" />
         <span class="mr-0.5">{{ props.columnsConf.find(col => col.name === item.columnName)?.title }}</span>
         <span class="mr-0.5">{{ translateOperatorKind(item.operator) }}</span>
@@ -282,13 +279,13 @@ async function deleteSimpleFilterItem(idx: number) {
       <div v-if="selectedFilterItem?.dataKind === DataKind.BOOLEAN" class="iw-contextmenu__item w-full">
         <input
           class="iw-toggle iw-toggle-xs" type="checkbox" :checked="selectedFilterItem.value"
-          @click="(event:PointerEvent) => setFilterValue((event.target as HTMLInputElement).checked)"
+          @click="(e:PointerEvent) => setFilterValue((e.target as HTMLInputElement).checked)"
         >
       </div>
       <div v-else class="iw-contextmenu__item w-full">
         <input
           class="iw-input iw-input-bordered iw-input-xs w-full" :type="getInputTypeByDataKind(selectedFilterItem?.dataKind)"
-          :value="selectedFilterItem.value" @change="(event:InputEvent) => setFilterValue((event.target as HTMLInputElement).value)"
+          :value="selectedFilterItem.value" @change="(e:InputEvent) => setFilterValue((e.target as HTMLInputElement).value)"
         >
       </div>
     </template>

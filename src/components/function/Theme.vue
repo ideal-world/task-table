@@ -1,22 +1,20 @@
 <script setup lang="ts">
-import { inject } from 'vue'
 import type { TableStyleConf } from '../conf'
-import { FUN_MODIFY_STYLES_TYPE } from '../events'
+import * as eb from '../eventbus'
 
 const props = defineProps<{
   styles: TableStyleConf
 }>()
-const modifyStyleFun = inject(FUN_MODIFY_STYLES_TYPE)!
 
-async function changeTheme(event: Event) {
-  const targetEle = event.target as HTMLInputElement
+async function changeTheme(e: Event) {
+  const targetEle = e.target as HTMLInputElement
   const theme = targetEle.value
   if (theme !== undefined) {
     const tableStyleConf: TableStyleConf = {
       ...props.styles,
       theme,
     }
-    await modifyStyleFun(tableStyleConf)
+    await eb.modifyStyles(tableStyleConf)
   }
 }
 </script>

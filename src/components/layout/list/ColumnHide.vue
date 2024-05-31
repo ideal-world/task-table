@@ -3,18 +3,17 @@ import { inject } from 'vue'
 import * as iconSvg from '../../../assets/icon'
 import { FUN_CLOSE_CONTEXT_MENU_TYPE } from '../../common/Menu.vue'
 import type { CachedColumnConf } from '../../conf'
-import { FUN_MODIFY_COLUMN_TYPE } from '../../events'
+import * as eb from '../../eventbus'
 
 const props = defineProps<{
   curColumnConf: CachedColumnConf
   columnsConf: CachedColumnConf[]
   pkColumnName: string
 }>()
-const modifyColumnFun = inject(FUN_MODIFY_COLUMN_TYPE)!
 const closeContextMenuFun = inject(FUN_CLOSE_CONTEXT_MENU_TYPE)!
 
 async function setHidedColumn() {
-  await modifyColumnFun({
+  await eb.modifyColumn({
     name: props.curColumnConf.name,
     wrap: props.curColumnConf.wrap,
     fixed: props.curColumnConf.fixed,

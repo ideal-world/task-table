@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { inject, onMounted, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import * as iconSvg from '../../../assets/icon'
+import type { TableCellDictItemProps, TableDataGroupResp, TableDataResp } from '../../../props'
+import { DataKind } from '../../../props'
 import { getParentWithClass } from '../../../utils/basic'
 import MenuComp, { MenuOffsetKind } from '../../common/Menu.vue'
 import type { CachedColumnConf } from '../../conf'
 import { getInputTypeByDataKind } from '../../conf'
-import { FUN_LOAD_CELL_DICT_ITEMS_TYPE, FUN_MODIFY_DATA_TYPE } from '../../events'
-import type { TableCellDictItemProps, TableDataGroupResp, TableDataResp } from '../../../props'
-import { DataKind } from '../../../props'
+import * as eb from '../../eventbus'
 import type { CellSelectedInfo } from './CellSelect.vue'
 
 const props = defineProps<{
@@ -16,9 +16,6 @@ const props = defineProps<{
   pkColumnName: string
   selectedCellInfo: CellSelectedInfo | undefined
 }>()
-
-const loadCellDictItemsFun = inject(FUN_LOAD_CELL_DICT_ITEMS_TYPE)!
-const modifyDataFun = inject(FUN_MODIFY_DATA_TYPE)!
 
 const cellEditSimpleRef = ref<HTMLElement>()
 const cellEditDictContextMenuRef = ref<InstanceType<typeof MenuComp>>()
@@ -57,7 +54,7 @@ async function enterEditMode(selectedCellInfo: CellSelectedInfo, fillEle: HTMLEl
     }
   }
   if (curColumnConf.value.useDict) {
-    curAllDictItems.value = (await loadCellDictItemsFun(curColumnConf.value!.name)).records
+    curAllDictItems.value = (await eb.loadCellDictItems(curColumnConf.value!.name)).records
     selectedDictItems.value = []
     if (curCellValue.value == null) {
       // Do Noting
@@ -148,7 +145,7 @@ function searchDictItems(value: string) {
 async function updateDictItem() {
   filterCurDictItems()
   const newValue = curColumnConf.value!.multiValue ? selectedDictItems.value.map(item => item.value) : selectedDictItems.value[0].value
-  await modifyDataFun([{
+  await eb.modifyData([{
     [props.pkColumnName]: curRowPk.value,
     [curColumnConf.value!.name]: newValue,
   }])
@@ -175,7 +172,7 @@ async function setCellValue(value: any) {
     if (curColumnConf.value!.dataKind === DataKind.DATETIME)
       value = new Date(value)
 
-    await modifyDataFun([{
+    await eb.modifyData([{
       [props.pkColumnName]: curRowPk.value,
       [curColumnConf.value!.name]: value,
     }])

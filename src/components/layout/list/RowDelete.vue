@@ -2,17 +2,16 @@
 import { inject } from 'vue'
 import * as iconSvg from '../../../assets/icon'
 import { FUN_CLOSE_CONTEXT_MENU_TYPE } from '../../common/Menu.vue'
-import { FUN_DELETE_DATA_TYPE } from '../../events'
+import * as eb from '../../eventbus'
 
 const props = defineProps<{
   selectedPks: string[] | number[]
 }>()
 
-const deleteDataFun = inject(FUN_DELETE_DATA_TYPE)!
 const closeContextMenuFun = inject(FUN_CLOSE_CONTEXT_MENU_TYPE)!
 
 async function deleteRow() {
-  await deleteDataFun(props.selectedPks.slice())
+  await eb.deleteData(props.selectedPks.slice())
   closeContextMenuFun()
 }
 </script>

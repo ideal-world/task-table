@@ -1,22 +1,20 @@
 <script setup lang="ts">
-import { inject, ref } from 'vue'
+import { ref } from 'vue'
 import type { TableLayoutModifyProps } from '../../../props'
 import MenuComp, { MenuOffsetKind } from '../../common/Menu.vue'
 import type { TableColumnConf, TableLayoutColumnConf } from '../../conf'
-import { FUN_MODIFY_COLUMN_TYPE, FUN_MODIFY_LAYOUT_TYPE } from '../../events'
+import * as eb from '../../eventbus'
 
 const props = defineProps<{
   basicColumnsConf: TableColumnConf[]
   layoutColumnsConf: TableLayoutColumnConf[]
 }>()
-const modifyColumnFun = inject(FUN_MODIFY_COLUMN_TYPE)!
-const modifyLayoutFun = inject(FUN_MODIFY_LAYOUT_TYPE)!
 const columnMoreCompRef = ref<InstanceType<typeof MenuComp>>()
 
 async function setShowToggleColumn(columnConf: TableColumnConf) {
   const layoutColumnsConf = props.layoutColumnsConf.find(col => col.name === columnConf.name)
   if (layoutColumnsConf) {
-    await modifyColumnFun({
+    await eb.modifyColumn({
       name: layoutColumnsConf.name,
       wrap: layoutColumnsConf.wrap,
       fixed: layoutColumnsConf.fixed,
@@ -33,7 +31,7 @@ async function setShowToggleColumn(columnConf: TableColumnConf) {
         hide: false,
       },
     }
-    await modifyLayoutFun(changedLayoutReq)
+    await eb.modifyLayout(changedLayoutReq)
   }
 }
 

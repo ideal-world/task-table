@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { computed } from 'vue'
 import dayjs from 'dayjs'
+import { computed } from 'vue'
+import { DATA_DICT_POSTFIX, DataKind } from '../../../props'
 import type { CachedColumnConf, TableStyleConf } from '../../conf'
 import RowTreeComp from '../../function/RowTree.vue'
-import { DATA_DICT_POSTFIX, DataKind } from '../../../props'
 
 const props = defineProps<{
   records: { [key: string]: any }[]
