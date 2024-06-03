@@ -118,10 +118,6 @@
       "copyTitle": "复制行",
       "pasteTitle": "粘贴行",
       "copyAndPasteTitle": "复制并粘贴行"
-    },
-    "dataLoad": {
-      "loadTitle": "加载更多",
-      "loadingTitle": "加载中"
     }
   }
 }

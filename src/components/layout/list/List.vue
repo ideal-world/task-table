@@ -10,10 +10,10 @@ import type { CellSelectedInfo } from './CellSelect.vue'
 import CellSelectComp from './CellSelect.vue'
 import ColumnAggsComp from './ColumnAggs.vue'
 import { setFixedColumnStyles } from './ColumnFixed.vue'
-import DataLoadComp from './DataLoad.vue'
 import HeaderComp from './Header.vue'
 import RowCopyPasteComp from './RowCopyPaste.vue'
 import RowDeleteComp from './RowDelete.vue'
+import RowSelectComp from './RowSelect.vue'
 import RowsComp from './Rows.vue'
 
 const listConf = defineProps<
@@ -22,6 +22,8 @@ const listConf = defineProps<
     basic: TableBasicConf
   }
 >()
+
+const COLUMN_SELECT_WIDTH = listConf.layout.showSelectColumn ? 30 : 0
 
 const selectedDataPks = ref<string[] | number[]>([])
 const selectedCellWrap = ref<{
@@ -47,15 +49,21 @@ function showRowContextMenu(event: PointerEvent) {
 }
 
 function setColumnStyles(colIdx: number) {
+// ColIdx of selected column = -1
   const styles: any = {}
-  styles.width = `${columnsWithoutHideConf.value[colIdx].width}px`
-  setFixedColumnStyles(styles, colIdx, columnsWithoutHideConf.value)
+  if (colIdx === -1) {
+    styles.width = `${COLUMN_SELECT_WIDTH}px`
+  }
+  else {
+    styles.width = `${columnsWithoutHideConf.value[colIdx].width}px`
+    setFixedColumnStyles(styles, colIdx, columnsWithoutHideConf.value)
+  }
   return styles
 }
 
 function setTableWidth() {
   const styles: any = {}
-  styles.width = `${listConf.layout.columns.filter(column => !column.hide).reduce((count, col) => count + col.width, 0)}px`
+  styles.width = `${listConf.layout.columns.filter(column => !column.hide).reduce((count, col) => count + col.width, COLUMN_SELECT_WIDTH)}px`
   return styles
 }
 
@@ -74,6 +82,7 @@ onMounted(() => {
 </script>
 
 <template>
+  test: {{ selectedDataPks }}
   <div
     :class="`iw-list relative iw-list--size${listConf.basic.styles.size}`"
     :style="setTableWidth()"
@@ -126,6 +135,11 @@ onMounted(() => {
     <RowCopyPasteComp :selected-pks="selectedDataPks" :pk-column-name="listConf.basic.pkColumnName" />
     <RowDeleteComp :selected-pks="selectedDataPks" />
   </MenuComp>  -->
+  <RowSelectComp
+    v-if="listConf.layout.showSelectColumn"
+    :selected-pks="selectedDataPks" :pk-column-name="listConf.basic.pkColumnName"
+    :pk-kind-is-number="pkKindIsNumber"
+  />
 </template>
 
 <style lang="css">

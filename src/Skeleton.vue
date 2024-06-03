@@ -5,7 +5,7 @@ import MenuComp, { MenuOffsetKind } from './components/common/Menu.vue'
 import type { TableBasicConf, TableLayoutConf } from './components/conf'
 import { initConf } from './components/conf'
 import * as Event from './components/eventbus'
-import ColumnComp from './components/function/Column.vue'
+import ColumnSettingComp from './components/function/ColumnSetting.vue'
 import FilterComp from './components/function/Filter.vue'
 import GroupComp from './components/function/Group.vue'
 import ResizeComp from './components/function/Resize.vue'
@@ -114,7 +114,7 @@ function showMoreMenu(event: MouseEvent) {
             <FilterComp :filters="layout.filters" :columns-conf="tableBasicConf.columns" />
           </div>
           <div>
-            <ColumnComp
+            <ColumnSettingComp
               :basic-columns-conf="tableBasicConf.columns"
               :layout-columns-conf="layout.columns"
               :pk-column-name="tableBasicConf.pkColumnName"
@@ -131,7 +131,7 @@ function showMoreMenu(event: MouseEvent) {
             <slot name="customActionBar" />
           </div>
           <div v-if="layout.layoutKind === LayoutKind.LIST && layout.data && !Array.isArray(layout.data)">
-            <PaginationComp :slice="layout.slice" :total-number="layout.data.totalNumber"/>
+            <PaginationComp :slice="layout.slice" :total-number="layout.data.totalNumber" />
           </div>
         </div>
       </template>
