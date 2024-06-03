@@ -4,7 +4,7 @@ import locales from '../locales'
 import type { TableCellDictItemsResp, TableDataSliceProps, TableEventProps, TableLayoutKernelProps, TableLayoutModifyProps } from '../props'
 import { getParentWithClass } from '../utils/basic'
 import { AlertKind, showAlert } from './common/Alert'
-import { type TableBasicConf, type TableLayoutColumnConf, type TableLayoutConf, type TableStyleConf, convertTableLayoutKernelPropsToTableLayoutKernelConf } from './conf'
+import { type TableBasicConf, type TableLayoutColumnConf, type TableLayoutConf, type TableStyleConf, convertTableLayoutColumnPropsToTableLayoutColumnConf, convertTableLayoutKernelPropsToTableLayoutKernelConf } from './conf'
 import { sortByTree } from './function/RowTree'
 
 const { t } = locales.global
@@ -47,7 +47,13 @@ export async function loadData(moreForGroupedValue?: any, offsetNumber?: number,
     layout.slice.fetchNumber = fetchNumber
   }
 
+  const showColumns = layout.columns.filter(column => !column.hide).map(column => column.name).slice()
+  if (tableBasicConf.parentPkColumnName && layout.columns.findIndex(column => column.name === tableBasicConf.parentPkColumnName) === -1) {
+    showColumns.push(tableBasicConf.parentPkColumnName)
+  }
+
   const resp = await events.loadData(
+    showColumns,
     layout.filters ?? toRaw(layout.filters),
     layout.sorts ?? toRaw(layout.sorts),
     layout.group ?? toRaw(layout.group),
@@ -197,92 +203,6 @@ export async function modifyStyles(changedStyles: TableStyleConf): Promise<boole
   return true
 }
 
-export async function newColumn(newLayoutColumnConf: TableLayoutColumnConf): Promise<boolean> {
-  const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
-
-  if (!events.modifyLayout) {
-    showAlert(t('_.event.notConfigured', { name: 'modifyLayout' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
-    throw new Error('[events.modifyLayout] Event not Configured')
-  }
-
-  if (!await events.modifyLayout(layout.id, {
-    newColumn: {
-      name: newLayoutColumnConf.name,
-      wrap: newLayoutColumnConf.wrap,
-      fixed: newLayoutColumnConf.fixed,
-      width: newLayoutColumnConf.width,
-      hide: newLayoutColumnConf.hide,
-      dateStart: newLayoutColumnConf.dateStart,
-      dateEnd: newLayoutColumnConf.dateEnd,
-    },
-  })) {
-    return false
-  }
-  layout.columns.push(newLayoutColumnConf)
-  await loadData()
-  return true
-}
-
-export async function modifyColumn(changedLayoutColumnConf: TableLayoutColumnConf): Promise<boolean> {
-  const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
-
-  if (!events.modifyLayout) {
-    showAlert(t('_.event.notConfigured', { name: 'modifyLayout' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
-    throw new Error('[events.modifyLayout] Event not Configured')
-  }
-
-  if (!await events.modifyLayout(layout.id, {
-    changedColumn: {
-      name: changedLayoutColumnConf.name,
-      wrap: changedLayoutColumnConf.wrap,
-      fixed: changedLayoutColumnConf.fixed,
-      width: changedLayoutColumnConf.width,
-      hide: changedLayoutColumnConf.hide,
-      dateStart: changedLayoutColumnConf.dateStart,
-      dateEnd: changedLayoutColumnConf.dateEnd,
-    },
-  })) {
-    return false
-  }
-
-  const oldColumnIdx = layout.columns.findIndex(column => column.name === changedLayoutColumnConf.name)
-  layout.columns.splice(oldColumnIdx, 1, changedLayoutColumnConf)
-
-  await loadData()
-  return true
-}
-
-export async function deleteColumn(deletedColumnName: string): Promise<boolean> {
-  const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
-
-  if (!events.modifyLayout) {
-    showAlert(t('_.event.notConfigured', { name: 'modifyLayout' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
-    throw new Error('[events.modifyLayout] Event not Configured')
-  }
-
-  if (!await events.modifyLayout(layout.id, {
-    deletedColumnName,
-  })) {
-    return false
-  }
-
-  const oldLayoutColumnIdx = layout.columns.findIndex(column => column.name === deletedColumnName)
-  layout.columns.splice(oldLayoutColumnIdx, 1)
-  if (Array.isArray(layout.data)) {
-    layout.data.forEach((d) => {
-      d.records.forEach((record) => {
-        delete (record[deletedColumnName])
-      })
-    })
-  }
-  else {
-    layout.data?.records.forEach((record) => {
-      delete (record[deletedColumnName])
-    })
-  }
-  return true
-}
-
 export async function newLayout(newLayoutProps: TableLayoutKernelProps): Promise<boolean> {
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
@@ -339,31 +259,21 @@ export async function modifyLayout(changedLayoutProps: TableLayoutModifyProps): 
   changedLayoutProps.group && (layout.group = changedLayoutProps.group)
   changedLayoutProps.aggs && (layout.aggs = changedLayoutProps.aggs)
   changedLayoutProps.slice && (layout.slice = changedLayoutProps.slice)
+
+  if (changedLayoutProps.newColumn) {
+    layout.columns.push(convertTableLayoutColumnPropsToTableLayoutColumnConf(changedLayoutProps.newColumn, tableBasicConf.columns.find(column => column.name === changedLayoutProps.newColumn?.name)!))
+  }
+
+  if (changedLayoutProps.changedColumn) {
+    const oldLayoutColumnIdx = layout.columns.findIndex(column => column.name === changedLayoutProps.changedColumn?.name)
+    layout.columns.splice(oldLayoutColumnIdx, 1, convertTableLayoutColumnPropsToTableLayoutColumnConf(changedLayoutProps.changedColumn, tableBasicConf.columns.find(column => column.name === changedLayoutProps.changedColumn?.name)!))
+  }
+
   if (changedLayoutProps.deletedColumnName) {
     const oldLayoutColumnIdx = layout.columns.findIndex(column => column.name === changedLayoutProps.deletedColumnName)
     layout.columns.splice(oldLayoutColumnIdx, 1)
   }
-  changedLayoutProps.newColumn && (layout.columns.push({
-    name: changedLayoutProps.newColumn.name,
-    wrap: changedLayoutProps.newColumn.wrap ?? true,
-    fixed: changedLayoutProps.newColumn.fixed ?? false,
-    width: changedLayoutProps.newColumn.width ?? 200,
-    hide: changedLayoutProps.newColumn.hide ?? false,
-    dateStart: changedLayoutProps.newColumn.dateStart ?? false,
-    dateEnd: changedLayoutProps.newColumn.dateEnd ?? false,
-  }))
-  if (changedLayoutProps.changedColumn) {
-    const oldLayoutColumnIdx = layout.columns.findIndex(column => column.name === changedLayoutProps.changedColumn?.name)
-    layout.columns.splice(oldLayoutColumnIdx, 1, {
-      name: changedLayoutProps.changedColumn.name,
-      wrap: changedLayoutProps.changedColumn.wrap ?? true,
-      fixed: changedLayoutProps.changedColumn.fixed ?? false,
-      width: changedLayoutProps.changedColumn.width ?? 200,
-      hide: changedLayoutProps.changedColumn.hide ?? false,
-      dateStart: changedLayoutProps.changedColumn.dateStart ?? false,
-      dateEnd: changedLayoutProps.changedColumn.dateEnd ?? false,
-    })
-  }
+
   if (changedLayoutProps.columnSortedNames) {
     const leftColumnIdx = layout.columns.findIndex(column => column.name === changedLayoutProps.columnSortedNames![0])
     const rightColumnIdx = layout.columns.findIndex(column => column.name === changedLayoutProps.columnSortedNames![1])

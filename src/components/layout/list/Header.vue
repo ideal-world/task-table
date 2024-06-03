@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import * as iconSvg from '../../../assets/icon'
 import MenuComp, { MenuSizeKind } from '../../common/Menu.vue'
 import type { CachedColumnConf, TableBasicConf, TableLayoutConf } from '../../conf'
 import ColumnWrapComp from './ColumnWrap.vue'
 import ColumnFixedComp from './ColumnFixed.vue'
+import ColumnResizeComp from './ColumnResize.vue'
 
 const props = defineProps<{
   columnsConf: CachedColumnConf[]
@@ -39,6 +39,7 @@ function showHeaderContextMenu(event: MouseEvent, columName: string) {
       <i :class="`${column.icon} mr-1`" /> {{ column.title }}
     </div>
   </div>
+  <ColumnResizeComp :columns-conf="columnsConf" />
   <MenuComp ref="headerMenuCompRef">
     <template v-if="selectedColumnConf">
       <div

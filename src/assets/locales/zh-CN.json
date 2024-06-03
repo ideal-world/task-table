@@ -88,7 +88,7 @@
       "hideEmptyTitle": "隐藏空组"
     },
     "column": {
-      "hideTitle": "隐藏列"
+      "showTitle": "显示列"
     }
   },
   "list": {

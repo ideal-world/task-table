@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { Ref } from 'vue'
 import { onMounted, ref } from 'vue'
-import { mount } from 'sortablejs'
 import { IwEvents } from '../src'
 import type { TableCellDictItemProps, TableCellDictItemsResp, TableColumnProps, TableDataFilterProps, TableDataGroupProps, TableDataGroupResp, TableDataResp, TableDataSliceProps, TableDataSortProps, TableEventProps, TableLayoutKernelProps, TableLayoutModifyProps, TableLayoutProps, TableStyleProps } from '../src/props'
 import { AggregateKind, DATA_DICT_POSTFIX, DataKind, LayoutKind, OperatorKind } from '../src/props'
@@ -83,14 +82,18 @@ const STYLES: Ref<TableStyleProps> = ref({})
 
 function attachDict(data: { [key: string]: any }[]) {
   return data.map((d) => {
-    d[`name${DATA_DICT_POSTFIX}`] = [NAME_DICT.find(dict => dict.value === d.name)!]
-    d[`stats${DATA_DICT_POSTFIX}`] = d.stats.map((s) => { return STATS_DICT.find(dict => dict.value === s)! })
+    if (d.name) {
+      d[`name${DATA_DICT_POSTFIX}`] = [NAME_DICT.find(dict => dict.value === d.name)!]
+    }
+    if (d.stats) {
+      d[`stats${DATA_DICT_POSTFIX}`] = d.stats.map((s) => { return STATS_DICT.find(dict => dict.value === s)! })
+    }
     return d
   })
 }
 
 const events: TableEventProps = {
-  loadData: async (filters?: TableDataFilterProps[], sorts?: TableDataSortProps[], group?: TableDataGroupProps, aggs?: { [key: string]: AggregateKind }, byGroupValue?: any, slice?: TableDataSliceProps): Promise<TableDataResp | TableDataGroupResp[]> => {
+  loadData: async (columns?: string[], filters?: TableDataFilterProps[], sorts?: TableDataSortProps[], group?: TableDataGroupProps, aggs?: { [key: string]: AggregateKind }, byGroupValue?: any, slice?: TableDataSliceProps): Promise<TableDataResp | TableDataGroupResp[]> => {
     let data: { [key: string]: any }[] = JSON.parse(JSON.stringify(DATA))
     if (filters) {
       // TODO 支持多组
@@ -198,6 +201,14 @@ const events: TableEventProps = {
             }
           })
         }
+        if (columns) {
+          data = data.map((d) => {
+            return columns.reduce((acc, cur) => {
+              acc[cur] = d[cur]
+              return acc
+            }, {})
+          })
+        }
         return {
           records: attachDict(data),
           totalNumber: groupTotalNumber[groupKey],
@@ -233,6 +244,14 @@ const events: TableEventProps = {
       }
       else {
         records = data
+      }
+      if (columns) {
+        records = records.map((d) => {
+          return columns.reduce((acc, cur) => {
+            acc[cur] = d[cur]
+            return acc
+          }, {})
+        })
       }
       return {
         records: attachDict(records),

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import * as iconSvg from '../../assets/icon'
 import type { TableLayoutModifyProps } from '../../props'
 import MenuComp, { MenuOffsetKind } from '../common/Menu.vue'
 import type { TableColumnConf, TableLayoutColumnConf } from '../conf'
@@ -8,55 +9,44 @@ import * as eb from '../eventbus'
 const props = defineProps<{
   basicColumnsConf: TableColumnConf[]
   layoutColumnsConf: TableLayoutColumnConf[]
+  pkColumnName: string
 }>()
 const columnCompRef = ref<InstanceType<typeof MenuComp>>()
 
-async function setShowToggleColumn(columnConf: TableColumnConf) {
-  const layoutColumnsConf = props.layoutColumnsConf.find(col => col.name === columnConf.name)
-  if (layoutColumnsConf) {
-    await eb.modifyColumn({
-      name: layoutColumnsConf.name,
-      wrap: layoutColumnsConf.wrap,
-      fixed: layoutColumnsConf.fixed,
-      width: layoutColumnsConf.width,
-      hide: !layoutColumnsConf.hide,
-      dateStart: layoutColumnsConf.dateStart,
-      dateEnd: layoutColumnsConf.dateEnd,
-    })
+async function setShowToggleColumn(columnConf: TableLayoutColumnConf) {
+  const changedLayoutReq: TableLayoutModifyProps = {
+    changedColumn: {
+      name: columnConf.name,
+      wrap: columnConf.wrap,
+      fixed: columnConf.fixed,
+      width: columnConf.width,
+      hide: !columnConf.hide,
+      dateStart: columnConf.dateStart,
+      dateEnd: columnConf.dateEnd,
+      render: columnConf.render,
+    },
   }
-  else {
-    const changedLayoutReq: TableLayoutModifyProps = {
-      newColumn: {
-        name: columnConf.name,
-        hide: false,
-      },
-    }
-    await eb.modifyLayout(changedLayoutReq)
-  }
+  await eb.modifyLayout(changedLayoutReq)
 }
 
 function showContainer(event: MouseEvent, offsetKind: MenuOffsetKind = MenuOffsetKind.RIGHT_BOTTOM) {
   columnCompRef.value?.show(event, offsetKind)
 }
-
-defineExpose({
-  show: showContainer,
-})
 </script>
 
 <template>
+  <a class="cursor-pointer"><i :class="iconSvg.MORE" @click="showContainer" /></a>
   <MenuComp ref="columnCompRef">
     <div class="iw-divider">
-      {{ $t('function.column.hideTitle') }}
+      {{ $t('function.column.showTitle') }}
     </div>
-    <div v-for="column in props.basicColumnsConf" :key="column.name" class="iw-contextmenu__item flex justify-between w-full">
+    <div v-for="column in props.layoutColumnsConf.filter(column => column.name !== props.pkColumnName)" :key="column.name" class="iw-contextmenu__item flex justify-between w-full">
       <span>
-        <i :class="column.icon" />
-        {{ column.title }}
+        {{ props.basicColumnsConf.find(col => col.name === column.name)?.title }}
       </span>
       <input
         type="checkbox" class="iw-toggle iw-toggle-xs"
-        :checked="props.layoutColumnsConf.find(col => col.name === column.name)?.hide ?? true"
+        :checked="!props.layoutColumnsConf.find(col => col.name === column.name)?.hide ?? false"
         @click="setShowToggleColumn(column)"
       >
     </div>

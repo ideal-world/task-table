@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { getParentWithClass } from '../../../utils/basic'
-import MenuComp from '../../common/Menu.vue'
+import type MenuComp from '../../common/Menu.vue'
 import type { CachedColumnConf, TableBasicConf, TableLayoutConf } from '../../conf'
 import type { TableDataResp } from '../../../props'
 import { DataKind } from '../../../props'
@@ -14,7 +14,6 @@ import DataLoadComp from './DataLoad.vue'
 import HeaderComp from './Header.vue'
 import RowCopyPasteComp from './RowCopyPaste.vue'
 import RowDeleteComp from './RowDelete.vue'
-import RowNewComp from './RowNew.vue'
 import RowsComp from './Rows.vue'
 
 const listConf = defineProps<
@@ -24,8 +23,6 @@ const listConf = defineProps<
   }
 >()
 
-const NEW_COLUMN_WIDTH = 80
-
 const selectedDataPks = ref<string[] | number[]>([])
 const selectedCellWrap = ref<{
   cellSelectedInfo: CellSelectedInfo | undefined
@@ -34,7 +31,7 @@ const selectedCellWrap = ref<{
 })
 const pkKindIsNumber = listConf.basic.columns.some(col => col.name === listConf.basic.pkColumnName && [DataKind.NUMBER, DataKind.SERIAL].includes(col.dataKind))
 
-const columnsConf = computed<CachedColumnConf[]>(() => {
+const columnsWithoutHideConf = computed<CachedColumnConf[]>(() => {
   return listConf.layout.columns.filter(column => !column.hide).map((column) => {
     return {
       ...listConf.basic.columns.find(col => col.name === column.name)!,
@@ -51,19 +48,14 @@ function showRowContextMenu(event: PointerEvent) {
 
 function setColumnStyles(colIdx: number) {
   const styles: any = {}
-  if (colIdx === -1) {
-    styles.width = `${NEW_COLUMN_WIDTH}px`
-  }
-  else {
-    styles.width = `${columnsConf.value[colIdx].width}px`
-    setFixedColumnStyles(styles, colIdx, columnsConf.value)
-  }
+  styles.width = `${columnsWithoutHideConf.value[colIdx].width}px`
+  setFixedColumnStyles(styles, colIdx, columnsWithoutHideConf.value)
   return styles
 }
 
 function setTableWidth() {
   const styles: any = {}
-  styles.width = `${listConf.layout.columns.filter(column => !column.hide).reduce((count, col) => count + col.width, NEW_COLUMN_WIDTH)}px`
+  styles.width = `${listConf.layout.columns.filter(column => !column.hide).reduce((count, col) => count + col.width, 0)}px`
   return styles
 }
 
@@ -86,55 +78,54 @@ onMounted(() => {
     :class="`iw-list relative iw-list--size-${listConf.basic.styles.size}`"
     :style="setTableWidth()"
   >
-    <HeaderComp :columns-conf="columnsConf" :layout="listConf.layout" :basic="listConf.basic" :set-column-styles="setColumnStyles" />
+    <HeaderComp :columns-conf="columnsWithoutHideConf" :layout="listConf.layout" :basic="listConf.basic" :set-column-styles="setColumnStyles" />
     <template v-if="listConf.layout.data && !Array.isArray(listConf.layout.data)">
       <RowsComp
         :records="listConf.layout.data.records" :pk-column-name="listConf.basic.pkColumnName"
         :parent-pk-column-name="listConf.basic.parentPkColumnName"
         :expand-data-pks="listConf.layout.expandDataPks"
         :pk-kind-is-number="pkKindIsNumber"
-        :columns-conf="columnsConf" :styles-conf="listConf.basic.styles" :set-column-styles="setColumnStyles"
+        :columns-conf="columnsWithoutHideConf" :styles-conf="listConf.basic.styles" :set-column-styles="setColumnStyles"
       />
-      <DataLoadComp :group-value="undefined" :total-number="listConf.layout.data.totalNumber" :loaded-number="listConf.layout.data.records.length" />
       <ColumnAggsComp
-        :layout-aggs="layout.aggs!" :data-basic="layout.data as TableDataResp"
-        :pk-column-name="listConf.basic.pkColumnName" :columns-conf="columnsConf" :styles-conf="listConf.basic.styles"
+        v-if="layout.aggs"
+        :layout-aggs="layout.aggs" :data-basic="layout.data as TableDataResp"
+        :columns-conf="columnsWithoutHideConf" :styles-conf="listConf.basic.styles"
         :set-column-styles="setColumnStyles"
       />
     </template>
-    <template v-else-if="listConf.layout.data && Array.isArray(listConf.layout.data)">
+    <!-- <template v-else-if="listConf.layout.data && Array.isArray(listConf.layout.data)">
       <template v-for="groupData in listConf.layout.data" :key="groupData.groupValue">
         <ColumnAggsComp
-          :layout-aggs="layout.aggs!" :data-basic="groupData"
-          :pk-column-name="listConf.basic.pkColumnName" :columns-conf="columnsConf" :styles-conf="listConf.basic.styles"
+          v-if="layout.aggs"
+          :layout-aggs="layout.aggs" :data-basic="groupData"
+          :columns-conf="columnsWithoutHideConf" :styles-conf="listConf.basic.styles"
           :group-value="groupData.groupValue" :set-column-styles="setColumnStyles"
         />
         <RowsComp
           :records="groupData.records" :pk-column-name="listConf.basic.pkColumnName" :parent-pk-column-name="listConf.basic.parentPkColumnName"
           :expand-data-pks="listConf.layout.expandDataPks"
           :pk-kind-is-number="pkKindIsNumber"
-          :columns-conf="columnsConf"
+          :columns-conf="columnsWithoutHideConf"
           :styles-conf="listConf.basic.styles" :set-column-styles="setColumnStyles"
         />
-        <DataLoadComp :group-value="groupData.groupValue" :total-number="groupData.totalNumber" :loaded-number="groupData.records.length" />
       </template>
-    </template>
-    <CellSelectComp
-      :wrap="selectedCellWrap" :columns-conf="columnsConf"
+    </template> -->
+    <!-- <CellSelectComp
+      :wrap="selectedCellWrap" :columns-conf="columnsWithoutHideConf"
       :pk-column-name="listConf.basic.pkColumnName"
       :pk-kind-is-number="pkKindIsNumber"
     />
     <CellEditComp
-      :columns-conf="columnsConf" :data="listConf.layout.data!"
+      :columns-conf="columnsWithoutHideConf" :data="listConf.layout.data!"
       :pk-column-name="listConf.basic.pkColumnName"
       :selected-cell-info="selectedCellWrap.cellSelectedInfo"
-    />
+    /> -->
   </div>
-  <MenuComp v-if="selectedDataPks.length > 0" ref="rowMenuCompRef">
+  <!-- <MenuComp v-if="selectedDataPks.length > 0" ref="rowMenuCompRef">
     <RowCopyPasteComp :selected-pks="selectedDataPks" :pk-column-name="listConf.basic.pkColumnName" />
     <RowDeleteComp :selected-pks="selectedDataPks" />
-    <RowNewComp />
-  </MenuComp>
+  </MenuComp>  -->
 </template>
 
 <style lang="css">

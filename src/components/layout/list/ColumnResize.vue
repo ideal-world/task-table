@@ -2,6 +2,7 @@
 import { onMounted } from 'vue'
 import type { CachedColumnConf } from '../../conf'
 import * as eb from '../../eventbus'
+import type { TableLayoutModifyProps } from '../../../props'
 
 const props = defineProps<{
   columnsConf: CachedColumnConf[]
@@ -40,15 +41,19 @@ onMounted(() => {
 
     const curColumnConf = props.columnsConf.find(item => item.name === currColumnName)
     if (curColumnConf) {
-      await eb.modifyColumn({
-        name: curColumnConf.name,
-        wrap: curColumnConf.wrap,
-        fixed: curColumnConf.fixed,
-        width: curColumnConf.width,
-        hide: curColumnConf.hide,
-        dateStart: curColumnConf.dateStart,
-        dateEnd: curColumnConf.dateEnd,
-      })
+      const changedLayoutReq: TableLayoutModifyProps = {
+        changedColumn: {
+          name: curColumnConf.name,
+          wrap: curColumnConf.wrap,
+          fixed: curColumnConf.fixed,
+          width: curColumnConf.width,
+          hide: curColumnConf.hide,
+          dateStart: curColumnConf.dateStart,
+          dateEnd: curColumnConf.dateEnd,
+          render: curColumnConf.render,
+        },
+      }
+      await eb.modifyLayout(changedLayoutReq)
     }
   })
 

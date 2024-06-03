@@ -30,18 +30,6 @@ export async function modifyStyles(changedStyles: TableStyleProps): Promise<bool
   return await eb.modifyStyles(convertTableStylePropsToTableStyleConf(changedStyles))
 }
 
-export async function newColumn(newLayoutColumnProps: TableLayoutColumnProps, tableColumn: TableColumnProps): Promise<boolean> {
-  return await eb.newColumn(convertTableLayoutColumnPropsToTableLayoutColumnConf(newLayoutColumnProps, convertTableColumnPropsToTableColumnConf(tableColumn)))
-}
-
-export async function modifyColumn(changedLayoutColumnProps: TableLayoutColumnProps, tableColumn: TableColumnProps): Promise<boolean> {
-  return await eb.modifyColumn(convertTableLayoutColumnPropsToTableLayoutColumnConf(changedLayoutColumnProps, convertTableColumnPropsToTableColumnConf(tableColumn)))
-}
-
-export async function deleteColumn(deletedColumnName: string): Promise<boolean> {
-  return await eb.deleteColumn(deletedColumnName)
-}
-
 export async function newLayout(newLayoutProps: TableLayoutKernelProps): Promise<boolean> {
   return await eb.newLayout(newLayoutProps)
 }

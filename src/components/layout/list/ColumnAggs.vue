@@ -10,7 +10,6 @@ import { showGroupAggMappingByDataKind } from '../../function/Group'
 const props = defineProps<{
   layoutAggs: { [key: string]: AggregateKind }
   dataBasic: TableDataResp
-  pkColumnName: string
   columnsConf: CachedColumnConf[]
   stylesConf: TableStyleConf
   groupValue?: string
@@ -38,9 +37,9 @@ async function changeColumnAggs(aggKind: AggregateKind, colIdx: number) {
   <div :class="`${props.stylesConf.rowClass} iw-list-row iw-list-agg-row flex border-r border-r-base-300`">
     <template v-for="(column, colIdx) in props.columnsConf" :key="column.name">
       <div
-        v-if="column.name === props.pkColumnName"
+        v-if="colIdx === 0"
         :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-agg-cell cursor-pointer flex items-center justify-end pr-1 bg-base-100 border-solid border-b border-b-base-300 border-l  border-l-base-300 hover:bg-base-200`" :data-column-name="column.name"
-        :style="props.setColumnStyles(colIdx)" @click="(event: MouseEvent) => showAggsContextMenu(event, colIdx)"
+        :style="props.setColumnStyles(0)" @click="(event: MouseEvent) => showAggsContextMenu(event, 0)"
       >
         <span class="iw-list-agg-cell__group font-bold flex-grow pl-1">{{ props.groupValue }}</span>
         <span class="iw-list-agg-cell__agg text-xs pr-1 self-center">{{ $t('_.agg.count')
@@ -68,9 +67,5 @@ async function changeColumnAggs(aggKind: AggregateKind, colIdx: number) {
         </div>
       </MenuComp>
     </template>
-    <div
-      :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-agg-cell cursor-pointer flex items-center justify-end pr-1 bg-base-100 border-solid border-b border-b-base-300 border-l  border-l-base-300 hover:bg-base-200`"
-      :style="props.setColumnStyles(-1)"
-    />
   </div>
 </template>

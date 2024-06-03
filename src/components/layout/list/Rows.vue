@@ -17,7 +17,7 @@ const props = defineProps<{
 }>()
 
 const columnsConfWithoutPk = computed<CachedColumnConf[]>(() => {
-  return props.columnsConf.filter(column => column.name !== props.pkColumnName)
+  return props.columnsConf.slice(1)
 })
 </script>
 
@@ -65,10 +65,6 @@ const columnsConfWithoutPk = computed<CachedColumnConf[]>(() => {
           </template>
         </div>
       </template>
-      <div
-        :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-data-cell flex items-center iw-list-data-row--unselected border-solid border-b border-b-base-300 border-l border-l-base-300 `"
-        :style="props.setColumnStyles(-1)"
-      />
     </div>
   </template>
 </template>

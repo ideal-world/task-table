@@ -198,7 +198,9 @@ export interface TableStyleProps {
 }
 
 export interface TableEventProps {
-  loadData: (filters?: TableDataFilterProps[],
+  loadData: (
+    columns?: string[],
+    filters?: TableDataFilterProps[],
     sorts?: TableDataSortProps[],
     group?: TableDataGroupProps,
     aggs?: { [key: string]: AggregateKind },

@@ -4,6 +4,7 @@ import * as iconSvg from '../../../assets/icon'
 import { FUN_CLOSE_CONTEXT_MENU_TYPE } from '../../common/Menu.vue'
 import type { CachedColumnConf } from '../../conf'
 import * as eb from '../../eventbus'
+import type { TableLayoutModifyProps } from '../../../props'
 
 const props = defineProps<{
   curColumnConf: CachedColumnConf
@@ -24,18 +25,33 @@ watch(props, () => {
 async function setFixedColumn() {
   const oldFixedColumnConf = props.columnsConf.find(col => col.fixed)
   if (oldFixedColumnConf && oldFixedColumnConf.name !== props.curColumnConf.name) {
-    oldFixedColumnConf.fixed = false
-    await eb.modifyColumn(oldFixedColumnConf)
+    const changedLayoutReq: TableLayoutModifyProps = {
+      changedColumn: {
+        name: oldFixedColumnConf.name,
+        wrap: oldFixedColumnConf.wrap,
+        fixed: false,
+        width: oldFixedColumnConf.width,
+        hide: oldFixedColumnConf.hide,
+        dateStart: oldFixedColumnConf.dateStart,
+        dateEnd: oldFixedColumnConf.dateEnd,
+        render: oldFixedColumnConf.render,
+      },
+    }
+    await eb.modifyLayout(changedLayoutReq)
   }
-  await eb.modifyColumn({
-    name: props.curColumnConf.name,
-    wrap: props.curColumnConf.wrap,
-    fixed: !props.curColumnConf.fixed,
-    width: props.curColumnConf.width,
-    hide: props.curColumnConf.hide,
-    dateStart: props.curColumnConf.dateStart,
-    dateEnd: props.curColumnConf.dateEnd,
-  })
+  const changedLayoutReq: TableLayoutModifyProps = {
+    changedColumn: {
+      name: props.curColumnConf.name,
+      wrap: props.curColumnConf.wrap,
+      fixed: !props.curColumnConf.fixed,
+      width: props.curColumnConf.width,
+      hide: props.curColumnConf.hide,
+      dateStart: props.curColumnConf.dateStart,
+      dateEnd: props.curColumnConf.dateEnd,
+      render: props.curColumnConf.render,
+    },
+  }
+  await eb.modifyLayout(changedLayoutReq)
   closeContextMenuFun()
 }
 </script>

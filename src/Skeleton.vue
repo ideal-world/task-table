@@ -5,9 +5,9 @@ import MenuComp, { MenuOffsetKind } from './components/common/Menu.vue'
 import type { TableBasicConf, TableLayoutConf } from './components/conf'
 import { initConf } from './components/conf'
 import * as Event from './components/eventbus'
+import ColumnComp from './components/function/Column.vue'
 import FilterComp from './components/function/Filter.vue'
 import GroupComp from './components/function/Group.vue'
-import ColumnComp from './components/function/Column.vue'
 import ResizeComp from './components/function/Resize.vue'
 import ThemeComp from './components/function/Theme.vue'
 import ListComp from './components/layout/list/List.vue'
@@ -18,7 +18,6 @@ const [_tableBasicConf, _tableLayoutsConf] = initConf(props)
 
 const menuLayoutCompRef = ref<InstanceType<typeof MenuComp>>()
 const menuMoreCompRef = ref<InstanceType<typeof MenuComp>>()
-const headerColumnCompRef = ref<InstanceType<typeof MenuComp>>()
 
 const tableBasicConf = reactive<TableBasicConf>(_tableBasicConf)
 const tableLayoutsConf = reactive<TableLayoutConf[]>(_tableLayoutsConf)
@@ -49,11 +48,6 @@ function showLayoutMenu(event: MouseEvent) {
 function showMoreMenu(event: MouseEvent) {
   const targetEle = event.target as HTMLElement
   menuMoreCompRef.value?.show(targetEle, MenuOffsetKind.RIGHT_BOTTOM)
-}
-
-async function showColumnContextMenu(event: MouseEvent) {
-  const targetEle = event.target as HTMLElement
-  await headerColumnCompRef.value?.show(targetEle)
 }
 </script>
 
@@ -97,7 +91,7 @@ async function showColumnContextMenu(event: MouseEvent) {
         </template>
       </div>
       <div class="flex-none">
-        <a class="cursor-pointer" @click="showMoreMenu"><i :class="iconSvg.MORE" /></a>
+        <a class="cursor-pointer"><i :class="iconSvg.MORE" @click="showMoreMenu" /></a>
         <MenuComp ref="menuMoreCompRef">
           <ResizeComp :size="tableBasicConf.styles.size" :styles="tableBasicConf.styles" />
           <ThemeComp :styles="tableBasicConf.styles" />
@@ -106,20 +100,19 @@ async function showColumnContextMenu(event: MouseEvent) {
     </div>
     <div class="iw-tt-main">
       <template v-for="layout in tableLayoutsConf" :key="layout.id">
-        <div v-if="currentLayoutId === layout.id" :id="`iw-tt-layout-${layout.id}`" class="iw-tt-toolbar flex items-center h-8 p-0.5">
-          <GroupComp :group="layout.group" :columns-conf="tableBasicConf.columns" />
-          <div class="iw-divider iw-divider-horizontal m-0.5" />
-          <FilterComp :filters="layout.filters" :columns-conf="tableBasicConf.columns" />
-          <ColumnComp
-    ref="headerColumnCompRef" :basic-columns-conf="tableBasicConf.columns"
-    :layout-columns-conf="layout"
-  />
-          <div
-      :class="`${props.basic.styles.cellClass} iw-list-cell flex justify-end items-center bg-base-100 border-solid border-b border-b-base-300 border-l border-l-base-300 hover:cursor-pointer hover:bg-base-200`"
-      :style="props.setColumnStyles(-1)"
-    >
-      <i :class="iconSvg.MORE" @click="showColumnContextMenu" />
-    </div>
+        <div v-if="currentLayoutId === layout.id" :id="`iw-tt-layout-${layout.id}`" class="iw-tt-toolbar flex justify-between h-8 p-0.5">
+          <div class="flex">
+            <GroupComp :group="layout.group" :columns-conf="tableBasicConf.columns" />
+            <div class="iw-divider iw-divider-horizontal m-0.5" />
+            <FilterComp :filters="layout.filters" :columns-conf="tableBasicConf.columns" />
+          </div>
+          <div>
+            <ColumnComp
+              :basic-columns-conf="tableBasicConf.columns"
+              :layout-columns-conf="layout.columns"
+              :pk-column-name="tableBasicConf.pkColumnName"
+            />
+          </div>
         </div>
         <div v-if="currentLayoutId === layout.id" class="iw-tt-table overflow-auto w-full">
           <ListComp :key="layout.id" :layout="layout" :basic="tableBasicConf" />

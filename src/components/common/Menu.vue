@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { InjectionKey } from 'vue';
-import { onMounted, provide, ref } from 'vue';
-import { IwUtils } from '../../utils';
+import type { InjectionKey } from 'vue'
+import { onMounted, provide, ref } from 'vue'
+import { IwUtils } from '../../utils'
 
 const contextmenuRef = ref<HTMLElement | null>(null)
 
