@@ -40,7 +40,10 @@ const columnsConfWithoutPk = computed<CachedColumnConf[]>(() => {
           :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-data-cell flex items-center iw-list-data-row--unselected border-solid border-b border-b-base-300 border-l border-l-base-300 ${column.wrap ? 'break-words flex-wrap' : 'whitespace-nowrap overflow-hidden text-ellipsis flex-nowrap'}`"
           :data-column-name="column.name" :style="props.setColumnStyles(colIdx + 1)"
         >
-          <template v-if="column.dataKind === DataKind.DATE || column.dataKind === DataKind.TIME || column.dataKind === DataKind.DATETIME">
+          <template v-if="column.render">
+            <div v-html="column.render(row, column.name)" />
+          </template>
+          <template v-else-if="column.dataKind === DataKind.DATE || column.dataKind === DataKind.TIME || column.dataKind === DataKind.DATETIME">
             <div>{{ column.kindDateTimeFormat ? dayjs(row[column.name]).format(column.kindDateTimeFormat) : row[column.name] }}</div>
           </template>
           <template v-else-if="!column.useDict">

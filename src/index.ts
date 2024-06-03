@@ -4,6 +4,7 @@ import './assets/main.css'
 import locales from './locales'
 import IwTaskTable from './Skeleton.vue'
 import * as IwProps from './props'
+import * as IwEvents from './events'
 
 export default (app: App): void => {
   app.use(locales).component('IwTaskTable', IwTaskTable)
@@ -13,11 +14,12 @@ export const IwTaskTableComp = defineCustomElement(IwTaskTable)
 
 declare module 'vue' {
   export interface GlobalComponents {
-    'IwTaskTable': typeof IwTaskTableComp
+    IwTaskTable: typeof IwTaskTableComp
   }
 }
 
 export {
   IwTaskTable,
   IwProps,
+  IwEvents,
 }

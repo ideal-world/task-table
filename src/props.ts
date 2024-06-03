@@ -152,6 +152,7 @@ export interface TableColumnProps {
   multiValue?: boolean
   kindDateTimeFormat?: string
   groupable?: boolean
+  render?: (record: { [key: string]: any }, columnName: string) => any
 }
 
 export interface TableLayoutKernelProps {
@@ -182,7 +183,8 @@ export interface TableLayoutColumnProps {
   hide?: boolean
   dateStart?: boolean
   dateEnd?: boolean
-  customRender?: (record: { [key: string]: any }, columnName: string) => any
+  // Overwrite the value of TableColumnProps
+  render?: (record: { [key: string]: any }, columnName: string) => any
 }
 
 export interface TableStyleProps {

@@ -37,8 +37,8 @@ const pkKindIsNumber = listConf.basic.columns.some(col => col.name === listConf.
 const columnsConf = computed<CachedColumnConf[]>(() => {
   return listConf.layout.columns.filter(column => !column.hide).map((column) => {
     return {
-      ...column,
       ...listConf.basic.columns.find(col => col.name === column.name)!,
+      ...column,
     }
   })
 })

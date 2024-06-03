@@ -314,7 +314,7 @@ export async function newLayout(newLayoutProps: TableLayoutKernelProps): Promise
   })
   tableLayoutsConf.push({
     id: layoutId,
-    ...convertTableLayoutKernelPropsToTableLayoutKernelConf(newLayoutProps),
+    ...convertTableLayoutKernelPropsToTableLayoutKernelConf(newLayoutProps, tableBasicConf.columns),
   })
 
   await loadData(undefined, undefined, undefined, layoutId)

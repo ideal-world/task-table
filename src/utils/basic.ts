@@ -36,3 +36,15 @@ export function getRandomString(length: number, characters: string = 'ABCDEFGHIJ
 
   return result
 }
+
+export function delegateEvent(parentSelector: string, eventType: string, childSelector: string, handler: (event: Event) => void): void {
+  const parentElement = document.querySelector(parentSelector)
+  if (parentElement) {
+    parentElement.addEventListener(eventType, (event) => {
+      const targetElement = (event.target as Element).closest(childSelector)
+      if (targetElement && parentElement.contains(targetElement)) {
+        handler.call(targetElement, event)
+      }
+    })
+  }
+}

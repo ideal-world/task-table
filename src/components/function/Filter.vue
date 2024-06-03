@@ -234,7 +234,7 @@ async function deleteSimpleFilterItem(idx: number) {
 <template>
   <div class="flex justify-center overflow-x-auto">
     <button v-for="(item, idx) in simpleFilterItems" :key="idx" class="iw-btn iw-btn-outline iw-btn-xs flex-none mr-1">
-      <span @click="(e:PointerEvent) => showSimpleFilterItem(e, item, idx)">
+      <span @click="(e:MouseEvent) => showSimpleFilterItem(e, item, idx)">
         <i :class="props.columnsConf.find(col => col.name === item.columnName)?.icon" />
         <span class="mr-0.5">{{ props.columnsConf.find(col => col.name === item.columnName)?.title }}</span>
         <span class="mr-0.5">{{ translateOperatorKind(item.operator) }}</span>
@@ -279,13 +279,13 @@ async function deleteSimpleFilterItem(idx: number) {
       <div v-if="selectedFilterItem?.dataKind === DataKind.BOOLEAN" class="iw-contextmenu__item w-full">
         <input
           class="iw-toggle iw-toggle-xs" type="checkbox" :checked="selectedFilterItem.value"
-          @click="(e:PointerEvent) => setFilterValue((e.target as HTMLInputElement).checked)"
+          @click="(e:MouseEvent) => setFilterValue((e.target as HTMLInputElement).checked)"
         >
       </div>
       <div v-else class="iw-contextmenu__item w-full">
         <input
           class="iw-input iw-input-bordered iw-input-xs w-full" :type="getInputTypeByDataKind(selectedFilterItem?.dataKind)"
-          :value="selectedFilterItem.value" @change="(e:InputEvent) => setFilterValue((e.target as HTMLInputElement).value)"
+          :value="selectedFilterItem.value" @change="(e:Event) => setFilterValue((e.target as HTMLInputElement).value)"
         >
       </div>
     </template>

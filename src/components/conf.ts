@@ -24,6 +24,7 @@ export interface TableColumnConf {
   multiValue: boolean
   kindDateTimeFormat?: string
   groupable: boolean
+  render?: (record: { [key: string]: any }, columnName: string) => any
 }
 
 export function convertTableColumnPropsToTableColumnConf(props: TableColumnProps): TableColumnConf {
@@ -36,8 +37,9 @@ export function convertTableColumnPropsToTableColumnConf(props: TableColumnProps
     useDict: props.useDict ?? false,
     dictEditable: props.dictEditable ?? false,
     multiValue: props.multiValue ?? false,
-    groupable: props.groupable ?? false,
     kindDateTimeFormat: props.kindDateTimeFormat,
+    groupable: props.groupable ?? false,
+    render: props.render,
   }
 }
 
@@ -60,13 +62,13 @@ export interface TableLayoutKernelConf {
   data?: TableDataResp | TableDataGroupResp[]
 }
 
-export function convertTableLayoutKernelPropsToTableLayoutKernelConf(props: TableLayoutKernelProps): TableLayoutKernelConf {
+export function convertTableLayoutKernelPropsToTableLayoutKernelConf(props: TableLayoutKernelProps, tableColumns: TableColumnConf[]): TableLayoutKernelConf {
   return {
     title: props.title,
     layoutKind: props.layoutKind,
     icon: props.icon ?? getDefaultIconByLayoutKind(props.layoutKind),
     columns: props.columns.map((column) => {
-      return convertTableLayoutColumnPropsToTableLayoutColumnConf(column)
+      return convertTableLayoutColumnPropsToTableLayoutColumnConf(column, tableColumns.find(tableColumn => tableColumn.name === column.name)!)
     }),
     filters: props.filters,
     sorts: props.sorts,
@@ -77,6 +79,7 @@ export function convertTableLayoutKernelPropsToTableLayoutKernelConf(props: Tabl
       fetchNumber: 50,
     },
     showSelectColumn: props.showSelectColumn ?? true,
+    actionColumnRender: props.actionColumnRender,
     expandDataPks: [],
   }
 }
@@ -93,10 +96,10 @@ export interface TableLayoutColumnConf {
   hide: boolean
   dateStart: boolean
   dateEnd: boolean
-  customRender?: (record: { [key: string]: any }, columnName: string) => any
+  render?: (record: { [key: string]: any }, columnName: string) => any
 }
 
-export function convertTableLayoutColumnPropsToTableLayoutColumnConf(props: TableLayoutColumnProps): TableLayoutColumnConf {
+export function convertTableLayoutColumnPropsToTableLayoutColumnConf(props: TableLayoutColumnProps, tableColumn: TableColumnConf): TableLayoutColumnConf {
   return {
     name: props.name,
     wrap: props.wrap ?? true,
@@ -105,6 +108,9 @@ export function convertTableLayoutColumnPropsToTableLayoutColumnConf(props: Tabl
     hide: props.hide ?? false,
     dateStart: props.dateStart ?? false,
     dateEnd: props.dateEnd ?? false,
+    render: props.render
+      ? props.render
+      : tableColumn.render,
   }
 }
 
@@ -121,7 +127,6 @@ export function getDefaultLayoutColumnConf(columnName: string): TableLayoutColum
 }
 
 export interface CachedColumnConf extends TableColumnConf, TableLayoutColumnConf {
-  name: string
 }
 
 export interface TableStyleConf {
@@ -295,13 +300,14 @@ export function getInputTypeByDataKind(dataKind?: DataKind): string {
 }
 
 export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]] {
+  const columns = props.columns.map((column) => {
+    return convertTableColumnPropsToTableColumnConf(column)
+  })
   const basicConf = {
     id: props.id ?? `iw-table${Math.floor(Math.random() * 1000000)}`,
     pkColumnName: props.pkColumnName,
     parentPkColumnName: props.parentPkColumnName,
-    columns: props.columns.map((column) => {
-      return convertTableColumnPropsToTableColumnConf(column)
-    }),
+    columns,
     styles: convertTableStylePropsToTableStyleConf(props.styles),
   }
   const layoutsConf: TableLayoutConf[] = []
@@ -309,7 +315,7 @@ export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]]
     props.layouts.forEach((layout) => {
       layoutsConf.push({
         id: layout.id,
-        ...convertTableLayoutKernelPropsToTableLayoutKernelConf(layout),
+        ...convertTableLayoutKernelPropsToTableLayoutKernelConf(layout, columns),
       })
     })
   }

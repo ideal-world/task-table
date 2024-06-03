@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { Ref } from 'vue'
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
+import { mount } from 'sortablejs'
+import { IwEvents } from '../src'
 import type { TableCellDictItemProps, TableCellDictItemsResp, TableColumnProps, TableDataFilterProps, TableDataGroupProps, TableDataGroupResp, TableDataResp, TableDataSliceProps, TableDataSortProps, TableEventProps, TableLayoutKernelProps, TableLayoutModifyProps, TableLayoutProps, TableStyleProps } from '../src/props'
 import { AggregateKind, DATA_DICT_POSTFIX, DataKind, LayoutKind, OperatorKind } from '../src/props'
 import { IwUtils } from '../src/utils'
@@ -40,11 +42,26 @@ const DATA: { [key: string]: any }[] = [
   { no: 29, pno: null, name: 'xh', stats: ['close'], phone: 'Phone29', addr: 'Addr29', time: '2023-11-20' },
 ]
 
-const COLUMNS: Ref<TableColumnProps[]> = ref([{ name: 'no', title: '序号', dataKind: DataKind.NUMBER, dataEditable: false }, { name: 'pno', title: '父序号', dataKind: DataKind.NUMBER, dataEditable: false }, { name: 'name', title: '姓名', useDict: true, dictEditable: true }, { name: 'phone', title: '手机' }, { name: 'stats', title: '状态', useDict: true, dictEditable: true, multiValue: true }, { name: 'addr', title: '地址' }, { name: 'time', title: '时间', dataKind: DataKind.DATETIME }])
+const COLUMNS: Ref<TableColumnProps[]> = ref([
+  { name: 'no', title: '序号', dataKind: DataKind.NUMBER, dataEditable: false },
+  { name: 'pno', title: '父序号', dataKind: DataKind.NUMBER, dataEditable: false },
+  { name: 'name', title: '姓名', useDict: true, dictEditable: true },
+  { name: 'phone', title: '手机', render: (record: { [key: string]: any }, columnName: string) => {
+    return `<strong>+86</strong> ${record[columnName]} <button class="btn-row-delete" data-id='${record.no}'>删除</button>`
+  } },
+  { name: 'stats', title: '状态', useDict: true, dictEditable: true, multiValue: true },
+  { name: 'addr', title: '地址' },
+  { name: 'time', title: '时间', dataKind: DataKind.DATETIME },
+])
+
 const LAYOUTS: Ref<TableLayoutProps[]> = ref([{
   id: 'hi',
   title: 'HI',
   layoutKind: LayoutKind.LIST,
+  showSelectColumn: true,
+  actionColumnRender: (record: { [key: string]: any }) => {
+    return `<a href="#" onclick="()=> deleteData(${record.no})">删除</a>`
+  },
   columns: [{
     name: 'name',
   }, {
@@ -54,6 +71,8 @@ const LAYOUTS: Ref<TableLayoutProps[]> = ref([{
     width: 80,
   }, {
     name: 'addr',
+  }, {
+    name: 'phone',
   }, {
     name: 'time',
   }],
@@ -243,14 +262,18 @@ const events: TableEventProps = {
 
   modifyData: async (changedRecords: { [key: string]: any }[]): Promise<{ [key: string]: any }[]> => {
     changedRecords.forEach((changedRecord) => {
-      const record = DATA.find(d => d.no === changedRecord.no)!
+      // 不区别类型
+    // eslint-disable-next-line eqeqeq
+      const record = DATA.find(d => d.no == changedRecord.no)!
       Object.assign(record, changedRecord)
     })
     return JSON.parse(JSON.stringify(DATA))
   },
 
   deleteData: async (deletedRecordPks: any[]): Promise<boolean> => {
-    DATA.splice(DATA.findIndex(d => d.no === deletedRecordPks[0]), 1)
+    // 不区别类型
+    // eslint-disable-next-line eqeqeq
+    DATA.splice(DATA.findIndex(d => d.no == deletedRecordPks[0]), 1)
     return true
   },
 
@@ -346,31 +369,14 @@ const events: TableEventProps = {
       }
     }
   },
-
-  // newOrModifyCellDictItem: async (columnName: string, changedItem: TableCellDictItemProps): Promise<boolean> => {
-  //   return await ws.reqOk<boolean>('NewOrModifyDictItem', changedItem, {
-  //     dict_code: columnName,
-  //   })
-  // },
-
-  // deleteCellDictItem: async (columnName: string, value: any): Promise<boolean> => {
-  //   return await ws.reqOk<boolean>('DeleteDictItem', {
-  //   }, {
-  //     dict_code: columnName,
-  //     value,
-  //   })
-  // },
-
-  // sortCellDictItems: async (columnName: string, leftItemValue: any, rightItemValue: any): Promise<boolean> => {
-  //   return await ws.reqOk<boolean>('SortDictItem', {
-  //   }, {
-  //     dict_code: columnName,
-  //     left_item_value: leftItemValue,
-  //     right_item_value: rightItemValue,
-  //   })
-  // },
-
 }
+
+onMounted(() => {
+  IwUtils.delegateEvent('.iw-tt-main', 'click', '.btn-row-delete', (e) => {
+    IwEvents.deleteData([(e.target as HTMLElement).dataset.id])
+  })
+},
+)
 </script>
 
 <template>

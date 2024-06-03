@@ -1,6 +1,6 @@
-import { convertTableLayoutColumnPropsToTableLayoutColumnConf, convertTableStylePropsToTableStyleConf } from './components/conf'
+import { convertTableColumnPropsToTableColumnConf, convertTableLayoutColumnPropsToTableLayoutColumnConf, convertTableStylePropsToTableStyleConf } from './components/conf'
 import * as eb from './components/eventbus'
-import type { TableCellDictItemsResp, TableDataSliceProps, TableLayoutColumnProps, TableLayoutKernelProps, TableLayoutModifyProps, TableStyleProps } from './props'
+import type { TableCellDictItemsResp, TableColumnProps, TableDataSliceProps, TableLayoutColumnProps, TableLayoutKernelProps, TableLayoutModifyProps, TableStyleProps } from './props'
 
 export async function loadData(moreForGroupedValue?: any, offsetNumber?: number, fetchNumber?: number, layoutId?: string) {
   await eb.loadData(moreForGroupedValue, offsetNumber, fetchNumber, layoutId)
@@ -30,12 +30,12 @@ export async function modifyStyles(changedStyles: TableStyleProps): Promise<bool
   return await eb.modifyStyles(convertTableStylePropsToTableStyleConf(changedStyles))
 }
 
-export async function newColumn(newLayoutColumnProps: TableLayoutColumnProps): Promise<boolean> {
-  return await eb.newColumn(convertTableLayoutColumnPropsToTableLayoutColumnConf(newLayoutColumnProps))
+export async function newColumn(newLayoutColumnProps: TableLayoutColumnProps, tableColumn: TableColumnProps): Promise<boolean> {
+  return await eb.newColumn(convertTableLayoutColumnPropsToTableLayoutColumnConf(newLayoutColumnProps, convertTableColumnPropsToTableColumnConf(tableColumn)))
 }
 
-export async function modifyColumn(changedLayoutColumnProps: TableLayoutColumnProps): Promise<boolean> {
-  return await eb.modifyColumn(convertTableLayoutColumnPropsToTableLayoutColumnConf(changedLayoutColumnProps))
+export async function modifyColumn(changedLayoutColumnProps: TableLayoutColumnProps, tableColumn: TableColumnProps): Promise<boolean> {
+  return await eb.modifyColumn(convertTableLayoutColumnPropsToTableLayoutColumnConf(changedLayoutColumnProps, convertTableColumnPropsToTableColumnConf(tableColumn)))
 }
 
 export async function deleteColumn(deletedColumnName: string): Promise<boolean> {
