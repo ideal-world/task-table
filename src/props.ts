@@ -117,10 +117,10 @@ export function translateAggregateKind(aggKind: AggregateKind): string {
 }
 
 export enum SizeKind {
-  MINI = 'mini',
-  SMALL = 'small',
-  MEDIUM = 'medium',
-  LARGE = 'large',
+  MINI = '-xs',
+  SMALL = '-sm',
+  MEDIUM = '',
+  LARGE = '-lg',
 }
 
 export enum LayoutKind {
@@ -268,6 +268,7 @@ export interface TableDataGroupProps {
 export interface TableDataSliceProps {
   offsetNumber: number
   fetchNumber: number
+  fetchNumbers?: number[]
 }
 
 export interface TableDataResp {

@@ -47,3 +47,8 @@ export const WRAP = 'octicon-move-to-end-24'
 export const EXPAND = 'octicon-triangle-right-24'
 export const SHRINK = 'octicon-triangle-down-24'
 export const LOAD = 'octicon-fold-down-24'
+
+export const FIRST  = 'octicon-move-to-start-24'
+export const LAST  = 'octicon-move-to-end-24'
+export const PREVIOUS  = 'octicon-chevron-left-24'
+export const NEXT  = 'octicon-chevron-right-24'

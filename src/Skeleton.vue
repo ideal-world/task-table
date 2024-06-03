@@ -84,7 +84,9 @@ function showMoreMenu(event: MouseEvent) {
     :id="tableBasicConf.id"
     :class="`${tableBasicConf.styles.tableClass} iw-tt w-full text-sm text-base-content bg-base-100 relative`"
   >
-    <div class=" iw-tt-header iw-navbar p-0 min-h-0">
+    <div
+      :class="`${tableBasicConf.styles.headerClass} iw-tt-header iw-navbar p-0 min-h-0`"
+    >
       <div class="flex-1">
         <template v-for="layout in tableLayoutsConf" :key="layout.id">
           <a
@@ -122,12 +124,14 @@ function showMoreMenu(event: MouseEvent) {
         <div v-if="currentLayoutId === layout.id" class="iw-tt-table overflow-auto w-full">
           <ListComp :key="layout.id" :layout="layout" :basic="tableBasicConf" />
         </div>
-        <div class=" iw-tt-footer flex justify-between p-1 min-h-0">
+        <div
+          :class="`${tableBasicConf.styles.footerClass} iw-tt-footer flex justify-between p-1 min-h-0`"
+        >
           <div>
             <slot name="customActionBar" />
           </div>
           <div v-if="layout.layoutKind === LayoutKind.LIST && layout.data && !Array.isArray(layout.data)">
-            <PaginationComp :slice="layout.slice" :total-number="layout.data.totalNumber" />
+            <PaginationComp :slice="layout.slice" :total-number="layout.data.totalNumber"/>
           </div>
         </div>
       </template>

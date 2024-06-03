@@ -75,7 +75,7 @@ onMounted(() => {
 
 <template>
   <div
-    :class="`iw-list relative iw-list--size-${listConf.basic.styles.size}`"
+    :class="`iw-list relative iw-list--size${listConf.basic.styles.size}`"
     :style="setTableWidth()"
   >
     <HeaderComp :columns-conf="columnsWithoutHideConf" :layout="listConf.layout" :basic="listConf.basic" :set-column-styles="setColumnStyles" />
@@ -129,7 +129,7 @@ onMounted(() => {
 </template>
 
 <style lang="css">
-.iw-list--size-mini {
+.iw-list--size-xs {
   @apply text-xs;
 
   .iw-list-cell {
@@ -137,7 +137,7 @@ onMounted(() => {
   }
 }
 
-.iw-list--size-small {
+.iw-list--size-sm {
   @apply text-sm;
 
   .iw-list-cell {
@@ -145,7 +145,7 @@ onMounted(() => {
   }
 }
 
-.iw-list--size-medium {
+.iw-list--size {
   @apply text-base;
 
   .iw-list-cell {
@@ -153,7 +153,7 @@ onMounted(() => {
   }
 }
 
-.iw-list--size-large {
+.iw-list--size-lg {
   @apply text-lg;
 
   .iw-list-cell {

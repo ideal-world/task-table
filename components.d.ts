@@ -12,10 +12,8 @@ declare module 'vue' {
     Column: typeof import('./src/components/function/Column.vue')['default']
     ColumnAggs: typeof import('./src/components/layout/list/ColumnAggs.vue')['default']
     ColumnFixed: typeof import('./src/components/layout/list/ColumnFixed.vue')['default']
-    ColumnHide: typeof import('./src/components/function/ColumnHide.vue')['default']
     ColumnResize: typeof import('./src/components/layout/list/ColumnResize.vue')['default']
     ColumnWrap: typeof import('./src/components/layout/list/ColumnWrap.vue')['default']
-    copy: typeof import('./src/components/function/Column copy.vue')['default']
     DataLoad: typeof import('./src/components/layout/list/DataLoad.vue')['default']
     Filter: typeof import('./src/components/function/Filter.vue')['default']
     Group: typeof import('./src/components/function/Group.vue')['default']
@@ -26,10 +24,8 @@ declare module 'vue' {
     Resize: typeof import('./src/components/function/Resize.vue')['default']
     RowCopyPaste: typeof import('./src/components/layout/list/RowCopyPaste.vue')['default']
     RowDelete: typeof import('./src/components/layout/list/RowDelete.vue')['default']
-    RowNew: typeof import('./src/components/layout/list/RowNew.vue')['default']
     Rows: typeof import('./src/components/layout/list/Rows.vue')['default']
     RowTree: typeof import('./src/components/function/RowTree.vue')['default']
-    Skeleton: typeof import('./src/Skeleton.vue')['default']
     Theme: typeof import('./src/components/function/Theme.vue')['default']
   }
 }

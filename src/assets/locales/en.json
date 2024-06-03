@@ -89,6 +89,9 @@
     },
     "column": {
       "showTitle": "Show column"
+    },
+    "pagination": {
+      "total": "Total {number} rows"
     }
   },
   "list": {

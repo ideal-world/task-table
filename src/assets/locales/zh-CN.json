@@ -51,7 +51,7 @@
     "state": {
       "selectPlaceholder": "请选择"
     },
-    "event":{
+    "event": {
       "notConfigured": "事件[{name}]未配置",
       "loadDataInvalidScene": "数据加载失败：场景不合法"
     }
@@ -89,6 +89,9 @@
     },
     "column": {
       "showTitle": "显示列"
+    },
+    "pagination": {
+      "total": "共 {number} 条"
     }
   },
   "list": {
