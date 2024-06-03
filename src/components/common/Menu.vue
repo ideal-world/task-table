@@ -4,8 +4,10 @@ import { onMounted, provide, ref } from 'vue'
 import { IwUtils } from '../../utils'
 
 const contextmenuRef = ref<HTMLElement | null>(null)
+const showMenu = ref<boolean>(false)
 
 function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: MenuOffsetKind = MenuOffsetKind.LEFT_BOTTOM, size: MenuSizeKind = MenuSizeKind.MEDIUM, force: boolean = false) {
+  showMenu.value = true
   if (!force && attachObj instanceof HTMLElement && IwUtils.hasParentWithClass(attachObj, 'iw-contextmenu')) {
     // Prevent accidental triggering from items
     return
@@ -125,6 +127,7 @@ function hideUnActiveContextMenus(event: MouseEvent) {
 }
 
 function hideCurrentContextMenu() {
+  showMenu.value = false
   const contextMenuEle = contextmenuRef.value as HTMLElement
   contextMenuEle.style.display = `none`
 }
@@ -180,7 +183,7 @@ export const FUN_CLOSE_CONTEXT_MENU_TYPE = Symbol('FUN_CLOSE_CONTEXT_MENU_TYPE')
     ref="contextmenuRef" class="iw-contextmenu flex flex-col items-start fixed z-[3000] bg-base-100 p-1 rounded-md border border-base-300"
     style="display: none;"
   >
-    <slot />
+    <slot v-if="showMenu" />
   </div>
 </template>
 

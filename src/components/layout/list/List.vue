@@ -87,12 +87,12 @@ onMounted(() => {
         :pk-kind-is-number="pkKindIsNumber"
         :columns-conf="columnsWithoutHideConf" :styles-conf="listConf.basic.styles" :set-column-styles="setColumnStyles"
       />
-      <ColumnAggsComp
+      <!-- <ColumnAggsComp
         v-if="layout.aggs"
         :layout-aggs="layout.aggs" :data-basic="layout.data as TableDataResp"
         :columns-conf="columnsWithoutHideConf" :styles-conf="listConf.basic.styles"
         :set-column-styles="setColumnStyles"
-      />
+      /> -->
     </template>
     <!-- <template v-else-if="listConf.layout.data && Array.isArray(listConf.layout.data)">
       <template v-for="groupData in listConf.layout.data" :key="groupData.groupValue">

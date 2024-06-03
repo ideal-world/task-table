@@ -42,6 +42,7 @@ function showContainer(event: MouseEvent, offsetKind: MenuOffsetKind = MenuOffse
     </div>
     <div v-for="column in props.layoutColumnsConf.filter(column => column.name !== props.pkColumnName)" :key="column.name" class="iw-contextmenu__item flex justify-between w-full">
       <span>
+        <i :class="props.basicColumnsConf.find(col => col.name === column.name)?.icon" />
         {{ props.basicColumnsConf.find(col => col.name === column.name)?.title }}
       </span>
       <input
