@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { InjectionKey } from 'vue'
-import { onMounted, provide, ref } from 'vue'
-import { IwUtils } from '../../utils'
+import type { InjectionKey } from 'vue';
+import { onMounted, provide, ref } from 'vue';
+import { IwUtils } from '../../utils';
 
 const contextmenuRef = ref<HTMLElement | null>(null)
 
@@ -93,7 +93,6 @@ function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: MenuOffset
     nodeEle.style.padding = `${padding}px`
   })
   contextMenuEle.style.display = `block`
-
   if (attachObj instanceof HTMLElement || attachObj.target instanceof HTMLElement) {
     const parentMenuEle = IwUtils.getParentWithClass(attachObj instanceof HTMLElement ? attachObj as HTMLElement : attachObj.target as HTMLElement, 'iw-contextmenu')
     if (parentMenuEle)
@@ -136,7 +135,7 @@ onMounted(() => {
       return
     hideUnActiveContextMenus(event)
   })
-  window.addEventListener('scroll', (event) => {
+  window.addEventListener('scroll', () => {
     const contextmenuEles = document.querySelectorAll('.iw-contextmenu')
     for (const i in contextmenuEles) {
       if (!(contextmenuEles[i] instanceof HTMLElement) || (contextmenuEles[i] as HTMLElement).style.display === 'none')
@@ -178,9 +177,15 @@ export const FUN_CLOSE_CONTEXT_MENU_TYPE = Symbol('FUN_CLOSE_CONTEXT_MENU_TYPE')
 
 <template>
   <div
-    ref="contextmenuRef" class="iw-contextmenu flex flex-col items-start fixed z-[3000] shadow bg-base-100 p-1 rounded-md"
+    ref="contextmenuRef" class="iw-contextmenu flex flex-col items-start fixed z-[3000] bg-base-100 p-1 rounded-md border border-base-300"
     style="display: none;"
   >
     <slot />
   </div>
 </template>
+
+<style lang="css">
+.iw-contextmenu {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+</style>

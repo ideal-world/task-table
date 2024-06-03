@@ -86,6 +86,9 @@
       "moreConfTitle": "More configuration",
       "groupSortTitle": "Reverse order",
       "hideEmptyTitle": "Hide empty group"
+    },
+    "column": {
+      "hideTitle": "Hide column"
     }
   },
   "list": {
@@ -107,42 +110,6 @@
     },
     "columnWrap": {
       "title": "Break words"
-    },
-    "columnCopy": {
-      "title": "Copy column"
-    },
-    "columnDelete": {
-      "title": "Delete column"
-    },
-    "columnHide": {
-      "title": "Hide"
-    },
-    "columnNew": {
-      "title": "New column",
-      "dataKind": "Data kind",
-      "submit": "New",
-      "useDict": "Using dictionaries",
-      "dictEditable": "Dictionary editable",
-      "groupable": "Groupable",
-      "columnNamePlaceholder": "New column name",
-      "multiValue": "Support multi-value"
-    },
-    "columnDict": {
-      "dictTitle": "Dictionary configuration",
-      "searchPlaceholder": "Search...",
-      "newTitle": "New",
-      "titlePlaceholder": "New name",
-      "submit": "New"
-    },
-    "columnKindDateTime": {
-      "dateTitle": "Date/Time configuration",
-      "formatPlaceholder": "Format",
-      "formatError": "Format error",
-      "dateFormatTip": "YYYY Year, MM Month, DD Day",
-      "timeFormatTip": "HH Hour, mm Minute, ss Second, SSS Millisecond"
-    },
-    "rowNew": {
-      "newTitle": "New row"
     },
     "rowCopyPaste": {
       "copyTitle": "Copy row(s)",

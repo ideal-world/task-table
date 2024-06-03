@@ -86,6 +86,9 @@
       "moreConfTitle": "更多设置",
       "groupSortTitle": "倒序",
       "hideEmptyTitle": "隐藏空组"
+    },
+    "column": {
+      "hideTitle": "隐藏列"
     }
   },
   "list": {
@@ -107,42 +110,6 @@
     },
     "columnWrap": {
       "title": "换行"
-    },
-    "columnCopy": {
-      "title": "复制列"
-    },
-    "columnDelete": {
-      "title": "删除列"
-    },
-    "columnHide": {
-      "title": "隐藏列"
-    },
-    "columnNew": {
-      "title": "新增列",
-      "dataKind": "数据类型",
-      "submit": "添加",
-      "useDict": "使用字典",
-      "dictEditable": "字典可编辑",
-      "groupable": "可分组",
-      "columnNamePlaceholder": "新的列名",
-      "multiValue": "支持多值"
-    },
-    "columnDict": {
-      "dictTitle": "字典配置",
-      "searchPlaceholder": "搜索字典项",
-      "newTitle": "添加字典项",
-      "titlePlaceholder": "新的字典项名称",
-      "submit": "添加"
-    },
-    "columnKindDateTime": {
-      "dateTitle": "日期时间配置",
-      "formatPlaceholder": "格式化",
-      "formatError": "格式化错误",
-      "dateFormatTip": "YYYY 年, MM 月, DD 日",
-      "timeFormatTip": "HH 时, mm 分, ss 秒 SSS 毫秒"
-    },
-    "rowNew": {
-      "newTitle": "新增行"
     },
     "rowCopyPaste": {
       "copyTitle": "复制行",

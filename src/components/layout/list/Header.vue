@@ -5,8 +5,6 @@ import MenuComp, { MenuSizeKind } from '../../common/Menu.vue'
 import type { CachedColumnConf, TableBasicConf, TableLayoutConf } from '../../conf'
 import ColumnWrapComp from './ColumnWrap.vue'
 import ColumnFixedComp from './ColumnFixed.vue'
-import ColumnHideComp from './ColumnHide.vue'
-import ColumnMoreComp from './ColumnMore.vue'
 
 const props = defineProps<{
   columnsConf: CachedColumnConf[]
@@ -18,7 +16,6 @@ const props = defineProps<{
 const selectedColumnConf = ref<CachedColumnConf | undefined>()
 
 const headerMenuCompRef = ref<InstanceType<typeof MenuComp>>()
-const headerColumnMoreCompRef = ref<InstanceType<typeof MenuComp>>()
 
 function showHeaderContextMenu(event: MouseEvent, columName: string) {
   selectedColumnConf.value = props.columnsConf.find(col => col.name === columName)
@@ -26,10 +23,6 @@ function showHeaderContextMenu(event: MouseEvent, columName: string) {
   headerMenuCompRef.value?.show(targetEle, undefined, MenuSizeKind.LARGE)
 }
 
-async function showColumnMoreContextMenu(event: MouseEvent) {
-  const targetEle = event.target as HTMLElement
-  await headerColumnMoreCompRef.value?.show(targetEle)
-}
 </script>
 
 <template>
@@ -45,20 +38,9 @@ async function showColumnMoreContextMenu(event: MouseEvent) {
     >
       <i :class="`${column.icon} mr-1`" /> {{ column.title }}
     </div>
-    <div
-      :class="`${props.basic.styles.cellClass} iw-list-cell flex justify-end items-center bg-base-100 border-solid border-b border-b-base-300 border-l border-l-base-300 hover:cursor-pointer hover:bg-base-200`"
-      :style="props.setColumnStyles(-1)"
-    >
-      <i :class="iconSvg.MORE" @click="showColumnMoreContextMenu" />
-    </div>
   </div>
   <MenuComp ref="headerMenuCompRef">
     <template v-if="selectedColumnConf">
-      <div
-        class="iw-contextmenu__item flex justify-between w-full p-1 mb-1 mt-1"
-      >
-        <ColumnHideComp :cur-column-conf="selectedColumnConf" :pk-column-name="props.basic.pkColumnName" :columns-conf="columnsConf" />
-      </div>
       <div
         class="iw-contextmenu__item flex justify-between w-full p-1"
       >
@@ -67,8 +49,4 @@ async function showColumnMoreContextMenu(event: MouseEvent) {
       </div>
     </template>
   </MenuComp>
-  <ColumnMoreComp
-    ref="headerColumnMoreCompRef" :basic-columns-conf="props.basic.columns"
-    :layout-columns-conf="props.layout.columns"
-  />
 </template>

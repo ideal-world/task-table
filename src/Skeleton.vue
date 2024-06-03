@@ -7,6 +7,7 @@ import { initConf } from './components/conf'
 import * as Event from './components/eventbus'
 import FilterComp from './components/function/Filter.vue'
 import GroupComp from './components/function/Group.vue'
+import ColumnComp from './components/function/Column.vue'
 import ResizeComp from './components/function/Resize.vue'
 import ThemeComp from './components/function/Theme.vue'
 import ListComp from './components/layout/list/List.vue'
@@ -17,6 +18,7 @@ const [_tableBasicConf, _tableLayoutsConf] = initConf(props)
 
 const menuLayoutCompRef = ref<InstanceType<typeof MenuComp>>()
 const menuMoreCompRef = ref<InstanceType<typeof MenuComp>>()
+const headerColumnCompRef = ref<InstanceType<typeof MenuComp>>()
 
 const tableBasicConf = reactive<TableBasicConf>(_tableBasicConf)
 const tableLayoutsConf = reactive<TableLayoutConf[]>(_tableLayoutsConf)
@@ -48,8 +50,36 @@ function showMoreMenu(event: MouseEvent) {
   const targetEle = event.target as HTMLElement
   menuMoreCompRef.value?.show(targetEle, MenuOffsetKind.RIGHT_BOTTOM)
 }
+
+async function showColumnContextMenu(event: MouseEvent) {
+  const targetEle = event.target as HTMLElement
+  await headerColumnCompRef.value?.show(targetEle)
+}
 </script>
 
+<!--
++-----------------------------------------+
+| iw-tt                                   |
+| +-------------------------------------+ |
+| |w-tt-header                          | |
+| +------------------+------------------+ |
+| |iw-tt-header__item|iw-tt-header__item| |
+| +------------------+------------------+ |
+| |iw-tt-main                           | |
+| |  +-------------------+              | |
+| |  |iw-tt-toolbar      |              | |
+| |  +-------------------+              | |
+| |  |iw-tt-table        |              | |
+| |  |           +-------+-----------+  | |
+| |  |           |iw-tt-toolbar      |  | |
+| |  |           +-------------------+  | |
+| |  |           |iw-tt-table        |  | |
+| |  |           |       |           |  | |
+| |  +-----------+-------+           |  | |
+| |              +-------------------+  | |
+| +-------------------------------------+ |
++-----------------------------------------+
+-->
 <template>
   <div
     :id="tableBasicConf.id"
@@ -79,8 +109,17 @@ function showMoreMenu(event: MouseEvent) {
         <div v-if="currentLayoutId === layout.id" :id="`iw-tt-layout-${layout.id}`" class="iw-tt-toolbar flex items-center h-8 p-0.5">
           <GroupComp :group="layout.group" :columns-conf="tableBasicConf.columns" />
           <div class="iw-divider iw-divider-horizontal m-0.5" />
-          <div class="iw-divider iw-divider-horizontal m-0.5" />
           <FilterComp :filters="layout.filters" :columns-conf="tableBasicConf.columns" />
+          <ColumnComp
+    ref="headerColumnCompRef" :basic-columns-conf="tableBasicConf.columns"
+    :layout-columns-conf="layout"
+  />
+          <div
+      :class="`${props.basic.styles.cellClass} iw-list-cell flex justify-end items-center bg-base-100 border-solid border-b border-b-base-300 border-l border-l-base-300 hover:cursor-pointer hover:bg-base-200`"
+      :style="props.setColumnStyles(-1)"
+    >
+      <i :class="iconSvg.MORE" @click="showColumnContextMenu" />
+    </div>
         </div>
         <div v-if="currentLayoutId === layout.id" class="iw-tt-table overflow-auto w-full">
           <ListComp :key="layout.id" :layout="layout" :basic="tableBasicConf" />
@@ -88,12 +127,10 @@ function showMoreMenu(event: MouseEvent) {
       </template>
     </div>
   </div>
+
   <MenuComp ref="menuLayoutCompRef">
     <div class="iw-contextmenu__item">
-      <!-- TODO 抽取 -->
-      <!-- <i :class="iconSvg.RENAME"></i>
-                                                                              <input class="iw-input iw-input-bordered iw-input-sm" type="text"
-                                                                                v-model="tableLayoutsConf.find(layout => layout.id == currentLayoutId)?.title" /> -->
+      <!-- TODO 抽取 重命名layout -->
     </div>
   </MenuComp>
 </template>

@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import type { TableLayoutModifyProps } from '../../../props'
-import MenuComp, { MenuOffsetKind } from '../../common/Menu.vue'
-import type { TableColumnConf, TableLayoutColumnConf } from '../../conf'
-import * as eb from '../../eventbus'
+import type { TableLayoutModifyProps } from '../../props'
+import MenuComp, { MenuOffsetKind } from '../common/Menu.vue'
+import type { TableColumnConf, TableLayoutColumnConf } from '../conf'
+import * as eb from '../eventbus'
 
 const props = defineProps<{
   basicColumnsConf: TableColumnConf[]
   layoutColumnsConf: TableLayoutColumnConf[]
 }>()
-const columnMoreCompRef = ref<InstanceType<typeof MenuComp>>()
+const columnCompRef = ref<InstanceType<typeof MenuComp>>()
 
 async function setShowToggleColumn(columnConf: TableColumnConf) {
   const layoutColumnsConf = props.layoutColumnsConf.find(col => col.name === columnConf.name)
@@ -36,7 +36,7 @@ async function setShowToggleColumn(columnConf: TableColumnConf) {
 }
 
 function showContainer(event: MouseEvent, offsetKind: MenuOffsetKind = MenuOffsetKind.RIGHT_BOTTOM) {
-  columnMoreCompRef.value?.show(event, offsetKind)
+  columnCompRef.value?.show(event, offsetKind)
 }
 
 defineExpose({
@@ -45,9 +45,9 @@ defineExpose({
 </script>
 
 <template>
-  <MenuComp ref="columnMoreCompRef">
+  <MenuComp ref="columnCompRef">
     <div class="iw-divider">
-      {{ $t('list.columnHide.title') }}
+      {{ $t('function.column.hideTitle') }}
     </div>
     <div v-for="column in props.basicColumnsConf" :key="column.name" class="iw-contextmenu__item flex justify-between w-full">
       <span>
