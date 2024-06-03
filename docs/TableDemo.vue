@@ -76,6 +76,10 @@ const LAYOUTS: Ref<TableLayoutProps[]> = ref([{
     name: 'time',
   }],
   aggs: { name: AggregateKind.MIN },
+  slice: {
+    offsetNumber: 0,
+    fetchNumber: 10,
+  },
 }])
 
 const STYLES: Ref<TableStyleProps> = ref({})

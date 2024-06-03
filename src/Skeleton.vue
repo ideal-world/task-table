@@ -10,8 +10,10 @@ import FilterComp from './components/function/Filter.vue'
 import GroupComp from './components/function/Group.vue'
 import ResizeComp from './components/function/Resize.vue'
 import ThemeComp from './components/function/Theme.vue'
+import PaginationComp from './components/function/Pagination.vue'
 import ListComp from './components/layout/list/List.vue'
 import type { TableProps } from './props'
+import { LayoutKind } from './props'
 
 const props = defineProps<TableProps>()
 const [_tableBasicConf, _tableLayoutsConf] = initConf(props)
@@ -30,9 +32,10 @@ onMounted(async () => {
   Array.prototype.forEach.call(document.getElementsByClassName('iw-tt'), (ttEle) => {
     const outHeight = ttEle.parentElement?.clientHeight
     const headerHeight = ttEle.getElementsByClassName('iw-tt-header')[0].offsetHeight
-    Array.prototype.forEach.call(ttEle.getElementsByClassName('iw-tt-main'), (layoutEle) => {
+    Array.prototype.forEach.call(ttEle.getElementsByClassName('iw-tt-layout'), (layoutEle) => {
       const toolbarHeight = layoutEle.getElementsByClassName('iw-tt-toolbar')[0].offsetHeight
-      layoutEle.getElementsByClassName('iw-tt-table')[0].style.height = `${outHeight - headerHeight - toolbarHeight}px`
+      const footerHeight = layoutEle.getElementsByClassName('iw-tt-footer')[0].offsetHeight
+      layoutEle.getElementsByClassName('iw-tt-table')[0].style.height = `${outHeight - headerHeight - toolbarHeight - footerHeight}px`
     })
   })
   await Event.watch()
@@ -59,11 +62,13 @@ function showMoreMenu(event: MouseEvent) {
 | +------------------+------------------+ |
 | |iw-tt-header__item|iw-tt-header__item| |
 | +------------------+------------------+ |
-| |iw-tt-main                           | |
+| |iw-tt-layout                         | |
 | |  +-------------------+              | |
 | |  |iw-tt-toolbar      |              | |
 | |  +-------------------+              | |
 | |  |iw-tt-table        |              | |
+| |  +-------------------+              | |
+| |  |iw-tt-footer       |              | |
 | |  |           +-------+-----------+  | |
 | |  |           |iw-tt-toolbar      |  | |
 | |  |           +-------------------+  | |
@@ -71,7 +76,7 @@ function showMoreMenu(event: MouseEvent) {
 | |  |           |       |           |  | |
 | |  +-----------+-------+           |  | |
 | |              +-------------------+  | |
-| +-------------------------------------+ |
+| +------------------+------------------+ |
 +-----------------------------------------+
 -->
 <template>
@@ -98,7 +103,7 @@ function showMoreMenu(event: MouseEvent) {
         </MenuComp>
       </div>
     </div>
-    <div class="iw-tt-main">
+    <div class="iw-tt-layout">
       <template v-for="layout in tableLayoutsConf" :key="layout.id">
         <div v-if="currentLayoutId === layout.id" :id="`iw-tt-layout-${layout.id}`" class="iw-tt-toolbar flex justify-between h-8 p-0.5">
           <div class="flex">
@@ -116,6 +121,14 @@ function showMoreMenu(event: MouseEvent) {
         </div>
         <div v-if="currentLayoutId === layout.id" class="iw-tt-table overflow-auto w-full">
           <ListComp :key="layout.id" :layout="layout" :basic="tableBasicConf" />
+        </div>
+        <div class=" iw-tt-footer flex justify-between p-1 min-h-0">
+          <div>
+            <slot name="customActionBar" />
+          </div>
+          <div v-if="layout.layoutKind === LayoutKind.LIST && layout.data && !Array.isArray(layout.data)">
+            <PaginationComp :slice="layout.slice" :total-number="layout.data.totalNumber" />
+          </div>
         </div>
       </template>
     </div>

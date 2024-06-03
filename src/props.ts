@@ -192,6 +192,7 @@ export interface TableStyleProps {
   theme?: string
   tableClass?: string
   headerClass?: string
+  footerClass?: string
   rowClass?: string
   cellClass?: string
   aggClass?: string

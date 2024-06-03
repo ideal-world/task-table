@@ -134,6 +134,7 @@ export interface TableStyleConf {
   theme: string
   tableClass: string
   headerClass: string
+  footerClass: string
   rowClass: string
   cellClass: string
   aggClass: string
@@ -143,6 +144,7 @@ export function convertTableStylePropsToTableStyleConf(props?: TableStyleProps):
   return {
     tableClass: props?.tableClass ?? '',
     headerClass: props?.headerClass ?? '',
+    footerClass: props?.footerClass ?? '',
     rowClass: props?.rowClass ?? '',
     cellClass: props?.cellClass ?? '',
     aggClass: props?.aggClass ?? '',

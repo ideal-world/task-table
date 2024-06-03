@@ -31,7 +31,7 @@ function showHeaderContextMenu(event: MouseEvent, columName: string) {
   >
     <div
       v-for="(column, colIdx) in columnsConf" :key="column.name"
-      :class="`${props.basic.styles.cellClass} iw-list-cell iw-list-header-cell ${column.name !== props.basic.pkColumnName ? 'iw-list-header-normal-cell' : ''} flex items-center bg-base-100 border-solid border-b border-b-base-300 border-l border-l-base-300 hover:cursor-pointer hover:bg-base-200`"
+      :class="`${props.basic.styles.cellClass} iw-list-cell iw-list-header-cell ${column.name !== props.basic.pkColumnName ? 'iw-list-header-normal-cell' : ''} flex items-center bg-base-200 border-solid border-b border-b-base-300 border-l border-l-base-300 hover:cursor-pointer hover:bg-base-200`"
       :data-column-name="column.name"
       :style="props.setColumnStyles(colIdx)"
       @click="(event: MouseEvent) => showHeaderContextMenu(event, column.name)"
