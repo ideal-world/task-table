@@ -167,8 +167,8 @@ export interface TableLayoutKernelProps {
   aggs?: { [key: string]: AggregateKind }
   slice?: TableDataSliceProps
   showSelectColumn?: boolean
-  // TODO 调用事件
   actionColumnRender?: (record: { [key: string]: any }) => any
+  actionColumnWidth?: number
 }
 
 export interface TableLayoutProps extends TableLayoutKernelProps {

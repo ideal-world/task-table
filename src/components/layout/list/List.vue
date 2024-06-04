@@ -24,6 +24,7 @@ const listConf = defineProps<
 >()
 
 const COLUMN_SELECT_WIDTH = listConf.layout.showSelectColumn ? 30 : 0
+const COLUMN_ACTION_WIDTH = listConf.layout.actionColumnRender ? listConf.layout.actionColumnWidth ?? 100 : 0
 
 const expandDataPks = ref<string[] | number[]>([])
 
@@ -50,21 +51,26 @@ const columnsWithoutHideConf = computed<CachedColumnConf[]>(() => {
 // }
 
 function setColumnStyles(colIdx: number) {
-// ColIdx of selected column = -1
+// ColIdx of select column = -1
+// ColIdx of action column = -2
   const styles: any = {}
   if (colIdx === -1) {
     styles.width = `${COLUMN_SELECT_WIDTH}px`
   }
+  else if (colIdx === -2) {
+    styles.width = `${COLUMN_ACTION_WIDTH}px`
+  }
   else {
     styles.width = `${columnsWithoutHideConf.value[colIdx].width}px`
-    setFixedColumnStyles(styles, colIdx, columnsWithoutHideConf.value)
   }
+  setFixedColumnStyles(styles, colIdx, columnsWithoutHideConf.value, COLUMN_SELECT_WIDTH)
   return styles
 }
 
 function setTableWidth() {
   const styles: any = {}
-  styles.width = `${listConf.layout.columns.filter(column => !column.hide).reduce((count, col) => count + col.width, COLUMN_SELECT_WIDTH)}px`
+  // 2px for border
+  styles.width = `${listConf.layout.columns.filter(column => !column.hide).reduce((count, col) => count + col.width, COLUMN_SELECT_WIDTH + COLUMN_ACTION_WIDTH + 2)}px`
   return styles
 }
 
@@ -94,7 +100,11 @@ function setTableWidth() {
         :parent-pk-column-name="listConf.basic.parentPkColumnName"
         :expand-data-pks="expandDataPks"
         :pk-kind-is-number="pkKindIsNumber"
-        :columns-conf="columnsWithoutHideConf" :styles-conf="listConf.basic.styles" :set-column-styles="setColumnStyles"
+        :columns-conf="columnsWithoutHideConf"
+        :styles-conf="listConf.basic.styles"
+        :show-select-column="listConf.layout.showSelectColumn"
+        :action-column-render="listConf.layout.actionColumnRender"
+        :set-column-styles="setColumnStyles"
       />
       <!-- <ColumnAggsComp
         v-if="layout.aggs"
@@ -116,7 +126,10 @@ function setTableWidth() {
           :expand-data-pks="expandDataPks"
           :pk-kind-is-number="pkKindIsNumber"
           :columns-conf="columnsWithoutHideConf"
-          :styles-conf="listConf.basic.styles" :set-column-styles="setColumnStyles"
+          :styles-conf="listConf.basic.styles"
+          :show-select-column="listConf.layout.showSelectColumn"
+          :action-column-render="listConf.layout.actionColumnRender"
+          :set-column-styles="setColumnStyles"
         />
       </template>
     </template> -->

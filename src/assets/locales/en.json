@@ -60,6 +60,9 @@
     "title": {
       "default": "Default",
       "rename": "Rename"
+    },
+    "action": {
+      "title": "Action"
     }
   },
   "function": {

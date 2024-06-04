@@ -60,6 +60,9 @@
     "title": {
       "default": "默认",
       "rename": "重命名"
+    },
+    "action": {
+      "title": "操作"
     }
   },
   "function": {

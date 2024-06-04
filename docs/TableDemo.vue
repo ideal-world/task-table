@@ -48,7 +48,7 @@ const COLUMNS: Ref<TableColumnProps[]> = ref([
   { name: 'pno', title: '父序号', dataKind: DataKind.NUMBER, dataEditable: false },
   { name: 'name', title: '姓名', useDict: true, dictEditable: true },
   { name: 'phone', title: '手机', render: (record: { [key: string]: any }, columnName: string) => {
-    return `<strong>+86</strong> ${record[columnName]} <button class="btn-row-delete" data-id='${record.no}'>删除</button>`
+    return `<strong>+86</strong> ${record[columnName]}`
   } },
   { name: 'stats', title: '状态', useDict: true, dictEditable: true, multiValue: true },
   { name: 'addr', title: '地址' },
@@ -61,7 +61,7 @@ const LAYOUTS: Ref<TableLayoutProps[]> = ref([{
   layoutKind: LayoutKind.LIST,
   showSelectColumn: true,
   actionColumnRender: (record: { [key: string]: any }) => {
-    return `<a href="#" onclick="()=> deleteData(${record.no})">删除</a>`
+    return `<button class="btn-row-delete" data-id='${record.no}'>删除</button>`
   },
   columns: [{
     name: 'name',
@@ -298,7 +298,7 @@ const events: TableEventProps = {
   deleteData: async (deletedRecordPks: any[]): Promise<boolean> => {
     // 不区别类型
     // eslint-disable-next-line eqeqeq
-    DATA.includes(d => d.no == deletedRecordPks[0]) && DATA.splice(DATA.findIndex(d => d.no == deletedRecordPks[0]), 1)
+    DATA.splice(DATA.findIndex(d => d.no == deletedRecordPks[0]), 1)
     return true
   },
 
@@ -402,7 +402,7 @@ const events: TableEventProps = {
 }
 
 onMounted(() => {
-  IwUtils.delegateEvent('.iw-tt-main', 'click', '.btn-row-delete', (e) => {
+  IwUtils.delegateEvent('.iw-tt-table', 'click', '.btn-row-delete', (e) => {
     IwEvents.deleteData([(e.target as HTMLElement).dataset.id])
   })
 },

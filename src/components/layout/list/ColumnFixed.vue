@@ -57,13 +57,31 @@ async function setFixedColumn() {
 </script>
 
 <script lang="ts">
-export function setFixedColumnStyles(styles: any, colIdx: number, columnsConf: CachedColumnConf[]) {
+export function setFixedColumnStyles(styles: any, colIdx: number, columnsConf: CachedColumnConf[], selectColumnWidth: number) {
   const fixedColumnIdx = columnsConf.findIndex(col => col.fixed)
-  if (fixedColumnIdx >= colIdx) {
+  if (colIdx === -1 && fixedColumnIdx === -1) {
+    // non-fixed column
+    styles.position = 'static'
+  }
+  else if (colIdx === -1) {
+    // fixed select column
     styles.position = 'sticky'
     styles.zIndex = 1099
-    // TODO 判断left要小于视口宽度
-    styles.left = `${columnsConf.slice(0, colIdx).reduce((count, col) => count + col.width, 0)}px`
+    styles.left = `0px`
+  }
+  else if (colIdx === -2) {
+    // fixed action column
+    styles.position = 'sticky'
+    styles.zIndex = 1099
+    styles.right = `0px`
+    // class: base-300
+    styles.borderLeft = '3px solid oklch(var(--b3))'
+  }
+  else if (fixedColumnIdx >= colIdx) {
+    // fixed columns
+    styles.position = 'sticky'
+    styles.zIndex = 1099
+    styles.left = `${columnsConf.slice(0, colIdx).reduce((count, col) => count + col.width, selectColumnWidth)}px`
     if (fixedColumnIdx === colIdx) {
       // class: base-300
       styles.borderRight = '3px solid oklch(var(--b3))'

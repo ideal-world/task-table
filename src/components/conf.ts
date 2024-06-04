@@ -54,8 +54,8 @@ export interface TableLayoutKernelConf {
   aggs?: { [key: string]: AggregateKind }
   slice: TableDataSliceProps
   showSelectColumn: boolean
-  // TODO 调用事件
   actionColumnRender?: (record: { [key: string]: any }) => any
+  actionColumnWidth?: number
   data?: TableDataResp | TableDataGroupResp[]
   selectedDataPks: any[]
 }
@@ -78,6 +78,7 @@ export function convertTableLayoutKernelPropsToTableLayoutKernelConf(props: Tabl
     },
     showSelectColumn: props.showSelectColumn ?? true,
     actionColumnRender: props.actionColumnRender,
+    actionColumnWidth: props.actionColumnWidth,
     selectedDataPks: [],
   }
 }

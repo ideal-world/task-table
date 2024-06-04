@@ -32,7 +32,7 @@ function showHeaderContextMenu(event: MouseEvent, columName: string) {
       v-if="props.layout.showSelectColumn"
       :class="`${props.basic.styles.cellClass} iw-list-cell iw-list-header-cell flex justify-center items-center bg-base-200 border-solid border-b border-b-base-300 border-l border-l-base-300 hover:cursor-pointer hover:bg-base-200`"
       :style="props.setColumnStyles(-1)"
-      >
+    >
       <input type="checkbox" class="iw-list-select-all-cell__chk iw-checkbox iw-checkbox-sm">
     </div>
     <div
@@ -43,6 +43,13 @@ function showHeaderContextMenu(event: MouseEvent, columName: string) {
       @click="(event: MouseEvent) => showHeaderContextMenu(event, column.name)"
     >
       <i :class="`${column.icon} mr-1`" /> {{ column.title }}
+    </div>
+    <div
+      v-if="props.layout.actionColumnRender"
+      :class="`${props.basic.styles.cellClass} iw-list-cell iw-list-header-cell flex justify-center items-center bg-base-200 border-solid border-b border-b-base-300 border-l border-l-base-300 hover:cursor-pointer hover:bg-base-200`"
+      :style="props.setColumnStyles(-2)"
+    >
+      {{ $t('layout.action.title') }}
     </div>
   </div>
   <ColumnResizeComp :columns-conf="columnsConf" />
