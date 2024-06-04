@@ -20,7 +20,7 @@ const aggsMenuCompRefs = ref<InstanceType<typeof MenuComp>[]>()
 
 function showAggsContextMenu(event: MouseEvent, colIdx: number) {
   const targetEle = event.target as HTMLElement
-  aggsMenuCompRefs.value && aggsMenuCompRefs.value[colIdx].show(targetEle, MenuOffsetKind.RIGHT_BOTTOM, MenuSizeKind.SMALL)
+  aggsMenuCompRefs.value && aggsMenuCompRefs.value[colIdx].show(targetEle, MenuOffsetKind.LEFT_BOTTOM, MenuSizeKind.SMALL)
 }
 
 async function changeColumnAggs(aggKind: AggregateKind, colIdx: number) {

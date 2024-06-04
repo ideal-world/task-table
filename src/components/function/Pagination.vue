@@ -1,12 +1,15 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import * as iconSvg from '../../assets/icon'
 import type { TableDataSliceProps, TableLayoutModifyProps } from '../../props'
+import MenuComp, { MenuOffsetKind, MenuSizeKind } from '../common/Menu.vue'
 import * as eb from '../eventbus'
 
 const props = defineProps<{
   slice: TableDataSliceProps
   totalNumber: number
 }>()
+const fetchNumberSelectCompRef = ref<InstanceType<typeof MenuComp>>()
 
 function getTotalPage() {
   return Math.ceil(props.totalNumber / props.slice.fetchNumber)
@@ -46,6 +49,7 @@ async function setFetchNumber(fetchNumber: number) {
     },
   }
   await eb.modifyLayout(changedLayoutReq)
+  fetchNumberSelectCompRef.value?.close()
 }
 </script>
 
@@ -70,21 +74,17 @@ async function setFetchNumber(fetchNumber: number) {
   <button v-if="getCurrentPage() < getTotalPage() - 1" class="iw-btn iw-btn-ghost pl-1 pr-1 ml-1 iw-btn-sm" @click="setCurrentPage(getTotalPage())">
     <i :class="iconSvg.LAST" />
   </button>
-  <div class="iw-dropdown iw-dropdown-top">
+  <button class="iw-btn ml-1 mr-1 iw-btn-sm" @click="(e) => { fetchNumberSelectCompRef?.show(e.target as HTMLElement, MenuOffsetKind.MEDIUM_BOTTOM, MenuSizeKind.MINI) }">
+    {{ props.slice.fetchNumber }}
+  </button>
+  <MenuComp ref="fetchNumberSelectCompRef">
     <div
-      tabindex="0" role="button"
-      class="iw-btn ml-1 mr-1 iw-btn-sm"
+      v-for="number in props.slice.fetchNumbers ?? [5, 20, 30, 50, 100]" :key="number"
+      class="p-2 hover:cursor-pointer"
+      @click="setFetchNumber(number)"
     >
-      {{ props.slice.fetchNumber }}
+      {{ number }}
     </div>
-    <ul tabindex="0" class="iw-dropdown-content z-[1] iw-menu shadow bg-base-100 rounded-box">
-      <li
-        v-for="number in props.slice.fetchNumbers ?? [5, 20, 30, 50, 100]" :key="number"
-        class="h-8"
-      >
-        <a @click="setFetchNumber(number)">{{ number }}</a>
-      </li>
-    </ul>
-  </div>
+  </MenuComp>
   {{ $t('function.pagination.total', { number: props.totalNumber }) }}
 </template>

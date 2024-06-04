@@ -28,14 +28,10 @@ async function setShowToggleColumn(columnConf: TableLayoutColumnConf) {
   }
   await eb.modifyLayout(changedLayoutReq)
 }
-
-function showContainer(event: MouseEvent, offsetKind: MenuOffsetKind = MenuOffsetKind.RIGHT_BOTTOM) {
-  columnCompRef.value?.show(event, offsetKind)
-}
 </script>
 
 <template>
-  <a class="cursor-pointer"><i :class="iconSvg.MORE" @click="showContainer" /></a>
+  <a class="cursor-pointer"><i :class="iconSvg.MORE" @click="(e) => { columnCompRef?.show(e) }" /></a>
   <MenuComp ref="columnCompRef">
     <div class="iw-divider">
       {{ $t('function.column.showTitle') }}

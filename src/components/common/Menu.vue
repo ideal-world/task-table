@@ -1,37 +1,26 @@
 <script setup lang="ts">
 import type { InjectionKey } from 'vue'
-import { onMounted, provide, ref } from 'vue'
+import { nextTick, onMounted, provide, ref } from 'vue'
 import { IwUtils } from '../../utils'
 
 const contextmenuRef = ref<HTMLElement | null>(null)
-const showMenu = ref<boolean>(false)
+const init = ref<boolean>(false)
 
-function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: MenuOffsetKind = MenuOffsetKind.LEFT_BOTTOM, size: MenuSizeKind = MenuSizeKind.MEDIUM, force: boolean = false) {
-  showMenu.value = true
-  if (!force && attachObj instanceof HTMLElement && IwUtils.hasParentWithClass(attachObj, 'iw-contextmenu')) {
+const DIFF_OFFSET = 10
+
+async function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: MenuOffsetKind = MenuOffsetKind.MEDIUM_TOP, size: MenuSizeKind = MenuSizeKind.MEDIUM, force: boolean = false) {
+  init.value = true
+
+  if (!force
+    && (attachObj instanceof HTMLElement && contextmenuRef.value!.contains(attachObj)
+    || attachObj instanceof MouseEvent && attachObj.target instanceof HTMLElement && contextmenuRef.value!.contains(attachObj.target))) {
     // Prevent accidental triggering from items
     return
   }
-  let left
-  let top
-  let attachObjHeight
-  let attachObjWidth
+
   let minHeight
   let minWidth
   let padding = 0
-  if (attachObj instanceof HTMLElement) {
-    const targetOffset = attachObj.getBoundingClientRect()
-    left = targetOffset.left
-    top = targetOffset.top
-    attachObjHeight = targetOffset.height + 5
-    attachObjWidth = targetOffset.width
-  }
-  else {
-    left = attachObj.x
-    top = attachObj.y
-    attachObjHeight = 0
-    attachObjWidth = 0
-  }
   switch (size) {
     case MenuSizeKind.MINI: {
       minHeight = 20
@@ -58,53 +47,84 @@ function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: MenuOffset
       break
     }
   }
-  switch (offset) {
-    case MenuOffsetKind.LEFT_TOP: {
-      break
-    }
-    case MenuOffsetKind.MEDIUM_TOP: {
-      left = left + attachObjWidth - minWidth / 2
-      break
-    }
-    case MenuOffsetKind.RIGHT_TOP: {
-      left = left + attachObjWidth - minWidth
-      break
-    }
-    case MenuOffsetKind.LEFT_BOTTOM: {
-      top = top + attachObjHeight
-      break
-    }
-    case MenuOffsetKind.MEDIUM_BOTTOM: {
-      left = left + attachObjWidth - minWidth / 2
-      top = top + attachObjHeight
-      break
-    }
-    case MenuOffsetKind.RIGHT_BOTTOM: {
-      left = left + attachObjWidth - minWidth
-      top = top + attachObjHeight
-      break
-    }
-  }
+
   const contextMenuEle = contextmenuRef.value as HTMLElement
   contextMenuEle.style.minHeight = `${minHeight}px`
   contextMenuEle.style.minWidth = `${minWidth}px`
-  contextMenuEle.style.left = `${left}px`
-  contextMenuEle.style.top = `${top}px`
-  contextMenuEle.querySelectorAll('.iw-contextmenu__item').forEach((node) => {
-    const nodeEle = node as HTMLElement
-    nodeEle.style.padding = `${padding}px`
-  })
+  contextMenuEle.style.visibility = 'hidden'
   contextMenuEle.style.display = `block`
-  if (attachObj instanceof HTMLElement || attachObj.target instanceof HTMLElement) {
-    const parentMenuEle = IwUtils.getParentWithClass(attachObj instanceof HTMLElement ? attachObj as HTMLElement : attachObj.target as HTMLElement, 'iw-contextmenu')
-    if (parentMenuEle)
-      contextMenuEle.dataset.level = `${Number.parseInt(parentMenuEle.dataset.level!) + 1}`
-    else
+
+  nextTick().then(() => {
+    let left
+    let top
+    let attachObjHeight
+    let attachObjWidth
+    if (attachObj instanceof HTMLElement) {
+      const targetOffset = attachObj.getBoundingClientRect()
+      left = targetOffset.left
+      top = targetOffset.top
+      attachObjHeight = targetOffset.height
+      attachObjWidth = targetOffset.width
+    }
+    else {
+      left = attachObj.x
+      top = attachObj.y
+      attachObjHeight = 0
+      attachObjWidth = 0
+    }
+    const menuHeight = contextMenuEle.offsetHeight
+    const menuWidth = contextMenuEle.offsetWidth
+
+    switch (offset) {
+      case MenuOffsetKind.LEFT_TOP: {
+        top = top + attachObjHeight + DIFF_OFFSET
+        break
+      }
+      case MenuOffsetKind.MEDIUM_TOP: {
+        left = left + attachObjWidth / 2 - menuWidth / 2
+        top = top + attachObjHeight + DIFF_OFFSET
+        break
+      }
+      case MenuOffsetKind.RIGHT_TOP: {
+        left = left + attachObjWidth - menuWidth
+        top = top + attachObjHeight + DIFF_OFFSET
+        break
+      }
+      case MenuOffsetKind.LEFT_BOTTOM: {
+        top = top - menuHeight - DIFF_OFFSET
+        break
+      }
+      case MenuOffsetKind.MEDIUM_BOTTOM: {
+        left = left + attachObjWidth / 2 - menuWidth / 2
+        top = top - menuHeight - DIFF_OFFSET
+        break
+      }
+      case MenuOffsetKind.RIGHT_BOTTOM: {
+        left = left + attachObjWidth - menuWidth
+        top = top - menuHeight - DIFF_OFFSET
+        break
+      }
+    }
+    contextMenuEle.style.left = `${left}px`
+    contextMenuEle.style.top = `${top}px`
+    contextMenuEle.style.visibility = 'visible'
+
+    contextMenuEle.querySelectorAll('.iw-contextmenu__item').forEach((node) => {
+      const nodeEle = node as HTMLElement
+      nodeEle.style.padding = `${padding}px`
+    })
+    contextMenuEle.style.display = `block`
+    if (attachObj instanceof HTMLElement || attachObj.target instanceof HTMLElement) {
+      const parentMenuEle = IwUtils.getParentWithClass(attachObj instanceof HTMLElement ? attachObj as HTMLElement : attachObj.target as HTMLElement, 'iw-contextmenu')
+      if (parentMenuEle)
+        contextMenuEle.dataset.level = `${Number.parseInt(parentMenuEle.dataset.level!) + 1}`
+      else
+        contextMenuEle.dataset.level = '0'
+    }
+    else {
       contextMenuEle.dataset.level = '0'
-  }
-  else {
-    contextMenuEle.dataset.level = '0'
-  }
+    }
+  })
 }
 
 function hideUnActiveContextMenus(event: MouseEvent) {
@@ -127,7 +147,6 @@ function hideUnActiveContextMenus(event: MouseEvent) {
 }
 
 function hideCurrentContextMenu() {
-  showMenu.value = false
   const contextMenuEle = contextmenuRef.value as HTMLElement
   contextMenuEle.style.display = `none`
 }
@@ -180,10 +199,11 @@ export const FUN_CLOSE_CONTEXT_MENU_TYPE = Symbol('FUN_CLOSE_CONTEXT_MENU_TYPE')
 
 <template>
   <div
-    ref="contextmenuRef" class="iw-contextmenu flex flex-col items-start fixed z-[3000] bg-base-100 p-1 rounded-md border border-base-300"
-    style="display: none;"
+    v-show="init"
+    ref="contextmenuRef"
+    class="iw-contextmenu flex flex-col items-start fixed z-[3000] bg-base-100 p-1 rounded-md border border-base-300"
   >
-    <slot v-if="showMenu" />
+    <slot v-if="init" />
   </div>
 </template>
 

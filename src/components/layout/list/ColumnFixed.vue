@@ -62,6 +62,7 @@ export function setFixedColumnStyles(styles: any, colIdx: number, columnsConf: C
   if (colIdx === -1 && fixedColumnIdx === -1) {
     // non-fixed column
     styles.position = 'static'
+    styles.zIndex = 1000
   }
   else if (colIdx === -1) {
     // fixed select column
@@ -94,7 +95,7 @@ export function setFixedColumnStyles(styles: any, colIdx: number, columnsConf: C
 </script>
 
 <template>
-  <div class="flex justify-between items-center w-full mr-2">
+  <div class="flex justify-between items-center w-full">
     <span>
       <i :class="iconSvg.PIN" />
       {{ $t('list.columnFixed.title') }}

@@ -23,7 +23,7 @@ const listConf = defineProps<
   }
 >()
 
-const COLUMN_SELECT_WIDTH = listConf.layout.showSelectColumn ? 30 : 0
+const COLUMN_SELECT_WIDTH = listConf.layout.showSelectColumn ? 25 : 0
 const COLUMN_ACTION_WIDTH = listConf.layout.actionColumnRender ? listConf.layout.actionColumnWidth ?? 100 : 0
 
 const expandDataPks = ref<string[] | number[]>([])
