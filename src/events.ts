@@ -1,6 +1,6 @@
-import { convertTableColumnPropsToTableColumnConf, convertTableLayoutColumnPropsToTableLayoutColumnConf, convertTableStylePropsToTableStyleConf } from './components/conf'
+import { convertTableStylePropsToTableStyleConf } from './components/conf'
 import * as eb from './components/eventbus'
-import type { TableCellDictItemsResp, TableColumnProps, TableDataSliceProps, TableLayoutColumnProps, TableLayoutKernelProps, TableLayoutModifyProps, TableStyleProps } from './props'
+import type { TableCellDictItemsResp, TableDataSliceProps, TableLayoutKernelProps, TableLayoutModifyProps, TableStyleProps } from './props'
 
 export async function loadData(moreForGroupedValue?: any, offsetNumber?: number, fetchNumber?: number, layoutId?: string) {
   await eb.loadData(moreForGroupedValue, offsetNumber, fetchNumber, layoutId)
@@ -20,6 +20,10 @@ export async function modifyData(changedRecords: { [key: string]: any }[]): Prom
 
 export async function deleteData(deletedRecordPks: any[]): Promise<boolean> {
   return await eb.deleteData(deletedRecordPks)
+}
+
+export async function selectData(selectedRecordPks: any[]): Promise<boolean> {
+  return await eb.selectData(selectedRecordPks)
 }
 
 export async function loadCellDictItems(columnName: string, filterValue?: any, slice?: TableDataSliceProps): Promise<TableCellDictItemsResp> {

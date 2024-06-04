@@ -6,6 +6,8 @@ import type { TableCellDictItemProps, TableCellDictItemsResp, TableColumnProps, 
 import { AggregateKind, DATA_DICT_POSTFIX, DataKind, LayoutKind, OperatorKind } from '../src/props'
 import { IwUtils } from '../src/utils'
 
+const selectedRecordPks: Ref<any[]> = ref([])
+
 const NAME_DICT = [{ title: '星航', value: 'xh', avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg' }, { title: '星杨', value: 'xy', avatar: 'https://pic1.zhimg.com/v2-770e9580d5febfb49cbb23c409cea85d_r.jpg?source=1def8aca' }, { title: '星辰', value: 'xc' }]
 const STATS_DICT = [{ title: '初始化', value: 'init', color: '#43ad7f7f' }, { title: '进行中', value: 'progress' }, { title: '有风险', value: 'risk', color: '#be14807f' }, { title: '已完成', value: 'finish' }, { title: '已关闭', value: 'close' }]
 
@@ -296,7 +298,12 @@ const events: TableEventProps = {
   deleteData: async (deletedRecordPks: any[]): Promise<boolean> => {
     // 不区别类型
     // eslint-disable-next-line eqeqeq
-    DATA.splice(DATA.findIndex(d => d.no == deletedRecordPks[0]), 1)
+    DATA.includes(d => d.no == deletedRecordPks[0]) && DATA.splice(DATA.findIndex(d => d.no == deletedRecordPks[0]), 1)
+    return true
+  },
+
+  selectData: async (_selectedRecordPks: any[]): Promise<boolean> => {
+    selectedRecordPks.value = _selectedRecordPks
     return true
   },
 
@@ -403,6 +410,7 @@ onMounted(() => {
 </script>
 
 <template>
+  <div>选择中的行Id: {{ selectedRecordPks }}</div>
   <div style="height: 600px">
     <iw-task-table
       pk-column-name="no" parent-pk-column-name="pno" :columns="COLUMNS" :events="events" :layouts="LAYOUTS"

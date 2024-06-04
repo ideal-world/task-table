@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import { IwUtils } from '../../../utils'
-import { getParentWithClass } from '../../../utils/basic'
+import { onMounted } from 'vue';
+import { IwUtils } from '../../../utils';
+import { getParentWithClass } from '../../../utils/basic';
+import * as eb from '../../eventbus';
 
 const props = defineProps<{
   selectedPks: any[]
@@ -30,8 +31,9 @@ function onSelectToggle(event: Event) {
   }
   else {
     removeSelect(selectPk, selectCheckBoxEle, selectRowEle, listEle)
-    indeterminateSelect(selectRowEle, listEle)
   }
+  indeterminateSelect(selectRowEle, listEle)
+  eb.selectData(props.selectedPks)
 }
 
 function onSelectAllToggle(event: Event) {
@@ -50,7 +52,7 @@ function onSelectAllToggle(event: Event) {
 }
 
 function addSelect(selectPk: any, selectCheckBoxEle: HTMLInputElement, listEle: HTMLElement) {
-  props.selectedPks.push(selectPk)
+  !props.selectedPks.includes(selectPk) && props.selectedPks.push(selectPk)
   selectCheckBoxEle.checked = true
   selectCheckBoxEle.indeterminate = false
   listEle.querySelectorAll(`.iw-list-data-row[data-parent-pk='${selectPk}']`).forEach((childrenRowEle) => {
@@ -61,7 +63,7 @@ function addSelect(selectPk: any, selectCheckBoxEle: HTMLInputElement, listEle: 
 }
 
 function removeSelect(selectPk: any, selectCheckBoxEle: HTMLInputElement, rowEle: HTMLElement, listEle: HTMLElement) {
-  props.selectedPks.splice(props.selectedPks.indexOf(selectPk), 1)
+  props.selectedPks.includes(selectPk) && props.selectedPks.splice(props.selectedPks.indexOf(selectPk), 1)
   selectCheckBoxEle.checked = false
   selectCheckBoxEle.indeterminate = false
   listEle.querySelectorAll(`.iw-list-data-row[data-parent-pk='${selectPk}']`).forEach((childrenRowEle) => {
@@ -76,7 +78,7 @@ function indeterminateSelect(rowEle: HTMLElement, listEle: HTMLElement) {
     const parentRowEle = listEle.querySelector(`.iw-list-data-row[data-pk='${rowEle.dataset.parentPk}']`)
     if (parentRowEle) {
       const parentPk = props.pkKindIsNumber ? Number.parseInt((parentRowEle as HTMLElement).dataset.pk as string) : (parentRowEle as HTMLElement).dataset.pk
-      props.selectedPks.splice(props.selectedPks.indexOf(parentPk), 1)
+      props.selectedPks.includes(parentPk) && props.selectedPks.splice(props.selectedPks.indexOf(parentPk), 1)
       const childrenCheckBoxEle = parentRowEle.querySelector('.iw-list-select-cell__chk') as HTMLInputElement
       childrenCheckBoxEle.indeterminate = true
       indeterminateSelect(parentRowEle as HTMLElement, listEle)

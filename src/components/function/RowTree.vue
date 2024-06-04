@@ -2,6 +2,7 @@
 import { inject } from 'vue'
 import * as iconSvg from '../../assets/icon'
 import { getParentWithClass } from '../../utils/basic'
+import { IwUtils } from '../../utils'
 import { NODE_DEPTH_FLAG } from './RowTree'
 
 const props = defineProps<{
@@ -19,26 +20,22 @@ function expandNode(dataPk: any) {
   if (props.pkKindIsNumber) {
     dataPk = Number.parseInt(dataPk)
   }
-  props.expandDataPks.push(dataPk)
+  !props.expandDataPks.includes(dataPk) && props.expandDataPks.push(dataPk)
 }
 
 function shrinkNode(dataPk: any) {
   if (props.pkKindIsNumber) {
     dataPk = Number.parseInt(dataPk)
   }
-  props.expandDataPks.splice(props.expandDataPks.indexOf(dataPk), 1)
+  props.expandDataPks.includes(dataPk) && props.expandDataPks.splice(props.expandDataPks.indexOf(dataPk), 1)
 }
 
 function init() {
-  document.querySelectorAll('.iw-tt').forEach(async (ttEle) => {
-    ttEle.addEventListener('click', async (event) => {
-      const targetEle = event.target as HTMLElement
-      if (targetEle.classList.contains('iw-tree-node--expand'))
-        expandNode(getParentWithClass(targetEle, 'iw-list-data-row')!.dataset.pk!)
-
-      else if (targetEle.classList.contains('iw-tree-node--shrink'))
-        shrinkNode(getParentWithClass(targetEle, 'iw-list-data-row')!.dataset.pk!)
-    })
+  IwUtils.delegateEvent('.iw-list', 'click', '.iw-tree-node--expand', (e) => {
+    expandNode(getParentWithClass(e.target as HTMLElement, 'iw-list-data-row')!.dataset.pk!)
+  })
+  IwUtils.delegateEvent('.iw-list', 'click', '.iw-tree-node--shrink', (e) => {
+    shrinkNode(getParentWithClass(e.target as HTMLElement, 'iw-list-data-row')!.dataset.pk!)
   })
 }
 

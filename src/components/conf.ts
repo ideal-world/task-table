@@ -56,10 +56,8 @@ export interface TableLayoutKernelConf {
   showSelectColumn: boolean
   // TODO 调用事件
   actionColumnRender?: (record: { [key: string]: any }) => any
-
-  expandDataPks: any[]
-
   data?: TableDataResp | TableDataGroupResp[]
+  selectedDataPks: any[]
 }
 
 export function convertTableLayoutKernelPropsToTableLayoutKernelConf(props: TableLayoutKernelProps, tableColumns: TableColumnConf[]): TableLayoutKernelConf {
@@ -80,7 +78,7 @@ export function convertTableLayoutKernelPropsToTableLayoutKernelConf(props: Tabl
     },
     showSelectColumn: props.showSelectColumn ?? true,
     actionColumnRender: props.actionColumnRender,
-    expandDataPks: [],
+    selectedDataPks: [],
   }
 }
 
@@ -335,7 +333,7 @@ export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]]
         fetchNumber: 50,
       },
       showSelectColumn: true,
-      expandDataPks: [],
+      selectedDataPks: [],
     })
   }
   layoutsConf.forEach((layout) => {
