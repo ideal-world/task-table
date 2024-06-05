@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { onMounted } from 'vue';
-import { IwUtils } from '../../../utils';
-import { getParentWithClass } from '../../../utils/basic';
-import * as eb from '../../eventbus';
+import { onMounted } from 'vue'
+import { IwUtils } from '../../../utils'
+import { getParentWithClass } from '../../../utils/basic'
+import * as eb from '../../eventbus'
 
 const props = defineProps<{
   selectedPks: any[]
@@ -49,6 +49,7 @@ function onSelectAllToggle(event: Event) {
       removeSelect(selectPk, selectCheckBoxEle, rowEle as HTMLElement, listEle)
     }
   })
+  eb.selectData(props.selectedPks)
 }
 
 function addSelect(selectPk: any, selectCheckBoxEle: HTMLInputElement, listEle: HTMLElement) {

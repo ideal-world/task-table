@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import type { Ref } from 'vue'
 import { computed, onMounted, ref } from 'vue'
+import type { TableDataResp } from '../../../props'
 import { DataKind, SubDataShowKind } from '../../../props'
 import type { CachedColumnConf, TableBasicConf, TableLayoutConf } from '../../conf'
 import { registerCellClickListener } from '../../function/CellClick'
 import { registerTreeRowToggleListener } from '../../function/RowTree'
 import { setFixedColumnStyles } from './ColumnFixed.vue'
+import ColumnAggsComp from './ColumnAggs.vue'
 import HeaderComp from './Header.vue'
 import RowSelectComp from './RowSelect.vue'
 import RowsComp from './Rows.vue'
@@ -81,12 +83,15 @@ onMounted(() => {
         :action-column-render="listConf.layout.actionColumnRender"
         :set-column-styles="setColumnStyles"
       />
-      <!-- <ColumnAggsComp
+      <ColumnAggsComp
         v-if="layout.aggs"
-        :layout-aggs="layout.aggs" :data-basic="layout.data as TableDataResp"
+        :layout-aggs="layout.aggs"
+        :data-basic="layout.data as TableDataResp"
+        :show-select-column="layout.showSelectColumn"
+        :show-action-column="layout.actionColumnRender !== undefined"
         :columns-conf="columnsWithoutHideConf" :styles-conf="listConf.basic.styles"
         :set-column-styles="setColumnStyles"
-      /> -->
+      />
     </template>
     <!-- <template v-else-if="listConf.layout.data && Array.isArray(listConf.layout.data)">
       <template v-for="groupData in listConf.layout.data" :key="groupData.groupValue">

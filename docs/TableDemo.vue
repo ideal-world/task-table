@@ -198,17 +198,27 @@ const events: TableEventProps = {
             const agg = aggs[aggKey]
             switch (agg) {
               case AggregateKind.COUNT:
-                return { aggKey: data.filter(d => d[aggKey] !== undefined).length }
+                return aggsResult[aggKey] = data.filter(d => d[aggKey] !== undefined).length
               case AggregateKind.SUM:
-                return { aggKey: data.reduce((acc, cur) => acc + cur[aggKey], 0) }
+                return aggsResult[aggKey] = data.reduce((acc, cur) => acc + cur[aggKey], 0)
               case AggregateKind.AVG:
-                return { aggKey: data.reduce((acc, cur) => acc + cur[aggKey], 0) / data.length }
+                return aggsResult[aggKey] = data.reduce((acc, cur) => acc + cur[aggKey], 0) / data.length
               case AggregateKind.MAX:
-                return { aggKey: Math.max(...data.map(d => d[aggKey])) }
+                if (typeof data[0][aggKey] === 'string') {
+                  return aggsResult[aggKey] = data.reduce((acc, cur) => acc[aggKey] > cur[aggKey] ? acc : cur)[aggKey]
+                }
+                else {
+                  return aggsResult[aggKey] = Math.max(...data.map(d => d[aggKey]))
+                }
               case AggregateKind.MIN:
-                return { aggKey: Math.min(...data.map(d => d[aggKey])) }
+                if (typeof data[0][aggKey] === 'string') {
+                  return aggsResult[aggKey] = data.reduce((acc, cur) => acc[aggKey] > cur[aggKey] ? acc : cur)[aggKey]
+                }
+                else {
+                  return aggsResult[aggKey] = Math.min(...data.map(d => d[aggKey]))
+                }
               default:
-                return { aggKey: data.filter(d => d[aggKey] !== undefined).length }
+                return aggsResult[aggKey] = data.filter(d => d[aggKey] !== undefined).length
             }
           })
         }
@@ -229,23 +239,33 @@ const events: TableEventProps = {
       })
     }
     else {
-      let aggsResult = {}
+      const aggsResult = {}
       if (aggs) {
-        aggsResult = Object.keys(aggs).map((aggKey) => {
+        Object.keys(aggs).forEach((aggKey) => {
           const agg = aggs[aggKey]
           switch (agg) {
             case AggregateKind.COUNT:
-              return { aggKey: data.filter(d => d[aggKey] !== undefined).length }
+              return aggsResult[aggKey] = data.filter(d => d[aggKey] !== undefined).length
             case AggregateKind.SUM:
-              return { aggKey: data.reduce((acc, cur) => acc + cur[aggKey], 0) }
+              return aggsResult[aggKey] = data.reduce((acc, cur) => acc + cur[aggKey], 0)
             case AggregateKind.AVG:
-              return { aggKey: data.reduce((acc, cur) => acc + cur[aggKey], 0) / data.length }
+              return aggsResult[aggKey] = data.reduce((acc, cur) => acc + cur[aggKey], 0) / data.length
             case AggregateKind.MAX:
-              return { aggKey: Math.max(...data.map(d => d[aggKey])) }
+              if (typeof data[0][aggKey] === 'string') {
+                return aggsResult[aggKey] = data.reduce((acc, cur) => acc[aggKey] > cur[aggKey] ? acc : cur)[aggKey]
+              }
+              else {
+                return aggsResult[aggKey] = Math.max(...data.map(d => d[aggKey]))
+              }
             case AggregateKind.MIN:
-              return { aggKey: Math.min(...data.map(d => d[aggKey])) }
+              if (typeof data[0][aggKey] === 'string') {
+                return aggsResult[aggKey] = data.reduce((acc, cur) => acc[aggKey] > cur[aggKey] ? acc : cur)[aggKey]
+              }
+              else {
+                return aggsResult[aggKey] = Math.min(...data.map(d => d[aggKey]))
+              }
             default:
-              return { aggKey: data.filter(d => d[aggKey] !== undefined).length }
+              return aggsResult[aggKey] = data.filter(d => d[aggKey] !== undefined).length
           }
         })
       }

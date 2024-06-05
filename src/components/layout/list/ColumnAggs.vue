@@ -9,6 +9,8 @@ import { showGroupAggMappingByDataKind } from '../../function/Group'
 
 const props = defineProps<{
   layoutAggs: { [key: string]: AggregateKind }
+  showSelectColumn: boolean
+  showActionColumn: boolean
   dataBasic: TableDataResp
   columnsConf: CachedColumnConf[]
   stylesConf: TableStyleConf
@@ -19,8 +21,7 @@ const props = defineProps<{
 const aggsMenuCompRefs = ref<InstanceType<typeof MenuComp>[]>()
 
 function showAggsContextMenu(event: MouseEvent, colIdx: number) {
-  const targetEle = event.target as HTMLElement
-  aggsMenuCompRefs.value && aggsMenuCompRefs.value[colIdx].show(targetEle, MenuOffsetKind.LEFT_BOTTOM, MenuSizeKind.SMALL)
+  aggsMenuCompRefs.value && aggsMenuCompRefs.value[colIdx - 1].show(event, MenuOffsetKind.RIGHT_BOTTOM, MenuSizeKind.MINI)
 }
 
 async function changeColumnAggs(aggKind: AggregateKind, colIdx: number) {
@@ -29,26 +30,30 @@ async function changeColumnAggs(aggKind: AggregateKind, colIdx: number) {
   await eb.modifyLayout({
     aggs,
   })
-  aggsMenuCompRefs.value && aggsMenuCompRefs.value[colIdx].close()
+  aggsMenuCompRefs.value && aggsMenuCompRefs.value[colIdx - 1].close()
 }
 </script>
 
 <template>
-  <div :class="`${props.stylesConf.rowClass} iw-list-row iw-list-agg-row flex border-r border-r-base-300`">
+  <div :class="`${props.stylesConf.rowClass} iw-list-row iw-list-agg-row flex border-r border-r-base-300 text-sm`">
+    <div
+      v-if="props.showSelectColumn"
+      :class="`${props.stylesConf.cellClass} iw-list-cell flex justify-center items-center bg-base-100 border-b border-b-base-300 border-l border-l-base-300 whitespace-nowrap flex-nowrap`"
+      :style="props.setColumnStyles(-1)"
+    />
     <template v-for="(column, colIdx) in props.columnsConf" :key="column.name">
       <div
         v-if="colIdx === 0"
-        :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-agg-cell cursor-pointer flex items-center justify-end pr-1 bg-base-100 border-solid border-b border-b-base-300 border-l  border-l-base-300 hover:bg-base-200`" :data-column-name="column.name"
-        :style="props.setColumnStyles(0)" @click="(event: MouseEvent) => showAggsContextMenu(event, 0)"
+        :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-agg-cell flex items-center justify-end pr-1 bg-base-100 border-solid border-b border-b-base-300 border-l border-l-base-300`" :data-column-name="column.name"
+        :style="props.setColumnStyles(0)"
       >
         <span class="iw-list-agg-cell__group font-bold flex-grow pl-1">{{ props.groupValue }}</span>
-        <span class="iw-list-agg-cell__agg text-xs pr-1 self-center">{{ $t('_.agg.count')
-        }}</span>
+        <span class="iw-list-agg-cell__agg text-xs pr-1 self-center">{{ $t('_.agg.count') }}</span>
         <span class="iw-list-agg-cell__value text-info self-center">{{ props.dataBasic.totalNumber }}</span>
       </div>
       <div
         v-else
-        :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-agg-cell cursor-pointer flex items-center justify-end pr-1 bg-base-100 border-solid border-b border-b-base-300 border-l  border-l-base-300 hover:bg-base-200`" :data-column-name="column.name"
+        :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-agg-cell cursor-pointer flex items-center justify-end pr-1 bg-base-100 border-solid border-b border-b-base-300 border-l border-l-base-300 hover:bg-base-200`" :data-column-name="column.name"
         :style="props.setColumnStyles(colIdx)" @click="(event: MouseEvent) => showAggsContextMenu(event, colIdx)"
       >
         <template v-if="props.layoutAggs && props.layoutAggs[column.name]">
@@ -57,7 +62,7 @@ async function changeColumnAggs(aggKind: AggregateKind, colIdx: number) {
           <span class="iw-list-agg-cell__value text-info self-center">{{ props.dataBasic.aggs[column.name] }}</span>
         </template>
       </div>
-      <MenuComp ref="aggsMenuCompRefs" class="iw-list-agg-row-contextmenu">
+      <MenuComp v-if="colIdx !== 0" ref="aggsMenuCompRefs" class="iw-list-agg-row-contextmenu">
         <div
           v-for="aggItem in showGroupAggMappingByDataKind(column.dataKind)" :key="aggItem.kind"
           class="iw-contextmenu__item"
@@ -67,5 +72,10 @@ async function changeColumnAggs(aggKind: AggregateKind, colIdx: number) {
         </div>
       </MenuComp>
     </template>
+    <div
+      v-if="props.showActionColumn"
+      :class="`${props.stylesConf.cellClass} iw-list-cell flex justify-center items-center bg-base-100 border-b border-b-base-300 border-l border-l-base-300 whitespace-nowrap flex-nowrap`"
+      :style="props.setColumnStyles(-2)"
+    />
   </div>
 </template>
