@@ -3,6 +3,7 @@ import type { Ref } from 'vue'
 import { computed, onMounted, ref } from 'vue'
 import { DataKind, SubDataShowKind } from '../../../props'
 import type { CachedColumnConf, TableBasicConf, TableLayoutConf } from '../../conf'
+import { registerCellClickListener } from '../../function/CellClick'
 import { registerTreeRowToggleListener } from '../../function/RowTree'
 import { setFixedColumnStyles } from './ColumnFixed.vue'
 import HeaderComp from './Header.vue'
@@ -57,6 +58,7 @@ function setTableWidth() {
 
 onMounted(() => {
   registerTreeRowToggleListener(listCompRef.value!)
+  registerCellClickListener(listCompRef.value!)
 })
 </script>
 

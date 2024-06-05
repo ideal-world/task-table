@@ -312,6 +312,14 @@ const events: TableEventProps = {
     return true
   },
 
+  clickCell: async (clickedRecordPk: any, clickedColumnName: string): Promise<boolean> => {
+    if (clickedColumnName === 'no') {
+      // eslint-disable-next-line no-alert
+      alert(`点击了序号${clickedRecordPk}`)
+    }
+    return true
+  },
+
   modifyStyles: async (changedStyleProps: TableStyleProps): Promise<boolean> => {
     STYLES.value = changedStyleProps
     return true

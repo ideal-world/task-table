@@ -235,7 +235,7 @@ export interface TableEventProps {
   // Need to delete child node
   deleteData?: (deletedRecordPks: any[]) => Promise<boolean>
   selectData?: (selectedRecordPks: any[]) => Promise<boolean>
-  clickCell?: (recordPk: any, columnName: string) => Promise<boolean>
+  clickCell?: (clickedRecordPk: any, clickedColumnName: string) => Promise<boolean>
 
   loadCellDictItems?: (columnName: string, filterValue?: any, slice?: TableDataSliceProps) => Promise<TableCellDictItemsResp>
 

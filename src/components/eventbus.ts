@@ -184,6 +184,16 @@ export async function selectData(selectedRecordPks: any[]): Promise<boolean> {
   return true
 }
 
+export async function clickCell(clickedRecordPk: any, clickedColumnName: string): Promise<boolean> {
+  const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
+
+  if (!events.clickCell) {
+    showAlert(t('_.event.notConfigured', { name: 'clickCell' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    throw new Error('[events.clickCell] Event not Configured')
+  }
+  return await events.clickCell(clickedRecordPk, clickedColumnName)
+}
+
 export async function loadCellDictItems(columnName: string, filterValue?: any, slice?: TableDataSliceProps): Promise<TableCellDictItemsResp> {
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 

@@ -35,7 +35,7 @@ const props = defineProps<{
       <input type="checkbox" class="iw-list-select-cell__chk iw-checkbox iw-checkbox-xs">
     </div>
     <div
-      :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-data-pk-cell flex items-center bg-base-100 border-l border-l-base-300 whitespace-nowrap flex-nowrap`"
+      :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-data-cell flex items-center bg-base-100 border-l border-l-base-300 whitespace-nowrap flex-nowrap`"
       :data-column-name="props.pkColumnName" :style="props.setColumnStyles(0)"
     >
       <div v-if="!props.tileAllData && props.parentPkColumnName" class="flex justify-end" :style="{ width: `${15 * (row[NODE_DEPTH_FLAG] + 1)}px` }" v-html="renderTreeToggleHandler(props.records[idx + 1] && row[props.pkColumnName] === props.records[idx + 1][props.parentPkColumnName])" />
@@ -70,7 +70,7 @@ const props = defineProps<{
     </div>
     <div
       v-if="props.actionColumnRender"
-      :class="`${props.stylesConf.cellClass} iw-list-cell flex justify-center items-center  bg-base-100 border-l border-l-base-300 whitespace-nowrap flex-nowrap`"
+      :class="`${props.stylesConf.cellClass} iw-list-cell flex justify-center items-center bg-base-100 border-l border-l-base-300 whitespace-nowrap flex-nowrap`"
       :style="props.setColumnStyles(-2)"
       v-html="props.actionColumnRender(row)"
     />
