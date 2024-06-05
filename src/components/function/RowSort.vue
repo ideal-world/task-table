@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
 import Sortable from 'sortablejs'
+import { onMounted, ref } from 'vue'
 import * as iconSvg from '../../assets/icon'
 import type { TableDataSortProps } from '../../props'
-import MenuComp, { MenuSizeKind } from '../common/Menu.vue'
+import MenuComp from '../common/Menu.vue'
 import type { TableColumnConf } from '../conf'
 import * as eb from '../eventbus'
 

@@ -99,7 +99,7 @@ function attachDict(data: { [key: string]: any }[]) {
 }
 
 const events: TableEventProps = {
-  loadData: async (columns?: string[], filters?: TableDataFilterProps[], sorts?: TableDataSortProps[], group?: TableDataGroupProps, aggs?: { [key: string]: AggregateKind }, byGroupValue?: any, slice?: TableDataSliceProps): Promise<TableDataResp | TableDataGroupResp[]> => {
+  loadData: async (columns?: string[], filters?: TableDataFilterProps[], sorts?: TableDataSortProps[], group?: TableDataGroupProps, aggs?: { [key: string]: AggregateKind }, hideSubData?: boolean, byGroupValue?: any, slice?: TableDataSliceProps): Promise<TableDataResp | TableDataGroupResp[]> => {
     let data: { [key: string]: any }[] = JSON.parse(JSON.stringify(DATA))
     if (filters) {
       // TODO 支持多组
@@ -156,6 +156,11 @@ const events: TableEventProps = {
             return b[sort.columnName] - a[sort.columnName]
           }
         })
+      })
+    }
+    if (hideSubData) {
+      data = data.filter((d) => {
+        return d.pno === null
       })
     }
     if (group) {
@@ -343,6 +348,9 @@ const events: TableEventProps = {
     }
     if (changedLayoutProps.slice) {
       currLayout.slice = changedLayoutProps.slice
+    }
+    if (changedLayoutProps.subDataShowKind) {
+      currLayout.subDataShowKind = changedLayoutProps.subDataShowKind
     }
     if (changedLayoutProps.columnSortedNames) {
       const leftColumnName = changedLayoutProps.columnSortedNames[0]

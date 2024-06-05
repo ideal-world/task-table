@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { DataKind } from '../../../props'
+import { DataKind, SubDataShowKind } from '../../../props'
 import type { CachedColumnConf, TableBasicConf, TableLayoutConf } from '../../conf'
 import { setFixedColumnStyles } from './ColumnFixed.vue'
 import HeaderComp from './Header.vue'
@@ -53,7 +53,6 @@ function setTableWidth() {
   styles.width = `${listConf.layout.columns.filter(column => !column.hide).reduce((count, col) => count + col.width, COLUMN_SELECT_WIDTH + COLUMN_ACTION_WIDTH + 2)}px`
   return styles
 }
-
 </script>
 
 <template>
@@ -66,6 +65,7 @@ function setTableWidth() {
       <RowsComp
         :records="listConf.layout.data.records" :pk-column-name="listConf.basic.pkColumnName"
         :parent-pk-column-name="listConf.basic.parentPkColumnName"
+        :tile-all-data="listConf.layout.subDataShowKind === SubDataShowKind.TILE_ALL_DATA"
         :expand-data-pks="expandDataPks"
         :pk-kind-is-number="pkKindIsNumber"
         :columns-conf="columnsWithoutHideConf"

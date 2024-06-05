@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { inject } from 'vue'
-import * as iconSvg from '../../assets/icon'
-import { getParentWithClass } from '../../utils/basic'
-import { IwUtils } from '../../utils'
-import { NODE_DEPTH_FLAG } from './RowTree'
+import * as iconSvg from '../../assets/icon';
+import { IwUtils } from '../../utils';
+import { getParentWithClass } from '../../utils/basic';
+import { NODE_DEPTH_FLAG } from './RowTree';
 
 const props = defineProps<{
   curData: { [key: string]: any }
@@ -46,7 +45,7 @@ if (!IS_INIT) {
 </script>
 
 <template>
-  <div class="flex justify-end iw-list-data-cell__container" :style="{ width: `${20 * (props.curData[NODE_DEPTH_FLAG] + 1)}px` }">
+  <div class="flex justify-end iw-list-data-cell__container" :style="{ width: `${15 * (props.curData[NODE_DEPTH_FLAG] + 1)}px` }">
     <template v-if="props.nextData && props.nextData[props.parentPkColumnName] === props.curData[props.pkColumnName]">
       <i v-if="props.expandDataPks.indexOf(curData[props.pkColumnName]) === -1" :class="iconSvg.EXPAND" class="iw-tree-node--expand cursor-pointer" />
       <i v-else :class="iconSvg.SHRINK" class="iw-tree-node--shrink cursor-pointer" />

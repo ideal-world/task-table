@@ -1,7 +1,7 @@
 import * as iconSvg from '../assets/icon'
 import locales from '../locales'
 import type { AggregateKind, TableColumnProps, TableDataFilterProps, TableDataGroupProps, TableDataGroupResp, TableDataResp, TableDataSliceProps, TableDataSortProps, TableLayoutColumnProps, TableLayoutKernelProps, TableProps, TableStyleProps } from '../props'
-import { DataKind, LayoutKind, OperatorKind, SizeKind } from '../props'
+import { DataKind, LayoutKind, OperatorKind, SizeKind, SubDataShowKind } from '../props'
 
 const { t } = locales.global
 
@@ -55,6 +55,7 @@ export interface TableLayoutKernelConf {
   group?: TableDataGroupProps
   aggs?: { [key: string]: AggregateKind }
   slice: TableDataSliceProps
+  subDataShowKind: SubDataShowKind
   showSelectColumn: boolean
   actionColumnRender?: (record: { [key: string]: any }) => any
   actionColumnWidth?: number
@@ -78,6 +79,7 @@ export function convertTableLayoutKernelPropsToTableLayoutKernelConf(props: Tabl
       offsetNumber: 0,
       fetchNumber: 50,
     },
+    subDataShowKind: props.subDataShowKind ?? SubDataShowKind.FOLD_SUB_DATA,
     showSelectColumn: props.showSelectColumn ?? true,
     actionColumnRender: props.actionColumnRender,
     actionColumnWidth: props.actionColumnWidth,
@@ -335,6 +337,7 @@ export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]]
         offsetNumber: 0,
         fetchNumber: 50,
       },
+      subDataShowKind: SubDataShowKind.FOLD_SUB_DATA,
       showSelectColumn: true,
       selectedDataPks: [],
     })

@@ -131,6 +131,21 @@ export enum LayoutKind {
   CHART = 'CHART',
 }
 
+export enum SubDataShowKind {
+  TILE_ALL_DATA = 'TILE_ALL_DATA',
+  ONLY_PARENT_DATA = 'ONLY_PARENT_DATA',
+  FOLD_SUB_DATA = 'FOLD_SUB_DATA',
+}
+
+export function translateSubDataShowKind(subDataShowKind: SubDataShowKind): string {
+  switch (subDataShowKind) {
+    case SubDataShowKind.TILE_ALL_DATA:
+      return t('layout.subData.tileAllData')
+    case SubDataShowKind.ONLY_PARENT_DATA: return t('layout.subData.onlyParentData')
+    case SubDataShowKind.FOLD_SUB_DATA: return t('layout.subData.foldSubData')
+  }
+}
+
 export interface TableProps {
   id?: string
   pkColumnName: string
@@ -169,6 +184,7 @@ export interface TableLayoutKernelProps {
   aggs?: { [key: string]: AggregateKind }
   // Pagination with out group
   slice?: TableDataSliceProps
+  subDataShowKind?: SubDataShowKind
   showSelectColumn?: boolean
   actionColumnRender?: (record: { [key: string]: any }) => any
   actionColumnWidth?: number
@@ -208,6 +224,7 @@ export interface TableEventProps {
     sorts?: TableDataSortProps[],
     group?: TableDataGroupProps,
     aggs?: { [key: string]: AggregateKind },
+    hideSubData?: boolean,
     // Load only the data of the corresponding group
     byGroupValue?: any,
     // Do not use this slice if it exists in group.slices
@@ -237,6 +254,7 @@ export interface TableLayoutModifyProps {
   group?: TableDataGroupProps
   aggs?: { [key: string]: AggregateKind }
   slice?: TableDataSliceProps
+  subDataShowKind?: SubDataShowKind
   columnSortedNames?: [string, string]
   newColumn?: TableLayoutColumnProps
   changedColumn?: TableLayoutColumnProps

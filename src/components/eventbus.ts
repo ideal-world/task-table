@@ -1,7 +1,7 @@
 import type { Ref } from 'vue'
 import { toRaw } from 'vue'
 import locales from '../locales'
-import type { TableCellDictItemsResp, TableDataSliceProps, TableEventProps, TableLayoutKernelProps, TableLayoutModifyProps } from '../props'
+import { SubDataShowKind, type TableCellDictItemsResp, type TableDataSliceProps, type TableEventProps, type TableLayoutKernelProps, type TableLayoutModifyProps } from '../props'
 import { getParentWithClass } from '../utils/basic'
 import { AlertKind, showAlert } from './common/Alert'
 import { type TableBasicConf, type TableLayoutConf, type TableStyleConf, convertTableLayoutColumnPropsToTableLayoutColumnConf, convertTableLayoutKernelPropsToTableLayoutKernelConf } from './conf'
@@ -58,6 +58,7 @@ export async function loadData(moreForGroupedValue?: any, offsetNumber?: number,
     layout.sorts ?? toRaw(layout.sorts),
     layout.group ?? toRaw(layout.group),
     layout.aggs ?? toRaw(layout.aggs),
+    layout.subDataShowKind === SubDataShowKind.ONLY_PARENT_DATA,
     moreForGroupedValue ?? moreForGroupedValue,
     toRaw(layout.slice),
   )
@@ -65,7 +66,7 @@ export async function loadData(moreForGroupedValue?: any, offsetNumber?: number,
   if (!moreForGroupedValue && !layout.group) {
     // Load data without grouping
     if (!Array.isArray(resp)) {
-      resp.records = sortByTree(resp.records, tableBasicConf.pkColumnName, tableBasicConf.parentPkColumnName)
+      resp.records = layout.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA ? sortByTree(resp.records, tableBasicConf.pkColumnName, tableBasicConf.parentPkColumnName) : resp.records
       layout.data = resp
     }
     else {
@@ -77,7 +78,7 @@ export async function loadData(moreForGroupedValue?: any, offsetNumber?: number,
     // Load all grouped data
     if (Array.isArray(resp)) {
       resp.forEach((groupData) => {
-        groupData.records = sortByTree(groupData.records, tableBasicConf.pkColumnName, tableBasicConf.parentPkColumnName)
+        groupData.records = layout.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA ? sortByTree(groupData.records, tableBasicConf.pkColumnName, tableBasicConf.parentPkColumnName) : groupData.records
       })
       layout.data = resp
     }
@@ -91,7 +92,7 @@ export async function loadData(moreForGroupedValue?: any, offsetNumber?: number,
     if (!Array.isArray(resp) && Array.isArray(layout.data)) {
       const groupData = layout.data.find(d => d.groupValue === moreForGroupedValue)
       if (groupData) {
-        groupData.records = sortByTree(resp.records, tableBasicConf.pkColumnName, tableBasicConf.parentPkColumnName)
+        groupData.records = layout.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA ? sortByTree(resp.records, tableBasicConf.pkColumnName, tableBasicConf.parentPkColumnName) : resp.records
         groupData.aggs = resp.aggs
         groupData.totalNumber = resp.totalNumber
       }
@@ -273,6 +274,7 @@ export async function modifyLayout(changedLayoutProps: TableLayoutModifyProps): 
   changedLayoutProps.group && (layout.group = changedLayoutProps.group)
   changedLayoutProps.aggs && (layout.aggs = changedLayoutProps.aggs)
   changedLayoutProps.slice && (layout.slice = changedLayoutProps.slice)
+  changedLayoutProps.subDataShowKind && (layout.subDataShowKind = changedLayoutProps.subDataShowKind)
 
   if (changedLayoutProps.newColumn) {
     layout.columns.push(convertTableLayoutColumnPropsToTableLayoutColumnConf(changedLayoutProps.newColumn, tableBasicConf.columns.find(column => column.name === changedLayoutProps.newColumn?.name)!))

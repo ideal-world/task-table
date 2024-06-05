@@ -47,6 +47,7 @@ export const WRAP = 'octicon-move-to-end-24'
 export const EXPAND = 'octicon-triangle-right-24'
 export const SHRINK = 'octicon-triangle-down-24'
 export const LOAD = 'octicon-fold-down-24'
+export const SUB = 'octicon-arrow-up-left-24'
 
 export const FIRST  = 'octicon-move-to-start-24'
 export const LAST  = 'octicon-move-to-end-24'
@@ -55,3 +56,8 @@ export const NEXT  = 'octicon-chevron-right-24'
 
 export const ASC  = 'octicon-sort-asc-24'
 export const DESC  = 'octicon-sort-desc-24'
+
+
+export const TILE_ALL_DATA = 'octicon-multi-select-24'
+export const ONLY_PARENT_DATA = 'octicon-x-24'
+export const FOLD_SUB_DATA = 'octicon-quote-24'

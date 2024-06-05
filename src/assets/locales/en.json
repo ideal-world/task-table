@@ -63,6 +63,15 @@
     },
     "action": {
       "title": "Action"
+    },
+    "subData": {
+      "title": "Sub Data",
+      "tileAllData": "Tile all data",
+      "onlyParentData": "Parent data only",
+      "foldSubData": "Fold sub data",
+      "tileAllDataTitle": "Tile",
+      "onlyParentDataTitle": "Hide",
+      "foldSubDataTitle": "Fold"
     }
   },
   "function": {
@@ -101,26 +110,11 @@
     "rowSelect": {
       "acrossGroupError": "Cannot select across groups"
     },
-    "cellFill": {
-      "acrossGroupError": "Cannot fill across groups"
-    },
-    "cellEdit": {
-      "dictTitle": "Available dictionary values",
-      "searchPlaceholder": "Search..."
-    },
     "columnFixed": {
       "title": "Fixed"
     },
-    "rowDelete": {
-      "title": "Delete row(s)"
-    },
     "columnWrap": {
       "title": "Break words"
-    },
-    "rowCopyPaste": {
-      "copyTitle": "Copy row(s)",
-      "pasteTitle": "Paste row(s)",
-      "copyAndPasteTitle": "Copy and Paste row(s)"
     }
   }
 }

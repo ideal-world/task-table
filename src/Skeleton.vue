@@ -5,13 +5,13 @@ import MenuComp from './components/common/Menu.vue'
 import type { TableBasicConf, TableLayoutConf } from './components/conf'
 import { initConf } from './components/conf'
 import * as Event from './components/eventbus'
-import ColumnSettingComp from './components/function/ColumnSetting.vue'
 import FilterComp from './components/function/Filter.vue'
 import GroupComp from './components/function/Group.vue'
-import RowSortComp from './components/function/RowSort.vue'
-import ResizeComp from './components/function/Resize.vue'
-import ThemeComp from './components/function/Theme.vue'
+import LayoutSettingComp from './components/function/LayoutSetting.vue'
 import PaginationComp from './components/function/Pagination.vue'
+import ResizeComp from './components/function/Resize.vue'
+import RowSortComp from './components/function/RowSort.vue'
+import ThemeComp from './components/function/Theme.vue'
 import ListComp from './components/layout/list/List.vue'
 import type { TableProps } from './props'
 import { LayoutKind } from './props'
@@ -116,10 +116,9 @@ function showMoreMenu(event: MouseEvent) {
             <FilterComp :filters="layout.filters" :columns-conf="tableBasicConf.columns" />
           </div>
           <div>
-            <ColumnSettingComp
-              :basic-columns-conf="tableBasicConf.columns"
-              :layout-columns-conf="layout.columns"
-              :pk-column-name="tableBasicConf.pkColumnName"
+            <LayoutSettingComp
+              :basic-conf="tableBasicConf"
+              :layout-conf="layout"
             />
           </div>
         </div>
