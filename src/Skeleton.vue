@@ -8,6 +8,7 @@ import * as Event from './components/eventbus'
 import ColumnSettingComp from './components/function/ColumnSetting.vue'
 import FilterComp from './components/function/Filter.vue'
 import GroupComp from './components/function/Group.vue'
+import RowSortComp from './components/function/RowSort.vue'
 import ResizeComp from './components/function/Resize.vue'
 import ThemeComp from './components/function/Theme.vue'
 import PaginationComp from './components/function/Pagination.vue'
@@ -109,6 +110,8 @@ function showMoreMenu(event: MouseEvent) {
         <div v-if="currentLayoutId === layout.id" :id="`iw-tt-layout-${layout.id}`" class="iw-tt-toolbar flex justify-between h-8 p-0.5">
           <div class="flex">
             <GroupComp :group="layout.group" :columns-conf="tableBasicConf.columns" />
+            <div class="iw-divider iw-divider-horizontal m-0.5" />
+            <RowSortComp :sorts="layout.sorts" :columns-conf="tableBasicConf.columns" />
             <div class="iw-divider iw-divider-horizontal m-0.5" />
             <FilterComp :filters="layout.filters" :columns-conf="tableBasicConf.columns" />
           </div>

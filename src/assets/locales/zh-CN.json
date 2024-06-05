@@ -74,8 +74,8 @@
       "multiTitle": "排序",
       "desc": "倒序",
       "asc": "正序",
-      "selectColumnPlaceholder": "新增列",
-      "selectAscPlaceholder": "排序方式"
+      "sortedColumns": "已排序的列",
+      "sortableColumns": "可排序的列"
     },
     "filter": {
       "new": "新的过滤",

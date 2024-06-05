@@ -52,3 +52,6 @@ export const FIRST  = 'octicon-move-to-start-24'
 export const LAST  = 'octicon-move-to-end-24'
 export const PREVIOUS  = 'octicon-chevron-left-24'
 export const NEXT  = 'octicon-chevron-right-24'
+
+export const ASC  = 'octicon-sort-asc-24'
+export const DESC  = 'octicon-sort-desc-24'

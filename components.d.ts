@@ -27,6 +27,7 @@ declare module 'vue' {
     RowDelete: typeof import('./src/components/layout/list/RowDelete.vue')['default']
     Rows: typeof import('./src/components/layout/list/Rows.vue')['default']
     RowSelect: typeof import('./src/components/layout/list/RowSelect.vue')['default']
+    RowSort: typeof import('./src/components/function/RowSort.vue')['default']
     RowTree: typeof import('./src/components/function/RowTree.vue')['default']
     Skeleton: typeof import('./src/Skeleton.vue')['default']
     Theme: typeof import('./src/components/function/Theme.vue')['default']

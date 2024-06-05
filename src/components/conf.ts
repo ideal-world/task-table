@@ -24,6 +24,7 @@ export interface TableColumnConf {
   multiValue: boolean
   kindDateTimeFormat?: string
   groupable: boolean
+  sortable: boolean
   render?: (record: { [key: string]: any }, columnName: string) => any
 }
 
@@ -39,6 +40,7 @@ export function convertTableColumnPropsToTableColumnConf(props: TableColumnProps
     multiValue: props.multiValue ?? false,
     kindDateTimeFormat: props.kindDateTimeFormat,
     groupable: props.groupable ?? false,
+    sortable: props.sortable ?? false,
     render: props.render,
   }
 }

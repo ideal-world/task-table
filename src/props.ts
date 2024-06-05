@@ -152,6 +152,7 @@ export interface TableColumnProps {
   multiValue?: boolean
   kindDateTimeFormat?: string
   groupable?: boolean
+  sortable?: boolean
   render?: (record: { [key: string]: any }, columnName: string) => any
 }
 
@@ -164,7 +165,9 @@ export interface TableLayoutKernelProps {
   filters?: TableDataFilterProps[]
   sorts?: TableDataSortProps[]
   group?: TableDataGroupProps
+  // Column name -> AggregateKind
   aggs?: { [key: string]: AggregateKind }
+  // Pagination with out group
   slice?: TableDataSliceProps
   showSelectColumn?: boolean
   actionColumnRender?: (record: { [key: string]: any }) => any

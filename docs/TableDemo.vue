@@ -44,15 +44,15 @@ const DATA: { [key: string]: any }[] = [
 ]
 
 const COLUMNS: Ref<TableColumnProps[]> = ref([
-  { name: 'no', title: '序号', dataKind: DataKind.NUMBER, dataEditable: false },
+  { name: 'no', title: '序号', dataKind: DataKind.NUMBER, dataEditable: false, sortable: true },
   { name: 'pno', title: '父序号', dataKind: DataKind.NUMBER, dataEditable: false },
-  { name: 'name', title: '姓名', useDict: true, dictEditable: true },
-  { name: 'phone', title: '手机', render: (record: { [key: string]: any }, columnName: string) => {
+  { name: 'name', title: '姓名', useDict: true, dictEditable: true, sortable: true },
+  { name: 'phone', title: '手机', sortable: true, render: (record: { [key: string]: any }, columnName: string) => {
     return `<strong>+86</strong> ${record[columnName]}`
   } },
-  { name: 'stats', title: '状态', useDict: true, dictEditable: true, multiValue: true },
+  { name: 'stats', title: '状态', useDict: true, dictEditable: true, multiValue: true, sortable: true },
   { name: 'addr', title: '地址' },
-  { name: 'time', title: '时间', dataKind: DataKind.DATETIME },
+  { name: 'time', title: '时间', dataKind: DataKind.DATETIME, sortable: true },
 ])
 
 const LAYOUTS: Ref<TableLayoutProps[]> = ref([{

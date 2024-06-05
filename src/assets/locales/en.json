@@ -74,8 +74,8 @@
       "multiTitle": "Sorts",
       "desc": "Descending",
       "asc": "Ascending",
-      "selectColumnPlaceholder": "New column",
-      "selectAscPlaceholder": "New sort"
+      "sortedColumns": "Sorted Columns",
+      "sortableColumns": "Sortable Columns"
     },
     "filter": {
       "new": "New Filter",
