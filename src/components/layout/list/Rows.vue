@@ -2,15 +2,14 @@
 import dayjs from 'dayjs'
 import { DATA_DICT_POSTFIX, DataKind } from '../../../props'
 import type { CachedColumnConf, TableStyleConf } from '../../conf'
-import RowTreeComp from '../../function/RowTree.vue'
 import * as iconSvg from '../../../assets/icon'
+import { NODE_DEPTH_FLAG, registerTreeRowToggleListener, renderTreeToggleHandler } from '../../function/RowTree'
 
 const props = defineProps<{
   records: { [key: string]: any }[]
   pkColumnName: string
   parentPkColumnName?: string
   tileAllData: boolean
-  expandDataPks: any[]
   pkKindIsNumber: boolean
   columnsConf: CachedColumnConf[]
   stylesConf: TableStyleConf
@@ -21,10 +20,8 @@ const props = defineProps<{
 </script>
 
 <template>
-  <!-- 显示条件：平铺显示 OR 父列不存在 OR 当前行父ID不存在 OR 展开的子行不存在 -->
   <div
     v-for="(row, idx) in props.records"
-    v-show="props.tileAllData || !props.parentPkColumnName || !row[props.parentPkColumnName] || props.expandDataPks.indexOf(row[props.parentPkColumnName]) !== -1"
     :key="row[props.pkColumnName]"
     :data-pk="row[props.pkColumnName]"
     :data-parent-pk="props.parentPkColumnName ? row[props.parentPkColumnName] : undefined"
@@ -41,11 +38,9 @@ const props = defineProps<{
       :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-data-pk-cell flex items-center bg-base-100 border-l border-l-base-300 whitespace-nowrap flex-nowrap`"
       :data-column-name="props.pkColumnName" :style="props.setColumnStyles(0)"
     >
-      <RowTreeComp
-        v-if="!props.tileAllData && props.parentPkColumnName"
-        :cur-data="row" :next-data="props.records[idx + 1]" :pk-kind-is-number="pkKindIsNumber" :pk-column-name="props.pkColumnName" :parent-pk-column-name="props.parentPkColumnName!" :expand-data-pks="expandDataPks"
-      />
-      <div> <i v-if="props.tileAllData && props.parentPkColumnName && row[props.parentPkColumnName]" :class="`${iconSvg.SUB}`" />{{ row[props.pkColumnName] }}</div>
+      <div v-if="!props.tileAllData && props.parentPkColumnName" class="flex justify-end" :style="{ width: `${15 * (row[NODE_DEPTH_FLAG] + 1)}px` }" v-html="renderTreeToggleHandler(props.records[idx + 1] && row[props.pkColumnName] === props.records[idx + 1][props.parentPkColumnName])" />
+      <i v-else-if="props.tileAllData && props.parentPkColumnName && row[props.parentPkColumnName]" :class="`${iconSvg.SUB}`"/>
+      {{ row[props.pkColumnName] }}
     </div>
     <div
       v-for="(column, colIdx) in props.columnsConf.slice(1)" :key="column.name"
@@ -80,6 +75,10 @@ const props = defineProps<{
       v-html="props.actionColumnRender(row)"
     />
   </div>
+  <!-- <RowTreeComp
+    v-if="!props.tileAllData && props.parentPkColumnName"
+    :pk-kind-is-number="pkKindIsNumber" :pk-column-name="props.pkColumnName" :parent-pk-column-name="props.parentPkColumnName!"
+  /> -->
 </template>
 
 <style lang="css">

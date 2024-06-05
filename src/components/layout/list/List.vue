@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import type { Ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { DataKind, SubDataShowKind } from '../../../props'
 import type { CachedColumnConf, TableBasicConf, TableLayoutConf } from '../../conf'
+import { registerTreeRowToggleListener } from '../../function/RowTree'
 import { setFixedColumnStyles } from './ColumnFixed.vue'
 import HeaderComp from './Header.vue'
 import RowSelectComp from './RowSelect.vue'
@@ -13,11 +15,10 @@ const listConf = defineProps<
     basic: TableBasicConf
   }
 >()
+const listCompRef: Ref<HTMLDivElement | null> = ref(null)
 
 const COLUMN_SELECT_WIDTH = listConf.layout.showSelectColumn ? 25 : 0
 const COLUMN_ACTION_WIDTH = listConf.layout.actionColumnRender ? listConf.layout.actionColumnWidth ?? 100 : 0
-
-const expandDataPks = ref<string[] | number[]>([])
 
 const pkKindIsNumber = listConf.basic.columns.some(col => col.name === listConf.basic.pkColumnName && [DataKind.NUMBER, DataKind.SERIAL].includes(col.dataKind))
 
@@ -53,10 +54,15 @@ function setTableWidth() {
   styles.width = `${listConf.layout.columns.filter(column => !column.hide).reduce((count, col) => count + col.width, COLUMN_SELECT_WIDTH + COLUMN_ACTION_WIDTH + 2)}px`
   return styles
 }
+
+onMounted(() => {
+  registerTreeRowToggleListener(listCompRef.value!)
+})
 </script>
 
 <template>
   <div
+    ref="listCompRef"
     :class="`iw-list relative iw-list--size${listConf.basic.styles.size}`"
     :style="setTableWidth()"
   >
@@ -66,7 +72,6 @@ function setTableWidth() {
         :records="listConf.layout.data.records" :pk-column-name="listConf.basic.pkColumnName"
         :parent-pk-column-name="listConf.basic.parentPkColumnName"
         :tile-all-data="listConf.layout.subDataShowKind === SubDataShowKind.TILE_ALL_DATA"
-        :expand-data-pks="expandDataPks"
         :pk-kind-is-number="pkKindIsNumber"
         :columns-conf="columnsWithoutHideConf"
         :styles-conf="listConf.basic.styles"
@@ -130,7 +135,7 @@ function setTableWidth() {
   @apply text-base;
 
   .iw-list-cell {
-    @apply p-[2px]
+    @apply p-[2px] pl-[4px]
   }
 }
 
