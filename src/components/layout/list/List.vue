@@ -1,18 +1,9 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { getParentWithClass } from '../../../utils/basic'
-import type MenuComp from '../../common/Menu.vue'
-import type { CachedColumnConf, TableBasicConf, TableLayoutConf } from '../../conf'
-import type { TableDataResp } from '../../../props'
+import { computed, ref } from 'vue'
 import { DataKind } from '../../../props'
-import CellEditComp from './CellEdit.vue'
-import type { CellSelectedInfo } from './CellSelect.vue'
-import CellSelectComp from './CellSelect.vue'
-import ColumnAggsComp from './ColumnAggs.vue'
+import type { CachedColumnConf, TableBasicConf, TableLayoutConf } from '../../conf'
 import { setFixedColumnStyles } from './ColumnFixed.vue'
 import HeaderComp from './Header.vue'
-import RowCopyPasteComp from './RowCopyPaste.vue'
-import RowDeleteComp from './RowDelete.vue'
 import RowSelectComp from './RowSelect.vue'
 import RowsComp from './Rows.vue'
 
@@ -28,11 +19,6 @@ const COLUMN_ACTION_WIDTH = listConf.layout.actionColumnRender ? listConf.layout
 
 const expandDataPks = ref<string[] | number[]>([])
 
-// const selectedCellWrap = ref<{
-//   cellSelectedInfo: CellSelectedInfo | undefined
-// }>({
-//   cellSelectedInfo: undefined,
-// })
 const pkKindIsNumber = listConf.basic.columns.some(col => col.name === listConf.basic.pkColumnName && [DataKind.NUMBER, DataKind.SERIAL].includes(col.dataKind))
 
 const columnsWithoutHideConf = computed<CachedColumnConf[]>(() => {
@@ -43,12 +29,6 @@ const columnsWithoutHideConf = computed<CachedColumnConf[]>(() => {
     }
   })
 })
-
-// const rowMenuCompRef = ref<InstanceType<typeof MenuComp>>()
-
-// function showRowContextMenu(event: PointerEvent) {
-//   rowMenuCompRef.value?.show(event)
-// }
 
 function setColumnStyles(colIdx: number) {
 // ColIdx of select column = -1
@@ -74,18 +54,6 @@ function setTableWidth() {
   return styles
 }
 
-// onMounted(() => {
-//   document.querySelectorAll('.iw-list').forEach((listEle) => {
-//     listEle.addEventListener('contextmenu', (event) => {
-//       const pkEle = getParentWithClass(event.target as HTMLElement, 'iw-list-data-pk-cell')
-//       if (pkEle === null)
-//         return
-
-//       event.preventDefault()
-//       showRowContextMenu(event as PointerEvent)
-//     })
-//   })
-// })
 </script>
 
 <template>
@@ -133,21 +101,7 @@ function setTableWidth() {
         />
       </template>
     </template> -->
-    <!-- <CellSelectComp
-      :wrap="selectedCellWrap" :columns-conf="columnsWithoutHideConf"
-      :pk-column-name="listConf.basic.pkColumnName"
-      :pk-kind-is-number="pkKindIsNumber"
-    />
-    <CellEditComp
-      :columns-conf="columnsWithoutHideConf" :data="listConf.layout.data!"
-      :pk-column-name="listConf.basic.pkColumnName"
-      :selected-cell-info="selectedCellWrap.cellSelectedInfo"
-    /> -->
   </div>
-  <!-- <MenuComp v-if="selectedDataPks.length > 0" ref="rowMenuCompRef">
-    <RowCopyPasteComp :selected-pks="selectedDataPks" :pk-column-name="listConf.basic.pkColumnName" />
-    <RowDeleteComp :selected-pks="selectedDataPks" />
-  </MenuComp>  -->
   <RowSelectComp
     v-if="listConf.layout.showSelectColumn"
     :selected-pks="listConf.layout.selectedDataPks" :pk-column-name="listConf.basic.pkColumnName"
