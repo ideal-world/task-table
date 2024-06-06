@@ -62,7 +62,7 @@ async function setGroupHideEmpty() {
 
 <template>
   <div
-    class="iw-divider mt-1 mb-1 ml-2 mr-2"
+    class="iw-divider iw-divider-end mt-1 mb-1 ml-2 mr-2"
   >
     {{ $t('function.group.columnsTitle') }}
   </div>
@@ -82,9 +82,7 @@ async function setGroupHideEmpty() {
   </div>
   <div
     class="iw-divider mt-1 mb-1 ml-2 mr-2"
-  >
-    {{ $t('function.group.moreConfTitle') }}
-  </div>
+  />
   <div class="flex justify-between items-center w-full mr-2">
     <span>
       <i :class="iconSvg.SORT" />

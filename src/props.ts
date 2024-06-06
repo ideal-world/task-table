@@ -65,7 +65,6 @@ export enum OperatorKind {
   NOT_ENDWITH = 'NENDWITH',
   IS_EMPTY = 'ISEMPTY',
   NOT_EMPTY = 'NOTEMPTY',
-  // TODO Add between
 }
 
 export function translateOperatorKind(operatorKind?: OperatorKind): string {

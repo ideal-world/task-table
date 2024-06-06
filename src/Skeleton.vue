@@ -1,25 +1,19 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
-import * as iconSvg from './assets/icon'
-import MenuComp, { MenuOffsetKind } from './components/common/Menu.vue'
 import type { TableBasicConf, TableLayoutConf } from './components/conf'
 import { initConf } from './components/conf'
 import * as Event from './components/eventbus'
 import FilterSettingComp from './components/function/FilterSetting.vue'
 import LayoutSettingComp from './components/function/LayoutSetting.vue'
 import PaginationComp from './components/function/Pagination.vue'
-import ResizeSettingComp from './components/function/ResizeSetting.vue'
 import RowSortSettingComp from './components/function/RowSortSetting.vue'
-import ThemeSettingComp from './components/function/ThemeSetting.vue'
+import TableSettingComp from './components/function/TableSetting.vue'
 import ListComp from './components/layout/list/List.vue'
 import type { TableProps } from './props'
 import { LayoutKind } from './props'
 
 const props = defineProps<TableProps>()
 const [_tableBasicConf, _tableLayoutsConf] = initConf(props)
-
-const menuLayoutCompRef = ref<InstanceType<typeof MenuComp>>()
-const menuMoreCompRef = ref<InstanceType<typeof MenuComp>>()
 
 const tableBasicConf = reactive<TableBasicConf>(_tableBasicConf)
 const tableLayoutsConf = reactive<TableLayoutConf[]>(_tableLayoutsConf)
@@ -40,17 +34,6 @@ onMounted(async () => {
   })
   await Event.watch()
 })
-
-// ------------- Layout Process -------------
-function showLayoutMenu(event: MouseEvent) {
-  const targetEle = event.target as HTMLElement
-  menuLayoutCompRef.value?.show(targetEle, MenuOffsetKind.RIGHT_TOP)
-}
-
-function showMoreMenu(event: MouseEvent) {
-  const targetEle = event.target as HTMLElement
-  menuMoreCompRef.value?.show(targetEle, MenuOffsetKind.RIGHT_TOP)
-}
 </script>
 
 <!--
@@ -89,19 +72,14 @@ function showMoreMenu(event: MouseEvent) {
       <div class="flex-1">
         <template v-for="layout in tableLayoutsConf" :key="layout.id">
           <a
-            :class="`iw-tt-header__item iw-tab iw-tab-bordered ${currentLayoutId === layout.id ? 'iw-tab-active' : ''} flex flex-col`"
-            @contextmenu.prevent="showLayoutMenu"
+            :class="`iw-tt-header__item iw-tab iw-tab-bordered ${currentLayoutId === layout.id ? 'iw-tab-active' : ''} flex flex-col text-base`"
           >
-            <i :class="`${layout.icon}`" /> {{ layout.title }}
+            <i :class="`${layout.icon}`" class="mr-1"/> {{ layout.title }}
           </a>
         </template>
       </div>
       <div class="flex-none">
-        <a class="cursor-pointer"><i :class="iconSvg.MORE" @click="showMoreMenu" /></a>
-        <MenuComp ref="menuMoreCompRef">
-          <ResizeSettingComp :size="tableBasicConf.styles.size" :styles="tableBasicConf.styles" />
-          <ThemeSettingComp :styles="tableBasicConf.styles" />
-        </MenuComp>
+        <TableSettingComp :basic-conf="tableBasicConf" />
       </div>
     </div>
     <div class="iw-tt-layout">
@@ -135,10 +113,4 @@ function showMoreMenu(event: MouseEvent) {
       </template>
     </div>
   </div>
-
-  <MenuComp ref="menuLayoutCompRef">
-    <div class="iw-contextmenu__item">
-      <!-- TODO 抽取 重命名layout -->
-    </div>
-  </MenuComp>
 </template>

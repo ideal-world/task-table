@@ -61,6 +61,14 @@
       "default": "默认",
       "rename": "重命名"
     },
+    "delete": {
+      "title": "删除",
+      "confirm": "确认删除 [{title}] 吗？"
+    },
+    "reset": {
+      "title": "重置",
+      "confirm": "确认重置 [{title}] 吗？"
+    },
     "action": {
       "title": "操作"
     },
