@@ -62,11 +62,11 @@
       "rename": "Rename"
     },
     "delete": {
-      "title": "Delete",
+      "title": "Delete layout",
       "confirm": "Are you sure you want to delete [{title}]?"
     },
     "reset": {
-      "title": "Reset",
+      "title": "Reset layout",
       "confirm": "Are you sure you want to reset [{title}]?"
     },
     "action": {

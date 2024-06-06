@@ -74,7 +74,7 @@ onMounted(async () => {
           <a
             :class="`iw-tt-header__item iw-tab iw-tab-bordered ${currentLayoutId === layout.id ? 'iw-tab-active' : ''} flex flex-col text-base`"
           >
-            <i :class="`${layout.icon}`" class="mr-1"/> {{ layout.title }}
+            <i :class="`${layout.icon}`" class="mr-1" /> {{ layout.title }}
           </a>
         </template>
       </div>
@@ -94,6 +94,7 @@ onMounted(async () => {
             <LayoutSettingComp
               :basic-conf="tableBasicConf"
               :layout-conf="layout"
+              :layout-length="tableLayoutsConf.length"
             />
           </div>
         </div>
