@@ -87,6 +87,18 @@ const LAYOUTS: Ref<TableLayoutProps[]> = ref([{
 
 const STYLES: Ref<TableStyleProps> = ref({})
 
+function getDictValue(columnName: string, dataValue: any) {
+  if (columnName === 'name') {
+    return NAME_DICT.find(dict => dict.value === dataValue)!.title
+  }
+  else if (columnName === 'stats') {
+    return STATS_DICT.find(dict => dict.value === dataValue)!.title
+  }
+  else {
+    return dataValue
+  }
+}
+
 function attachDict(data: { [key: string]: any }[]) {
   return data.map((d) => {
     if (d.name) {
@@ -237,6 +249,7 @@ const events: TableEventProps = {
           totalNumber: groupTotalNumber[groupKey],
           aggs: aggsResult,
           groupValue: groupKey,
+          groupShowTitle: getDictValue(group.columnName, groupKey),
         }
       })
     }

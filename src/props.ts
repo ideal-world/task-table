@@ -347,6 +347,7 @@ export interface TableDataResp {
 
 export interface TableDataGroupResp extends TableDataResp {
   groupValue: string
+  groupShowTitle?: string
 }
 
 export interface TableCellDictItemProps {
