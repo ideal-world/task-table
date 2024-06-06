@@ -100,7 +100,7 @@ async function setSlice(newPage?: number, newFetchNumber?: number) {
 </script>
 
 <template>
-  <div style="position: sticky; right: 0; ">
+  <div style="position: sticky; right: 0; " class="z-[3000]">
     <button v-if="getCurrentPage() > 2" class="iw-btn iw-btn-ghost pl-1 pr-1 iw-btn-xs" @click="setCurrentPage(1)">
       <i :class="iconSvg.FIRST" />
     </button>
