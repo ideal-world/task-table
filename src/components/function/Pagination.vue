@@ -94,7 +94,7 @@ async function setSlice(newPage?: number, newFetchNumber?: number) {
     const changedLayoutReq: TableLayoutModifyProps = {
       groupSlices: newSlice,
     }
-    await eb.modifyLayout(changedLayoutReq)
+    await eb.modifyLayout(changedLayoutReq, props.groupValue)
   }
 }
 </script>

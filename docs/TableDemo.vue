@@ -78,9 +78,10 @@ const LAYOUTS: Ref<TableLayoutProps[]> = ref([{
     name: 'time',
   }],
   aggs: { name: AggregateKind.MIN },
-  slices: {
+  defaultSlice: {
     offsetNumber: 0,
     fetchNumber: 10,
+    fetchNumbers: [5, 10, 20, 30, 50],
   },
 }])
 
@@ -163,10 +164,11 @@ const events: TableEventProps = {
         return d.pno === null
       })
     }
-    if (group) {
-      // if (byGroupValue)
-    //   params.byGroupValue = byGroupValue
-
+    if (byGroupValue && group) {
+      // 只获取当前分组的数据
+      data = data.filter(d => d[group.columnName] === byGroupValue)
+    }
+    if (group && !byGroupValue) {
       let dataGroup: { [key: string]: any[] } = IwUtils.groupBy(data, (d) => { return d[group.columnName] })
       if (group.hideEmptyRecord) {
         dataGroup = Object.fromEntries(Object.entries(dataGroup).filter(([_, value]) => value.length > 0))
@@ -192,9 +194,9 @@ const events: TableEventProps = {
         )
       }
       return Object.entries(dataGroup).map(([groupKey, data]) => {
-        let aggsResult = {}
+        const aggsResult = {}
         if (aggs) {
-          aggsResult = Object.keys(aggs).map((aggKey) => {
+          Object.keys(aggs).forEach((aggKey) => {
             const agg = aggs[aggKey]
             switch (agg) {
               case AggregateKind.COUNT:
@@ -212,7 +214,7 @@ const events: TableEventProps = {
                 }
               case AggregateKind.MIN:
                 if (typeof data[0][aggKey] === 'string') {
-                  return aggsResult[aggKey] = data.reduce((acc, cur) => acc[aggKey] > cur[aggKey] ? acc : cur)[aggKey]
+                  return aggsResult[aggKey] = data.reduce((acc, cur) => acc[aggKey] < cur[aggKey] ? acc : cur)[aggKey]
                 }
                 else {
                   return aggsResult[aggKey] = Math.min(...data.map(d => d[aggKey]))
@@ -259,7 +261,7 @@ const events: TableEventProps = {
               }
             case AggregateKind.MIN:
               if (typeof data[0][aggKey] === 'string') {
-                return aggsResult[aggKey] = data.reduce((acc, cur) => acc[aggKey] > cur[aggKey] ? acc : cur)[aggKey]
+                return aggsResult[aggKey] = data.reduce((acc, cur) => acc[aggKey] < cur[aggKey] ? acc : cur)[aggKey]
               }
               else {
                 return aggsResult[aggKey] = Math.min(...data.map(d => d[aggKey]))

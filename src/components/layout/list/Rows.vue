@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import dayjs from 'dayjs'
 import * as iconSvg from '../../../assets/icon'
-import { DATA_DICT_POSTFIX, DataKind } from '../../../props'
+import { DATA_DICT_POSTFIX, DataKind, SubDataShowKind } from '../../../props'
+
 import type { CachedColumnConf, TableStyleConf } from '../../conf'
 import { NODE_DEPTH_FLAG, renderTreeToggleHandler } from '../../function/RowTree'
 
@@ -9,7 +10,7 @@ const props = defineProps<{
   records: { [key: string]: any }[]
   pkColumnName: string
   parentPkColumnName?: string
-  tileAllData: boolean
+  subDataShowKind: SubDataShowKind
   pkKindIsNumber: boolean
   columnsConf: CachedColumnConf[]
   stylesConf: TableStyleConf
@@ -20,12 +21,18 @@ const props = defineProps<{
 </script>
 
 <template>
+  <!-- key的值使用主键+子数据显示类型以确保子数据显示类型切换时可以重新创建所有行。
+  否则，折叠行时MutationObserver处理会遗漏一些需要隐藏的子数据。
+
+  The value of key uses primary key + sub-data display kind to ensure that all rows can be recreated when the sub-data display kind is switched.
+  Otherwise, MutationObserver processing when collapsing rows will miss some sub-data that needs to be hidden.
+-->
   <div
     v-for="(row, idx) in props.records"
-    :key="row[props.pkColumnName]"
-    :data-pk="row[props.pkColumnName]"
+    :key="row[props.pkColumnName] + props.subDataShowKind"
+    :data-pk="row[props.pkColumnName] "
     :data-parent-pk="props.parentPkColumnName ? row[props.parentPkColumnName] : undefined"
-    :class="`${props.stylesConf.rowClass} iw-list-row iw-list-data-row ${props.tileAllData ? 'iw-list-data-fold' : ''} flex bg-base-100 border-b border-b-base-300 border-r border-r-base-300`"
+    :class="`${props.stylesConf.rowClass} iw-list-row iw-list-data-row ${props.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA ? 'iw-list-data-fold' : ''} flex bg-base-100 border-b border-b-base-300 border-r border-r-base-300`"
   >
     <div
       v-if="props.showSelectColumn"
@@ -38,8 +45,8 @@ const props = defineProps<{
       :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-data-cell flex items-center bg-base-100 border-l border-l-base-300 whitespace-nowrap flex-nowrap`"
       :data-column-name="props.pkColumnName" :style="props.setColumnStyles(0)"
     >
-      <div v-if="!props.tileAllData && props.parentPkColumnName" class="flex justify-end" :style="{ width: `${15 * (row[NODE_DEPTH_FLAG] + 1)}px` }" v-html="renderTreeToggleHandler(props.records[idx + 1] && row[props.pkColumnName] === props.records[idx + 1][props.parentPkColumnName])" />
-      <i v-else-if="props.tileAllData && props.parentPkColumnName && row[props.parentPkColumnName]" :class="`${iconSvg.SUB}`" />
+      <div v-if="props.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA && props.parentPkColumnName" class="flex justify-end" :style="{ width: `${15 * (row[NODE_DEPTH_FLAG] + 1)}px` }" v-html="renderTreeToggleHandler(props.records[idx + 1] && row[props.pkColumnName] === props.records[idx + 1][props.parentPkColumnName])" />
+      <i v-else-if="props.subDataShowKind === SubDataShowKind.TILE_ALL_DATA && props.parentPkColumnName && row[props.parentPkColumnName]" :class="`${iconSvg.SUB}`" />
       {{ row[props.pkColumnName] }}
     </div>
     <div

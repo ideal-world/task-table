@@ -246,7 +246,7 @@ export async function newLayout(newLayoutProps: TableLayoutKernelProps): Promise
   return true
 }
 
-export async function modifyLayout(changedLayoutProps: TableLayoutModifyProps): Promise<boolean> {
+export async function modifyLayout(changedLayoutProps: TableLayoutModifyProps, byGroupValue?: any): Promise<boolean> {
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.modifyLayout) {
@@ -292,7 +292,7 @@ export async function modifyLayout(changedLayoutProps: TableLayoutModifyProps): 
     rightColumnIdx !== -1 && layout.columns.splice(rightColumnIdx, 1, tmpColumn)
   }
 
-  await loadData()
+  await loadData(byGroupValue)
   return true
 }
 
