@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import * as iconSvg from '../../assets/icon'
-import MenuComp from '../common/Menu.vue'
+import MenuComp, { MenuOffsetKind } from '../common/Menu.vue'
 import type { TableBasicConf, TableLayoutConf } from '../conf'
 import ColumnShowSettingComp from './ColumnShowSetting.vue'
 import GroupSettingComp from './GroupSetting.vue'
@@ -20,7 +20,7 @@ function collapseEle(e: Event) {
 </script>
 
 <template>
-  <a class="cursor-pointer"><i :class="iconSvg.MORE" @click="(e) => { columnCompRef?.show(e) }" /></a>
+  <a class="cursor-pointer"><i :class="iconSvg.MORE" @click="(e) => { columnCompRef?.show(e, MenuOffsetKind.RIGHT_TOP) }" /></a>
   <MenuComp ref="columnCompRef">
     <template v-if="props.basicConf.parentPkColumnName">
       <div class="iw-divider font-bold">

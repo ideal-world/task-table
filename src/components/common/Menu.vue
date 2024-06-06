@@ -201,7 +201,7 @@ export const FUN_CLOSE_CONTEXT_MENU_TYPE = Symbol('FUN_CLOSE_CONTEXT_MENU_TYPE')
   <div
     v-show="init"
     ref="contextmenuRef"
-    class="iw-contextmenu flex flex-col items-start fixed z-[3000] bg-base-100 p-1 rounded-md border border-base-300"
+    class="iw-contextmenu flex flex-col items-start fixed z-[3100] bg-base-100 p-1 rounded-md border border-base-300"
   >
     <slot v-if="init" />
   </div>

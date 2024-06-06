@@ -70,6 +70,7 @@ const LAYOUTS: Ref<TableLayoutProps[]> = ref([{
   }, {
     name: 'no',
     width: 80,
+    styles: { cursor: 'pointer' },
   }, {
     name: 'addr',
   }, {
@@ -92,7 +93,7 @@ function getDictValue(columnName: string, dataValue: any) {
     return NAME_DICT.find(dict => dict.value === dataValue)!.title
   }
   else if (columnName === 'stats') {
-    return STATS_DICT.find(dict => dict.value === dataValue)!.title
+    return dataValue.split(',').map(val => STATS_DICT.find(dict => dict.value === val)!.title).join(',')
   }
   else {
     return dataValue

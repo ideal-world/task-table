@@ -3,7 +3,7 @@ import Sortable from 'sortablejs'
 import { onMounted, ref } from 'vue'
 import * as iconSvg from '../../assets/icon'
 import type { TableDataSortProps } from '../../props'
-import MenuComp from '../common/Menu.vue'
+import MenuComp, { MenuOffsetKind } from '../common/Menu.vue'
 import type { TableColumnConf } from '../conf'
 import * as eb from '../eventbus'
 
@@ -16,7 +16,7 @@ const sortCompRef = ref<InstanceType<typeof MenuComp>>()
 
 function showRowSortContextMenu(event: MouseEvent) {
   const targetEle = event.target as HTMLElement
-  sortCompRef.value?.show(targetEle)
+  sortCompRef.value?.show(targetEle, MenuOffsetKind.LEFT_TOP)
 }
 
 onMounted(() => {

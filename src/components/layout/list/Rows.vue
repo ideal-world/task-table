@@ -42,8 +42,8 @@ const props = defineProps<{
       <input type="checkbox" class="iw-list-select-cell__chk iw-checkbox iw-checkbox-xs">
     </div>
     <div
-      :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-data-cell flex items-center bg-base-100 border-l border-l-base-300 whitespace-nowrap flex-nowrap ${props.columnsConf[0].style}`"
-      :data-column-name="props.pkColumnName" :style="props.setColumnStyles(0)"
+      :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-data-cell flex items-center bg-base-100 border-l border-l-base-300 whitespace-nowrap flex-nowrap`"
+      :data-column-name="props.pkColumnName" :style="{ ...props.columnsConf[0].styles, ...props.setColumnStyles(0) }"
     >
       <div v-if="props.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA && props.parentPkColumnName" class="flex justify-end" :style="{ width: `${15 * (row[NODE_DEPTH_FLAG] + 1)}px` }" v-html="renderTreeToggleHandler(props.records[idx + 1] && row[props.pkColumnName] === props.records[idx + 1][props.parentPkColumnName])" />
       <i v-else-if="props.subDataShowKind === SubDataShowKind.TILE_ALL_DATA && props.parentPkColumnName && row[props.parentPkColumnName]" :class="`${iconSvg.SUB}`" />
@@ -51,8 +51,8 @@ const props = defineProps<{
     </div>
     <div
       v-for="(column, colIdx) in props.columnsConf.slice(1)" :key="column.name"
-      :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-data-cell flex items-center bg-base-100 border-l border-l-base-300 ${column.wrap ? 'break-words flex-wrap' : 'whitespace-nowrap overflow-hidden text-ellipsis flex-nowrap'} ${column.style}`"
-      :data-column-name="column.name" :style="props.setColumnStyles(colIdx + 1)"
+      :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-data-cell flex items-center bg-base-100 border-l border-l-base-300 ${column.wrap ? 'break-words flex-wrap' : 'whitespace-nowrap overflow-hidden text-ellipsis flex-nowrap'}`"
+      :data-column-name="column.name" :style="{ ...column.styles, ...props.setColumnStyles(colIdx + 1) }"
     >
       <div v-if="column.render" v-html="column.render(row, column.name)" />
       <div v-else-if="column.dataKind === DataKind.DATE || column.dataKind === DataKind.TIME || column.dataKind === DataKind.DATETIME">

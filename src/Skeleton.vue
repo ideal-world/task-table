@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref } from 'vue'
 import * as iconSvg from './assets/icon'
-import MenuComp from './components/common/Menu.vue'
+import MenuComp, { MenuOffsetKind } from './components/common/Menu.vue'
 import type { TableBasicConf, TableLayoutConf } from './components/conf'
 import { initConf } from './components/conf'
 import * as Event from './components/eventbus'
@@ -44,12 +44,12 @@ onMounted(async () => {
 // ------------- Layout Process -------------
 function showLayoutMenu(event: MouseEvent) {
   const targetEle = event.target as HTMLElement
-  menuLayoutCompRef.value?.show(targetEle)
+  menuLayoutCompRef.value?.show(targetEle, MenuOffsetKind.RIGHT_TOP)
 }
 
 function showMoreMenu(event: MouseEvent) {
   const targetEle = event.target as HTMLElement
-  menuMoreCompRef.value?.show(targetEle)
+  menuMoreCompRef.value?.show(targetEle, MenuOffsetKind.RIGHT_TOP)
 }
 </script>
 
