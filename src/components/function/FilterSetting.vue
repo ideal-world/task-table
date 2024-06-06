@@ -201,7 +201,6 @@ async function newOrModifySimpleFilterItem(changedFilterItem: TableDataFilterIte
     await eb.modifyLayout({
       filters: [filters],
     })
-    await eb.loadData()
   }
   else if (props.filters === undefined || props.filters.length === 0) {
     await eb.modifyLayout({
@@ -215,7 +214,6 @@ async function newOrModifySimpleFilterItem(changedFilterItem: TableDataFilterIte
         },
       ],
     })
-    await eb.loadData()
   }
 }
 
@@ -226,7 +224,6 @@ async function deleteSimpleFilterItem(idx: number) {
     await eb.modifyLayout({
       filters: [filters],
     })
-    await eb.loadData()
   }
 }
 </script>

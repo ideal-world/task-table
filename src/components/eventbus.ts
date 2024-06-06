@@ -23,29 +23,12 @@ export async function init(_tableBasicConf: TableBasicConf, _tableLayoutsConf: T
 
 export async function watch() {
   tableLayoutsConf.forEach((layout) => {
-    loadData(undefined, undefined, undefined, layout.id)
+    loadData(undefined, layout.id)
   })
 }
 
-export async function loadData(moreForGroupedValue?: any, offsetNumber?: number, fetchNumber?: number, layoutId?: string) {
+export async function loadData(moreForGroupedValue?: any, layoutId?: string) {
   const layout = layoutId ? tableLayoutsConf.find(layout => layout.id === layoutId)! : tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
-
-  if (offsetNumber && fetchNumber) {
-    if (moreForGroupedValue && layout.group) {
-      if (layout.group.slices[moreForGroupedValue]) {
-        layout.group.slices[moreForGroupedValue].offsetNumber = offsetNumber
-        layout.group.slices[moreForGroupedValue].fetchNumber = fetchNumber
-      }
-    }
-    else if (layout.group) {
-      for (const groupValue in layout.group.slices) {
-        layout.group.slices[groupValue].offsetNumber = offsetNumber
-        layout.group.slices[groupValue].fetchNumber = fetchNumber
-      }
-    }
-    layout.slice.offsetNumber = offsetNumber
-    layout.slice.fetchNumber = fetchNumber
-  }
 
   const showColumns = layout.columns.filter(column => !column.hide).map(column => column.name).slice()
   if (tableBasicConf.parentPkColumnName && layout.columns.findIndex(column => column.name === tableBasicConf.parentPkColumnName) === -1) {
@@ -60,7 +43,7 @@ export async function loadData(moreForGroupedValue?: any, offsetNumber?: number,
     layout.aggs ?? toRaw(layout.aggs),
     layout.subDataShowKind === SubDataShowKind.ONLY_PARENT_DATA,
     moreForGroupedValue ?? moreForGroupedValue,
-    toRaw(layout.slice),
+    toRaw(layout.slices),
   )
 
   if (!moreForGroupedValue && !layout.group) {
@@ -105,14 +88,6 @@ export async function loadData(moreForGroupedValue?: any, offsetNumber?: number,
   else {
     showAlert(t('_.event.loadDataInvalidScene'), 2, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
     throw new Error('[events.loadData]  Invalid scene')
-  }
-
-  if (offsetNumber && fetchNumber) {
-    // Update slice by current layout
-    await modifyLayout({
-      group: layout.group,
-      slice: layout.slice,
-    })
   }
 }
 
@@ -255,14 +230,14 @@ export async function newLayout(newLayoutProps: TableLayoutKernelProps): Promise
     sorts: newLayoutProps.sorts,
     group: newLayoutProps.group,
     aggs: newLayoutProps.aggs,
-    slice: newLayoutProps.slice,
+    slices: newLayoutProps.slices,
   })
   tableLayoutsConf.push({
     id: layoutId,
     ...convertTableLayoutKernelPropsToTableLayoutKernelConf(newLayoutProps, tableBasicConf.columns),
   })
 
-  await loadData(undefined, undefined, undefined, layoutId)
+  await loadData(undefined, layoutId)
   return true
 }
 
@@ -282,8 +257,11 @@ export async function modifyLayout(changedLayoutProps: TableLayoutModifyProps): 
   changedLayoutProps.filters && (layout.filters = changedLayoutProps.filters)
   changedLayoutProps.sorts && (layout.sorts = changedLayoutProps.sorts)
   changedLayoutProps.group && (layout.group = changedLayoutProps.group)
+  if (changedLayoutProps.removeGroup) {
+    layout.group = undefined
+  }
   changedLayoutProps.aggs && (layout.aggs = changedLayoutProps.aggs)
-  changedLayoutProps.slice && (layout.slice = changedLayoutProps.slice)
+  changedLayoutProps.slices && (layout.slices = changedLayoutProps.slices)
   changedLayoutProps.subDataShowKind && (layout.subDataShowKind = changedLayoutProps.subDataShowKind)
 
   if (changedLayoutProps.newColumn) {

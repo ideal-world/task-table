@@ -48,7 +48,7 @@ export function registerTreeRowToggleListener(rowsEle: HTMLDivElement) {
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
       mutation.type === 'childList' && mutation.addedNodes.forEach((node) => {
-        if (node instanceof HTMLElement && node.classList.contains('iw-list-data-row') && node.dataset.parentPk !== undefined) {
+        if (node instanceof HTMLElement && node.classList.contains('iw-list-data-fold') && node.dataset.parentPk !== undefined) {
           node.style.display = 'none'
         }
       })

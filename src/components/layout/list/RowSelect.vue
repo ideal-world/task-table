@@ -86,8 +86,6 @@ function indeterminateSelect(rowEle: HTMLElement, listEle: HTMLElement) {
     }
   }
 }
-
-// TODO 跨组选择
 </script>
 
 <template>

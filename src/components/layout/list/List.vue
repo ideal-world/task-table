@@ -5,9 +5,10 @@ import type { TableDataResp } from '../../../props'
 import { DataKind, SubDataShowKind } from '../../../props'
 import type { CachedColumnConf, TableBasicConf, TableLayoutConf } from '../../conf'
 import { registerCellClickListener } from '../../function/CellClick'
+import PaginationComp from '../../function/Pagination.vue'
 import { registerTreeRowToggleListener } from '../../function/RowTree'
-import { setFixedColumnStyles } from './ColumnFixed.vue'
 import ColumnAggsComp from './ColumnAggs.vue'
+import { setFixedColumnStyles } from './ColumnFixed.vue'
 import HeaderComp from './Header.vue'
 import RowSelectComp from './RowSelect.vue'
 import RowsComp from './Rows.vue'
@@ -59,7 +60,7 @@ function setTableWidth() {
 }
 
 onMounted(() => {
-  registerTreeRowToggleListener(listCompRef.value!)
+  listConf.layout.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA && registerTreeRowToggleListener(listCompRef.value!)
   registerCellClickListener(listCompRef.value!)
 })
 </script>
@@ -73,7 +74,8 @@ onMounted(() => {
     <HeaderComp :columns-conf="columnsWithoutHideConf" :layout="listConf.layout" :basic="listConf.basic" :set-column-styles="setColumnStyles" />
     <template v-if="listConf.layout.data && !Array.isArray(listConf.layout.data)">
       <RowsComp
-        :records="listConf.layout.data.records" :pk-column-name="listConf.basic.pkColumnName"
+        :records="listConf.layout.data.records"
+        :pk-column-name="listConf.basic.pkColumnName"
         :parent-pk-column-name="listConf.basic.parentPkColumnName"
         :tile-all-data="listConf.layout.subDataShowKind === SubDataShowKind.TILE_ALL_DATA"
         :pk-kind-is-number="pkKindIsNumber"
@@ -93,17 +95,22 @@ onMounted(() => {
         :set-column-styles="setColumnStyles"
       />
     </template>
-    <!-- <template v-else-if="listConf.layout.data && Array.isArray(listConf.layout.data)">
+    <template v-else-if="listConf.layout.data && Array.isArray(listConf.layout.data)">
       <template v-for="groupData in listConf.layout.data" :key="groupData.groupValue">
         <ColumnAggsComp
           v-if="layout.aggs"
-          :layout-aggs="layout.aggs" :data-basic="groupData"
+          :layout-aggs="layout.aggs"
+          :data-basic="groupData"
+          :show-select-column="layout.showSelectColumn"
+          :show-action-column="layout.actionColumnRender !== undefined"
           :columns-conf="columnsWithoutHideConf" :styles-conf="listConf.basic.styles"
           :group-value="groupData.groupValue" :set-column-styles="setColumnStyles"
         />
         <RowsComp
-          :records="groupData.records" :pk-column-name="listConf.basic.pkColumnName" :parent-pk-column-name="listConf.basic.parentPkColumnName"
-          :expand-data-pks="expandDataPks"
+          :records="groupData.records"
+          :pk-column-name="listConf.basic.pkColumnName"
+          :parent-pk-column-name="listConf.basic.parentPkColumnName"
+          :tile-all-data="listConf.layout.subDataShowKind === SubDataShowKind.TILE_ALL_DATA"
           :pk-kind-is-number="pkKindIsNumber"
           :columns-conf="columnsWithoutHideConf"
           :styles-conf="listConf.basic.styles"
@@ -111,8 +118,13 @@ onMounted(() => {
           :action-column-render="listConf.layout.actionColumnRender"
           :set-column-styles="setColumnStyles"
         />
+        <div
+          class="flex justify-end p-2 min-h-0"
+        >
+          <PaginationComp :slices="layout.slices" :group-value="groupData.groupValue" :total-number="groupData.totalNumber" />
+        </div>
       </template>
-    </template> -->
+    </template>
   </div>
   <RowSelectComp
     v-if="listConf.layout.showSelectColumn"

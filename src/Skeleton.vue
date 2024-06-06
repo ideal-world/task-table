@@ -5,13 +5,12 @@ import MenuComp from './components/common/Menu.vue'
 import type { TableBasicConf, TableLayoutConf } from './components/conf'
 import { initConf } from './components/conf'
 import * as Event from './components/eventbus'
-import FilterComp from './components/function/Filter.vue'
-import GroupComp from './components/function/Group.vue'
+import FilterSettingComp from './components/function/FilterSetting.vue'
 import LayoutSettingComp from './components/function/LayoutSetting.vue'
 import PaginationComp from './components/function/Pagination.vue'
-import ResizeComp from './components/function/Resize.vue'
-import RowSortComp from './components/function/RowSort.vue'
-import ThemeComp from './components/function/Theme.vue'
+import ResizeSettingComp from './components/function/ResizeSetting.vue'
+import RowSortSettingComp from './components/function/RowSortSetting.vue'
+import ThemeSettingComp from './components/function/ThemeSetting.vue'
 import ListComp from './components/layout/list/List.vue'
 import type { TableProps } from './props'
 import { LayoutKind } from './props'
@@ -100,8 +99,8 @@ function showMoreMenu(event: MouseEvent) {
       <div class="flex-none">
         <a class="cursor-pointer"><i :class="iconSvg.MORE" @click="showMoreMenu" /></a>
         <MenuComp ref="menuMoreCompRef">
-          <ResizeComp :size="tableBasicConf.styles.size" :styles="tableBasicConf.styles" />
-          <ThemeComp :styles="tableBasicConf.styles" />
+          <ResizeSettingComp :size="tableBasicConf.styles.size" :styles="tableBasicConf.styles" />
+          <ThemeSettingComp :styles="tableBasicConf.styles" />
         </MenuComp>
       </div>
     </div>
@@ -109,11 +108,9 @@ function showMoreMenu(event: MouseEvent) {
       <template v-for="layout in tableLayoutsConf" :key="layout.id">
         <div v-if="currentLayoutId === layout.id" :id="`iw-tt-layout-${layout.id}`" class="iw-tt-toolbar flex justify-between h-8 p-0.5">
           <div class="flex">
-            <GroupComp :group="layout.group" :columns-conf="tableBasicConf.columns" />
+            <RowSortSettingComp :sorts="layout.sorts" :columns-conf="tableBasicConf.columns" />
             <div class="iw-divider iw-divider-horizontal m-0.5" />
-            <RowSortComp :sorts="layout.sorts" :columns-conf="tableBasicConf.columns" />
-            <div class="iw-divider iw-divider-horizontal m-0.5" />
-            <FilterComp :filters="layout.filters" :columns-conf="tableBasicConf.columns" />
+            <FilterSettingComp :filters="layout.filters" :columns-conf="tableBasicConf.columns" />
           </div>
           <div>
             <LayoutSettingComp
@@ -131,9 +128,9 @@ function showMoreMenu(event: MouseEvent) {
           <div>
             <slot name="customActionBar" />
           </div>
-          <div v-if="layout.layoutKind === LayoutKind.LIST && layout.data && !Array.isArray(layout.data)">
-            <PaginationComp :slice="layout.slice" :total-number="layout.data.totalNumber" />
-          </div>
+          <template v-if="layout.layoutKind === LayoutKind.LIST && layout.data && !Array.isArray(layout.data)">
+            <PaginationComp :slices="layout.slices" :total-number="layout.data.totalNumber" />
+          </template>
         </div>
       </template>
     </div>

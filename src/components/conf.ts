@@ -54,7 +54,7 @@ export interface TableLayoutKernelConf {
   sorts?: TableDataSortProps[]
   group?: TableDataGroupProps
   aggs?: { [key: string]: AggregateKind }
-  slice: TableDataSliceProps
+  slices: TableDataSliceProps | { [key: string]: TableDataSliceProps }
   subDataShowKind: SubDataShowKind
   showSelectColumn: boolean
   actionColumnRender?: (record: { [key: string]: any }) => any
@@ -75,7 +75,7 @@ export function convertTableLayoutKernelPropsToTableLayoutKernelConf(props: Tabl
     sorts: props.sorts,
     group: props.group,
     aggs: props.aggs,
-    slice: props.slice ?? {
+    slices: props.slices ?? {
       offsetNumber: 0,
       fetchNumber: 50,
     },
@@ -333,7 +333,7 @@ export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]]
       columns: props.columns.map((column) => {
         return getDefaultLayoutColumnConf(column.name)
       }),
-      slice: {
+      slices: {
         offsetNumber: 0,
         fetchNumber: 50,
       },

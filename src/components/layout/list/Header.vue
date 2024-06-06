@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import MenuComp, { MenuOffsetKind } from '../../common/Menu.vue'
+import MenuComp from '../../common/Menu.vue'
 import type { CachedColumnConf, TableBasicConf, TableLayoutConf } from '../../conf'
 import ColumnFixedComp from './ColumnFixed.vue'
 import ColumnResizeComp from './ColumnResize.vue'

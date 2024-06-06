@@ -146,6 +146,53 @@ export function translateSubDataShowKind(subDataShowKind: SubDataShowKind): stri
   }
 }
 
+export interface AggItem {
+  kind: AggregateKind
+  title: string
+}
+
+export function showAggMappingByDataKind(dataKind: DataKind): AggItem[] {
+  const items = [
+    { kind: AggregateKind.COUNT, title: translateAggregateKind(AggregateKind.COUNT) },
+    { kind: AggregateKind.DISTINCT, title: translateAggregateKind(AggregateKind.DISTINCT) },
+  ]
+  switch (dataKind) {
+    case DataKind.SERIAL:
+    case DataKind.NUMBER:
+    case DataKind.AMOUNT:
+      items.push(...[
+        { kind: AggregateKind.SUM, title: translateAggregateKind(AggregateKind.SUM) },
+        { kind: AggregateKind.AVG, title: translateAggregateKind(AggregateKind.AVG) },
+        { kind: AggregateKind.MEDIAN, title: translateAggregateKind(AggregateKind.MEDIAN) },
+        { kind: AggregateKind.STDDEV, title: translateAggregateKind(AggregateKind.STDDEV) },
+        { kind: AggregateKind.MAX, title: translateAggregateKind(AggregateKind.MAX) },
+        { kind: AggregateKind.MIN, title: translateAggregateKind(AggregateKind.MIN) },
+        { kind: AggregateKind.DISTINCT, title: translateAggregateKind(AggregateKind.DISTINCT) },
+      ])
+      break
+    case DataKind.TEXT:
+    case DataKind.TEXTAREA:
+      items.push(...[
+        { kind: AggregateKind.MAX, title: translateAggregateKind(AggregateKind.MAX) },
+        { kind: AggregateKind.MIN, title: translateAggregateKind(AggregateKind.MIN) },
+        { kind: AggregateKind.DISTINCT, title: translateAggregateKind(AggregateKind.DISTINCT) },
+      ])
+      break
+    case DataKind.DATE:
+    case DataKind.DATETIME:
+    case DataKind.TIME:
+      items.push(...[
+        { kind: AggregateKind.MAX, title: translateAggregateKind(AggregateKind.MAX) },
+        { kind: AggregateKind.MIN, title: translateAggregateKind(AggregateKind.MIN) },
+        { kind: AggregateKind.DISTINCT, title: translateAggregateKind(AggregateKind.DISTINCT) },
+      ])
+      break
+    default:
+      break
+  }
+  return items
+}
+
 export interface TableProps {
   id?: string
   pkColumnName: string
@@ -182,8 +229,7 @@ export interface TableLayoutKernelProps {
   group?: TableDataGroupProps
   // Column name -> AggregateKind
   aggs?: { [key: string]: AggregateKind }
-  // Pagination with out group
-  slice?: TableDataSliceProps
+  slices?: TableDataSliceProps | { [key: string]: TableDataSliceProps }
   subDataShowKind?: SubDataShowKind
   showSelectColumn?: boolean
   actionColumnRender?: (record: { [key: string]: any }) => any
@@ -227,8 +273,7 @@ export interface TableEventProps {
     hideSubData?: boolean,
     // Load only the data of the corresponding group
     byGroupValue?: any,
-    // Do not use this slice if it exists in group.slices
-    defaultGroupSlice?: TableDataSliceProps) => Promise<TableDataResp | TableDataGroupResp[]>
+    slices?: TableDataSliceProps | { [key: string]: TableDataSliceProps }) => Promise<TableDataResp | TableDataGroupResp[]>
   newData?: (newRecords: { [key: string]: any }[]) => Promise<{ [key: string]: any }[]>
   copyData?: (targetRecordPks: any[]) => Promise<{ [key: string]: any }[]>
   modifyData?: (changedRecords: { [key: string]: any }[]) => Promise<{ [key: string]: any }[]>
@@ -252,8 +297,9 @@ export interface TableLayoutModifyProps {
   filters?: TableDataFilterProps[]
   sorts?: TableDataSortProps[]
   group?: TableDataGroupProps
+  removeGroup?: boolean
   aggs?: { [key: string]: AggregateKind }
-  slice?: TableDataSliceProps
+  slices?: TableDataSliceProps | { [key: string]: TableDataSliceProps }
   subDataShowKind?: SubDataShowKind
   columnSortedNames?: [string, string]
   newColumn?: TableLayoutColumnProps
@@ -278,12 +324,10 @@ export interface TableDataFilterItemProps {
 }
 
 export interface TableDataGroupProps {
-  columnNames: string[]
+  columnName: string
   groupOrderDesc: boolean
   // useDict: boolean
   hideEmptyRecord: boolean
-  // key=group value
-  slices: { [key: string]: TableDataSliceProps }
 }
 
 export interface TableDataSliceProps {
