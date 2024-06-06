@@ -101,7 +101,7 @@ export interface TableLayoutColumnConf {
   hide: boolean
   dateStart: boolean
   dateEnd: boolean
-  style?: string
+  styles: { [key: string]: string }
   render?: (record: { [key: string]: any }, columnName: string) => any
 }
 
@@ -114,7 +114,7 @@ export function convertTableLayoutColumnPropsToTableLayoutColumnConf(props: Tabl
     hide: props.hide ?? false,
     dateStart: props.dateStart ?? false,
     dateEnd: props.dateEnd ?? false,
-    style: props.style ?? '',
+    styles: props.styles ?? {},
     render: props.render
       ? props.render
       : tableColumn.render,
@@ -130,6 +130,7 @@ export function getDefaultLayoutColumnConf(columnName: string): TableLayoutColum
     hide: false,
     dateStart: false,
     dateEnd: false,
+    styles: {},
   }
 }
 
@@ -309,7 +310,6 @@ export function getInputTypeByDataKind(dataKind?: DataKind): string {
 }
 
 export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]] {
-  debugger
   const columns = props.columns.map((column) => {
     return convertTableColumnPropsToTableColumnConf(column)
   })
@@ -322,7 +322,6 @@ export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]]
   }
   const layoutsConf: TableLayoutConf[] = []
   if (props.layouts) {
-    debugger
     props.layouts.forEach((layout) => {
       layoutsConf.push({
         id: layout.id,
@@ -350,7 +349,6 @@ export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]]
     })
   }
   layoutsConf.forEach((layout) => {
-    debugger
     // Make sure the primary key is in the first column
     const pkIdx = layout.columns.findIndex(column => column.name === basicConf.pkColumnName)
     if (pkIdx !== -1) {
@@ -371,6 +369,7 @@ export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]]
         hide: false,
         dateStart: false,
         dateEnd: false,
+        styles: {},
       })
     }
   })
