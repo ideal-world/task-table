@@ -6,18 +6,17 @@ import MenuComp, { MenuOffsetKind, MenuSizeKind } from '../common/Menu.vue'
 import * as eb from '../eventbus'
 
 const props = defineProps<{
-  slices: TableDataSliceProps | { [key: string]: TableDataSliceProps }
+  defaultSlice: TableDataSliceProps
+  groupSlices?: { [key: string]: TableDataSliceProps }
   groupValue?: string
   totalNumber: number
 }>()
 const fetchNumberSelectCompRef = ref<InstanceType<typeof MenuComp>>()
 
 function getRealSlice(): TableDataSliceProps {
-  return props.groupValue
-    ? (props.slices as { [key: string]: TableDataSliceProps })[props.groupValue]
-        ? (props.slices as { [key: string]: TableDataSliceProps })[props.groupValue]
-        : props.slices as TableDataSliceProps
-    : props.slices as TableDataSliceProps
+  return props.groupValue && props.groupSlices && props.groupSlices[props.groupValue]
+    ? props.groupSlices[props.groupValue]
+    : props.defaultSlice
 }
 
 function getTotalPage() {
@@ -41,49 +40,62 @@ function getShowPages(): number[] {
 }
 
 async function setCurrentPage(newPage: number) {
-  if (props.groupValue) {
-    const slices = props.slices as { [key: string]: TableDataSliceProps }
-    if(slices[props.groupValue]){
-      slices[props.groupValue].offsetNumber = (newPage - 1) * slices[props.groupValue].fetchNumber
-    }else{
-      slices[props.groupValue] = {
-        offsetNumber : (newPage - 1) * slices[props.groupValue].fetchNumber
-        fetchNumber: 0
-      }
-    }
-    const changedLayoutReq: TableLayoutModifyProps = {
-      slices,
-    }
-    await eb.modifyLayout(changedLayoutReq)
-  }
-  else {
-    const slices = props.slices as TableDataSliceProps
-    slices.offsetNumber = (newPage - 1) * slices.fetchNumber
-    const changedLayoutReq: TableLayoutModifyProps = {
-      slices,
-    }
-    await eb.modifyLayout(changedLayoutReq)
-  }
+  await setSlice(newPage, undefined)
 }
 
 async function setFetchNumber(fetchNumber: number) {
-  if (props.groupValue) {
-    const slices = props.slices as { [key: string]: TableDataSliceProps }
-    slices[props.groupValue].fetchNumber = fetchNumber
+  await setSlice(undefined, fetchNumber)
+  fetchNumberSelectCompRef.value?.close()
+}
+
+async function setSlice(newPage?: number, newFetchNumber?: number) {
+  if (!props.groupValue) {
+    const newSlice = {
+      offsetNumber: newPage ? (newPage - 1) * (newFetchNumber ?? props.defaultSlice.fetchNumber) : props.defaultSlice.offsetNumber,
+      fetchNumber: newFetchNumber ?? props.defaultSlice.fetchNumber,
+      fetchNumbers: props.defaultSlice.fetchNumbers,
+    }
     const changedLayoutReq: TableLayoutModifyProps = {
-      slices,
+      defaultSlice: newSlice,
     }
     await eb.modifyLayout(changedLayoutReq)
   }
   else {
-    const slices = props.slices as TableDataSliceProps
-    slices.fetchNumber = fetchNumber
+    let newSlice
+    if (props.groupSlices && props.groupSlices[props.groupValue]) {
+      newSlice = {
+        ...props.groupSlices,
+        [props.groupValue]: {
+          offsetNumber: newPage ? (newPage - 1) * (newFetchNumber ?? props.groupSlices[props.groupValue].fetchNumber) : 0,
+          fetchNumber: newFetchNumber ?? props.groupSlices[props.groupValue].fetchNumber,
+          fetchNumbers: props.groupSlices[props.groupValue].fetchNumbers,
+        },
+      }
+    }
+    else if (props.groupSlices) {
+      newSlice = {
+        ...props.groupSlices,
+        [props.groupValue]: {
+          offsetNumber: newPage ? (newPage - 1) * (newFetchNumber ?? props.defaultSlice.fetchNumber) : 0,
+          fetchNumber: newFetchNumber ?? props.defaultSlice.fetchNumber,
+          fetchNumbers: props.defaultSlice.fetchNumbers,
+        },
+      }
+    }
+    else {
+      newSlice = {
+        [props.groupValue]: {
+          offsetNumber: newPage ? (newPage - 1) * (newFetchNumber ?? props.defaultSlice.fetchNumber) : 0,
+          fetchNumber: newFetchNumber ?? props.defaultSlice.fetchNumber,
+          fetchNumbers: props.defaultSlice.fetchNumbers,
+        },
+      }
+    }
     const changedLayoutReq: TableLayoutModifyProps = {
-      slices,
+      groupSlices: newSlice,
     }
     await eb.modifyLayout(changedLayoutReq)
   }
-  fetchNumberSelectCompRef.value?.close()
 }
 </script>
 
@@ -114,7 +126,7 @@ async function setFetchNumber(fetchNumber: number) {
     </button>
     <MenuComp ref="fetchNumberSelectCompRef">
       <div
-        v-for="number in getRealSlice().fetchNumbers ?? [5, 20, 30, 50, 100]" :key="number"
+        v-for="number in getRealSlice().fetchNumbers" :key="number"
         class="p-2 hover:cursor-pointer text-xs"
         @click="setFetchNumber(number)"
       >

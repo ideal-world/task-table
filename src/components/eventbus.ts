@@ -43,7 +43,7 @@ export async function loadData(moreForGroupedValue?: any, layoutId?: string) {
     layout.aggs ?? toRaw(layout.aggs),
     layout.subDataShowKind === SubDataShowKind.ONLY_PARENT_DATA,
     moreForGroupedValue ?? moreForGroupedValue,
-    toRaw(layout.slices),
+    moreForGroupedValue && layout.groupSlices && layout.groupSlices[moreForGroupedValue as string] ? layout.groupSlices[moreForGroupedValue as string] : layout.defaultSlice,
   )
 
   if (!moreForGroupedValue && !layout.group) {
@@ -230,7 +230,12 @@ export async function newLayout(newLayoutProps: TableLayoutKernelProps): Promise
     sorts: newLayoutProps.sorts,
     group: newLayoutProps.group,
     aggs: newLayoutProps.aggs,
-    slices: newLayoutProps.slices,
+    defaultSlice: newLayoutProps.defaultSlice,
+    groupSlices: newLayoutProps.groupSlices,
+    subDataShowKind: newLayoutProps.subDataShowKind,
+    showSelectColumn: newLayoutProps.showSelectColumn,
+    actionColumnRender: newLayoutProps.actionColumnRender,
+    actionColumnWidth: newLayoutProps.actionColumnWidth,
   })
   tableLayoutsConf.push({
     id: layoutId,
@@ -261,7 +266,8 @@ export async function modifyLayout(changedLayoutProps: TableLayoutModifyProps): 
     layout.group = undefined
   }
   changedLayoutProps.aggs && (layout.aggs = changedLayoutProps.aggs)
-  changedLayoutProps.slices && (layout.slices = changedLayoutProps.slices)
+  changedLayoutProps.defaultSlice && (layout.defaultSlice = changedLayoutProps.defaultSlice)
+  changedLayoutProps.groupSlices && (layout.groupSlices = changedLayoutProps.groupSlices)
   changedLayoutProps.subDataShowKind && (layout.subDataShowKind = changedLayoutProps.subDataShowKind)
 
   if (changedLayoutProps.newColumn) {

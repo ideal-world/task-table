@@ -129,7 +129,7 @@ function showMoreMenu(event: MouseEvent) {
             <slot name="customActionBar" />
           </div>
           <template v-if="layout.layoutKind === LayoutKind.LIST && layout.data && !Array.isArray(layout.data)">
-            <PaginationComp :slices="layout.slices" :total-number="layout.data.totalNumber" />
+            <PaginationComp :default-slice="layout.defaultSlice" :total-number="layout.data.totalNumber" />
           </template>
         </div>
       </template>

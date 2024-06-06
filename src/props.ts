@@ -229,7 +229,8 @@ export interface TableLayoutKernelProps {
   group?: TableDataGroupProps
   // Column name -> AggregateKind
   aggs?: { [key: string]: AggregateKind }
-  slices?: TableDataSliceProps | { [key: string]: TableDataSliceProps }
+  defaultSlice?: TableDataSliceProps
+  groupSlices?: { [key: string]: TableDataSliceProps }
   subDataShowKind?: SubDataShowKind
   showSelectColumn?: boolean
   actionColumnRender?: (record: { [key: string]: any }) => any
@@ -273,7 +274,7 @@ export interface TableEventProps {
     hideSubData?: boolean,
     // Load only the data of the corresponding group
     byGroupValue?: any,
-    slices?: TableDataSliceProps | { [key: string]: TableDataSliceProps }) => Promise<TableDataResp | TableDataGroupResp[]>
+    slices?: TableDataSliceProps) => Promise<TableDataResp | TableDataGroupResp[]>
   newData?: (newRecords: { [key: string]: any }[]) => Promise<{ [key: string]: any }[]>
   copyData?: (targetRecordPks: any[]) => Promise<{ [key: string]: any }[]>
   modifyData?: (changedRecords: { [key: string]: any }[]) => Promise<{ [key: string]: any }[]>
@@ -299,7 +300,8 @@ export interface TableLayoutModifyProps {
   group?: TableDataGroupProps
   removeGroup?: boolean
   aggs?: { [key: string]: AggregateKind }
-  slices?: TableDataSliceProps | { [key: string]: TableDataSliceProps }
+  defaultSlice?: TableDataSliceProps
+  groupSlices?: { [key: string]: TableDataSliceProps }
   subDataShowKind?: SubDataShowKind
   columnSortedNames?: [string, string]
   newColumn?: TableLayoutColumnProps
@@ -333,7 +335,7 @@ export interface TableDataGroupProps {
 export interface TableDataSliceProps {
   offsetNumber: number
   fetchNumber: number
-  fetchNumbers?: number[]
+  fetchNumbers: number[]
 }
 
 export interface TableDataResp {

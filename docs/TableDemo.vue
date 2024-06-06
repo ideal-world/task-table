@@ -99,7 +99,7 @@ function attachDict(data: { [key: string]: any }[]) {
 }
 
 const events: TableEventProps = {
-  loadData: async (columns?: string[], filters?: TableDataFilterProps[], sorts?: TableDataSortProps[], group?: TableDataGroupProps, aggs?: { [key: string]: AggregateKind }, hideSubData?: boolean, byGroupValue?: any, slices?: TableDataSliceProps | { [key: string]: TableDataSliceProps }): Promise<TableDataResp | TableDataGroupResp[]> => {
+  loadData: async (columns?: string[], filters?: TableDataFilterProps[], sorts?: TableDataSortProps[], group?: TableDataGroupProps, aggs?: { [key: string]: AggregateKind }, hideSubData?: boolean, byGroupValue?: any, slices?: TableDataSliceProps): Promise<TableDataResp | TableDataGroupResp[]> => {
     let data: { [key: string]: any }[] = JSON.parse(JSON.stringify(DATA))
     if (filters) {
       // TODO 支持多组
@@ -175,14 +175,9 @@ const events: TableEventProps = {
         return [key, value.length]
       }),
       )
-      if (Object.keys(slices as { [key: string]: TableDataSliceProps }).length === 0) {
+      if (slices) {
         dataGroup = Object.fromEntries(Object.entries(dataGroup).map(([key, value]) => {
-          if ((slices as { [key: string]: TableDataSliceProps })[key]) {
-            return [key, value.slice((slices as { [key: string]: TableDataSliceProps })[key].offsetNumber, (slices as { [key: string]: TableDataSliceProps })[key].offsetNumber + (slices as { [key: string]: TableDataSliceProps })[key].fetchNumber)]
-          }
-          else {
-            return [key, value]
-          }
+          return [key, value.slice(slices.offsetNumber, slices.offsetNumber + slices.fetchNumber)]
         }),
         )
       }
@@ -276,7 +271,7 @@ const events: TableEventProps = {
       }
       let records
       if (slices) {
-        records = data.slice((slices as TableDataSliceProps).offsetNumber, (slices as TableDataSliceProps).offsetNumber + (slices as TableDataSliceProps).fetchNumber)
+        records = data.slice(slices.offsetNumber, slices.offsetNumber + slices.fetchNumber)
       }
       else {
         records = data
@@ -379,8 +374,11 @@ const events: TableEventProps = {
     if (changedLayoutProps.aggs) {
       currLayout.aggs = changedLayoutProps.aggs
     }
-    if (changedLayoutProps.slices) {
-      currLayout.slices = changedLayoutProps.slices
+    if (changedLayoutProps.defaultSlice) {
+      currLayout.defaultSlice = changedLayoutProps.defaultSlice
+    }
+    if (changedLayoutProps.groupSlices) {
+      currLayout.groupSlices = changedLayoutProps.groupSlices
     }
     if (changedLayoutProps.subDataShowKind) {
       currLayout.subDataShowKind = changedLayoutProps.subDataShowKind
