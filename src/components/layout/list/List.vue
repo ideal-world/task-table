@@ -104,7 +104,9 @@ onMounted(() => {
           :show-select-column="layout.showSelectColumn"
           :show-action-column="layout.actionColumnRender !== undefined"
           :columns-conf="columnsWithoutHideConf" :styles-conf="listConf.basic.styles"
-          :group-value="groupData.groupValue" :set-column-styles="setColumnStyles"
+          :group-column-name="listConf.layout.group?.columnName"
+          :group-value="groupData.groupShowTitle ?? groupData.groupValue"
+          :set-column-styles="setColumnStyles"
         />
         <RowsComp
           :records="groupData.records"

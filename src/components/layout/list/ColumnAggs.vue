@@ -13,6 +13,7 @@ const props = defineProps<{
   dataBasic: TableDataResp
   columnsConf: CachedColumnConf[]
   stylesConf: TableStyleConf
+  groupColumnName?: string
   groupValue?: string
   setColumnStyles: (colIdx: number) => any
 }>()
@@ -56,7 +57,7 @@ async function changeColumnAggs(aggKind: AggregateKind, colIdx: number) {
         :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-agg-cell flex items-center justify-end pr-1 bg-base-100 border-solid border-b border-b-base-300 border-l border-l-base-300`" :data-column-name="column.name"
         :style="props.setColumnStyles(0)"
       >
-        <span class="iw-list-agg-cell__group font-bold flex-grow pl-1">{{ props.groupValue }}</span>
+        <span v-if="props.groupColumnName" class="iw-list-agg-cell__group font-bold flex-grow pl-1">{{ props.groupValue }}</span>
         <span class="iw-list-agg-cell__agg text-xs pr-1 self-center">{{ $t('_.agg.count') }}</span>
         <span class="iw-list-agg-cell__value text-info self-center">{{ props.dataBasic.totalNumber }}</span>
       </div>
