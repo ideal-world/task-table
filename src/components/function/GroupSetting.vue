@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import * as iconSvg from '../../assets/icon';
-import type { TableDataGroupProps } from '../../props';
-import type { TableColumnConf } from '../conf';
-import * as eb from '../eventbus';
+import * as iconSvg from '../../assets/icon'
+import type { TableDataGroupProps } from '../../props'
+import type { TableColumnConf } from '../conf'
+import * as eb from '../eventbus'
 
 const props = defineProps<{
   group?: TableDataGroupProps
@@ -68,7 +68,7 @@ async function setGroupHideEmpty() {
   </div>
   <div
     v-for="column in props.columnsConf.filter(columnConf => columnConf.groupable)"
-    :key="column.name" class="iw-contextmenu__item flex justify-between w-full"
+    :key="column.name" class="iw-contextmenu__item flex items-center justify-between w-full"
   >
     <span>
       <i :class="column.icon" />

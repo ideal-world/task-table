@@ -26,7 +26,7 @@ async function setShowToggleColumn(columnConf: TableLayoutColumnConf) {
 </script>
 
 <template>
-  <div v-for="column in props.layoutColumnConf.filter(column => column.name !== props.basicConf.pkColumnName)" :key="column.name" class="iw-contextmenu__item flex justify-between w-full">
+  <div v-for="column in props.layoutColumnConf.filter(column => column.name !== props.basicConf.pkColumnName)" :key="column.name" class="iw-contextmenu__item flex items-center justify-between w-full">
     <span>
       <i :class="props.basicConf.columns.find(col => col.name === column.name)?.icon" />
       {{ props.basicConf.columns.find(col => col.name === column.name)?.title }}
