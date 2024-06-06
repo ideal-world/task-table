@@ -249,6 +249,7 @@ export interface TableLayoutColumnProps {
   hide?: boolean
   dateStart?: boolean
   dateEnd?: boolean
+  style?: string
   // Overwrite the value of TableColumnProps
   render?: (record: { [key: string]: any }, columnName: string) => any
 }
