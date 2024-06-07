@@ -1,7 +1,7 @@
 import type { Ref } from 'vue'
 import { toRaw } from 'vue'
 import locales from '../locales'
-import type { TableCellDictItemsResp, TableDataQuerySliceProps, TableEventProps, TableLayoutKernelProps, TableLayoutModifyProps } from '../props'
+import type { TableCellDictItemsResp, TableDataGroupResp, TableDataQuerySliceProps, TableDataResp, TableEventProps, TableLayoutKernelProps, TableLayoutModifyProps } from '../props'
 import { SubDataShowKind } from '../props'
 
 import { getParentWithClass } from '../utils/basic'
@@ -25,11 +25,11 @@ export async function init(_tableBasicConf: TableBasicConf, _tableLayoutsConf: T
 
 export async function watch() {
   tableLayoutsConf.forEach((layout) => {
-    loadData(undefined, layout.id)
+    loadData(undefined, undefined, layout.id)
   })
 }
 
-export async function loadData(moreForGroupedValue?: any, layoutId?: string) {
+export async function loadData(moreForGroupedValue?: any, returnOnlyAggs?: boolean, layoutId?: string) {
   const layout = layoutId ? tableLayoutsConf.find(layout => layout.id === layoutId)! : tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   const showColumns = layout.columns.filter(column => !column.hide).map(column => column.name).slice()
@@ -44,7 +44,7 @@ export async function loadData(moreForGroupedValue?: any, layoutId?: string) {
     layout.group ?? toRaw(layout.group),
     layout.aggs ?? toRaw(layout.aggs),
     layout.subDataShowKind === SubDataShowKind.ONLY_PARENT_DATA,
-    moreForGroupedValue ?? moreForGroupedValue,
+    moreForGroupedValue,
     moreForGroupedValue && layout.groupSlices && layout.groupSlices[moreForGroupedValue as string]
       ? {
           offsetNumber: layout.groupSlices[moreForGroupedValue as string].offsetNumber,
@@ -54,13 +54,19 @@ export async function loadData(moreForGroupedValue?: any, layoutId?: string) {
           offsetNumber: layout.defaultSlice.offsetNumber,
           fetchNumber: layout.defaultSlice.fetchNumber,
         },
+    returnOnlyAggs,
   )
 
   if (!moreForGroupedValue && !layout.group) {
     // Load data without grouping
     if (!Array.isArray(resp)) {
-      resp.records = layout.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA ? sortByTree(resp.records, tableBasicConf.pkColumnName, tableBasicConf.parentPkColumnName) : resp.records
-      layout.data = resp
+      if (!returnOnlyAggs) {
+        resp.records = layout.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA ? sortByTree(resp.records, tableBasicConf.pkColumnName, tableBasicConf.parentPkColumnName) : resp.records
+        layout.data = resp
+      }
+      else {
+        (layout.data as TableDataResp).aggs = resp.aggs
+      }
     }
     else {
       showAlert(t('_.event.loadDataInvalidScene'), 2, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
@@ -70,10 +76,17 @@ export async function loadData(moreForGroupedValue?: any, layoutId?: string) {
   else if (!moreForGroupedValue && layout.group) {
     // Load all grouped data
     if (Array.isArray(resp)) {
-      resp.forEach((groupData) => {
-        groupData.records = layout.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA ? sortByTree(groupData.records, tableBasicConf.pkColumnName, tableBasicConf.parentPkColumnName) : groupData.records
-      })
-      layout.data = resp
+      if (!returnOnlyAggs) {
+        resp.forEach((groupData) => {
+          groupData.records = layout.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA ? sortByTree(groupData.records, tableBasicConf.pkColumnName, tableBasicConf.parentPkColumnName) : groupData.records
+        })
+        layout.data = resp
+      }
+      else {
+        resp.forEach((groupData) => {
+          (layout.data as TableDataGroupResp[]).find(d => d.groupValue === groupData.groupValue)!.aggs = groupData.aggs
+        })
+      }
     }
     else {
       showAlert(t('_.event.loadDataInvalidScene'), 2, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
@@ -83,11 +96,19 @@ export async function loadData(moreForGroupedValue?: any, layoutId?: string) {
   else if (moreForGroupedValue) {
     // Load a grouped data
     if (!Array.isArray(resp) && Array.isArray(layout.data)) {
-      const groupData = layout.data.find(d => d.groupValue === moreForGroupedValue)
-      if (groupData) {
-        groupData.records = layout.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA ? sortByTree(resp.records, tableBasicConf.pkColumnName, tableBasicConf.parentPkColumnName) : resp.records
-        groupData.aggs = resp.aggs
-        groupData.totalNumber = resp.totalNumber
+      if (!returnOnlyAggs) {
+        const groupData = layout.data.find(d => d.groupValue === moreForGroupedValue)
+        if (groupData) {
+          groupData.records = layout.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA ? sortByTree(resp.records, tableBasicConf.pkColumnName, tableBasicConf.parentPkColumnName) : resp.records
+          groupData.aggs = resp.aggs
+          groupData.totalNumber = resp.totalNumber
+        }
+      }
+      else {
+        const groupData = (layout.data as TableDataGroupResp[]).find(d => d.groupValue === moreForGroupedValue)
+        if (groupData) {
+          groupData.aggs = resp.aggs
+        }
       }
     }
     else {
@@ -176,7 +197,7 @@ export async function clickCell(clickedRecordPk: any, clickedColumnName: string)
     showAlert(t('_.event.notConfigured', { name: 'clickCell' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
     throw new Error('[events.clickCell] Event not Configured')
   }
-  return await events.clickCell(clickedRecordPk, clickedColumnName)
+  return await events.clickCell(clickedRecordPk, clickedColumnName, layout.id, layout.layoutKind)
 }
 
 export async function loadCellDictItems(columnName: string, filterValue?: any, slice?: TableDataQuerySliceProps): Promise<TableCellDictItemsResp> {
@@ -190,7 +211,7 @@ export async function loadCellDictItems(columnName: string, filterValue?: any, s
   return await events.loadCellDictItems(columnName, filterValue, slice)
 }
 
-export async function loadCellDictItemsWithMultiConds(conds: { [columnName: string]: any[] }, slice?: TableDataQuerySliceProps): Promise<{[columnName:string]:TableCellDictItemsResp}> {
+export async function loadCellDictItemsWithMultiConds(conds: { [columnName: string]: any[] }, slice?: TableDataQuerySliceProps): Promise<{ [columnName: string]: TableCellDictItemsResp }> {
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.loadCellDictItemsWithMultiConds) {
@@ -236,17 +257,7 @@ export async function newLayout(newLayoutProps: TableLayoutKernelProps): Promise
     title: newLayoutProps.title,
     layoutKind: newLayoutProps.layoutKind,
     icon: newLayoutProps.icon,
-    columns: Object.entries(newLayoutProps.columns).map(([name, column]) => {
-      return {
-        name,
-        wrap: column.wrap,
-        fixed: column.fixed,
-        width: column.width,
-        hide: column.hide,
-        dateStart: column.dateStart,
-        dateEnd: column.dateEnd,
-      }
-    }),
+    columns: newLayoutProps.columns,
     filters: newLayoutProps.filters,
     sorts: newLayoutProps.sorts,
     group: newLayoutProps.group,
@@ -263,7 +274,7 @@ export async function newLayout(newLayoutProps: TableLayoutKernelProps): Promise
     ...convertTableLayoutKernelPropsToTableLayoutKernelConf(newLayoutProps, tableBasicConf.columns),
   })
 
-  await loadData(undefined, layoutId)
+  await loadData(undefined, undefined, layoutId)
   return true
 }
 
@@ -313,7 +324,12 @@ export async function modifyLayout(changedLayoutProps: TableLayoutModifyProps, b
     rightColumnIdx !== -1 && layout.columns.splice(rightColumnIdx, 1, tmpColumn)
   }
 
-  await loadData(byGroupValue)
+  if (Object.entries(changedLayoutProps).length === 1 && changedLayoutProps.aggs) {
+    await loadData(byGroupValue, true)
+  }
+  else {
+    await loadData(byGroupValue)
+  }
   return true
 }
 

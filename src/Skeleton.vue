@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { onMounted, reactive, ref, watch } from 'vue'
 import type { TableBasicConf, TableLayoutConf } from './components/conf'
 import { initConf } from './components/conf'
 import * as Event from './components/eventbus'
 import FilterSettingComp from './components/function/FilterSetting.vue'
-import LayoutSettingComp from './components/function/LayoutSetting.vue'
 import PaginationComp from './components/function/Pagination.vue'
 import RowSortSettingComp from './components/function/RowSortSetting.vue'
 import TableSettingComp from './components/function/TableSetting.vue'
 import ListComp from './components/layout/list/List.vue'
 import type { TableProps } from './props'
 import { LayoutKind } from './props'
+import { IwUtils } from './utils'
 
 const props = defineProps<TableProps>()
 const [_tableBasicConf, _tableLayoutsConf] = initConf(props)
@@ -18,6 +18,13 @@ const [_tableBasicConf, _tableLayoutsConf] = initConf(props)
 const tableBasicConf = reactive<TableBasicConf>(_tableBasicConf)
 const tableLayoutsConf = reactive<TableLayoutConf[]>(_tableLayoutsConf)
 const currentLayoutId = ref<string>(tableLayoutsConf[0].id)
+
+watch(tableLayoutsConf, () => {
+  // Reset the current layout after the layout is deleted
+  if (tableLayoutsConf.findIndex(layout => layout.id === currentLayoutId.value) === -1) {
+    currentLayoutId.value = tableLayoutsConf[0].id
+  }
+})
 
 Event.init(tableBasicConf, tableLayoutsConf, currentLayoutId, props.events)
 
@@ -31,6 +38,13 @@ onMounted(async () => {
       const footerHeight = layoutEle.getElementsByClassName('iw-tt-footer')[0].offsetHeight
       layoutEle.getElementsByClassName('iw-tt-table')[0].style.height = `${outHeight - headerHeight - toolbarHeight - footerHeight}px`
     })
+  })
+  IwUtils.delegateEvent(`#iw-tt-${tableBasicConf.id}`, 'click', '.iw-tt-header__item', (e: Event) => {
+    const target = e.target as HTMLElement
+    const layoutId = target.dataset.layoutId
+    if (layoutId) {
+      currentLayoutId.value = layoutId
+    }
   })
   await Event.watch()
 })
@@ -63,22 +77,25 @@ onMounted(async () => {
 -->
 <template>
   <div
-    :id="tableBasicConf.id"
+    :id="`iw-tt-${tableBasicConf.id}`"
     :class="`${tableBasicConf.styles.tableClass} iw-tt w-full text-sm text-base-content bg-base-100 relative`"
   >
     <div
-      :class="`${tableBasicConf.styles.headerClass} iw-tt-header iw-navbar p-0 min-h-0`"
+      :class="`${tableBasicConf.styles.headerClass} iw-tt-header flex justify-between p-0 min-h-0`"
     >
-      <div class="flex-1">
-        <template v-for="layout in tableLayoutsConf" :key="layout.id">
-          <a
-            :class="`iw-tt-header__item iw-tab iw-tab-bordered ${currentLayoutId === layout.id ? 'iw-tab-active' : ''} flex flex-col text-base`"
-          >
-            <i :class="`${layout.icon}`" class="mr-1" /> {{ layout.title }}
-          </a>
-        </template>
+      <div class="tablist iw-tabs iw-tabs-sm iw-tabs-boxed">
+        <a
+          v-for="layout in tableLayoutsConf"
+          :key="layout.id"
+          :data-layout-id="layout.id"
+          role="tab"
+          class="iw-tt-header__item iw-tab"
+          :class="currentLayoutId === layout.id ? 'iw-tab-active' : ''"
+        >
+          <i :class="`${layout.icon}`" class="mr-1" /> {{ layout.title }}
+        </a>
       </div>
-      <div class="flex-none">
+      <div>
         <TableSettingComp
           :basic-conf="tableBasicConf"
           :layout-conf="tableLayoutsConf.find(layout => layout.id === currentLayoutId)!"
@@ -88,25 +105,27 @@ onMounted(async () => {
     </div>
     <div class="iw-tt-layout">
       <template v-for="layout in tableLayoutsConf" :key="layout.id">
-        <div v-if="currentLayoutId === layout.id" :id="`iw-tt-layout-${layout.id}`" class="iw-tt-toolbar flex h-8 p-0.5">
-          <div class="flex">
-            <RowSortSettingComp :sorts="layout.sorts" :columns-conf="tableBasicConf.columns" />
-            <div class="iw-divider iw-divider-horizontal m-0.5" />
-            <FilterSettingComp :filters="layout.filters" :columns-conf="tableBasicConf.columns" />
+        <div v-show="currentLayoutId === layout.id">
+          <div :id="`iw-tt-layout-${layout.id}`" class="iw-tt-toolbar flex h-8 p-0.5">
+            <div class="flex">
+              <RowSortSettingComp :sorts="layout.sorts" :columns-conf="tableBasicConf.columns" />
+              <div class="iw-divider iw-divider-horizontal m-0.5" />
+              <FilterSettingComp :filters="layout.filters" :columns-conf="tableBasicConf.columns" />
+            </div>
           </div>
-        </div>
-        <div v-if="currentLayoutId === layout.id" class="iw-tt-table overflow-auto w-full">
-          <ListComp :key="layout.id" :layout="layout" :basic="tableBasicConf" />
-        </div>
-        <div
-          :class="`${tableBasicConf.styles.footerClass} iw-tt-footer flex justify-between p-1 min-h-0`"
-        >
-          <div>
-            <slot name="customActionBar" />
+          <div class="iw-tt-table overflow-auto w-full">
+            <ListComp :key="layout.id" :layout="layout" :basic="tableBasicConf" />
           </div>
-          <template v-if="layout.layoutKind === LayoutKind.LIST && layout.data && !Array.isArray(layout.data)">
-            <PaginationComp :default-slice="layout.defaultSlice" :total-number="layout.data.totalNumber" />
-          </template>
+          <div
+            :class="`${tableBasicConf.styles.footerClass} iw-tt-footer flex justify-between p-1 min-h-0`"
+          >
+            <div>
+              <slot name="customActionBar" />
+            </div>
+            <template v-if="layout.layoutKind === LayoutKind.LIST && layout.data && !Array.isArray(layout.data)">
+              <PaginationComp :default-slice="layout.defaultSlice" :total-number="layout.data.totalNumber" />
+            </template>
+          </div>
         </div>
       </template>
     </div>

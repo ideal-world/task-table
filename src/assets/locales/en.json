@@ -63,12 +63,22 @@
       "rename": "Rename"
     },
     "delete": {
-      "title": "Delete layout",
+      "title": "Delete",
+      "note": "Delete current layout",
       "confirm": "Are you sure you want to delete [{title}]?"
     },
     "reset": {
-      "title": "Reset layout",
+      "title": "Reset",
+      "note": "Clear current layout settings",
       "confirm": "Are you sure you want to reset [{title}]?"
+    },
+    "copy": {
+      "title": "Copy",
+      "note": "Copy current layout to a new layout"
+    },
+    "new": {
+      "title": "New",
+      "note": "Create a new blank layout"
     },
     "action": {
       "title": "Action"

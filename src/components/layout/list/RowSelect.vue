@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import { IwUtils } from '../../../utils'
-import { getParentWithClass } from '../../../utils/basic'
-import * as eb from '../../eventbus'
+import { onMounted, ref } from 'vue';
+import { IwUtils } from '../../../utils';
+import { getParentWithClass } from '../../../utils/basic';
+import * as eb from '../../eventbus';
 
 const props = defineProps<{
   selectedPks: any[]
@@ -10,9 +10,13 @@ const props = defineProps<{
   pkKindIsNumber: boolean
 }>()
 
+const currentCompRef = ref<HTMLElement | null>(null)
+let listEle: HTMLElement
+
 onMounted(() => {
-  IwUtils.delegateEvent('.iw-list', 'click', '.iw-list-select-cell__chk', onSelectToggle)
-  IwUtils.delegateEvent('.iw-list', 'click', '.iw-list-select-all-cell__chk', onSelectAllToggle)
+  listEle = currentCompRef.value!.closest('.iw-list')! as HTMLElement
+  IwUtils.delegateEvent(listEle, 'click', '.iw-list-select-cell__chk', onSelectToggle)
+  IwUtils.delegateEvent(listEle, 'click', '.iw-list-select-all-cell__chk', onSelectAllToggle)
 })
 
 function onSelectToggle(event: Event) {
@@ -72,6 +76,8 @@ function removeSelect(selectPk: any, selectCheckBoxEle: HTMLInputElement, rowEle
     const childrenCheckBoxEle = childrenRowEle.querySelector('.iw-list-select-cell__chk') as HTMLInputElement
     removeSelect(childrenPk, childrenCheckBoxEle, childrenRowEle as HTMLElement, listEle)
   })
+  const selectAllEle = listEle.querySelector('.iw-list-select-all-cell__chk') as HTMLInputElement
+  selectAllEle.checked = false
 }
 
 function indeterminateSelect(rowEle: HTMLElement, listEle: HTMLElement) {
@@ -89,5 +95,5 @@ function indeterminateSelect(rowEle: HTMLElement, listEle: HTMLElement) {
 </script>
 
 <template>
-  <div />
+  <div ref="currentCompRef" />
 </template>

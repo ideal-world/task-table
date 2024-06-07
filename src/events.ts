@@ -2,8 +2,8 @@ import { convertTableStylePropsToTableStyleConf } from './components/conf'
 import * as eb from './components/eventbus'
 import type { TableCellDictItemsResp, TableDataQuerySliceProps, TableLayoutKernelProps, TableLayoutModifyProps, TableStyleProps } from './props'
 
-export async function loadData(moreForGroupedValue?: any, layoutId?: string) {
-  await eb.loadData(moreForGroupedValue, layoutId)
+export async function loadData(moreForGroupedValue?: any, returnOnlyAggs?: boolean, layoutId?: string) {
+  await eb.loadData(moreForGroupedValue, returnOnlyAggs, layoutId)
 }
 
 export async function newData(newRecords: { [key: string]: any }[]): Promise<boolean> {

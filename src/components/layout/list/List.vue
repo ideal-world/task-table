@@ -80,6 +80,7 @@ onMounted(() => {
         :sub-data-show-kind="listConf.layout.subDataShowKind"
         :pk-kind-is-number="pkKindIsNumber"
         :columns-conf="columnsWithoutHideConf"
+        :layout-id="listConf.layout.id"
         :styles-conf="listConf.basic.styles"
         :show-select-column="listConf.layout.showSelectColumn"
         :action-column-render="listConf.layout.actionColumnRender"
@@ -115,6 +116,7 @@ onMounted(() => {
           :sub-data-show-kind="listConf.layout.subDataShowKind"
           :pk-kind-is-number="pkKindIsNumber"
           :columns-conf="columnsWithoutHideConf"
+          :layout-id="listConf.layout.id"
           :styles-conf="listConf.basic.styles"
           :show-select-column="listConf.layout.showSelectColumn"
           :action-column-render="listConf.layout.actionColumnRender"
@@ -127,12 +129,12 @@ onMounted(() => {
         </div>
       </template>
     </template>
+    <RowSelectComp
+      v-if="listConf.layout.showSelectColumn"
+      :selected-pks="listConf.layout.selectedDataPks" :pk-column-name="listConf.basic.pkColumnName"
+      :pk-kind-is-number="pkKindIsNumber"
+    />
   </div>
-  <RowSelectComp
-    v-if="listConf.layout.showSelectColumn"
-    :selected-pks="listConf.layout.selectedDataPks" :pk-column-name="listConf.basic.pkColumnName"
-    :pk-kind-is-number="pkKindIsNumber"
-  />
 </template>
 
 <style lang="css">

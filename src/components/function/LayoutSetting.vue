@@ -35,6 +35,27 @@ async function resetLayout() {
   await eb.modifyLayout(layout)
   confirmResetLayoutCompRef.value?.close()
 }
+
+async function copyLayout() {
+  const newLayout = JSON.parse(JSON.stringify(props.layoutConf))
+  newLayout.title
+  = await eb.newLayout({
+      title: `${newLayout.title} - Copy`,
+      layoutKind: newLayout.layoutKind,
+      icon: newLayout.icon,
+      columns: newLayout.columns,
+      filters: newLayout.filters,
+      sorts: newLayout.sorts,
+      group: newLayout.group,
+      aggs: newLayout.aggs,
+      groupSlices: newLayout.groupSlices,
+      defaultSlice: newLayout.defaultSlice,
+      subDataShowKind: newLayout.subDataShowKind,
+      showSelectColumn: newLayout.showSelectColumn,
+      actionColumnRender: props.layoutConf.actionColumnRender,
+      actionColumnWidth: newLayout.actionColumnWidth,
+    })
+}
 </script>
 
 <template>
@@ -44,12 +65,14 @@ async function resetLayout() {
   <div style="display: none;">
     <div class="flex justify-between">
       <button
-        class="iw-btn iw-btn-xs"
-        :title="$t('layout.reset.title')"
+        class="iw-btn m-1 flex-1"
+        :title="$t('layout.reset.note')"
         @click="e => { confirmResetLayoutCompRef?.show(e, MenuOffsetKind.RIGHT_TOP, MenuSizeKind.MINI, true) }"
       >
-        <i :class="`${iconSvg.RESET}`" />
-        <span>{{ $t('layout.reset.title') }}</span>
+        <div class="flex items-center flex-col pb-1">
+          <i :class="`${iconSvg.RESET}`" class="text-lg" />
+          <span class="text-xs font-normal">{{ $t('layout.reset.title') }}</span>
+        </div>
       </button>
       <MenuComp ref="confirmResetLayoutCompRef">
         <div class="iw-contextmenu__item flex items-center justify-between w-full text-error">
@@ -71,13 +94,25 @@ async function resetLayout() {
         </div>
       </MenuComp>
       <button
+        class="iw-btn m-1 flex-1"
+        :title="$t('layout.copy.note')"
+        @click="copyLayout"
+      >
+        <div class="flex items-center flex-col pb-1">
+          <i :class="`${iconSvg.COPY}`" class="text-lg" />
+          <span class="text-xs font-normal">{{ $t('layout.copy.title') }}</span>
+        </div>
+      </button>
+      <button
         v-if="props.layoutLength > 1"
-        class="iw-btn iw-btn-xs"
-        :title="$t('layout.delete.title')"
+        class="iw-btn m-1 flex-1"
+        :title="$t('layout.delete.note')"
         @click="e => { confirmDeleteLayoutCompRef?.show(e, MenuOffsetKind.RIGHT_TOP, MenuSizeKind.MINI, true) }"
       >
-        <i :class="`${iconSvg.TRASH}`" />
-        <span>{{ $t('layout.delete.title') }}</span>
+        <div class="flex items-center flex-col pb-1">
+          <i :class="`${iconSvg.TRASH}`" class="text-lg" />
+          <span class="text-xs font-normal">{{ $t('layout.delete.title') }}</span>
+        </div>
       </button>
       <MenuComp ref="confirmDeleteLayoutCompRef">
         <div class="iw-contextmenu__item flex items-center justify-between w-full text-error">
@@ -98,6 +133,16 @@ async function resetLayout() {
           </button>
         </div>
       </MenuComp>
+      <button
+        class="iw-btn m-1 flex-1"
+        :title="$t('layout.new.note')"
+        @click="e => { confirmDeleteLayoutCompRef?.show(e, MenuOffsetKind.RIGHT_TOP, MenuSizeKind.MINI, true) }"
+      >
+        <div class="flex items-center flex-col pb-1">
+          <i :class="`${iconSvg.NEW}`" class="text-lg" />
+          <span class="text-xs font-normal">{{ $t('layout.new.title') }}</span>
+        </div>
+      </button>
     </div>
   </div>
 </template>

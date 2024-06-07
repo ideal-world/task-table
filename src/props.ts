@@ -274,14 +274,15 @@ export interface TableEventProps {
     hideSubData?: boolean,
     // Load only the data of the corresponding group
     byGroupValue?: any,
-    slices?: TableDataQuerySliceProps) => Promise<TableDataResp | TableDataGroupResp[]>
+    slices?: TableDataQuerySliceProps,
+    returnOnlyAggs?: boolean) => Promise<TableDataResp | TableDataGroupResp[]>
   newData?: (newRecords: { [key: string]: any }[]) => Promise<{ [key: string]: any }[]>
   copyData?: (targetRecordPks: any[]) => Promise<{ [key: string]: any }[]>
   modifyData?: (changedRecords: { [key: string]: any }[]) => Promise<{ [key: string]: any }[]>
   // Need to delete child node
   deleteData?: (deletedRecordPks: any[]) => Promise<boolean>
   selectData?: (selectedRecordPks: any[]) => Promise<boolean>
-  clickCell?: (clickedRecordPk: any, clickedColumnName: string) => Promise<boolean>
+  clickCell?: (clickedRecordPk: any, clickedColumnName: string, byLayoutId: string, byLayoutKind: LayoutKind) => Promise<boolean>
 
   loadCellDictItems?: (columnName: string, filterValue?: any, slice?: TableDataQuerySliceProps) => Promise<TableCellDictItemsResp>
   loadCellDictItemsWithMultiConds?: (conds: { [columnName: string]: any[] }, slice?: TableDataQuerySliceProps) => Promise<{ [columnName: string]: TableCellDictItemsResp }>
@@ -351,6 +352,14 @@ export interface TableDataResp {
 export interface TableDataGroupResp extends TableDataResp {
   groupValue: string
   groupShowTitle?: string
+}
+
+export interface TableAggsDataResp {
+  aggs: { [key: string]: any }
+}
+
+export interface TableAggsDataGroupResp extends TableAggsDataResp {
+  groupValue: string
 }
 
 export interface TableCellDictItemProps {

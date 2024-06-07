@@ -13,6 +13,7 @@ const props = defineProps<{
   subDataShowKind: SubDataShowKind
   pkKindIsNumber: boolean
   columnsConf: CachedColumnConf[]
+  layoutId: string
   stylesConf: TableStyleConf
   showSelectColumn: boolean
   actionColumnRender?: (record: { [key: string]: any }) => any
@@ -21,15 +22,15 @@ const props = defineProps<{
 </script>
 
 <template>
-  <!-- key的值使用主键+子数据显示类型以确保子数据显示类型切换时可以重新创建所有行。
+  <!-- key的值使用主键+布局Id+子数据显示类型以确保子数据显示类型切换时可以重新创建所有行。
   否则，折叠行时MutationObserver处理会遗漏一些需要隐藏的子数据。
 
-  The value of key uses primary key + sub-data display kind to ensure that all rows can be recreated when the sub-data display kind is switched.
+  The value of key uses primary key + layout id + sub-data display kind to ensure that all rows can be recreated when the sub-data display kind is switched.
   Otherwise, MutationObserver processing when collapsing rows will miss some sub-data that needs to be hidden.
 -->
   <div
     v-for="(row, idx) in props.records"
-    :key="row[props.pkColumnName] + props.subDataShowKind"
+    :key="row[props.pkColumnName] + layoutId + props.subDataShowKind"
     :data-pk="row[props.pkColumnName] "
     :data-parent-pk="props.parentPkColumnName ? row[props.parentPkColumnName] : undefined"
     :class="`${props.stylesConf.rowClass} iw-list-row iw-list-data-row ${props.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA ? 'iw-list-data-fold' : ''} flex bg-base-100 border-b border-b-base-300 border-r border-r-base-300`"
