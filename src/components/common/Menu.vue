@@ -155,8 +155,8 @@ function doCloseContextMenu(contextMenuEle: HTMLElement) {
   contextMenuEle.style.display = `none`
   const id = contextMenuEle.id
   if (id && ON_CLOSE_CALLBACKS[id]) {
-    ON_CLOSE_CALLBACKS[id]?.()
-    delete ON_CLOSE_CALLBACKS[id]
+    ON_CLOSE_CALLBACKS[id]?.callback()
+    ON_CLOSE_CALLBACKS[id]?.once && delete ON_CLOSE_CALLBACKS[id]
   }
 }
 
@@ -176,11 +176,14 @@ onMounted(() => {
   })
 })
 
-function registerOnCloseListener(callback: () => Promise<void>) {
+function registerOnCloseListener(callback: () => Promise<void>, once?: boolean) {
   const id = `iw-contextmenu-${Math.floor(Math.random() * 1000000)}`
   const contextMenuEle = contextmenuRef.value as HTMLElement
   contextMenuEle.id = id
-  ON_CLOSE_CALLBACKS[id] = callback
+  ON_CLOSE_CALLBACKS[id] = {
+    callback,
+    once: once ?? false,
+  }
 }
 
 defineExpose({
@@ -211,7 +214,10 @@ export enum MenuSizeKind {
 }
 
 export const FUN_CLOSE_CONTEXT_MENU_TYPE = Symbol('FUN_CLOSE_CONTEXT_MENU_TYPE') as InjectionKey<() => void>
-const ON_CLOSE_CALLBACKS: { [id: string]: () => Promise<void> } = {}
+const ON_CLOSE_CALLBACKS: { [id: string]: {
+  callback: () => Promise<void>
+  once: boolean
+} } = {}
 </script>
 
 <template>
