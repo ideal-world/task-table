@@ -48,15 +48,16 @@
       "isempty": "Is empty",
       "notempty": "Not empty"
     },
-    "state": {
-      "selectPlaceholder": "Please select"
-    },
     "event": {
       "notConfigured": "Event[{name}]not configured",
       "loadDataInvalidScene": "Unable to load data: Invalid scene"
+    },
+    "table": {
+      "moreSettingTitle": "More settings"
     }
   },
   "layout": {
+    "settingTitle": "Layout settings",
     "title": {
       "default": "Default",
       "rename": "Rename"
@@ -71,15 +72,6 @@
     },
     "action": {
       "title": "Action"
-    },
-    "subData": {
-      "title": "Sub Data",
-      "tileAllData": "Tile all data",
-      "onlyParentData": "Parent data only",
-      "foldSubData": "Fold sub data",
-      "tileAllDataTitle": "Tile",
-      "onlyParentDataTitle": "Hide",
-      "foldSubDataTitle": "Fold"
     }
   },
   "function": {
@@ -112,6 +104,15 @@
     },
     "pagination": {
       "total": "Total {number} rows"
+    },
+    "subData": {
+      "title": "Show sub Data",
+      "tileAllData": "Tile all data",
+      "onlyParentData": "Parent data only",
+      "foldSubData": "Fold sub data",
+      "tileAllDataTitle": "Tile",
+      "onlyParentDataTitle": "Hide",
+      "foldSubDataTitle": "Fold"
     }
   },
   "list": {

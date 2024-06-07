@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import * as iconSvg from '../../assets/icon'
-import type { TableDataGroupProps } from '../../props'
-import type { TableColumnConf } from '../conf'
-import * as eb from '../eventbus'
+import * as iconSvg from '../../assets/icon';
+import type { TableDataGroupProps } from '../../props';
+import type { TableColumnConf } from '../conf';
+import * as eb from '../eventbus';
 
 const props = defineProps<{
   group?: TableDataGroupProps
@@ -62,56 +62,54 @@ async function setGroupHideEmpty() {
 
 <template>
   <div
-    class="iw-divider iw-divider-end mt-1 mb-1 ml-2 mr-2"
+    class="iw-divider cursor-pointer iw-table-setting-title"
   >
-    {{ $t('function.group.columnsTitle') }}
+    {{ $t('function.group.groupTitle') }}
   </div>
-  <div
-    v-for="column in props.columnsConf.filter(columnConf => columnConf.groupable)"
-    :key="column.name" class="iw-contextmenu__item flex items-center justify-between w-full"
-  >
-    <span>
-      <i :class="column.icon" />
-      {{ column.title }}
-    </span>
-    <input
-      type="checkbox" class="iw-toggle iw-toggle-xs"
-      :checked="column.name === props.group?.columnName"
-      @click="setGroupColumn(column.name)"
+  <div style="display: none;">
+    <div
+      class="iw-divider iw-divider-end mt-1 mb-1 ml-2 mr-2"
     >
-  </div>
-  <div
-    class="iw-divider mt-1 mb-1 ml-2 mr-2"
-  />
-  <div class="flex justify-between items-center w-full mr-2">
-    <span>
-      <i :class="iconSvg.SORT" />
-      {{ $t('function.group.groupSortTitle') }}
-    </span>
-    <input
-      type="checkbox" class="iw-toggle iw-toggle-xs"
-      :checked="props.group?.groupOrderDesc"
-      @click="setGroupDescSort"
+      {{ $t('function.group.columnsTitle') }}
+    </div>
+    <div
+      v-for="column in props.columnsConf.filter(columnConf => columnConf.groupable)"
+      :key="column.name" class="iw-contextmenu__item flex items-center justify-between w-full"
     >
-  </div>
-  <div class="flex justify-between items-center w-full mr-2">
-    <span>
-      <i :class="iconSvg.SORT" />
-      {{ $t('function.group.hideEmptyTitle') }}
-    </span>
-    <input
-      type="checkbox" class="iw-toggle iw-toggle-xs"
-      :checked="props.group?.hideEmptyRecord"
-      @click="setGroupHideEmpty"
-    >
+      <span>
+        <i :class="column.icon" />
+        {{ column.title }}
+      </span>
+      <input
+        type="checkbox" class="iw-toggle iw-toggle-xs"
+        :checked="column.name === props.group?.columnName"
+        @click="setGroupColumn(column.name)"
+      >
+    </div>
+    <div
+      class="iw-divider mt-1 mb-1 ml-2 mr-2"
+    />
+    <div class="flex justify-between items-center w-full mr-2">
+      <span>
+        <i :class="iconSvg.SORT" />
+        {{ $t('function.group.groupSortTitle') }}
+      </span>
+      <input
+        type="checkbox" class="iw-toggle iw-toggle-xs"
+        :checked="props.group?.groupOrderDesc"
+        @click="setGroupDescSort"
+      >
+    </div>
+    <div class="flex justify-between items-center w-full mr-2">
+      <span>
+        <i :class="iconSvg.SORT" />
+        {{ $t('function.group.hideEmptyTitle') }}
+      </span>
+      <input
+        type="checkbox" class="iw-toggle iw-toggle-xs"
+        :checked="props.group?.hideEmptyRecord"
+        @click="setGroupHideEmpty"
+      >
+    </div>
   </div>
 </template>
-
-<style scoped>
-.iw-divider::before{
-  height: 0.05rem;
-}
-.iw-divider::after{
-  height: 0.05rem;
-}
-</style>

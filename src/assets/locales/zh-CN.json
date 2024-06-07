@@ -48,15 +48,16 @@
       "isempty": "为空",
       "notempty": "不为空"
     },
-    "state": {
-      "selectPlaceholder": "请选择"
-    },
     "event": {
       "notConfigured": "事件[{name}]未配置",
       "loadDataInvalidScene": "数据加载失败：场景不合法"
+    },
+    "table": {
+      "moreSettingTitle": "更多设置"
     }
   },
   "layout": {
+    "settingTitle": "布局设置",
     "title": {
       "default": "默认",
       "rename": "重命名"
@@ -71,15 +72,6 @@
     },
     "action": {
       "title": "操作"
-    },
-    "subData": {
-      "title": "子数据",
-      "tileAllData": "平铺所有数据",
-      "onlyParentData": "仅父数据",
-      "foldSubData": "折叠子数据",
-      "tileAllDataTitle": "平铺",
-      "onlyParentDataTitle": "隐藏",
-      "foldSubDataTitle": "折叠"
     }
   },
   "function": {
@@ -112,6 +104,15 @@
     },
     "pagination": {
       "total": "共 {number} 条"
+    },
+    "subData": {
+      "title": "子数据显示",
+      "tileAllData": "平铺所有数据",
+      "onlyParentData": "仅父数据",
+      "foldSubData": "折叠子数据",
+      "tileAllDataTitle": "平铺",
+      "onlyParentDataTitle": "隐藏",
+      "foldSubDataTitle": "折叠"
     }
   },
   "list": {

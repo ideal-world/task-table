@@ -7,15 +7,18 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    BasicSetting: typeof import('./src/components/function/BasicSetting.vue')['default']
     ColumnAggs: typeof import('./src/components/layout/list/ColumnAggs.vue')['default']
     ColumnFixed: typeof import('./src/components/layout/list/ColumnFixed.vue')['default']
     ColumnResize: typeof import('./src/components/layout/list/ColumnResize.vue')['default']
     ColumnShowSetting: typeof import('./src/components/function/ColumnShowSetting.vue')['default']
     ColumnWrap: typeof import('./src/components/layout/list/ColumnWrap.vue')['default']
+    copy: typeof import('./src/components/function/LayoutSetting copy.vue')['default']
     FilterSetting: typeof import('./src/components/function/FilterSetting.vue')['default']
     GroupSetting: typeof import('./src/components/function/GroupSetting.vue')['default']
     Header: typeof import('./src/components/layout/list/Header.vue')['default']
     IconPicker: typeof import('./src/components/common/IconPicker.vue')['default']
+    LayoutBasicSetting: typeof import('./src/components/function/LayoutBasicSetting.vue')['default']
     LayoutSetting: typeof import('./src/components/function/LayoutSetting.vue')['default']
     List: typeof import('./src/components/layout/list/List.vue')['default']
     Menu: typeof import('./src/components/common/Menu.vue')['default']

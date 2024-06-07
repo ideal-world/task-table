@@ -79,23 +79,20 @@ onMounted(async () => {
         </template>
       </div>
       <div class="flex-none">
-        <TableSettingComp :basic-conf="tableBasicConf" />
+        <TableSettingComp
+          :basic-conf="tableBasicConf"
+          :layout-conf="tableLayoutsConf.find(layout => layout.id === currentLayoutId)!"
+          :layout-length="tableLayoutsConf.length"
+        />
       </div>
     </div>
     <div class="iw-tt-layout">
       <template v-for="layout in tableLayoutsConf" :key="layout.id">
-        <div v-if="currentLayoutId === layout.id" :id="`iw-tt-layout-${layout.id}`" class="iw-tt-toolbar flex justify-between h-8 p-0.5">
+        <div v-if="currentLayoutId === layout.id" :id="`iw-tt-layout-${layout.id}`" class="iw-tt-toolbar flex h-8 p-0.5">
           <div class="flex">
             <RowSortSettingComp :sorts="layout.sorts" :columns-conf="tableBasicConf.columns" />
             <div class="iw-divider iw-divider-horizontal m-0.5" />
             <FilterSettingComp :filters="layout.filters" :columns-conf="tableBasicConf.columns" />
-          </div>
-          <div>
-            <LayoutSettingComp
-              :basic-conf="tableBasicConf"
-              :layout-conf="layout"
-              :layout-length="tableLayoutsConf.length"
-            />
           </div>
         </div>
         <div v-if="currentLayoutId === layout.id" class="iw-tt-table overflow-auto w-full">

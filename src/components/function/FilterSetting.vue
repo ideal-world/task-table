@@ -15,11 +15,12 @@ const props = defineProps<{
 }>()
 
 const filterGroupContainerCompRef = ref<InstanceType<typeof MenuComp>>()
-const filterGroupContainerItemsCompRef = ref<InstanceType<typeof HTMLDivElement>>()
 const filterColumnCompRef = ref<InstanceType<typeof MenuComp>>()
 const filterOpCompRef = ref<InstanceType<typeof MenuComp>>()
 const dictContainerCompRef = ref<InstanceType<typeof MenuComp>>()
 const queryDictItemsResp = ref<TableCellDictItemsResp>()
+
+let filterGroupContainerEle: HTMLElement
 
 interface FilterItemProps {
   columnName: string
@@ -160,8 +161,8 @@ function setFilterAValue(value: any, filterItemIdx: number) {
   else {
     currFilterItem!.values = [value]
   }
-  if (filterGroupContainerItemsCompRef.value) {
-    const inputEle = filterGroupContainerItemsCompRef.value.querySelector(`input[data-value-input-idx='${filterItemIdx}']`)
+  if (filterGroupContainerEle) {
+    const inputEle = filterGroupContainerEle.querySelector(`input[data-value-input-idx='${filterItemIdx}']`)
     if (inputEle) {
       (inputEle as HTMLInputElement).value = ''
     }
@@ -232,7 +233,10 @@ async function saveFilterGroup() {
 }
 
 onMounted(() => {
-  filterGroupContainerCompRef.value?.onClose(async () => {
+  filterGroupContainerCompRef.value?.onInit(async (menuEle: HTMLElement) => {
+    filterGroupContainerEle = menuEle
+  })
+  filterGroupContainerCompRef.value?.onClose(async (_) => {
     await saveFilterGroup()
   })
 })
@@ -272,55 +276,53 @@ onMounted(() => {
     </div>
   </div>
   <MenuComp ref="filterGroupContainerCompRef">
-    <div ref="filterGroupContainerItemsCompRef">
-      <div v-for="(filterItem, filterItemIdx) in selectedFilterGroup" :key="filterItemIdx" class="iw-contextmenu__item p-1 flex justify-between w-full">
-        <button class="iw-btn iw-btn-outline iw-btn-xs" @click="e => { showFilterColumns(e, filterItemIdx) }">
-          <i :class="filterItem.icon " />
-          <span class="mr-0.5">{{ filterItem.title }}</span>
-          <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />
-        </button>
-        <button class="iw-btn iw-btn-outline iw-btn-xs" @click="e => { showFilterOps(e, filterItemIdx) }">
-          <span class="mr-0.5">{{ translateOperatorKind(filterItem.operator) }}</span>
-          <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />
-        </button>
-        <div v-if="filterItem.operator !== OperatorKind.IS_EMPTY && filterItem.operator !== OperatorKind.NOT_EMPTY">
-          <input
-            v-if="filterItem.operator !== OperatorKind.IN && filterItem.operator !== OperatorKind.NOT_IN && !filterItem.useDict"
-            class="iw-input iw-input-bordered iw-input-xs w-full" :type="getInputTypeByDataKind(filterItem.dataKind)"
-            :value="filterItem.values" @change="e => { setFilterAValue((e.target as HTMLInputElement).value, filterItemIdx) }"
+    <div v-for="(filterItem, filterItemIdx) in selectedFilterGroup" :key="filterItemIdx" class="iw-contextmenu__item p-1 flex justify-between w-full">
+      <button class="iw-btn iw-btn-outline iw-btn-xs" @click="e => { showFilterColumns(e, filterItemIdx) }">
+        <i :class="filterItem.icon " />
+        <span class="mr-0.5">{{ filterItem.title }}</span>
+        <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />
+      </button>
+      <button class="iw-btn iw-btn-outline iw-btn-xs" @click="e => { showFilterOps(e, filterItemIdx) }">
+        <span class="mr-0.5">{{ translateOperatorKind(filterItem.operator) }}</span>
+        <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />
+      </button>
+      <div v-if="filterItem.operator !== OperatorKind.IS_EMPTY && filterItem.operator !== OperatorKind.NOT_EMPTY">
+        <input
+          v-if="filterItem.operator !== OperatorKind.IN && filterItem.operator !== OperatorKind.NOT_IN && !filterItem.useDict"
+          class="iw-input iw-input-bordered iw-input-xs w-full" :type="getInputTypeByDataKind(filterItem.dataKind)"
+          :value="filterItem.values" @change="e => { setFilterAValue((e.target as HTMLInputElement).value, filterItemIdx) }"
+        >
+        <label v-else class="iw-input iw-input-xs iw-input-bordered flex items-center gap-2">
+          <span
+            v-for="(dictItemOrRawValue, valueIdx) in parseDict(filterItem.columnName, filterItem.values)"
+            :key="valueIdx"
+            :style="`background-color: ${dictItemOrRawValue.color ?? ''}`"
+            class="iw-badge iw-badge-info"
           >
-          <label v-else class="iw-input iw-input-xs iw-input-bordered flex items-center gap-2">
-            <span
-              v-for="(dictItemOrRawValue, valueIdx) in parseDict(filterItem.columnName, filterItem.values)"
-              :key="valueIdx"
-              :style="`background-color: ${dictItemOrRawValue.color ?? ''}`"
-              class="iw-badge iw-badge-info"
-            >
-              <span v-if="dictItemOrRawValue.avatar !== undefined" class="avatar">
-                <img :src="dictItemOrRawValue.avatar" class="w-4 rounded-full">
-              </span>
-              <span class="ml-1 whitespace-nowrap">{{ dictItemOrRawValue.title ?? dictItemOrRawValue }}</span>
-              <i
-                :class="`${iconSvg.DELETE} ml-0.5 cursor-pointer`"
-                @click="deleteAValue(filterItemIdx, valueIdx)"
-              />
+            <span v-if="dictItemOrRawValue.avatar !== undefined" class="avatar">
+              <img :src="dictItemOrRawValue.avatar" class="w-4 rounded-full">
             </span>
-            <input
-              v-if="!filterItem.useDict"
-              class="iw-grow" :type="getInputTypeByDataKind(filterItem.dataKind)"
-              :data-value-input-idx="filterItemIdx"
-              @change="e => setFilterAValue((e.target as HTMLInputElement).value, filterItemIdx)"
-            >
-            <input
-              v-else
-              class="iw-grow" :type="getInputTypeByDataKind(filterItem.dataKind)"
-              :data-value-input-idx="filterItemIdx"
-              @keyup="e => { showDictItems((e.target as HTMLInputElement).value, filterItemIdx, e) }"
-            >
-          </label>
-        </div>
-        <i :class="`${iconSvg.DELETE} hover:text-secondary hover:font-bold`" @click="deleteFilterItem(filterItemIdx)" />
+            <span class="ml-1 whitespace-nowrap">{{ dictItemOrRawValue.title ?? dictItemOrRawValue }}</span>
+            <i
+              :class="`${iconSvg.DELETE} ml-0.5 cursor-pointer`"
+              @click="deleteAValue(filterItemIdx, valueIdx)"
+            />
+          </span>
+          <input
+            v-if="!filterItem.useDict"
+            class="iw-grow" :type="getInputTypeByDataKind(filterItem.dataKind)"
+            :data-value-input-idx="filterItemIdx"
+            @change="e => setFilterAValue((e.target as HTMLInputElement).value, filterItemIdx)"
+          >
+          <input
+            v-else
+            class="iw-grow" :type="getInputTypeByDataKind(filterItem.dataKind)"
+            :data-value-input-idx="filterItemIdx"
+            @keyup="e => { showDictItems((e.target as HTMLInputElement).value, filterItemIdx, e) }"
+          >
+        </label>
       </div>
+      <i :class="`${iconSvg.DELETE} hover:text-secondary hover:font-bold`" @click="deleteFilterItem(filterItemIdx)" />
     </div>
     <button class="iw-btn iw-btn-outline iw-btn-xs" @click="showFilterColumns">
       <span class="mr-0.5">{{ $t('function.filter.selectColumnPlaceholder') }}</span>
