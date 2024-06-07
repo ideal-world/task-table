@@ -96,6 +96,7 @@
     },
     "filter": {
       "new": "新的过滤",
+      "items": "条件",
       "selectColumnPlaceholder": "新增列",
       "dictTitle": "可用字典项",
       "searchPlaceholder": "搜索字典项"

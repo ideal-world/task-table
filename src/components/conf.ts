@@ -238,6 +238,10 @@ export function getDefaultIconByLayoutKind(layoutKind: LayoutKind): string {
   }
 }
 
+export function getOperatorKindsByColumn(columnConf: TableColumnConf): OperatorKind[] {
+  return getOperatorKindsByDataKind(columnConf.dataKind, columnConf.multiValue)
+}
+
 export function getOperatorKindsByDataKind(dataKind?: DataKind, multiValue?: boolean): OperatorKind[] {
   if (multiValue) {
     return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.IN, OperatorKind.NOT_IN, OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]

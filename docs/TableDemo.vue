@@ -2,7 +2,7 @@
 import type { Ref } from 'vue'
 import { onMounted, ref } from 'vue'
 import { IwEvents } from '../src'
-import type { TableCellDictItemProps, TableCellDictItemsResp, TableColumnProps, TableDataFilterProps, TableDataGroupProps, TableDataGroupResp, TableDataResp, TableDataSliceProps, TableDataSortProps, TableEventProps, TableLayoutKernelProps, TableLayoutModifyProps, TableLayoutProps, TableStyleProps } from '../src/props'
+import type { TableCellDictItemProps, TableCellDictItemsResp, TableColumnProps, TableDataFilterProps, TableDataGroupProps, TableDataGroupResp, TableDataQuerySliceProps, TableDataResp, TableDataSliceProps, TableDataSortProps, TableEventProps, TableLayoutKernelProps, TableLayoutModifyProps, TableLayoutProps, TableStyleProps } from '../src/props'
 import { AggregateKind, DATA_DICT_POSTFIX, DataKind, LayoutKind, OperatorKind } from '../src/props'
 import { IwUtils } from '../src/utils'
 
@@ -113,7 +113,7 @@ function attachDict(data: { [key: string]: any }[]) {
 }
 
 const events: TableEventProps = {
-  loadData: async (columns?: string[], filters?: TableDataFilterProps[], sorts?: TableDataSortProps[], group?: TableDataGroupProps, aggs?: { [key: string]: AggregateKind }, hideSubData?: boolean, byGroupValue?: any, slices?: TableDataSliceProps): Promise<TableDataResp | TableDataGroupResp[]> => {
+  loadData: async (columns?: string[], filters?: TableDataFilterProps[], sorts?: TableDataSortProps[], group?: TableDataGroupProps, aggs?: { [key: string]: AggregateKind }, hideSubData?: boolean, byGroupValue?: any, slices?: TableDataQuerySliceProps): Promise<TableDataResp | TableDataGroupResp[]> => {
     let data: { [key: string]: any }[] = JSON.parse(JSON.stringify(DATA))
     if (filters) {
       // TODO 支持多组
@@ -424,7 +424,7 @@ const events: TableEventProps = {
     return true
   },
 
-  loadCellDictItems: async (columnName: string, filterValue?: any, slice?: TableDataSliceProps): Promise<TableCellDictItemsResp> => {
+  loadCellDictItems: async (columnName: string, filterValue?: any, slice?: TableDataQuerySliceProps): Promise<TableCellDictItemsResp> => {
     if (columnName === 'name') {
       let nameDict: TableCellDictItemProps[] = JSON.parse(JSON.stringify(NAME_DICT))
       if (filterValue) {

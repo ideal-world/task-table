@@ -12,7 +12,6 @@ declare module 'vue' {
     ColumnResize: typeof import('./src/components/layout/list/ColumnResize.vue')['default']
     ColumnShowSetting: typeof import('./src/components/function/ColumnShowSetting.vue')['default']
     ColumnWrap: typeof import('./src/components/layout/list/ColumnWrap.vue')['default']
-    copy: typeof import('./src/components/function/LayoutSetting copy.vue')['default']
     FilterSetting: typeof import('./src/components/function/FilterSetting.vue')['default']
     GroupSetting: typeof import('./src/components/function/GroupSetting.vue')['default']
     Header: typeof import('./src/components/layout/list/Header.vue')['default']

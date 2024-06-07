@@ -274,7 +274,7 @@ export interface TableEventProps {
     hideSubData?: boolean,
     // Load only the data of the corresponding group
     byGroupValue?: any,
-    slices?: TableDataSliceProps) => Promise<TableDataResp | TableDataGroupResp[]>
+    slices?: TableDataQuerySliceProps) => Promise<TableDataResp | TableDataGroupResp[]>
   newData?: (newRecords: { [key: string]: any }[]) => Promise<{ [key: string]: any }[]>
   copyData?: (targetRecordPks: any[]) => Promise<{ [key: string]: any }[]>
   modifyData?: (changedRecords: { [key: string]: any }[]) => Promise<{ [key: string]: any }[]>
@@ -283,7 +283,7 @@ export interface TableEventProps {
   selectData?: (selectedRecordPks: any[]) => Promise<boolean>
   clickCell?: (clickedRecordPk: any, clickedColumnName: string) => Promise<boolean>
 
-  loadCellDictItems?: (columnName: string, filterValue?: any, slice?: TableDataSliceProps) => Promise<TableCellDictItemsResp>
+  loadCellDictItems?: (columnName: string, filterValue?: any, slice?: TableDataQuerySliceProps) => Promise<TableCellDictItemsResp>
 
   modifyStyles?: (changedStyleProps: TableStyleProps) => Promise<boolean>
 
@@ -332,9 +332,12 @@ export interface TableDataGroupProps {
   hideEmptyRecord: boolean
 }
 
-export interface TableDataSliceProps {
+export interface TableDataQuerySliceProps {
   offsetNumber: number
   fetchNumber: number
+}
+
+export interface TableDataSliceProps extends TableDataQuerySliceProps {
   fetchNumbers: number[]
 }
 

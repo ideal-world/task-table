@@ -1,9 +1,9 @@
 import { convertTableStylePropsToTableStyleConf } from './components/conf'
 import * as eb from './components/eventbus'
-import type { TableCellDictItemsResp, TableDataSliceProps, TableLayoutKernelProps, TableLayoutModifyProps, TableStyleProps } from './props'
+import type { TableCellDictItemsResp, TableDataQuerySliceProps, TableLayoutKernelProps, TableLayoutModifyProps, TableStyleProps } from './props'
 
-export async function loadData(moreForGroupedValue?: any, offsetNumber?: number, fetchNumber?: number, layoutId?: string) {
-  await eb.loadData(moreForGroupedValue, offsetNumber, fetchNumber, layoutId)
+export async function loadData(moreForGroupedValue?: any, layoutId?: string) {
+  await eb.loadData(moreForGroupedValue, layoutId)
 }
 
 export async function newData(newRecords: { [key: string]: any }[]): Promise<boolean> {
@@ -26,7 +26,7 @@ export async function selectData(selectedRecordPks: any[]): Promise<boolean> {
   return await eb.selectData(selectedRecordPks)
 }
 
-export async function loadCellDictItems(columnName: string, filterValue?: any, slice?: TableDataSliceProps): Promise<TableCellDictItemsResp> {
+export async function loadCellDictItems(columnName: string, filterValue?: any, slice?: TableDataQuerySliceProps): Promise<TableCellDictItemsResp> {
   return await eb.loadCellDictItems(columnName, filterValue, slice)
 }
 

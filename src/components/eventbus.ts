@@ -1,7 +1,9 @@
 import type { Ref } from 'vue'
 import { toRaw } from 'vue'
 import locales from '../locales'
-import { SubDataShowKind, type TableCellDictItemsResp, type TableDataSliceProps, type TableEventProps, type TableLayoutKernelProps, type TableLayoutModifyProps } from '../props'
+import type { TableCellDictItemsResp, TableDataQuerySliceProps, TableEventProps, TableLayoutKernelProps, TableLayoutModifyProps } from '../props'
+import { SubDataShowKind } from '../props'
+
 import { getParentWithClass } from '../utils/basic'
 import { AlertKind, showAlert } from './common/Alert'
 import { type TableBasicConf, type TableLayoutConf, type TableStyleConf, convertTableLayoutColumnPropsToTableLayoutColumnConf, convertTableLayoutKernelPropsToTableLayoutKernelConf } from './conf'
@@ -43,7 +45,15 @@ export async function loadData(moreForGroupedValue?: any, layoutId?: string) {
     layout.aggs ?? toRaw(layout.aggs),
     layout.subDataShowKind === SubDataShowKind.ONLY_PARENT_DATA,
     moreForGroupedValue ?? moreForGroupedValue,
-    moreForGroupedValue && layout.groupSlices && layout.groupSlices[moreForGroupedValue as string] ? layout.groupSlices[moreForGroupedValue as string] : layout.defaultSlice,
+    moreForGroupedValue && layout.groupSlices && layout.groupSlices[moreForGroupedValue as string]
+      ? {
+          offsetNumber: layout.groupSlices[moreForGroupedValue as string].offsetNumber,
+          fetchNumber: layout.groupSlices[moreForGroupedValue as string].fetchNumber,
+        }
+      : {
+          offsetNumber: layout.defaultSlice.offsetNumber,
+          fetchNumber: layout.defaultSlice.fetchNumber,
+        },
   )
 
   if (!moreForGroupedValue && !layout.group) {
@@ -169,7 +179,7 @@ export async function clickCell(clickedRecordPk: any, clickedColumnName: string)
   return await events.clickCell(clickedRecordPk, clickedColumnName)
 }
 
-export async function loadCellDictItems(columnName: string, filterValue?: any, slice?: TableDataSliceProps): Promise<TableCellDictItemsResp> {
+export async function loadCellDictItems(columnName: string, filterValue?: any, slice?: TableDataQuerySliceProps): Promise<TableCellDictItemsResp> {
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.loadCellDictItems) {
