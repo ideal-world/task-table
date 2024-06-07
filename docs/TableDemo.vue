@@ -219,14 +219,20 @@ const events: TableEventProps = {
               case AggregateKind.AVG:
                 return aggsResult[aggKey] = data.reduce((acc, cur) => acc + cur[aggKey], 0) / data.length
               case AggregateKind.MAX:
-                if (typeof data[0][aggKey] === 'string') {
+                if (data.length === 0) {
+                  return aggsResult[aggKey] = ''
+                }
+                else if (typeof data[0][aggKey] === 'string') {
                   return aggsResult[aggKey] = data.reduce((acc, cur) => acc[aggKey] > cur[aggKey] ? acc : cur)[aggKey]
                 }
                 else {
                   return aggsResult[aggKey] = Math.max(...data.map(d => d[aggKey]))
                 }
               case AggregateKind.MIN:
-                if (typeof data[0][aggKey] === 'string') {
+                if (data.length === 0) {
+                  return aggsResult[aggKey] = ''
+                }
+                else if (typeof data[0][aggKey] === 'string') {
                   return aggsResult[aggKey] = data.reduce((acc, cur) => acc[aggKey] < cur[aggKey] ? acc : cur)[aggKey]
                 }
                 else {
@@ -267,14 +273,20 @@ const events: TableEventProps = {
             case AggregateKind.AVG:
               return aggsResult[aggKey] = data.reduce((acc, cur) => acc + cur[aggKey], 0) / data.length
             case AggregateKind.MAX:
-              if (typeof data[0][aggKey] === 'string') {
+              if (data.length === 0) {
+                return aggsResult[aggKey] = ''
+              }
+              else if (typeof data[0][aggKey] === 'string') {
                 return aggsResult[aggKey] = data.reduce((acc, cur) => acc[aggKey] > cur[aggKey] ? acc : cur)[aggKey]
               }
               else {
                 return aggsResult[aggKey] = Math.max(...data.map(d => d[aggKey]))
               }
             case AggregateKind.MIN:
-              if (typeof data[0][aggKey] === 'string') {
+              if (data.length === 0) {
+                return aggsResult[aggKey] = ''
+              }
+              else if (typeof data[0][aggKey] === 'string') {
                 return aggsResult[aggKey] = data.reduce((acc, cur) => acc[aggKey] < cur[aggKey] ? acc : cur)[aggKey]
               }
               else {
@@ -428,7 +440,7 @@ const events: TableEventProps = {
     if (columnName === 'name') {
       let nameDict: TableCellDictItemProps[] = JSON.parse(JSON.stringify(NAME_DICT))
       if (filterValue) {
-        nameDict = nameDict.filter((dict) => { return dict.title.includes(filterValue) })
+        nameDict = nameDict.filter((dict) => { return dict.title.includes(filterValue) || dict.value.includes(filterValue) })
       }
       const totalNumber = nameDict.length
       if (slice) {
@@ -442,7 +454,7 @@ const events: TableEventProps = {
     else {
       let statsDict: TableCellDictItemProps[] = JSON.parse(JSON.stringify(STATS_DICT))
       if (filterValue) {
-        statsDict = statsDict.filter((dict) => { return dict.title.includes(filterValue) })
+        statsDict = statsDict.filter((dict) => { return dict.title.includes(filterValue) || dict.value.includes(filterValue) })
       }
       const totalNumber = statsDict.length
       if (slice) {
@@ -453,6 +465,37 @@ const events: TableEventProps = {
         totalNumber,
       }
     }
+  },
+
+  loadCellDictItemsWithMultiConds: async (conds: { [columnName: string]: any[] }, slice?: TableDataQuerySliceProps): Promise<{ [columnName: string]: TableCellDictItemsResp }> => {
+    const resp = {}
+    Object.entries(conds).forEach(([columnName, values]) => {
+      if (columnName === 'name') {
+        let nameDict: TableCellDictItemProps[] = JSON.parse(JSON.stringify(NAME_DICT))
+        nameDict = nameDict.filter((dict) => { return values.find(val => dict.title.includes(val) || dict.value.includes(val)) })
+        const totalNumber = nameDict.length
+        if (slice) {
+          nameDict = nameDict.slice(slice.offsetNumber, slice.offsetNumber + slice.fetchNumber)
+        }
+        resp[columnName] = {
+          records: nameDict,
+          totalNumber,
+        }
+      }
+      else {
+        let statsDict: TableCellDictItemProps[] = JSON.parse(JSON.stringify(STATS_DICT))
+        statsDict = statsDict.filter((dict) => { return values.find(val => dict.title.includes(val) || dict.value.includes(val)) })
+        const totalNumber = statsDict.length
+        if (slice) {
+          statsDict = statsDict.slice(slice.offsetNumber, slice.offsetNumber + slice.fetchNumber)
+        }
+        resp[columnName] = {
+          records: statsDict,
+          totalNumber,
+        }
+      }
+    })
+    return resp
   },
 }
 

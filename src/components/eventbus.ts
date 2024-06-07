@@ -190,6 +190,17 @@ export async function loadCellDictItems(columnName: string, filterValue?: any, s
   return await events.loadCellDictItems(columnName, filterValue, slice)
 }
 
+export async function loadCellDictItemsWithMultiConds(conds: { [columnName: string]: any[] }, slice?: TableDataQuerySliceProps): Promise<{[columnName:string]:TableCellDictItemsResp}> {
+  const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
+
+  if (!events.loadCellDictItemsWithMultiConds) {
+    showAlert(t('_.event.notConfigured', { name: 'loadCellDictItemsWithMultiConds' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    throw new Error('[events.loadCellDictItemsWithMultiConds] Event not Configured')
+  }
+
+  return await events.loadCellDictItemsWithMultiConds(conds, slice)
+}
+
 export async function modifyStyles(changedStyles: TableStyleConf): Promise<boolean> {
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 

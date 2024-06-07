@@ -30,6 +30,10 @@ export async function loadCellDictItems(columnName: string, filterValue?: any, s
   return await eb.loadCellDictItems(columnName, filterValue, slice)
 }
 
+export async function loadCellDictItemsWithMultiConds(conds: { [columnName: string]: any[] }, slice?: TableDataQuerySliceProps): Promise<{ [columnName: string]: TableCellDictItemsResp }> {
+  return await eb.loadCellDictItemsWithMultiConds(conds, slice)
+}
+
 export async function modifyStyles(changedStyles: TableStyleProps): Promise<boolean> {
   return await eb.modifyStyles(convertTableStylePropsToTableStyleConf(changedStyles))
 }

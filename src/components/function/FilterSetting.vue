@@ -1,161 +1,21 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import * as iconSvg from '../../assets/icon'
-import type { DataKind, TableCellDictItemsResp, TableDataFilterItemProps, TableDataFilterProps } from '../../props'
+import type { DataKind, TableCellDictItemProps, TableCellDictItemsResp, TableDataFilterItemProps, TableDataFilterProps, TableLayoutModifyProps } from '../../props'
 import { OperatorKind, translateOperatorKind } from '../../props'
+import { IwUtils } from '../../utils'
 import MenuComp, { MenuOffsetKind, MenuSizeKind } from '../common/Menu.vue'
 import type { TableColumnConf } from '../conf'
 import { getInputTypeByDataKind, getOperatorKindsByDataKind } from '../conf'
 import * as eb from '../eventbus'
-import { IwUtils } from '../../utils'
 
 const props = defineProps<{
   filters?: TableDataFilterProps[]
   columnsConf: TableColumnConf[]
 }>()
 
-// const selectedDictItemResp = ref<TableCellDictItemsResp | undefined>()
-// const searchDictValue = ref<any | undefined>()
-
-// const selectedDictItems = computed<TableCellDictItemProps[]>(() => {
-//   if (!selectedDictItemResp.value)
-//     return []
-
-//   let dictItems = []
-//   if (selectedFilterItem.value) {
-//     if (Array.isArray(selectedFilterItem.value.value))
-//       dictItems = selectedDictItemResp.value.records.filter(val => selectedFilterItem.value?.value.indexOf(val.value) === -1)
-//     else
-//       dictItems = selectedDictItemResp.value.records.filter(val => selectedFilterItem.value?.value !== val.value)
-//   }
-//   else {
-//     dictItems = selectedDictItemResp.value.records
-//   }
-//   if (searchDictValue.value)
-//     dictItems = dictItems.filter(val => val.title.includes(searchDictValue.value) || val.value.includes(searchDictValue.value))
-
-//   return dictItems
-// })
-
-// const simpleFilterItems = computed<TableDataFilterItemProps[]>(() => {
-//   // Simple mode supports only one group of and conditions
-//   if (props.filters && props.filters.length === 1)
-//     return props.filters[0].items
-
-//   return []
-// })
-
-// async function setFilterColumn(e: MouseEvent) {
-//   const targetEle = e.target as HTMLElement
-//   const selectedColumnName = targetEle.dataset.columnName
-//   filterColumnCompRef.value?.close()
-//   if (!selectedColumnName)
-//     return
-
-//   const selectedColumnConf = props.columnsConf.find(col => col.name === selectedColumnName)!
-//   if (!selectedFilterItem.value) {
-//     // New filter
-//     selectedFilterItem.value = {
-//       columnName: selectedColumnName,
-//       operator: OperatorKind.EQ,
-//       ...selectedColumnConf,
-//       idx: -1,
-//       values: [],
-//     }
-//   }
-//   else {
-//     selectedFilterItem.value = {
-//       ...selectedFilterItem.value,
-//       ...selectedColumnConf,
-//       columnName: selectedColumnName,
-//       operator: OperatorKind.EQ,
-//       value: undefined,
-//       values: [],
-//     }
-//   }
-//   if (selectedFilterItem.value.value !== undefined || selectedFilterItem.value.operator === OperatorKind.IS_EMPTY || selectedFilterItem.value.operator === OperatorKind.NOT_EMPTY)
-//     await newOrModifySimpleFilterItem(selectedFilterItem.value)
-
-//   if (selectedFilterItem.value && selectedFilterItem.value.useDict) {
-//     const values = await eb.loadCellDictItems(selectedFilterItem.value.columnName as string)
-//     selectedDictItemResp.value = values
-//   }
-//   else {
-//     selectedDictItemResp.value = undefined
-//   }
-//   searchDictValue.value = undefined
-// }
-
-// async function setFilterDictItem(e: Event) {
-//   const targetEle = getParentWithClass(e.target as HTMLElement, 'iw-contextmenu__item')
-//   if (!targetEle)
-//     return
-
-//   if (!targetEle.dataset.value || !targetEle.dataset.title)
-//     return
-//   const value = targetEle.dataset.value
-//   const title = targetEle.dataset.title
-//   if (selectedFilterItem.value && Array.isArray(selectedFilterItem.value.value))
-//     selectedFilterItem.value.values.push(value)
-//   else
-//     selectedFilterItem.value!.value = value
-
-//   usedDictValues.value[`${selectedFilterItem.value?.columnName}-${value}`] = title
-//   if (!Array.isArray(selectedFilterItem.value?.value))
-//     simpleFilterCompRef.value?.close()
-
-//   await newOrModifySimpleFilterItem(selectedFilterItem.value!)
-// }
-
-// async function newOrModifySimpleFilterItem(changedFilterItem: TableDataFilterItemProps & { idx: number, values: any[] }) {
-//   if (changedFilterItem.operator === OperatorKind.IN || changedFilterItem.operator === OperatorKind.NOT_IN)
-//     changedFilterItem.value = changedFilterItem.values
-
-//   if (props.filters && props.filters.length === 1) {
-//     const filters = JSON.parse(JSON.stringify(props.filters[0]))
-//     if (changedFilterItem.idx === -1) {
-//       filters.items.push({
-//         columnName: changedFilterItem.columnName,
-//         operator: changedFilterItem.operator,
-//         value: changedFilterItem.value,
-//       })
-//     }
-//     else {
-//       filters.items.splice(changedFilterItem.idx, 1, {
-//         columnName: changedFilterItem.columnName,
-//         operator: changedFilterItem.operator,
-//         value: changedFilterItem.value,
-//       })
-//     }
-//     await eb.modifyLayout({
-//       filters: [filters],
-//     })
-//   }
-//   else if (props.filters === undefined || props.filters.length === 0) {
-//     await eb.modifyLayout({
-//       filters: [
-//         {
-//           items: [{
-//             columnName: changedFilterItem.columnName,
-//             operator: changedFilterItem.operator,
-//             value: changedFilterItem.value,
-//           }],
-//         },
-//       ],
-//     })
-//   }
-// }
-
-// async function deleteSimpleFilterItem(idx: number) {
-//   if (props.filters && props.filters.length === 1) {
-//     const filters = JSON.parse(JSON.stringify(props.filters[0]))
-//     filters.items.splice(idx, 1)
-//     await eb.modifyLayout({
-//       filters: [filters],
-//     })
-//   }
-// }
 const filterGroupContainerCompRef = ref<InstanceType<typeof MenuComp>>()
+const filterGroupContainerItemsCompRef = ref<InstanceType<typeof HTMLDivElement>>()
 const filterColumnCompRef = ref<InstanceType<typeof MenuComp>>()
 const filterOpCompRef = ref<InstanceType<typeof MenuComp>>()
 const dictContainerCompRef = ref<InstanceType<typeof MenuComp>>()
@@ -172,13 +32,15 @@ interface FilterItemProps {
   multiValue: boolean
 }
 const selectedFilterGroup = ref<FilterItemProps[] | undefined>()
+const selectedFilterGroupIdx = ref<number | undefined>()
 const selectedFilterItemIdx = ref<number | undefined>()
-// column name + '-' + column value -> dict title
-const mappingColumValueAndDictTitle = ref<{ [key: string | number]: string }>({})
+// column name + '-' + column value -> dict item
+const mappingColumValueAndDictTitle = ref<{ [key: string | number]: TableCellDictItemProps }>({})
 
-function showFilterGroupContainer(e: Event, filterGroupIdx?: number) {
+async function showFilterGroupContainer(e: Event, filterGroupIdx?: number) {
+  selectedFilterGroupIdx.value = filterGroupIdx
   const targetEle = e.target as HTMLElement
-  if (filterGroupIdx) {
+  if (filterGroupIdx !== undefined) {
     const filterItems = JSON.parse(JSON.stringify(props.filters![filterGroupIdx].items))
     selectedFilterGroup.value = filterItems.map((item: TableDataFilterItemProps) => {
       const columnConf = props.columnsConf.find(col => col.name === item.columnName)!
@@ -193,11 +55,25 @@ function showFilterGroupContainer(e: Event, filterGroupIdx?: number) {
         multiValue: columnConf.multiValue,
       }
     })
+    // init mapping dict
+    let groupedFilterItems: { [key: string]: TableDataFilterItemProps[] } = IwUtils.groupBy(
+      filterItems.filter((item: TableDataFilterItemProps) => item.value !== undefined),
+      (item: TableDataFilterItemProps) => { return item.columnName },
+    )
+    const queryConds: { [key: string]: any[] } = groupedFilterItems = Object.fromEntries(Object.entries(groupedFilterItems).map(([columnName, values]) => [columnName, values.map((item: TableDataFilterItemProps) => item.value!)]))
+    const dictItemResp = await eb.loadCellDictItemsWithMultiConds(queryConds, {
+      offsetNumber: 0,
+      fetchNumber: Math.max(...Object.entries(queryConds).map(([_, values]) => values.length)),
+    })
+    Object.entries(dictItemResp).forEach(([columnName, resp]) => {
+      resp.records.forEach((dictItem) => {
+        mappingColumValueAndDictTitle.value[`${columnName}-${dictItem.value}`] = dictItem
+      })
+    })
   }
   else {
     selectedFilterGroup.value = []
   }
-
   filterGroupContainerCompRef.value?.show(targetEle, undefined, MenuSizeKind.LARGE, false)
 }
 
@@ -209,7 +85,7 @@ async function deleteFilterGroup(filterGroupIdx: number) {
   })
 }
 
-function parseDictTitle(columnName: string, value?: any): any {
+function parseDict(columnName: string, value?: any): any | TableCellDictItemProps[] {
   if (value === undefined) {
     return ''
   }
@@ -217,7 +93,7 @@ function parseDictTitle(columnName: string, value?: any): any {
     return value.map(val => mappingColumValueAndDictTitle.value[`${columnName}-${val}`] ?? val)
   }
   else {
-    return mappingColumValueAndDictTitle.value[`${columnName}-${value}`] ?? value
+    return [mappingColumValueAndDictTitle.value[`${columnName}-${value}`] ?? value]
   }
 }
 
@@ -284,10 +160,16 @@ function setFilterAValue(value: any, filterItemIdx: number) {
   else {
     currFilterItem!.values = [value]
   }
+  if (filterGroupContainerItemsCompRef.value) {
+    const inputEle = filterGroupContainerItemsCompRef.value.querySelector(`input[data-value-input-idx='${filterItemIdx}']`)
+    if (inputEle) {
+      (inputEle as HTMLInputElement).value = ''
+    }
+  }
 }
 
 function deleteAValue(filterItemIdx: number, valueIdx: number) {
-  selectedFilterGroup.value?.[filterItemIdx]?.values.slice(valueIdx, 1)
+  selectedFilterGroup.value?.[filterItemIdx] && selectedFilterGroup.value[filterItemIdx].values.splice(valueIdx, 1)
 }
 
 async function showDictItems(value: any, filterItemIdx: number, e: Event) {
@@ -302,13 +184,51 @@ async function showDictItems(value: any, filterItemIdx: number, e: Event) {
 }
 
 function setFilterADictValue(e: Event) {
-  if (e.target instanceof HTMLElement && e.target.classList.contains('iw-contextmenu__item')) {
-    const dictItemTitle = e.target.dataset.title
-    const dictItemValue = e.target.dataset.value
-    const currFilterItem = selectedFilterGroup.value?.[electedFilterItemIdx.value!]
-    setFilterAValue(dictItemValue, selectedFilterItemIdx.value!)
-    mappingColumValueAndDictTitle.value[`${currFilterItem+'-'+dictItemValue}`] = dictItemTitle
+  if (!(e.target instanceof HTMLElement)) {
+    return
   }
+  const itemEle = e.target.closest('.iw-contextmenu__item')
+  if (!itemEle || !(itemEle instanceof HTMLElement)) {
+    return
+  }
+  const dictItemValue = itemEle.dataset.value!
+  const currFilterItem = selectedFilterGroup.value?.[selectedFilterItemIdx.value!]
+  setFilterAValue(dictItemValue, selectedFilterItemIdx.value!)
+  mappingColumValueAndDictTitle.value[`${`${currFilterItem?.columnName}-${dictItemValue}`}`] = {
+    title: itemEle.dataset.title!,
+    value: dictItemValue!,
+    avatar: itemEle.dataset.avatar,
+    color: itemEle.dataset.color,
+  }
+  dictContainerCompRef.value?.close()
+}
+
+async function saveFilterGroup() {
+  const currFilterGroup: TableDataFilterProps = {
+    items: selectedFilterGroup.value?.map((item) => {
+      const realValue = item.operator === OperatorKind.IS_EMPTY || item.operator === OperatorKind.NOT_EMPTY
+        ? undefined
+        : item.operator === OperatorKind.IN || item.operator === OperatorKind.NOT_IN
+          ? item.values
+          : item.values[0]
+      return {
+        columnName: item.columnName,
+        operator: item.operator,
+        value: realValue,
+      }
+    }) ?? [],
+  }
+  const filters = props.filters ? JSON.parse(JSON.stringify(props.filters)) : []
+  if (selectedFilterGroupIdx.value === undefined) {
+    filters.push(currFilterGroup)
+  }
+  else {
+    filters[selectedFilterGroupIdx.value] = currFilterGroup
+  }
+  const layout: TableLayoutModifyProps = {
+    filters,
+  }
+  await eb.modifyLayout(layout)
 }
 </script>
 
@@ -319,8 +239,19 @@ function setFilterADictValue(e: Event) {
         <template v-if="filterGroup.items.length === 1">
           <span class="mr-0.5">{{ props.columnsConf.find(col => col.name === filterGroup.items[0].columnName)?.title }}</span>
           <span class="mr-0.5">{{ translateOperatorKind(filterGroup.items[0].operator) }}</span>
-          <span class="mr-0.5 max-w-[100px] whitespace-nowrap overflow-hidden text-ellipsis">{{
-            parseDictTitle(filterGroup.items[0].columnName as string, filterGroup.items[0].value) }}</span>
+          <span class="mr-0.5 max-w-[100px] whitespace-nowrap overflow-hidden text-ellipsis">
+            <span
+              v-for="(dictItemOrRawValue, valueIdx) in parseDict(filterGroup.items[0].columnName, filterGroup.items[0].value)"
+              :key="valueIdx"
+              :style="`background-color: ${dictItemOrRawValue.color ?? ''}`"
+              class="iw-badge iw-badge-info"
+            >
+              <span v-if="dictItemOrRawValue.avatar !== undefined" class="avatar">
+                <img :src="dictItemOrRawValue.avatar" class="w-4 rounded-full">
+              </span>
+              <span class="ml-1 whitespace-nowrap">{{ dictItemOrRawValue.title ?? dictItemOrRawValue }}</span>
+            </span>
+          </span>
         </template>
         <template v-else>
           <span class="mr-0.5">{{ filterGroup.items.length }}</span>
@@ -335,59 +266,64 @@ function setFilterADictValue(e: Event) {
     </div>
   </div>
   <MenuComp ref="filterGroupContainerCompRef">
-    <div v-for="(filterItem, filterItemIdx) in selectedFilterGroup" :key="filterItemIdx" class="iw-contextmenu__item p-1 flex justify-between w-full">
-      <button class="iw-btn iw-btn-outline iw-btn-xs" @click="e => { showFilterColumns(e, filterItemIdx) }">
-        <i :class="filterItem.icon " />
-        <span class="mr-0.5">{{ filterItem.title }}</span>
-        <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />
-      </button>
-      <button class="iw-btn iw-btn-outline iw-btn-xs" @click="e => { showFilterOps(e, filterItemIdx) }">
-        <span class="mr-0.5">{{ translateOperatorKind(filterItem.operator) }}</span>
-        <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />
-      </button>
-      <div v-if="filterItem.operator !== OperatorKind.IS_EMPTY && filterItem.operator !== OperatorKind.NOT_EMPTY">
-        <input
-          v-if="filterItem.operator !== OperatorKind.IN && filterItem.operator !== OperatorKind.NOT_IN && !filterItem.useDict"
-          class="iw-input iw-input-bordered iw-input-xs w-full" :type="getInputTypeByDataKind(filterItem.dataKind)"
-          :value="filterItem.values" @change="e => { setFilterAValue((e.target as HTMLInputElement).value, filterItemIdx) }"
-        >
-        <input
-          v-if="filterItem.operator !== OperatorKind.IN && filterItem.operator !== OperatorKind.NOT_IN && filterItem.useDict"
-          class="iw-input iw-input-bordered iw-input-xs w-full" :type="getInputTypeByDataKind(filterItem.dataKind)"
-          :value="filterItem.values" @change="e => { showDictItems((e.target as HTMLInputElement).value, filterItemIdx, e) }"
-        >
-        <label v-else-if="!filterItem.useDict" class="iw-input iw-input-xs iw-input-bordered flex items-center gap-2">
-          <span v-for="(valueTitle, valueIdx) in parseDictTitle(filterItem.columnName, filterItem.values)" :key="valueIdx" class="iw-badge iw-badge-info">
-            {{ valueTitle }}
-            <i
-              :class="`${iconSvg.DELETE} ml-0.5 cursor-pointer`"
-              @click="deleteAValue(filterItemIdx, valueIdx)"
-            />
-          </span>
+    <div ref="filterGroupContainerItemsCompRef">
+      <div v-for="(filterItem, filterItemIdx) in selectedFilterGroup" :key="filterItemIdx" class="iw-contextmenu__item p-1 flex justify-between w-full">
+        <button class="iw-btn iw-btn-outline iw-btn-xs" @click="e => { showFilterColumns(e, filterItemIdx) }">
+          <i :class="filterItem.icon " />
+          <span class="mr-0.5">{{ filterItem.title }}</span>
+          <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />
+        </button>
+        <button class="iw-btn iw-btn-outline iw-btn-xs" @click="e => { showFilterOps(e, filterItemIdx) }">
+          <span class="mr-0.5">{{ translateOperatorKind(filterItem.operator) }}</span>
+          <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />
+        </button>
+        <div v-if="filterItem.operator !== OperatorKind.IS_EMPTY && filterItem.operator !== OperatorKind.NOT_EMPTY">
           <input
-            class="iw-grow" :type="getInputTypeByDataKind(filterItem.dataKind)"
-            :value="filterItem.values" @keyup.enter="e => setFilterAValue((e.target as HTMLInputElement).value, filterItemIdx)"
+            v-if="filterItem.operator !== OperatorKind.IN && filterItem.operator !== OperatorKind.NOT_IN && !filterItem.useDict"
+            class="iw-input iw-input-bordered iw-input-xs w-full" :type="getInputTypeByDataKind(filterItem.dataKind)"
+            :value="filterItem.values" @change="e => { setFilterAValue((e.target as HTMLInputElement).value, filterItemIdx) }"
           >
-        </label>
-        <label v-else class="iw-input iw-input-xs iw-input-bordered flex items-center gap-2">
-          <span v-for="(valueTitle, valueIdx) in parseDictTitle(filterItem.columnName, filterItem.values)" :key="valueIdx" class="iw-badge iw-badge-info">
-            {{ valueTitle }}
-            <i
-              :class="`${iconSvg.DELETE} ml-0.5 cursor-pointer`"
-              @click="deleteAValue(filterItemIdx, valueIdx)"
-            />
-          </span>
-          <input
-            class="iw-grow" :type="getInputTypeByDataKind(filterItem.dataKind)"
-            :value="filterItem.values" @change="e => { showDictItems((e.target as HTMLInputElement).value, filterItemIdx, e) }"
-          >
-        </label>
+          <label v-else class="iw-input iw-input-xs iw-input-bordered flex items-center gap-2">
+            <span
+              v-for="(dictItemOrRawValue, valueIdx) in parseDict(filterItem.columnName, filterItem.values)"
+              :key="valueIdx"
+              :style="`background-color: ${dictItemOrRawValue.color ?? ''}`"
+              class="iw-badge iw-badge-info"
+            >
+              <span v-if="dictItemOrRawValue.avatar !== undefined" class="avatar">
+                <img :src="dictItemOrRawValue.avatar" class="w-4 rounded-full">
+              </span>
+              <span class="ml-1 whitespace-nowrap">{{ dictItemOrRawValue.title ?? dictItemOrRawValue }}</span>
+              <i
+                :class="`${iconSvg.DELETE} ml-0.5 cursor-pointer`"
+                @click="deleteAValue(filterItemIdx, valueIdx)"
+              />
+            </span>
+            <input
+              v-if="!filterItem.useDict"
+              class="iw-grow" :type="getInputTypeByDataKind(filterItem.dataKind)"
+              :data-value-input-idx="filterItemIdx"
+              @change="e => setFilterAValue((e.target as HTMLInputElement).value, filterItemIdx)"
+            >
+            <input
+              v-else
+              class="iw-grow" :type="getInputTypeByDataKind(filterItem.dataKind)"
+              :data-value-input-idx="filterItemIdx"
+              @keyup="e => { showDictItems((e.target as HTMLInputElement).value, filterItemIdx, e) }"
+            >
+          </label>
+        </div>
+        <i :class="`${iconSvg.DELETE} hover:text-secondary hover:font-bold`" @click="deleteFilterItem(filterItemIdx)" />
       </div>
-      <i :class="`${iconSvg.DELETE} hover:text-secondary hover:font-bold`" @click="deleteFilterItem(filterItemIdx)" />
     </div>
     <button class="iw-btn iw-btn-outline iw-btn-xs" @click="showFilterColumns">
       <span class="mr-0.5">{{ $t('function.filter.selectColumnPlaceholder') }}</span>
       <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />
+    </button>
+
+    <button class="iw-btn iw-btn-outline iw-btn-xs" @click="saveFilterGroup">
+      <i :class="`${iconSvg.NEW} ml-0.5`" />
+      <span class="mr-0.5">{{ $t('function.filter.save') }}</span>
     </button>
   </MenuComp>
 
@@ -416,13 +352,14 @@ function setFilterADictValue(e: Event) {
       <div
         v-for="dictItem in queryDictItemsResp?.records" :key="dictItem.value"
         :style="`background-color: ${dictItem.color}`"
-        class="iw-contextmenu__item flex cursor-pointer iw-badge iw-badge-outline m-1.5 pl-0.5" :data-value="dictItem.value"
+        class="iw-contextmenu__item flex cursor-pointer iw-badge iw-badge-outline m-1.5 pl-0.5"
+        :data-value="dictItem.value"
         :data-title="dictItem.title"
+        :data-avatar="dictItem.avatar"
+        :data-color="dictItem.color"
       >
         <div v-if="dictItem.avatar !== undefined" class="avatar">
-          <div class="w-4 rounded-full">
-            <img :src="dictItem.avatar">
-          </div>
+          <img :src="dictItem.avatar" class="w-4 rounded-full">
         </div>
         <span class="ml-1 whitespace-nowrap">{{ dictItem.title }}{{ dictItem.title !== dictItem.value ? `(${dictItem.value})` : '' }}</span>
       </div>

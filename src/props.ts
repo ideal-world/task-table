@@ -284,6 +284,7 @@ export interface TableEventProps {
   clickCell?: (clickedRecordPk: any, clickedColumnName: string) => Promise<boolean>
 
   loadCellDictItems?: (columnName: string, filterValue?: any, slice?: TableDataQuerySliceProps) => Promise<TableCellDictItemsResp>
+  loadCellDictItemsWithMultiConds?: (conds: { [columnName: string]: any[] }, slice?: TableDataQuerySliceProps) => Promise<{ [columnName: string]: TableCellDictItemsResp }>
 
   modifyStyles?: (changedStyleProps: TableStyleProps) => Promise<boolean>
 

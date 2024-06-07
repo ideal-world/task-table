@@ -98,8 +98,7 @@
       "new": "New Filter",
       "items": "Items",
       "selectColumnPlaceholder": "New column",
-      "dictTitle": "Available dictionary values",
-      "searchPlaceholder": "Search..."
+      "save": "Save"
     },
     "group": {
       "groupTitle": "Group",
