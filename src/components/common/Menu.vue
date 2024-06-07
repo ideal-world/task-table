@@ -4,12 +4,17 @@ import { nextTick, onMounted, provide, ref } from 'vue'
 import { IwUtils } from '../../utils'
 
 const contextmenuRef = ref<HTMLElement | null>(null)
-const init = ref<boolean>(false)
+const is_init = ref<boolean>(false)
 
 const DIFF_OFFSET = 10
 
 async function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: MenuOffsetKind = MenuOffsetKind.MEDIUM_TOP, size: MenuSizeKind = MenuSizeKind.MEDIUM, force: boolean = false) {
-  init.value = true
+  const contextmenuEle = contextmenuRef.value!
+  if (!is_init.value && EVENTS.init[contextmenuEle.id]) {
+    EVENTS.init[contextmenuEle.id].callback(contextmenuEle)
+  }
+
+  is_init.value = true
 
   if (!force
     && (attachObj instanceof HTMLElement && contextmenuRef.value!.contains(attachObj)
@@ -154,9 +159,9 @@ function closeCurrentContextMenu() {
 function doCloseContextMenu(contextMenuEle: HTMLElement) {
   contextMenuEle.style.display = `none`
   const id = contextMenuEle.id
-  if (id && ON_CLOSE_CALLBACKS[id]) {
-    ON_CLOSE_CALLBACKS[id]?.callback()
-    ON_CLOSE_CALLBACKS[id]?.once && delete ON_CLOSE_CALLBACKS[id]
+  if (id && EVENTS.close[id]) {
+    EVENTS.close[id]?.callback(contextMenuEle)
+    EVENTS.close[id]?.once && delete EVENTS.close[id]
   }
 }
 
@@ -176,11 +181,16 @@ onMounted(() => {
   })
 })
 
-function registerOnCloseListener(callback: () => Promise<void>, once?: boolean) {
-  const id = `iw-contextmenu-${Math.floor(Math.random() * 1000000)}`
+function registerOnInitListener(callback: (menuEle: HTMLElement) => Promise<void>) {
   const contextMenuEle = contextmenuRef.value as HTMLElement
-  contextMenuEle.id = id
-  ON_CLOSE_CALLBACKS[id] = {
+  EVENTS.init[contextMenuEle.id] = {
+    callback,
+  }
+}
+
+function registerOnCloseListener(callback: (menuEle: HTMLElement) => Promise<void>, once?: boolean) {
+  const contextMenuEle = contextmenuRef.value as HTMLElement
+  EVENTS.close[contextMenuEle.id] = {
     callback,
     once: once ?? false,
   }
@@ -188,8 +198,11 @@ function registerOnCloseListener(callback: () => Promise<void>, once?: boolean) 
 
 defineExpose({
   show: showContextMenu,
-  onClose: registerOnCloseListener,
   close: closeCurrentContextMenu,
+  // 初始化时注册监听器，必须在显示前注册
+  // The listener is registered during initialization and must be registered before `show`
+  onInit: registerOnInitListener,
+  onClose: registerOnCloseListener,
 })
 
 // eslint-disable-next-line ts/no-use-before-define
@@ -214,19 +227,29 @@ export enum MenuSizeKind {
 }
 
 export const FUN_CLOSE_CONTEXT_MENU_TYPE = Symbol('FUN_CLOSE_CONTEXT_MENU_TYPE') as InjectionKey<() => void>
-const ON_CLOSE_CALLBACKS: { [id: string]: {
-  callback: () => Promise<void>
-  once: boolean
-} } = {}
+
+const EVENTS: {
+  init: { [id: string]: {
+    callback: (menuEle: HTMLElement) => Promise<void>
+  } }
+  close: { [id: string]: {
+    callback: (menuEle: HTMLElement) => Promise<void>
+    once: boolean
+  } }
+} = {
+  init: {},
+  close: {},
+}
 </script>
 
 <template>
   <div
-    v-show="init"
+    v-show="is_init"
+    :id="'iw-contextmenu-' + `${Math.floor(Math.random() * 1000000)}`"
     ref="contextmenuRef"
     class="iw-contextmenu flex flex-col items-start fixed z-[3100] bg-base-100 p-1 rounded-md border border-base-300"
   >
-    <slot v-if="init" />
+    <slot v-if="is_init" />
   </div>
 </template>
 
