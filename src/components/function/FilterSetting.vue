@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import * as iconSvg from '../../assets/icon'
 import type { DataKind, TableCellDictItemProps, TableCellDictItemsResp, TableDataFilterItemProps, TableDataFilterProps, TableLayoutModifyProps } from '../../props'
 import { OperatorKind, translateOperatorKind } from '../../props'
@@ -230,6 +230,12 @@ async function saveFilterGroup() {
   }
   await eb.modifyLayout(layout)
 }
+
+onMounted(() => {
+  filterGroupContainerCompRef.value?.onClose(async () => {
+    await saveFilterGroup()
+  })
+})
 </script>
 
 <template>

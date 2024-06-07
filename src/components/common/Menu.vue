@@ -141,14 +141,23 @@ function hideUnActiveContextMenus(event: MouseEvent) {
       || event.y > contextMenuRect.top + contextMenuRect.height
     ) {
       if (i === '0' || (contextmenuEles[Number(i) - 1] as HTMLElement).style.display === 'none')
-        contextMenuEle.style.display = `none`
+        doCloseContextMenu(contextMenuEle)
     }
   }
 }
 
-function hideCurrentContextMenu() {
+function closeCurrentContextMenu() {
   const contextMenuEle = contextmenuRef.value as HTMLElement
+  doCloseContextMenu(contextMenuEle)
+}
+
+function doCloseContextMenu(contextMenuEle: HTMLElement) {
   contextMenuEle.style.display = `none`
+  const id = contextMenuEle.id
+  if (id && ON_CLOSE_CALLBACKS[id]) {
+    ON_CLOSE_CALLBACKS[id]?.()
+    delete ON_CLOSE_CALLBACKS[id]
+  }
 }
 
 onMounted(() => {
@@ -162,19 +171,26 @@ onMounted(() => {
     for (const i in contextmenuEles) {
       if (!(contextmenuEles[i] instanceof HTMLElement) || (contextmenuEles[i] as HTMLElement).style.display === 'none')
         continue
-      const contextMenuEle = contextmenuEles[i] as HTMLElement
-      contextMenuEle.style.display = `none`
+      doCloseContextMenu(contextmenuEles[i] as HTMLElement)
     }
   })
 })
 
+function registerOnCloseListener(callback: () => Promise<void>) {
+  const id = `iw-contextmenu-${Math.floor(Math.random() * 1000000)}`
+  const contextMenuEle = contextmenuRef.value as HTMLElement
+  contextMenuEle.id = id
+  ON_CLOSE_CALLBACKS[id] = callback
+}
+
 defineExpose({
   show: showContextMenu,
-  close: hideCurrentContextMenu,
+  onClose: registerOnCloseListener,
+  close: closeCurrentContextMenu,
 })
 
 // eslint-disable-next-line ts/no-use-before-define
-provide(FUN_CLOSE_CONTEXT_MENU_TYPE, hideCurrentContextMenu)
+provide(FUN_CLOSE_CONTEXT_MENU_TYPE, closeCurrentContextMenu)
 </script>
 
 <script lang="ts">
@@ -195,6 +211,7 @@ export enum MenuSizeKind {
 }
 
 export const FUN_CLOSE_CONTEXT_MENU_TYPE = Symbol('FUN_CLOSE_CONTEXT_MENU_TYPE') as InjectionKey<() => void>
+const ON_CLOSE_CALLBACKS: { [id: string]: () => Promise<void> } = {}
 </script>
 
 <template>
