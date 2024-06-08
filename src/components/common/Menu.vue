@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import type { InjectionKey } from 'vue'
-import { nextTick, onMounted, provide, ref } from 'vue'
+import { computed, nextTick, onMounted, provide, ref } from 'vue'
 import { IwUtils } from '../../utils'
 
 const contextmenuRef = ref<HTMLElement | null>(null)
 const is_init = ref<boolean>(false)
 
 const DIFF_OFFSET = 10
+
+const contextmenuMathRandom = computed(() =>
+  Math.floor(Math.random() * 1000000),
+)
 
 async function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: MenuOffsetKind = MenuOffsetKind.MEDIUM_TOP, size: MenuSizeKind = MenuSizeKind.MEDIUM, force: boolean = false) {
   const contextmenuEle = contextmenuRef.value!
@@ -245,7 +249,7 @@ const EVENTS: {
 <template>
   <div
     v-show="is_init"
-    :id="'iw-contextmenu-' + `${Math.floor(Math.random() * 1000000)}`"
+    :id="'iw-contextmenu-' + `${contextmenuMathRandom}`"
     ref="contextmenuRef"
     class="iw-contextmenu flex flex-col items-start fixed z-[3100] bg-base-100 p-1 rounded-md border border-base-300"
   >
