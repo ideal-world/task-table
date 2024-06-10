@@ -8,6 +8,7 @@ import type { TableColumnConf } from '../conf'
 import * as eb from '../eventbus'
 
 const props = defineProps<{
+  layoutId: string
   sorts?: TableDataSortProps[]
   columnsConf: TableColumnConf[]
 }>()
@@ -104,7 +105,7 @@ function addSort(columnName: string, orderDesc: boolean) {
     </div>
     <div
       v-for="column in props.columnsConf.filter(col => col.sortable && !props.sorts?.find(sort => sort.columnName === col.name))"
-      :key="column.name"
+      :key="`${props.layoutId}-${column.name}`"
       class="p-1 flex w-full justify-between cursor-pointer" :data-column-name="column.name"
     >
       <div>

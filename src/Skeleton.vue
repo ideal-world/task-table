@@ -108,9 +108,9 @@ onMounted(async () => {
         <div v-show="currentLayoutId === layout.id">
           <div :id="`iw-tt-layout-${layout.id}`" class="iw-tt-toolbar flex h-8 p-0.5">
             <div class="flex items-center">
-              <RowSortSettingComp :sorts="layout.sorts" :columns-conf="tableBasicConf.columns" />
+              <RowSortSettingComp :layout-id="layout.id" :sorts="layout.sorts" :columns-conf="tableBasicConf.columns" />
               <div class="iw-divider iw-divider-horizontal m-0.5" />
-              <FilterSettingComp :filters="layout.filters" :columns-conf="tableBasicConf.columns" />
+              <FilterSettingComp :layout-id="layout.id" :filters="layout.filters" :columns-conf="tableBasicConf.columns" />
             </div>
           </div>
           <div class="iw-tt-table overflow-auto w-full">

@@ -10,6 +10,7 @@ import { getInputTypeByDataKind, getOperatorKindsByDataKind } from '../conf'
 import * as eb from '../eventbus'
 
 const props = defineProps<{
+  layoutId: string
   filters?: TableDataFilterProps[]
   columnsConf: TableColumnConf[]
 }>()
@@ -155,11 +156,17 @@ function setFilterOp(e: Event) {
 
 function setFilterAValue(value: any, filterItemIdx: number) {
   const currFilterItem = selectedFilterGroup.value?.[filterItemIdx]
-  if (currFilterItem?.operator === OperatorKind.IN || currFilterItem?.operator === OperatorKind.NOT_IN) {
-    currFilterItem!.values = [...currFilterItem!.values, value]
+  if (currFilterItem?.values.includes(value)) {
+    // remove already exists
+    currFilterItem.values = currFilterItem.values.filter(val => val !== value)
   }
   else {
-    currFilterItem!.values = [value]
+    if (currFilterItem?.operator === OperatorKind.IN || currFilterItem?.operator === OperatorKind.NOT_IN) {
+      currFilterItem!.values = [...currFilterItem!.values, value]
+    }
+    else {
+      currFilterItem!.values = [value]
+    }
   }
   if (filterGroupContainerEle) {
     const inputEle = filterGroupContainerEle.querySelector(`input[data-value-input-idx='${filterItemIdx}']`)
@@ -201,7 +208,9 @@ function setFilterADictValue(e: Event) {
     avatar: itemEle.dataset.avatar,
     color: itemEle.dataset.color,
   }
-  dictContainerCompRef.value?.close()
+  if (currFilterItem?.operator !== OperatorKind.IN && currFilterItem?.operator !== OperatorKind.NOT_IN) {
+    dictContainerCompRef.value?.close()
+  }
 }
 
 async function saveFilterGroup() {
@@ -244,7 +253,7 @@ onMounted(() => {
 
 <template>
   <div class="flex items-center justify-center overflow-x-auto">
-    <button v-for="(filterGroup, filterGroupIdx) in props.filters" :key="filterGroupIdx" class="iw-btn iw-btn-outline iw-btn-xs flex-none mr-1">
+    <button v-for="(filterGroup, filterGroupIdx) in props.filters" :key="`${props.layoutId}-${filterGroupIdx}`" class="iw-btn iw-btn-outline iw-btn-xs flex-none mr-1">
       <span class="flex items-center" @click="e => showFilterGroupContainer(e, filterGroupIdx)">
         <template v-if="filterGroup.items.length === 1">
           <span class="mr-0.5">{{ props.columnsConf.find(col => col.name === filterGroup.items[0].columnName)?.title }}</span>
@@ -252,7 +261,7 @@ onMounted(() => {
           <span class="mr-0.5 max-w-[100px] whitespace-nowrap overflow-hidden text-ellipsis">
             <span
               v-for="(dictItemOrRawValue, valueIdx) in parseDict(filterGroup.items[0].columnName, filterGroup.items[0].value)"
-              :key="valueIdx"
+              :key="`${filterGroup.items[0].columnName}-${valueIdx}`"
               :style="`background-color: ${dictItemOrRawValue.color ?? ''}`"
               class="iw-badge"
             >
@@ -276,7 +285,7 @@ onMounted(() => {
     </div>
   </div>
   <MenuComp ref="filterGroupContainerCompRef">
-    <div v-for="(filterItem, filterItemIdx) in selectedFilterGroup" :key="filterItemIdx" class="iw-contextmenu__item p-1 flex items-center w-full">
+    <div v-for="(filterItem, filterItemIdx) in selectedFilterGroup" :key="`${layoutId}-${selectedFilterGroupIdx}-${filterItemIdx}`" class="iw-contextmenu__item p-1 flex items-center w-full">
       <button class="iw-btn iw-btn-outline iw-btn-xs mr-1" :title="filterItem.title" @click="e => { showFilterColumns(e, filterItemIdx) }">
         <i :class="filterItem.icon " />
         <span class="mr-0.5 max-w-[40px] overflow-hidden text-ellipsis whitespace-nowrap">{{ filterItem.title }}</span>
@@ -295,7 +304,7 @@ onMounted(() => {
         <label v-else class="iw-input iw-input-xs iw-input-bordered flex items-center gap-2 h-[30px]">
           <span
             v-for="(dictItemOrRawValue, valueIdx) in parseDict(filterItem.columnName, filterItem.values)"
-            :key="valueIdx"
+            :key="`${filterItem.columnName}-${valueIdx}`"
             :style="`background-color: ${dictItemOrRawValue.color ?? ''}`"
             class="iw-badge"
           >
@@ -353,9 +362,10 @@ onMounted(() => {
   <MenuComp ref="dictContainerCompRef">
     <div @click="setFilterADictValue">
       <div
-        v-for="dictItem in queryDictItemsResp?.records" :key="dictItem.value"
+        v-for="dictItem in queryDictItemsResp?.records" :key="`${props.layoutId}-${selectedFilterGroupIdx}-${selectedFilterItemIdx}-${dictItem.value}`"
         :style="`background-color: ${dictItem.color}`"
-        class="iw-contextmenu__item flex cursor-pointer iw-badge iw-badge-outline m-1.5 pl-0.5"
+        class="iw-contextmenu__item flex cursor-pointer iw-badge m-1.5 pl-0.5"
+        :class="selectedFilterGroup?.[selectedFilterItemIdx!].values.includes(dictItem.value) ? 'iw-badge-primary' : 'iw-badge-outline'"
         :data-value="dictItem.value"
         :data-title="dictItem.title"
         :data-avatar="dictItem.avatar"

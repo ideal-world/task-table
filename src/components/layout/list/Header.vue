@@ -36,7 +36,7 @@ function showHeaderContextMenu(event: MouseEvent, columName: string) {
       <input type="checkbox" class="iw-list-select-all-cell__chk iw-checkbox iw-checkbox-xs">
     </div>
     <div
-      v-for="(column, colIdx) in columnsConf" :key="column.name + layout.id"
+      v-for="(column, colIdx) in columnsConf" :key="`${props.layout.id}-${column.name}`"
       :class="`${props.basic.styles.cellClass} iw-list-cell iw-list-header-cell ${column.name !== props.basic.pkColumnName ? 'iw-list-header-normal-cell' : ''} flex items-center bg-base-200 border-l border-l-base-300 hover:cursor-pointer`"
       :data-column-name="column.name"
       :style="props.setColumnStyles(colIdx)"
