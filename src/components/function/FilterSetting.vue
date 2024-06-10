@@ -214,8 +214,13 @@ function setFilterADictValue(e: Event) {
 }
 
 async function saveFilterGroup() {
+  if (selectedFilterGroup.value?.length === 0) {
+    return
+  }
   const currFilterGroup: TableDataFilterProps = {
-    items: selectedFilterGroup.value?.map((item) => {
+    items: selectedFilterGroup.value?.filter(item =>
+      item.operator === OperatorKind.IS_EMPTY || item.operator === OperatorKind.NOT_EMPTY || item.values.length > 0,
+    ).map((item) => {
       const realValue = item.operator === OperatorKind.IS_EMPTY || item.operator === OperatorKind.NOT_EMPTY
         ? undefined
         : item.operator === OperatorKind.IN || item.operator === OperatorKind.NOT_IN
@@ -227,6 +232,9 @@ async function saveFilterGroup() {
         value: realValue,
       }
     }) ?? [],
+  }
+  if (currFilterGroup.items.length === 0) {
+    return
   }
   const filters = props.filters ? JSON.parse(JSON.stringify(props.filters)) : []
   if (selectedFilterGroupIdx.value === undefined) {
@@ -252,7 +260,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex items-center justify-center overflow-x-auto">
+  <div class="flex items-center justify-center overflow-hidden">
     <button v-for="(filterGroup, filterGroupIdx) in props.filters" :key="`${props.layoutId}-${filterGroupIdx}`" class="iw-btn iw-btn-outline iw-btn-xs flex-none mr-1">
       <span class="flex items-center" @click="e => showFilterGroupContainer(e, filterGroupIdx)">
         <template v-if="filterGroup.items.length === 1">
@@ -325,6 +333,7 @@ onMounted(() => {
           >
           <input
             v-else
+            :class="filterItem.values && filterItem.values.length > 0 ? 'w-12' : ''"
             class="pl-1 rounded-md iw-input-bordered" :type="getInputTypeByDataKind(filterItem.dataKind)"
             :data-value-input-idx="filterItemIdx"
             @keyup="e => { showDictItems((e.target as HTMLInputElement).value, filterItemIdx, e) }"
@@ -365,7 +374,7 @@ onMounted(() => {
         v-for="dictItem in queryDictItemsResp?.records" :key="`${props.layoutId}-${selectedFilterGroupIdx}-${selectedFilterItemIdx}-${dictItem.value}`"
         :style="`background-color: ${dictItem.color}`"
         class="iw-contextmenu__item flex cursor-pointer iw-badge m-1.5 pl-0.5"
-        :class="selectedFilterGroup?.[selectedFilterItemIdx!].values.includes(dictItem.value) ? 'iw-badge-primary' : 'iw-badge-outline'"
+        :class="selectedFilterGroup?.[selectedFilterItemIdx!]?.values.includes(dictItem.value) ? 'iw-badge-primary' : 'iw-badge-outline'"
         :data-value="dictItem.value"
         :data-title="dictItem.title"
         :data-avatar="dictItem.avatar"

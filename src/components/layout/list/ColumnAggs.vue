@@ -7,6 +7,7 @@ import type { CachedColumnConf, TableStyleConf } from '../../conf'
 import * as eb from '../../eventbus'
 
 const props = defineProps<{
+  layoutId: string
   layoutAggs: { [key: string]: AggregateKind }
   showSelectColumn: boolean
   showActionColumn: boolean
@@ -51,7 +52,7 @@ async function changeColumnAggs(aggKind: AggregateKind, colIdx: number) {
       :class="`${props.stylesConf.cellClass} iw-list-cell flex justify-center items-center bg-base-100 border-b border-b-base-300 border-l border-l-base-300 whitespace-nowrap flex-nowrap`"
       :style="props.setColumnStyles(-1)"
     />
-    <template v-for="(column, colIdx) in props.columnsConf" :key="column.name">
+    <template v-for="(column, colIdx) in props.columnsConf" :key="`${props.layoutId}-${column.name}`">
       <div
         v-if="colIdx === 0"
         :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-agg-cell flex items-center justify-end pr-1 bg-base-100 border-solid border-b border-b-base-300 border-l border-l-base-300`" :data-column-name="column.name"

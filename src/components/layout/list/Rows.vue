@@ -22,7 +22,7 @@ const props = defineProps<{
 </script>
 
 <template>
-  <!-- key的值使用主键+布局Id+子数据显示类型以确保子数据显示类型切换时可以重新创建所有行。
+  <!-- key的值使用布局Id+主键+子数据显示类型以确保子数据显示类型切换时可以重新创建所有行。
   否则，折叠行时MutationObserver处理会遗漏一些需要隐藏的子数据。
 
   The value of key uses primary key + layout id + sub-data display kind to ensure that all rows can be recreated when the sub-data display kind is switched.
@@ -30,7 +30,7 @@ const props = defineProps<{
 -->
   <div
     v-for="(row, idx) in props.records"
-    :key="row[props.pkColumnName] + layoutId + props.subDataShowKind"
+    :key="`${layoutId}-${row[props.pkColumnName]}-${props.subDataShowKind}`"
     :data-pk="row[props.pkColumnName] "
     :data-parent-pk="props.parentPkColumnName ? row[props.parentPkColumnName] : undefined"
     :class="`${props.stylesConf.rowClass} iw-list-row iw-list-data-row ${props.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA ? 'iw-list-data-fold' : ''} flex bg-base-100 border-b border-b-base-300 border-r border-r-base-300`"
@@ -51,7 +51,7 @@ const props = defineProps<{
       {{ row[props.pkColumnName] }}
     </div>
     <div
-      v-for="(column, colIdx) in props.columnsConf.slice(1)" :key="column.name"
+      v-for="(column, colIdx) in props.columnsConf.slice(1)" :key="`${props.layoutId}-${column.name}`"
       :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-data-cell flex items-center bg-base-100 border-l border-l-base-300 ${column.wrap ? 'break-words flex-wrap' : 'whitespace-nowrap overflow-hidden text-ellipsis flex-nowrap'}`"
       :data-column-name="column.name" :style="{ ...column.styles, ...props.setColumnStyles(colIdx + 1) }"
     >
@@ -63,7 +63,7 @@ const props = defineProps<{
         {{ row[column.name] }}
       </div>
       <div
-        v-for="dictItem in row[column.name + DATA_DICT_POSTFIX]" v-else :key="dictItem.value"
+        v-for="dictItem in row[column.name + DATA_DICT_POSTFIX]" v-else :key="`${column.name}-${dictItem.value}`"
         :data-value="dictItem.value"
         class="iw-badge iw-badge-outline pl-0.5 mb-0.5 mr-0.5"
         :style="`background-color: ${dictItem.color}`"

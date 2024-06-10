@@ -75,7 +75,7 @@ function addSort(columnName: string, orderDesc: boolean) {
     </div>
     <div
       v-for="column in props.sorts"
-      :key="column.columnName"
+      :key="`${props.layoutId}-${column.columnName}`"
       class="iw-row-sort__item p-1 flex w-full justify-between cursor-pointer"
     >
       <div>

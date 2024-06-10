@@ -107,11 +107,9 @@ onMounted(async () => {
       <template v-for="layout in tableLayoutsConf" :key="layout.id">
         <div v-show="currentLayoutId === layout.id">
           <div :id="`iw-tt-layout-${layout.id}`" class="iw-tt-toolbar flex h-8 p-0.5">
-            <div class="flex items-center">
               <RowSortSettingComp :layout-id="layout.id" :sorts="layout.sorts" :columns-conf="tableBasicConf.columns" />
               <div class="iw-divider iw-divider-horizontal m-0.5" />
               <FilterSettingComp :layout-id="layout.id" :filters="layout.filters" :columns-conf="tableBasicConf.columns" />
-            </div>
           </div>
           <div class="iw-tt-table overflow-auto w-full">
             <ListComp :key="layout.id" :layout="layout" :basic="tableBasicConf" />

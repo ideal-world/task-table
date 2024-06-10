@@ -88,6 +88,7 @@ onMounted(() => {
       />
       <ColumnAggsComp
         v-if="layout.aggs"
+        :layout-id="props.layout.id"
         :layout-aggs="layout.aggs"
         :data-basic="layout.data as TableDataResp"
         :show-select-column="layout.showSelectColumn"
@@ -100,6 +101,7 @@ onMounted(() => {
       <template v-for="groupData in props.layout.data" :key="`${props.layout.id}-${groupData.groupValue}`">
         <ColumnAggsComp
           v-if="layout.aggs"
+          :layout-id="props.layout.id"
           :layout-aggs="layout.aggs"
           :data-basic="groupData"
           :show-select-column="layout.showSelectColumn"
