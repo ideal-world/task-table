@@ -5,6 +5,7 @@ import { initConf } from './components/conf'
 import * as Event from './components/eventbus'
 import FilterSettingComp from './components/function/FilterSetting.vue'
 import PaginationComp from './components/function/Pagination.vue'
+import ScrollableComp from './components/common/Scrollable.vue'
 import RowSortSettingComp from './components/function/RowSortSetting.vue'
 import TableSettingComp from './components/function/TableSetting.vue'
 import ListComp from './components/layout/list/List.vue'
@@ -103,29 +104,29 @@ onMounted(async () => {
         />
       </div>
     </div>
-    <div class="iw-tt-layout">
-      <template v-for="layout in tableLayoutsConf" :key="layout.id">
-        <div v-show="currentLayoutId === layout.id">
-          <div :id="`iw-tt-layout-${layout.id}`" class="iw-tt-toolbar flex h-8 p-0.5">
-              <RowSortSettingComp :layout-id="layout.id" :sorts="layout.sorts" :columns-conf="tableBasicConf.columns" />
-              <div class="iw-divider iw-divider-horizontal m-0.5" />
-              <FilterSettingComp :layout-id="layout.id" :filters="layout.filters" :columns-conf="tableBasicConf.columns" />
-          </div>
-          <div class="iw-tt-table overflow-auto w-full">
-            <ListComp :key="layout.id" :layout="layout" :basic="tableBasicConf" />
-          </div>
-          <div
-            :class="`${tableBasicConf.styles.footerClass} iw-tt-footer flex justify-between p-1 min-h-0`"
-          >
-            <div>
-              <slot name="customActionBar" />
-            </div>
-            <template v-if="layout.layoutKind === LayoutKind.LIST && layout.data && !Array.isArray(layout.data)">
-              <PaginationComp :default-slice="layout.defaultSlice" :total-number="layout.data.totalNumber" />
-            </template>
-          </div>
+    <template v-for="layout in tableLayoutsConf" :key="layout.id">
+      <div v-show="currentLayoutId === layout.id" :id="`iw-tt-layout-${layout.id}`" class="iw-tt-layout">
+        <div class="iw-tt-toolbar flex items-center h-8 p-0.5">
+          <RowSortSettingComp :layout-id="layout.id" :sorts="layout.sorts" :columns-conf="tableBasicConf.columns" />
+          <div class="iw-divider iw-divider-horizontal m-0.5" />
+          <ScrollableComp class="flex-1">
+            <FilterSettingComp :layout-id="layout.id" :filters="layout.filters" :columns-conf="tableBasicConf.columns" />
+          </ScrollableComp>
         </div>
-      </template>
-    </div>
+        <div class="iw-tt-table overflow-auto w-full">
+          <ListComp :key="layout.id" :layout="layout" :basic="tableBasicConf" />
+        </div>
+        <div
+          :class="`${tableBasicConf.styles.footerClass} iw-tt-footer flex justify-between p-1 min-h-0`"
+        >
+          <div>
+            <slot name="customActionBar" />
+          </div>
+          <template v-if="layout.layoutKind === LayoutKind.LIST && layout.data && !Array.isArray(layout.data)">
+            <PaginationComp :default-slice="layout.defaultSlice" :total-number="layout.data.totalNumber" />
+          </template>
+        </div>
+      </div>
+    </template>
   </div>
 </template>

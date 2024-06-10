@@ -260,7 +260,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex items-center justify-center overflow-hidden">
+  <div class="flex items-center justify-center">
     <button v-for="(filterGroup, filterGroupIdx) in props.filters" :key="`${props.layoutId}-${filterGroupIdx}`" class="iw-btn iw-btn-outline iw-btn-xs flex-none mr-1">
       <span class="flex items-center" @click="e => showFilterGroupContainer(e, filterGroupIdx)">
         <template v-if="filterGroup.items.length === 1">
@@ -287,7 +287,7 @@ onMounted(() => {
       </span>
       <i :class="`${iconSvg.DELETE} hover:text-secondary hover:font-bold`" @click="deleteFilterGroup(filterGroupIdx)" />
     </button>
-    <div class="self-center cursor-pointer" @click="showFilterGroupContainer">
+    <div class="self-center cursor-pointer text-nowrap" @click="showFilterGroupContainer">
       <i :class="iconSvg.NEW" />
       <span>{{ $t('function.filter.new') }}</span>
     </div>
