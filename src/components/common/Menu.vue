@@ -12,7 +12,7 @@ const contextmenuMathRandom = computed(() =>
   Math.floor(Math.random() * 1000000),
 )
 
-async function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: MenuOffsetKind = MenuOffsetKind.MEDIUM_TOP, size: MenuSizeKind = MenuSizeKind.MEDIUM, force: boolean = false, boundaryEle?: HTMLElement,
+async function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: MenuOffsetKind = MenuOffsetKind.MEDIUM_TOP, size:MenuSizeKind|MenuCustomSize: MenuSizeKind = MenuSizeKind.MEDIUM, force: boolean = false, boundaryEle?: HTMLElement,
 ) {
   const contextmenuEle = contextmenuRef.value!
   if (!is_init.value && EVENTS.init[contextmenuEle.id]) {
@@ -266,6 +266,11 @@ export enum MenuSizeKind {
   SMALL,
   MEDIUM,
   LARGE,
+}
+
+export interface MenuCustomSize{
+  width?: number
+  height?: number
 }
 
 export const FUN_CLOSE_CONTEXT_MENU_TYPE = Symbol('FUN_CLOSE_CONTEXT_MENU_TYPE') as InjectionKey<() => void>
