@@ -115,7 +115,9 @@ async function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: Menu
       }
     }
     contextMenuEle.style.left = `${left}px`
+    contextMenuEle.dataset.left = `${left + window.scrollX}`
     contextMenuEle.style.top = `${top}px`
+    contextMenuEle.dataset.top = `${top + window.scrollY}`
     contextMenuEle.style.visibility = 'visible'
 
     contextMenuEle.querySelectorAll('.iw-contextmenu__item').forEach((node) => {
@@ -178,9 +180,12 @@ onMounted(() => {
   window.addEventListener('scroll', () => {
     const contextmenuEles = document.querySelectorAll('.iw-contextmenu')
     for (const i in contextmenuEles) {
-      if (!(contextmenuEles[i] instanceof HTMLElement) || (contextmenuEles[i] as HTMLElement).style.display === 'none')
+      if (!(contextmenuEles[i] instanceof HTMLElement) || (contextmenuEles[i] as HTMLElement).style.display === 'none') {
         continue
-      doCloseContextMenu(contextmenuEles[i] as HTMLElement)
+      }
+      const contextMenuEle = contextmenuEles[i] as HTMLElement
+      contextMenuEle.style.top = `${Number.parseInt(contextMenuEle.dataset.top!) - window.scrollY}px`
+      contextMenuEle.style.left = `${Number.parseInt(contextMenuEle.dataset.left!) - window.scrollX}px`
     }
   })
 })
