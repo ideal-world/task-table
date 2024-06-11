@@ -71,62 +71,81 @@ async function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: Menu
   contextMenuEle.style.display = `block`
 
   nextTick().then(() => {
-    let left
-    let top
-    let attachObjHeight
-    let attachObjWidth
-    if (attachObj instanceof HTMLElement) {
-      const targetOffset = attachObj.getBoundingClientRect()
-      left = targetOffset.left
-      top = targetOffset.top
-      attachObjHeight = targetOffset.height
-      attachObjWidth = targetOffset.width
-    }
-    else {
-      left = attachObj.x
-      top = attachObj.y
-      attachObjHeight = 0
-      attachObjWidth = 0
-    }
-    const menuHeight = contextMenuEle.offsetHeight
-    const menuWidth = contextMenuEle.offsetWidth
+    const observer = new ResizeObserver((_) => {
+      let left
+      let top
+      let attachObjHeight
+      let attachObjWidth
+      if (attachObj instanceof HTMLElement) {
+        const targetOffset = attachObj.getBoundingClientRect()
+        left = targetOffset.left
+        top = targetOffset.top
+        attachObjHeight = targetOffset.height
+        attachObjWidth = targetOffset.width
+      }
+      else {
+        left = attachObj.x
+        top = attachObj.y
+        attachObjHeight = 0
+        attachObjWidth = 0
+      }
+      const menuHeight = contextMenuEle.offsetHeight
+      const menuWidth = contextMenuEle.offsetWidth
 
-    switch (offset) {
-      case MenuOffsetKind.LEFT_TOP: {
-        top = top + attachObjHeight + DIFF_OFFSET
-        break
+      switch (offset) {
+        case MenuOffsetKind.LEFT_TOP: {
+          top = top + attachObjHeight + DIFF_OFFSET
+          break
+        }
+        case MenuOffsetKind.MEDIUM_TOP: {
+          left = left + attachObjWidth / 2 - menuWidth / 2
+          top = top + attachObjHeight + DIFF_OFFSET
+          break
+        }
+        case MenuOffsetKind.RIGHT_TOP: {
+          left = left + attachObjWidth - menuWidth
+          top = top + attachObjHeight + DIFF_OFFSET
+          break
+        }
+        case MenuOffsetKind.LEFT_BOTTOM: {
+          top = top - menuHeight - DIFF_OFFSET
+          break
+        }
+        case MenuOffsetKind.MEDIUM_BOTTOM: {
+          left = left + attachObjWidth / 2 - menuWidth / 2
+          top = top - menuHeight - DIFF_OFFSET
+          break
+        }
+        case MenuOffsetKind.RIGHT_BOTTOM: {
+          left = left + attachObjWidth - menuWidth
+          top = top - menuHeight - DIFF_OFFSET
+          break
+        }
       }
-      case MenuOffsetKind.MEDIUM_TOP: {
-        left = left + attachObjWidth / 2 - menuWidth / 2
-        top = top + attachObjHeight + DIFF_OFFSET
-        break
-      }
-      case MenuOffsetKind.RIGHT_TOP: {
-        left = left + attachObjWidth - menuWidth
-        top = top + attachObjHeight + DIFF_OFFSET
-        break
-      }
-      case MenuOffsetKind.LEFT_BOTTOM: {
-        top = top - menuHeight - DIFF_OFFSET
-        break
-      }
-      case MenuOffsetKind.MEDIUM_BOTTOM: {
-        left = left + attachObjWidth / 2 - menuWidth / 2
-        top = top - menuHeight - DIFF_OFFSET
-        break
-      }
-      case MenuOffsetKind.RIGHT_BOTTOM: {
-        left = left + attachObjWidth - menuWidth
-        top = top - menuHeight - DIFF_OFFSET
-        break
-      }
-    }
-    contextMenuEle.style.left = `${left}px`
-    contextMenuEle.dataset.left = `${left + window.scrollX}`
-    contextMenuEle.style.top = `${top}px`
-    contextMenuEle.dataset.top = `${top + window.scrollY}`
 
-    addBoundaryAdjustment(contextMenuEle, boundaryEle)
+      if (boundaryEle) {
+        const boundaryEleRect = boundaryEle.getBoundingClientRect()
+        if (left < boundaryEleRect.left) {
+          left = boundaryEleRect.left
+        }
+        if (top < boundaryEleRect.top) {
+          top = boundaryEleRect.top
+        }
+        if ((left + contextMenuEle.offsetWidth) > boundaryEleRect.right) {
+          left = boundaryEleRect.right - contextMenuEle.offsetWidth
+        }
+
+        if ((top + contextMenuEle.offsetHeight) > boundaryEleRect.bottom) {
+          top = boundaryEleRect.bottom - contextMenuEle.offsetHeight
+        }
+      }
+
+      contextMenuEle.style.left = `${left}px`
+      contextMenuEle.dataset.left = `${left + window.scrollX}`
+      contextMenuEle.style.top = `${top}px`
+      contextMenuEle.dataset.top = `${top + window.scrollY}`
+    })
+    observer.observe(contextMenuEle)
 
     contextMenuEle.style.visibility = 'visible'
 
@@ -146,35 +165,6 @@ async function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: Menu
       contextMenuEle.dataset.level = '0'
     }
   })
-}
-
-function addBoundaryAdjustment(contextMenuEle: HTMLElement, boundaryEle?: HTMLElement) {
-  if (boundaryEle) {
-    const observer = new ResizeObserver((_) => {
-      let left = contextMenuEle.offsetLeft
-      let top = contextMenuEle.offsetTop
-
-      const boundaryEleRect = boundaryEle.getBoundingClientRect()
-      if (left < boundaryEleRect.left) {
-        left = boundaryEleRect.left
-      }
-      if (top < boundaryEleRect.top) {
-        top = boundaryEleRect.top
-      }
-      if ((left + contextMenuEle.offsetWidth) > boundaryEleRect.right) {
-        left = boundaryEleRect.right - contextMenuEle.offsetWidth
-      }
-
-      if ((top + contextMenuEle.offsetHeight) > boundaryEleRect.bottom) {
-        top = boundaryEleRect.bottom - contextMenuEle.offsetHeight
-      }
-      contextMenuEle.style.left = `${left}px`
-      contextMenuEle.dataset.left = `${left + window.scrollX}`
-      contextMenuEle.style.top = `${top}px`
-      contextMenuEle.dataset.top = `${top + window.scrollY}`
-    })
-    observer.observe(contextMenuEle)
-  }
 }
 
 function hideUnActiveContextMenus(event: MouseEvent) {
