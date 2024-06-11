@@ -12,7 +12,8 @@ const contextmenuMathRandom = computed(() =>
   Math.floor(Math.random() * 1000000),
 )
 
-async function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: MenuOffsetKind = MenuOffsetKind.MEDIUM_TOP, size: MenuSizeKind = MenuSizeKind.MEDIUM, force: boolean = false) {
+async function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: MenuOffsetKind = MenuOffsetKind.MEDIUM_TOP, size: MenuSizeKind | MenuCustomSize = MenuSizeKind.MEDIUM, force: boolean = false, boundaryEle?: HTMLElement,
+) {
   const contextmenuEle = contextmenuRef.value!
   if (!is_init.value && EVENTS.init[contextmenuEle.id]) {
     EVENTS.init[contextmenuEle.id].callback(contextmenuEle)
@@ -53,6 +54,12 @@ async function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: Menu
       minHeight = 100
       minWidth = 220
       padding = 4
+      break
+    }
+    default: {
+      minHeight = size.height ?? 80
+      minWidth = size.width ?? 160
+      padding = 3
       break
     }
   }
@@ -115,7 +122,12 @@ async function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: Menu
       }
     }
     contextMenuEle.style.left = `${left}px`
+    contextMenuEle.dataset.left = `${left + window.scrollX}`
     contextMenuEle.style.top = `${top}px`
+    contextMenuEle.dataset.top = `${top + window.scrollY}`
+
+    addBoundaryAdjustment(contextMenuEle, boundaryEle)
+
     contextMenuEle.style.visibility = 'visible'
 
     contextMenuEle.querySelectorAll('.iw-contextmenu__item').forEach((node) => {
@@ -134,6 +146,35 @@ async function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: Menu
       contextMenuEle.dataset.level = '0'
     }
   })
+}
+
+function addBoundaryAdjustment(contextMenuEle: HTMLElement, boundaryEle?: HTMLElement) {
+  if (boundaryEle) {
+    const observer = new ResizeObserver((_) => {
+      let left = contextMenuEle.offsetLeft
+      let top = contextMenuEle.offsetTop
+
+      const boundaryEleRect = boundaryEle.getBoundingClientRect()
+      if (left < boundaryEleRect.left) {
+        left = boundaryEleRect.left
+      }
+      if (top < boundaryEleRect.top) {
+        top = boundaryEleRect.top
+      }
+      if ((left + contextMenuEle.offsetWidth) > boundaryEleRect.right) {
+        left = boundaryEleRect.right - contextMenuEle.offsetWidth
+      }
+
+      if ((top + contextMenuEle.offsetHeight) > boundaryEleRect.bottom) {
+        top = boundaryEleRect.bottom - contextMenuEle.offsetHeight
+      }
+      contextMenuEle.style.left = `${left}px`
+      contextMenuEle.dataset.left = `${left + window.scrollX}`
+      contextMenuEle.style.top = `${top}px`
+      contextMenuEle.dataset.top = `${top + window.scrollY}`
+    })
+    observer.observe(contextMenuEle)
+  }
 }
 
 function hideUnActiveContextMenus(event: MouseEvent) {
@@ -178,9 +219,12 @@ onMounted(() => {
   window.addEventListener('scroll', () => {
     const contextmenuEles = document.querySelectorAll('.iw-contextmenu')
     for (const i in contextmenuEles) {
-      if (!(contextmenuEles[i] instanceof HTMLElement) || (contextmenuEles[i] as HTMLElement).style.display === 'none')
+      if (!(contextmenuEles[i] instanceof HTMLElement) || (contextmenuEles[i] as HTMLElement).style.display === 'none') {
         continue
-      doCloseContextMenu(contextmenuEles[i] as HTMLElement)
+      }
+      const contextMenuEle = contextmenuEles[i] as HTMLElement
+      contextMenuEle.style.top = `${Number.parseInt(contextMenuEle.dataset.top!) - window.scrollY}px`
+      contextMenuEle.style.left = `${Number.parseInt(contextMenuEle.dataset.left!) - window.scrollX}px`
     }
   })
 })
@@ -228,6 +272,11 @@ export enum MenuSizeKind {
   SMALL,
   MEDIUM,
   LARGE,
+}
+
+export interface MenuCustomSize {
+  width?: number
+  height?: number
 }
 
 export const FUN_CLOSE_CONTEXT_MENU_TYPE = Symbol('FUN_CLOSE_CONTEXT_MENU_TYPE') as InjectionKey<() => void>
