@@ -85,21 +85,24 @@ onMounted(async () => {
     <div
       :class="`${tableBasicConf.styles.headerClass} iw-tt-header flex justify-between p-0 min-h-0`"
     >
-      <div class="tablist iw-tabs iw-tabs-sm iw-tabs-boxed">
-        <a
-          v-for="layout in tableLayoutsConf"
-          :key="layout.id"
-          :data-layout-id="layout.id"
-          role="tab"
-          class="iw-tt-header__item iw-tab"
-          :class="currentLayoutId === layout.id ? 'iw-tab-active' : ''"
-        >
-          <i :class="`${layout.icon}`" class="mr-1" /> {{ layout.title }}
-        </a>
-      </div>
-      <div>
+      <ScrollableComp class="flex-1">
+        <div class="tablist iw-tabs iw-tabs-sm iw-tabs-boxed">
+          <a
+            v-for="layout in tableLayoutsConf"
+            :key="layout.id"
+            :data-layout-id="layout.id"
+            role="tab"
+            class="iw-tt-header__item iw-tab flex flex-nowrap"
+            :class="currentLayoutId === layout.id ? 'iw-tab-active' : ''"
+          >
+            <i :class="`${layout.icon}`" class="mr-1" /> {{ layout.title }}
+          </a>
+        </div>
+      </ScrollableComp>
+      <div class="flex items-center">
         <QuickSearchComp
           v-if="props.layouts.find(layout => layout.id === currentLayoutId)?.quickSearch"
+          class="mx-2"
           :placeholder="props.layouts.find(layout => layout.id === currentLayoutId)?.quickSearch?.placeholder!"
           :search-content="tableLayoutsConf.find(layout => layout.id === currentLayoutId)?.quickSearchContent"
         />
