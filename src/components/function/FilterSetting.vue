@@ -76,7 +76,7 @@ async function showFilterGroupContainer(e: Event, filterGroupIdx?: number) {
   else {
     selectedFilterGroup.value = []
   }
-  filterGroupContainerCompRef.value?.show(targetEle, undefined, MenuSizeKind.LARGE, false)
+  filterGroupContainerCompRef.value?.show(targetEle, undefined, MenuSizeKind.LARGE, false, targetEle.closest('.iw-tt') as HTMLElement)
 }
 
 async function deleteFilterGroup(filterGroupIdx: number) {

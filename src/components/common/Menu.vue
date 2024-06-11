@@ -12,7 +12,8 @@ const contextmenuMathRandom = computed(() =>
   Math.floor(Math.random() * 1000000),
 )
 
-async function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: MenuOffsetKind = MenuOffsetKind.MEDIUM_TOP, size: MenuSizeKind = MenuSizeKind.MEDIUM, force: boolean = false) {
+async function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: MenuOffsetKind = MenuOffsetKind.MEDIUM_TOP, size: MenuSizeKind = MenuSizeKind.MEDIUM, force: boolean = false, boundaryEle?: HTMLElement,
+) {
   const contextmenuEle = contextmenuRef.value!
   if (!is_init.value && EVENTS.init[contextmenuEle.id]) {
     EVENTS.init[contextmenuEle.id].callback(contextmenuEle)
@@ -114,6 +115,24 @@ async function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: Menu
         break
       }
     }
+
+    if (boundaryEle) {
+      const boundaryEleRect = boundaryEle.getBoundingClientRect()
+      if (left < boundaryEleRect.left) {
+        left = boundaryEleRect.left
+      }
+      if (top < boundaryEleRect.top) {
+        top = boundaryEleRect.top
+      }
+      if ((left + menuWidth) > boundaryEleRect.right) {
+        left = boundaryEleRect.right - menuWidth
+      }
+
+      if ((top + menuHeight) > boundaryEleRect.bottom) {
+        top = boundaryEleRect.bottom - menuHeight
+      }
+    }
+
     contextMenuEle.style.left = `${left}px`
     contextMenuEle.dataset.left = `${left + window.scrollX}`
     contextMenuEle.style.top = `${top}px`
