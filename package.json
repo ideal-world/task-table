@@ -1,13 +1,16 @@
 {
   "name": "@idealworld/task-table",
   "type": "module",
-  "version": "0.0.1",
+  "version": "0.0.1-alpha.1",
   "description": "Table component to support task management",
-  "author": {
+  "authors": [{
     "name": "gudaoxuri",
     "email": "i@sunisle.org",
     "url": "https://idealworld.group/"
-  },
+  }, {
+    "name": "ankang",
+    "email": "610575769@qq.com"
+  }],
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -48,8 +51,8 @@
   "dependencies": {
     "dayjs": "^1.11.11",
     "octicons-css": "^19.8.0",
-    "vue-i18n": "^9.13.1",
-    "sortablejs": "^1.15.2"
+    "sortablejs": "^1.15.2",
+    "vue-i18n": "^9.13.1"
   },
   "devDependencies": {
     "@antfu/eslint-config": "^2.19.1",
