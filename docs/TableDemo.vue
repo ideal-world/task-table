@@ -5,6 +5,7 @@ import { IwEvents } from '../src'
 import type { TableCellDictItemProps, TableCellDictItemsResp, TableColumnProps, TableDataFilterProps, TableDataGroupProps, TableDataGroupResp, TableDataQuerySliceProps, TableDataResp, TableDataSortProps, TableEventProps, TableLayoutKernelProps, TableLayoutModifyProps, TableLayoutProps, TableStyleProps } from '../src/props'
 import { AggregateKind, DATA_DICT_POSTFIX, DataKind, LayoutKind, OperatorKind } from '../src/props'
 import { IwUtils } from '../src/utils'
+import QuickSearch from '../src/components/function/QuickSearch.vue'
 
 const selectedRecordPks: Ref<any[]> = ref([])
 
@@ -78,6 +79,9 @@ const LAYOUTS: Ref<TableLayoutProps[]> = ref([{
   }, {
     name: 'time',
   }],
+  quickSearch:{
+    placeholder: '请输入姓名',
+  },
   aggs: { name: AggregateKind.MIN },
   defaultSlice: {
     offsetNumber: 0,
@@ -113,8 +117,14 @@ function attachDict(data: { [key: string]: any }[]) {
 }
 
 const events: TableEventProps = {
-  loadData: async (columns?: string[], filters?: TableDataFilterProps[], sorts?: TableDataSortProps[], group?: TableDataGroupProps, aggs?: { [key: string]: AggregateKind }, hideSubData?: boolean, byGroupValue?: any, slices?: TableDataQuerySliceProps, _returnOnlyAggs?: boolean): Promise<TableDataResp | TableDataGroupResp[]> => {
+  loadData: async (columns?: string[], quickSearchContent?: string, filters?: TableDataFilterProps[], sorts?: TableDataSortProps[], group?: TableDataGroupProps, aggs?: { [key: string]: AggregateKind }, hideSubData?: boolean, byGroupValue?: any, slices?: TableDataQuerySliceProps, _returnOnlyAggs?: boolean): Promise<TableDataResp | TableDataGroupResp[]> => {
     let data: { [key: string]: any }[] = JSON.parse(JSON.stringify(DATA))
+    if (quickSearchContent) {
+      data = data.filter((d) => {
+        return d.name.includes(quickSearchContent)
+      })
+    }
+
     if (filters) {
       // TODO 支持多组
       filters.forEach((filter) => {

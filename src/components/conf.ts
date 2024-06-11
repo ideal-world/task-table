@@ -1,9 +1,6 @@
 import * as iconSvg from '../assets/icon'
-import locales from '../locales'
 import type { AggregateKind, TableColumnProps, TableDataFilterProps, TableDataGroupProps, TableDataGroupResp, TableDataResp, TableDataSliceProps, TableDataSortProps, TableLayoutColumnProps, TableLayoutKernelProps, TableProps, TableStyleProps } from '../props'
 import { DataKind, LayoutKind, OperatorKind, SizeKind, SubDataShowKind } from '../props'
-
-const { t } = locales.global
 
 export interface TableBasicConf {
   id: string
@@ -50,6 +47,7 @@ export interface TableLayoutKernelConf {
   layoutKind: LayoutKind
   icon: string
   columns: TableLayoutColumnConf[]
+  quickSearchContent?: string
   filters?: TableDataFilterProps[]
   sorts?: TableDataSortProps[]
   group?: TableDataGroupProps
@@ -72,6 +70,7 @@ export function convertTableLayoutKernelPropsToTableLayoutKernelConf(props: Tabl
     columns: props.columns.map((column) => {
       return convertTableLayoutColumnPropsToTableLayoutColumnConf(column, tableColumns.find(tableColumn => tableColumn.name === column.name)!)
     }),
+    quickSearchContent: props.quickSearch && '',
     filters: props.filters,
     sorts: props.sorts,
     group: props.group,
@@ -325,33 +324,12 @@ export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]]
     styles: convertTableStylePropsToTableStyleConf(props.styles),
   }
   const layoutsConf: TableLayoutConf[] = []
-  if (props.layouts) {
-    props.layouts.forEach((layout) => {
-      layoutsConf.push({
-        id: layout.id,
-        ...convertTableLayoutKernelPropsToTableLayoutKernelConf(layout, columns),
-      })
-    })
-  }
-  else {
+  props.layouts.forEach((layout) => {
     layoutsConf.push({
-      id: 'default',
-      title: t('layout.title.default'),
-      layoutKind: LayoutKind.LIST,
-      icon: iconSvg.TEXT,
-      columns: props.columns.map((column) => {
-        return getDefaultLayoutColumnConf(column.name)
-      }),
-      defaultSlice: {
-        offsetNumber: 0,
-        fetchNumber: 20,
-        fetchNumbers: [5, 20, 30, 50, 100],
-      },
-      subDataShowKind: SubDataShowKind.FOLD_SUB_DATA,
-      showSelectColumn: true,
-      selectedDataPks: [],
+      id: layout.id,
+      ...convertTableLayoutKernelPropsToTableLayoutKernelConf(layout, columns),
     })
-  }
+  })
   layoutsConf.forEach((layout) => {
     // Make sure the primary key is in the first column
     const pkIdx = layout.columns.findIndex(column => column.name === basicConf.pkColumnName)

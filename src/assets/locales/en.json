@@ -100,7 +100,7 @@
       "new": "New Filter",
       "items": "Items",
       "selectColumnPlaceholder": "New column",
-      "save": "Save"
+      "note": "Multiple conditions within a group are AND, between groups are OR"
     },
     "group": {
       "groupTitle": "Group",

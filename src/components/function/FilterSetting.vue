@@ -347,6 +347,7 @@ onMounted(() => {
       <span class="mr-0.5">{{ $t('function.filter.selectColumnPlaceholder') }}</span>
       <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />
     </button>
+    <span class="absolute bottom-1 right-1 text-xs text-neutral-content">{{ $t('function.filter.note') }}</span>
   </MenuComp>
 
   <MenuComp ref="filterColumnCompRef" @click="setFilterColumn">

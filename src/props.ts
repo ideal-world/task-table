@@ -197,7 +197,7 @@ export interface TableProps {
   pkColumnName: string
   parentPkColumnName?: string
   columns: TableColumnProps[]
-  layouts?: TableLayoutProps[]
+  layouts: TableLayoutProps[]
   events: TableEventProps
   styles?: TableStyleProps
 }
@@ -222,6 +222,7 @@ export interface TableLayoutKernelProps {
   layoutKind: LayoutKind
   icon?: string
   columns: TableLayoutColumnProps[]
+  quickSearch?: TableDataQuickSearchProps
   // OR relationship between groups
   filters?: TableDataFilterProps[]
   sorts?: TableDataSortProps[]
@@ -264,9 +265,14 @@ export interface TableStyleProps {
   aggClass?: string
 }
 
+export interface TableDataQuickSearchProps {
+  placeholder: string
+}
+
 export interface TableEventProps {
   loadData: (
     columns?: string[],
+    quickSearchContent?: string,
     filters?: TableDataFilterProps[],
     sorts?: TableDataSortProps[],
     group?: TableDataGroupProps,
@@ -297,6 +303,7 @@ export interface TableEventProps {
 export interface TableLayoutModifyProps {
   title?: string
   icon?: string
+  quickSearchContent?: string
   filters?: TableDataFilterProps[]
   sorts?: TableDataSortProps[]
   group?: TableDataGroupProps

@@ -39,10 +39,11 @@ export async function loadData(moreForGroupedValue?: any, returnOnlyAggs?: boole
 
   const resp = await events.loadData(
     showColumns,
-    layout.filters ?? toRaw(layout.filters),
-    layout.sorts ?? toRaw(layout.sorts),
-    layout.group ?? toRaw(layout.group),
-    layout.aggs ?? toRaw(layout.aggs),
+    layout.quickSearchContent && toRaw(layout.quickSearchContent),
+    layout.filters && toRaw(layout.filters),
+    layout.sorts && toRaw(layout.sorts),
+    layout.group && toRaw(layout.group),
+    layout.aggs && toRaw(layout.aggs),
     layout.subDataShowKind === SubDataShowKind.ONLY_PARENT_DATA,
     moreForGroupedValue,
     moreForGroupedValue && layout.groupSlices && layout.groupSlices[moreForGroupedValue as string]
@@ -291,6 +292,7 @@ export async function modifyLayout(changedLayoutProps: TableLayoutModifyProps, b
 
   changedLayoutProps.title && (layout.title = changedLayoutProps.title)
   changedLayoutProps.icon && (layout.icon = changedLayoutProps.icon)
+  changedLayoutProps.quickSearchContent && (layout.quickSearchContent = changedLayoutProps.quickSearchContent)
   changedLayoutProps.filters && (layout.filters = changedLayoutProps.filters)
   changedLayoutProps.sorts && (layout.sorts = changedLayoutProps.sorts)
   changedLayoutProps.group && (layout.group = changedLayoutProps.group)

@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { onMounted, reactive, ref, watch } from 'vue'
+import ScrollableComp from './components/common/Scrollable.vue'
 import type { TableBasicConf, TableLayoutConf } from './components/conf'
 import { initConf } from './components/conf'
 import * as Event from './components/eventbus'
 import FilterSettingComp from './components/function/FilterSetting.vue'
 import PaginationComp from './components/function/Pagination.vue'
-import ScrollableComp from './components/common/Scrollable.vue'
+import QuickSearchComp from './components/function/QuickSearch.vue'
 import RowSortSettingComp from './components/function/RowSortSetting.vue'
 import TableSettingComp from './components/function/TableSetting.vue'
 import ListComp from './components/layout/list/List.vue'
@@ -97,6 +98,11 @@ onMounted(async () => {
         </a>
       </div>
       <div>
+        <QuickSearchComp
+          v-if="props.layouts.find(layout => layout.id === currentLayoutId)?.quickSearch"
+          :placeholder="props.layouts.find(layout => layout.id === currentLayoutId)?.quickSearch?.placeholder!"
+          :search-content="tableLayoutsConf.find(layout => layout.id === currentLayoutId)?.quickSearchContent"
+        />
         <TableSettingComp
           :basic-conf="tableBasicConf"
           :layout-conf="tableLayoutsConf.find(layout => layout.id === currentLayoutId)!"

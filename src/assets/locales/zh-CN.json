@@ -100,7 +100,7 @@
       "new": "新的过滤",
       "items": "条件",
       "selectColumnPlaceholder": "新增列",
-      "save": "保存"
+      "note": "组内多个条件为 AND，组间为 OR"
     },
     "group": {
       "groupTitle": "分组",
