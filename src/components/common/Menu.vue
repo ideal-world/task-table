@@ -12,7 +12,7 @@ const contextmenuMathRandom = computed(() =>
   Math.floor(Math.random() * 1000000),
 )
 
-async function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: MenuOffsetKind = MenuOffsetKind.MEDIUM_TOP, size:MenuSizeKind|MenuCustomSize: MenuSizeKind = MenuSizeKind.MEDIUM, force: boolean = false, boundaryEle?: HTMLElement,
+async function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: MenuOffsetKind = MenuOffsetKind.MEDIUM_TOP, size: MenuSizeKind | MenuCustomSize = MenuSizeKind.MEDIUM, force: boolean = false, boundaryEle?: HTMLElement,
 ) {
   const contextmenuEle = contextmenuRef.value!
   if (!is_init.value && EVENTS.init[contextmenuEle.id]) {
@@ -54,6 +54,12 @@ async function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: Menu
       minHeight = 100
       minWidth = 220
       padding = 4
+      break
+    }
+    default: {
+      minHeight = size.height ?? 80
+      minWidth = size.width ?? 160
+      padding = 3
       break
     }
   }
@@ -268,7 +274,7 @@ export enum MenuSizeKind {
   LARGE,
 }
 
-export interface MenuCustomSize{
+export interface MenuCustomSize {
   width?: number
   height?: number
 }
