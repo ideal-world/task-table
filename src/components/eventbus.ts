@@ -24,6 +24,7 @@ export async function init(_tableBasicConf: TableBasicConf, _tableLayoutsConf: T
 }
 
 export async function watch() {
+  initTableDomChangedListener()
   tableLayoutsConf.forEach((layout) => {
     loadData(undefined, undefined, layout.id)
   })
@@ -400,4 +401,50 @@ export async function deleteLayout(deletedLayoutId: string): Promise<boolean> {
   const oldColumnIdx = tableLayoutsConf.findIndex(layout => layout.id === deletedLayoutId)!
   tableLayoutsConf.splice(oldColumnIdx, 1)
   return true
+}
+
+const TABLE_DOM_CHANGED_HANDLER: {
+  addNodeEvents: ((node: HTMLElement) => void)[]
+  removedNodeEvents: ((node: HTMLElement) => void)[]
+} = {
+  addNodeEvents: [],
+  removedNodeEvents: [],
+}
+
+export function registerTableDomAddedEvent(event: (node: HTMLElement) => void) {
+  TABLE_DOM_CHANGED_HANDLER.addNodeEvents.push(event)
+}
+
+export function registerTableDomRemovedEvent(event: (node: HTMLElement) => void) {
+  TABLE_DOM_CHANGED_HANDLER.removedNodeEvents.push(event)
+}
+
+function initTableDomChangedListener() {
+  const observer = new MutationObserver((mutations) => {
+    mutations.filter(mutation => mutation.type === 'childList').forEach((mutation) => {
+      if (mutation.addedNodes.length > 0 && TABLE_DOM_CHANGED_HANDLER.addNodeEvents.length > 0) {
+        mutation.addedNodes.forEach((node) => {
+          if (!(node instanceof HTMLElement)) {
+            return
+          }
+          TABLE_DOM_CHANGED_HANDLER.addNodeEvents.forEach((event) => {
+            event(node)
+          })
+        })
+      }
+      else if (mutation.removedNodes.length > 0 && TABLE_DOM_CHANGED_HANDLER.removedNodeEvents.length > 0) {
+        mutation.removedNodes.forEach((node) => {
+          if (!(node instanceof HTMLElement)) {
+            return
+          }
+          TABLE_DOM_CHANGED_HANDLER.removedNodeEvents.forEach((event) => {
+            event(node)
+          })
+        })
+      }
+    })
+  })
+  document.querySelectorAll('.iw-tt').forEach((ele) => {
+    observer.observe(ele as HTMLElement, { childList: true, subtree: true })
+  })
 }
