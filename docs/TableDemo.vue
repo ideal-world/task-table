@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import type { Ref } from 'vue'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, toRaw } from 'vue'
 import { IwEvents } from '../src'
 import type { TableCellDictItemProps, TableCellDictItemsResp, TableColumnProps, TableDataFilterProps, TableDataGroupProps, TableDataGroupResp, TableDataQuerySliceProps, TableDataResp, TableDataSortProps, TableEventProps, TableLayoutKernelProps, TableLayoutModifyProps, TableLayoutProps, TableStyleProps } from '../src/props'
 import { AggregateKind, DATA_DICT_POSTFIX, DataKind, LayoutKind, OperatorKind } from '../src/props'
 import { IwUtils } from '../src/utils'
-import QuickSearch from '../src/components/function/QuickSearch.vue'
 
 const selectedRecordPks: Ref<any[]> = ref([])
 
@@ -45,9 +44,9 @@ const DATA: { [key: string]: any }[] = [
 ]
 
 const COLUMNS: Ref<TableColumnProps[]> = ref([
-  { name: 'no', title: '序号', dataKind: DataKind.NUMBER, dataEditable: false, sortable: true },
+  { name: 'no', title: '序号', dataKind: DataKind.NUMBER, dataEditable: false, sortable: true, defaultShow: true },
   { name: 'pno', title: '父序号', dataKind: DataKind.NUMBER, dataEditable: false },
-  { name: 'name', title: '姓名', useDict: true, dictEditable: true, sortable: true, groupable: true },
+  { name: 'name', title: '姓名', useDict: true, dictEditable: true, sortable: true, groupable: true, defaultShow: true },
   { name: 'phone', title: '手机', sortable: true, render: (record: { [key: string]: any }, columnName: string) => {
     return `<strong>+86</strong> ${record[columnName]}`
   } },
@@ -118,7 +117,7 @@ function attachDict(data: { [key: string]: any }[]) {
 
 const events: TableEventProps = {
   loadData: async (columns?: string[], quickSearchContent?: string, filters?: TableDataFilterProps[], sorts?: TableDataSortProps[], group?: TableDataGroupProps, aggs?: { [key: string]: AggregateKind }, hideSubData?: boolean, byGroupValue?: any, slices?: TableDataQuerySliceProps, _returnOnlyAggs?: boolean): Promise<TableDataResp | TableDataGroupResp[]> => {
-    let data: { [key: string]: any }[] = JSON.parse(JSON.stringify(DATA))
+    let data: { [key: string]: any }[] = toRaw(DATA)
     if (quickSearchContent) {
       data = data.filter((d) => {
         return d.name.includes(quickSearchContent)

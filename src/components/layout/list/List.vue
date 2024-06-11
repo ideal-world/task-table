@@ -22,7 +22,7 @@ const props = defineProps<
 const listCompRef: Ref<HTMLDivElement | null> = ref(null)
 
 const COLUMN_SELECT_WIDTH = props.layout.showSelectColumn ? 25 : 0
-const COLUMN_ACTION_WIDTH = props.layout.actionColumnRender ? props.layout.actionColumnWidth ?? 100 : 0
+const COLUMN_ACTION_WIDTH = props.layout.actionColumnRender ? props.layout.actionColumnWidth : 0
 
 const pkKindIsNumber = props.basic.columns.some(col => col.name === props.basic.pkColumnName && [DataKind.NUMBER, DataKind.SERIAL].includes(col.dataKind))
 

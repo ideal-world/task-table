@@ -8,6 +8,10 @@ export interface TableBasicConf {
   parentPkColumnName?: string
   columns: TableColumnConf[]
   styles: TableStyleConf
+  defaultSlice: TableDataSliceProps
+  defaultShowSelectColumn: boolean
+  defaultActionColumnRender?: (record: { [key: string]: any }) => any
+  defaultActionColumnWidth: number
 }
 
 export interface TableColumnConf {
@@ -22,6 +26,7 @@ export interface TableColumnConf {
   kindDateTimeFormat?: string
   groupable: boolean
   sortable: boolean
+  defaultShow: boolean
   render?: (record: { [key: string]: any }, columnName: string) => any
 }
 
@@ -38,6 +43,7 @@ export function convertTableColumnPropsToTableColumnConf(props: TableColumnProps
     kindDateTimeFormat: props.kindDateTimeFormat,
     groupable: props.groupable ?? false,
     sortable: props.sortable ?? false,
+    defaultShow: props.defaultShow ?? false,
     render: props.render,
   }
 }
@@ -57,33 +63,29 @@ export interface TableLayoutKernelConf {
   subDataShowKind: SubDataShowKind
   showSelectColumn: boolean
   actionColumnRender?: (record: { [key: string]: any }) => any
-  actionColumnWidth?: number
+  actionColumnWidth: number
   data?: TableDataResp | TableDataGroupResp[]
   selectedDataPks: any[]
 }
 
-export function convertTableLayoutKernelPropsToTableLayoutKernelConf(props: TableLayoutKernelProps, tableColumns: TableColumnConf[]): TableLayoutKernelConf {
+export function convertTableLayoutKernelPropsToTableLayoutKernelConf(props: TableLayoutKernelProps, basicConf: TableBasicConf): TableLayoutKernelConf {
   return {
     title: props.title,
     layoutKind: props.layoutKind,
     icon: props.icon ?? getDefaultIconByLayoutKind(props.layoutKind),
     columns: props.columns.map((column) => {
-      return convertTableLayoutColumnPropsToTableLayoutColumnConf(column, tableColumns.find(tableColumn => tableColumn.name === column.name)!)
+      return convertTableLayoutColumnPropsToTableLayoutColumnConf(column, basicConf.columns.find(tableColumn => tableColumn.name === column.name)!)
     }),
     quickSearchContent: props.quickSearch && '',
     filters: props.filters,
     sorts: props.sorts,
     group: props.group,
     aggs: props.aggs,
-    defaultSlice: props.defaultSlice ?? {
-      offsetNumber: 0,
-      fetchNumber: 20,
-      fetchNumbers: [5, 20, 30, 50, 100],
-    },
+    defaultSlice: props.defaultSlice ?? basicConf.defaultSlice,
     subDataShowKind: props.subDataShowKind ?? SubDataShowKind.FOLD_SUB_DATA,
-    showSelectColumn: props.showSelectColumn ?? true,
-    actionColumnRender: props.actionColumnRender,
-    actionColumnWidth: props.actionColumnWidth,
+    showSelectColumn: props.showSelectColumn ?? basicConf.defaultShowSelectColumn,
+    actionColumnRender: props.actionColumnRender ?? basicConf.defaultActionColumnRender,
+    actionColumnWidth: props.actionColumnWidth ?? basicConf.defaultActionColumnWidth,
     selectedDataPks: [],
   }
 }
@@ -120,9 +122,9 @@ export function convertTableLayoutColumnPropsToTableLayoutColumnConf(props: Tabl
   }
 }
 
-export function getDefaultLayoutColumnConf(columnName: string): TableLayoutColumnConf {
+export function getDefaultLayoutColumnConf(columnProps: TableColumnProps): TableLayoutColumnConf {
   return {
-    name: columnName,
+    name: columnProps.name,
     wrap: true,
     fixed: false,
     width: 200,
@@ -130,6 +132,7 @@ export function getDefaultLayoutColumnConf(columnName: string): TableLayoutColum
     dateStart: false,
     dateEnd: false,
     styles: {},
+    render: columnProps.render,
   }
 }
 
@@ -316,18 +319,26 @@ export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]]
   const columns = props.columns.map((column) => {
     return convertTableColumnPropsToTableColumnConf(column)
   })
-  const basicConf = {
+  const basicConf: TableBasicConf = {
     id: props.id ?? `iw-table${Math.floor(Math.random() * 1000000)}`,
     pkColumnName: props.pkColumnName,
     parentPkColumnName: props.parentPkColumnName,
     columns,
     styles: convertTableStylePropsToTableStyleConf(props.styles),
+    defaultSlice: props.defaultSlice ?? {
+      offsetNumber: 0,
+      fetchNumber: 10,
+      fetchNumbers: [5, 10, 20, 30, 50, 100],
+    },
+    defaultShowSelectColumn: props.defaultShowSelectColumn ?? false,
+    defaultActionColumnRender: props.defaultActionColumnRender,
+    defaultActionColumnWidth: props.defaultActionColumnWidth ?? 100,
   }
   const layoutsConf: TableLayoutConf[] = []
   props.layouts.forEach((layout) => {
     layoutsConf.push({
       id: layout.id,
-      ...convertTableLayoutKernelPropsToTableLayoutKernelConf(layout, columns),
+      ...convertTableLayoutKernelPropsToTableLayoutKernelConf(layout, basicConf),
     })
   })
   layoutsConf.forEach((layout) => {

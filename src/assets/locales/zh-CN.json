@@ -58,6 +58,13 @@
   },
   "layout": {
     "settingTitle": "布局设置",
+    "kind": {
+      "listTitle": "列表",
+      "ganttTitle": "甘特",
+      "chartTitle": "图表",
+      "calendarTitle": "日历",
+      "kanbanTitle": "看板"
+    },
     "title": {
       "default": "默认",
       "rename": "重命名"
@@ -78,7 +85,12 @@
     },
     "new": {
       "title": "新建",
-      "note": "新建一个空白布局"
+      "note": "新建一个布局",
+      "listNote": "新建一个列表布局",
+      "ganttNote": "新建一个甘特图布局",
+      "chartNote": "新建一个图表布局",
+      "calendarNote": "新建一个日历布局",
+      "kanbanNote": "新建一个看板布局"
     },
     "action": {
       "title": "操作"

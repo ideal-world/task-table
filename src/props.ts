@@ -200,6 +200,10 @@ export interface TableProps {
   layouts: TableLayoutProps[]
   events: TableEventProps
   styles?: TableStyleProps
+  defaultSlice?: TableDataSliceProps
+  defaultShowSelectColumn?: boolean
+  defaultActionColumnRender?: (record: { [key: string]: any }) => any
+  defaultActionColumnWidth?: number
 }
 
 export interface TableColumnProps {
@@ -214,6 +218,9 @@ export interface TableColumnProps {
   kindDateTimeFormat?: string
   groupable?: boolean
   sortable?: boolean
+  // 默认是否显示在新布局中
+  // Default whether to display in the new layout
+  defaultShow?: boolean
   render?: (record: { [key: string]: any }, columnName: string) => any
 }
 

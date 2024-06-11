@@ -58,6 +58,13 @@
   },
   "layout": {
     "settingTitle": "Layout settings",
+    "kind": {
+      "listTitle": "List",
+      "ganttTitle": "Gantt",
+      "chartTitle": "Chart",
+      "calendarTitle": "Calendar",
+      "kanbanTitle": "Kanban"
+    },
     "title": {
       "default": "Default",
       "rename": "Rename"
@@ -78,7 +85,12 @@
     },
     "new": {
       "title": "New",
-      "note": "Create a new blank layout"
+      "note": "Create a new layout",
+      "listNote": "Create a new list layout",
+      "ganttNote": "Create a new Gantt layout",
+      "chartNote": "Create a new chart layout",
+      "calendarNote": "Create a new calendar layout",
+      "kanbanNote": "Create a new kanban layout"
     },
     "action": {
       "title": "Action"

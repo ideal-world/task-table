@@ -33,7 +33,7 @@ onMounted(() => {
   <a class="cursor-pointer">
     <i
       :class="iconSvg.MORE"
-      @click="(e) => { tableSettingCompRef?.show(e, MenuOffsetKind.RIGHT_TOP, { width: 210 }, false, (e.target as HTMLElement).closest('.iw-tt') as HTMLElement) }"
+      @click="(e) => { tableSettingCompRef?.show(e, MenuOffsetKind.RIGHT_TOP, { width: 220 }, false, (e.target as HTMLElement).closest('.iw-tt') as HTMLElement) }"
     /></a>
   <MenuComp ref="tableSettingCompRef">
     <BasicSettingComp :layout-conf="props.layoutConf" />
@@ -42,7 +42,7 @@ onMounted(() => {
     </template>
     <GroupSettingComp :group="props.layoutConf.group" :columns-conf="props.basicConf.columns" />
     <ColumnShowSettingComp :layout-column-conf="props.layoutConf.columns" :basic-conf="props.basicConf" />
-    <LayoutSettingComp :layout-conf="props.layoutConf" :layout-length="props.layoutLength" />
+    <LayoutSettingComp :basic-conf="props.basicConf" :layout-conf="props.layoutConf" :layout-length="props.layoutLength" />
     <div class="iw-divider cursor-pointer iw-table-setting-title">
       {{ $t('_.table.moreSettingTitle') }}
     </div>
