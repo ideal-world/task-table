@@ -29,12 +29,12 @@ onMounted(() => {
 
 function offsetLeft() {
   const mainEle = scrollableMainRef.value!
-  mainEle.scrollLeft = Math.min(mainEle.scrollLeft + 200, mainEle.offsetWidth)
+  mainEle.scrollLeft = Math.max(mainEle.scrollLeft - 200, 0)
 }
 
 function offsetRight() {
   const mainEle = scrollableMainRef.value!
-  mainEle.scrollLeft = Math.max(mainEle.scrollLeft - 200, 0)
+  mainEle.scrollLeft = Math.min(mainEle.scrollLeft + 200, mainEle.offsetWidth)
 }
 </script>
 
