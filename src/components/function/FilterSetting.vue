@@ -260,7 +260,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex items-center justify-center">
+  <div class="flex items-center text-nowrap">
     <button v-for="(filterGroup, filterGroupIdx) in props.filters" :key="`${props.layoutId}-${filterGroupIdx}`" class="iw-btn iw-btn-outline iw-btn-xs flex-none mr-1">
       <span class="flex items-center" @click="e => showFilterGroupContainer(e, filterGroupIdx)">
         <template v-if="filterGroup.items.length === 1">
@@ -287,7 +287,7 @@ onMounted(() => {
       </span>
       <i :class="`${iconSvg.DELETE} hover:text-secondary hover:font-bold`" @click="deleteFilterGroup(filterGroupIdx)" />
     </button>
-    <div class="self-center cursor-pointer text-nowrap" @click="showFilterGroupContainer">
+    <div class="self-center cursor-pointer" @click="showFilterGroupContainer">
       <i :class="iconSvg.NEW" />
       <span>{{ $t('function.filter.new') }}</span>
     </div>
@@ -307,7 +307,8 @@ onMounted(() => {
         <input
           v-if="filterItem.operator !== OperatorKind.IN && filterItem.operator !== OperatorKind.NOT_IN && !filterItem.useDict"
           class="iw-input iw-input-bordered iw-input-xs w-full" :type="getInputTypeByDataKind(filterItem.dataKind)"
-          :value="filterItem.values" @change="e => { setFilterAValue((e.target as HTMLInputElement).value, filterItemIdx) }"
+          :value="filterItem.values"
+          @change="e => { setFilterAValue((e.target as HTMLInputElement).value, filterItemIdx) }"
         >
         <label v-else class="iw-input iw-input-xs iw-input-bordered flex items-center gap-2 h-[30px]">
           <span
