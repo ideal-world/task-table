@@ -115,28 +115,13 @@ async function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: Menu
         break
       }
     }
-
-    if (boundaryEle) {
-      const boundaryEleRect = boundaryEle.getBoundingClientRect()
-      if (left < boundaryEleRect.left) {
-        left = boundaryEleRect.left
-      }
-      if (top < boundaryEleRect.top) {
-        top = boundaryEleRect.top
-      }
-      if ((left + menuWidth) > boundaryEleRect.right) {
-        left = boundaryEleRect.right - menuWidth
-      }
-
-      if ((top + menuHeight) > boundaryEleRect.bottom) {
-        top = boundaryEleRect.bottom - menuHeight
-      }
-    }
-
     contextMenuEle.style.left = `${left}px`
     contextMenuEle.dataset.left = `${left + window.scrollX}`
     contextMenuEle.style.top = `${top}px`
     contextMenuEle.dataset.top = `${top + window.scrollY}`
+
+    addBoundaryAdjustment(contextMenuEle, boundaryEle)
+
     contextMenuEle.style.visibility = 'visible'
 
     contextMenuEle.querySelectorAll('.iw-contextmenu__item').forEach((node) => {
@@ -155,6 +140,35 @@ async function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: Menu
       contextMenuEle.dataset.level = '0'
     }
   })
+}
+
+function addBoundaryAdjustment(contextMenuEle: HTMLElement, boundaryEle?: HTMLElement) {
+  if (boundaryEle) {
+    const observer = new ResizeObserver((_) => {
+      let left = contextMenuEle.offsetLeft
+      let top = contextMenuEle.offsetTop
+
+      const boundaryEleRect = boundaryEle.getBoundingClientRect()
+      if (left < boundaryEleRect.left) {
+        left = boundaryEleRect.left
+      }
+      if (top < boundaryEleRect.top) {
+        top = boundaryEleRect.top
+      }
+      if ((left + contextMenuEle.offsetWidth) > boundaryEleRect.right) {
+        left = boundaryEleRect.right - contextMenuEle.offsetWidth
+      }
+
+      if ((top + contextMenuEle.offsetHeight) > boundaryEleRect.bottom) {
+        top = boundaryEleRect.bottom - contextMenuEle.offsetHeight
+      }
+      contextMenuEle.style.left = `${left}px`
+      contextMenuEle.dataset.left = `${left + window.scrollX}`
+      contextMenuEle.style.top = `${top}px`
+      contextMenuEle.dataset.top = `${top + window.scrollY}`
+    })
+    observer.observe(contextMenuEle)
+  }
 }
 
 function hideUnActiveContextMenus(event: MouseEvent) {

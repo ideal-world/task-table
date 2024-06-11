@@ -30,7 +30,11 @@ onMounted(() => {
 </script>
 
 <template>
-  <a class="cursor-pointer"><i :class="iconSvg.MORE" @click="(e) => { tableSettingCompRef?.show(e, MenuOffsetKind.RIGHT_TOP) }" /></a>
+  <a class="cursor-pointer">
+    <i
+      :class="iconSvg.MORE"
+      @click="(e) => { tableSettingCompRef?.show(e, MenuOffsetKind.RIGHT_TOP, undefined, false, (e.target as HTMLElement).closest('.iw-tt') as HTMLElement) }"
+    /></a>
   <MenuComp ref="tableSettingCompRef">
     <BasicSettingComp :layout-conf="props.layoutConf" />
     <template v-if="props.basicConf.parentPkColumnName">
