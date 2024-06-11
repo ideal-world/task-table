@@ -51,6 +51,7 @@ export const LOAD = 'octicon-fold-down-24'
 export const SUB = 'octicon-arrow-up-left-24'
 export const CONFIRM = 'octicon-check-24'
 export const CANCEL = 'octicon-x-24'
+export const SEARCH = 'octicon-search-24'
 
 export const FIRST  = 'octicon-move-to-start-24'
 export const LAST  = 'octicon-move-to-end-24'

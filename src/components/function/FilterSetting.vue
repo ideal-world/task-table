@@ -41,6 +41,7 @@ const mappingColumValueAndDictTitle = ref<{ [key: string | number]: TableCellDic
 
 async function showFilterGroupContainer(e: Event, filterGroupIdx?: number) {
   selectedFilterGroupIdx.value = filterGroupIdx
+  selectedFilterItemIdx.value = undefined
   const targetEle = e.target as HTMLElement
   if (filterGroupIdx !== undefined) {
     const filterItems = toRaw(props.filters![filterGroupIdx].items)
