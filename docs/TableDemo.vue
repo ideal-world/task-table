@@ -131,9 +131,11 @@ const events: TableEventProps = {
           return filter.items.every((item) => {
             switch (item.operator) {
               case OperatorKind.EQ:
-                return d[item.columnName] === item.value
+                // eslint-disable-next-line eqeqeq
+                return d[item.columnName] == item.value
               case OperatorKind.NE:
-                return d[item.columnName] !== item.value
+                 // eslint-disable-next-line eqeqeq
+                return d[item.columnName] != item.value
               case OperatorKind.LT:
                 return d[item.columnName] < item.value
               case OperatorKind.LE:

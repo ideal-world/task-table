@@ -1,5 +1,5 @@
 import type { Ref } from 'vue'
-import { toRaw } from 'vue'
+import { nextTick, toRaw } from 'vue'
 import locales from '../locales'
 import type { TableCellDictItemsResp, TableDataGroupResp, TableDataQuerySliceProps, TableDataResp, TableEventProps, TableLayoutKernelProps, TableLayoutModifyProps } from '../props'
 import { SubDataShowKind } from '../props'
@@ -344,8 +344,8 @@ export async function modifyLayout(changedLayoutProps: TableLayoutModifyProps, b
   changedLayoutProps.title && (layout.title = changedLayoutProps.title)
   changedLayoutProps.icon && (layout.icon = changedLayoutProps.icon)
   changedLayoutProps.quickSearchContent && (layout.quickSearchContent = changedLayoutProps.quickSearchContent)
-  changedLayoutProps.filters && (layout.filters = changedLayoutProps.filters)
-  changedLayoutProps.sorts && (layout.sorts = changedLayoutProps.sorts)
+  changedLayoutProps.filters && (layout.filters = [...changedLayoutProps.filters])
+  changedLayoutProps.sorts && (layout.sorts = [...changedLayoutProps.sorts])
   changedLayoutProps.group && (layout.group = changedLayoutProps.group)
   if (changedLayoutProps.removeGroup) {
     layout.group = undefined
