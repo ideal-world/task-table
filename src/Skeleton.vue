@@ -23,9 +23,7 @@ const currentLayoutId = ref<string>(tableLayoutsConf[0].id)
 
 watch(tableLayoutsConf, () => {
   // Reset the current layout after the layout is deleted
-  if (tableLayoutsConf.findIndex(layout => layout.id === currentLayoutId.value) === -1) {
-    currentLayoutId.value = tableLayoutsConf[0].id
-  }
+  currentLayoutId.value = tableLayoutsConf[tableLayoutsConf.length - 1] && tableLayoutsConf[tableLayoutsConf.length - 1].id
 })
 
 Event.init(tableBasicConf, tableLayoutsConf, currentLayoutId, props.events)
