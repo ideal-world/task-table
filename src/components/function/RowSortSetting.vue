@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Sortable from 'sortablejs'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, toRaw } from 'vue'
 import * as iconSvg from '../../assets/icon'
 import type { TableDataSortProps } from '../../props'
 import MenuComp, { MenuOffsetKind } from '../common/Menu.vue'
@@ -26,7 +26,7 @@ onMounted(() => {
     async onEnd(evt) {
       if (evt.oldIndex !== evt.newIndex && evt.oldIndex !== -1 && evt.newIndex !== -1 && props.sorts) {
         const oriSort = props.sorts[evt.oldIndex! - 1]
-        const sorts = JSON.parse(JSON.stringify(props.sorts))
+        const sorts = toRaw(props.sorts)
         sorts.splice(evt.oldIndex! - 1, 1)
         sorts.splice(evt.newIndex! - 1, 0, oriSort)
         await eb.modifyLayout({

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, toRaw } from 'vue'
 import * as iconSvg from '../../assets/icon'
 import type { DataKind, TableCellDictItemProps, TableCellDictItemsResp, TableDataFilterItemProps, TableDataFilterProps, TableLayoutModifyProps } from '../../props'
 import { OperatorKind, translateOperatorKind } from '../../props'
@@ -43,7 +43,7 @@ async function showFilterGroupContainer(e: Event, filterGroupIdx?: number) {
   selectedFilterGroupIdx.value = filterGroupIdx
   const targetEle = e.target as HTMLElement
   if (filterGroupIdx !== undefined) {
-    const filterItems = JSON.parse(JSON.stringify(props.filters![filterGroupIdx].items))
+    const filterItems = toRaw(props.filters![filterGroupIdx].items)
     selectedFilterGroup.value = filterItems.map((item: TableDataFilterItemProps) => {
       const columnConf = props.columnsConf.find(col => col.name === item.columnName)!
       return {
@@ -80,7 +80,7 @@ async function showFilterGroupContainer(e: Event, filterGroupIdx?: number) {
 }
 
 async function deleteFilterGroup(filterGroupIdx: number) {
-  const filters = JSON.parse(JSON.stringify(props.filters))
+  const filters = toRaw(props.filters!)
   filters.splice(filterGroupIdx, 1)
   await eb.modifyLayout({
     filters,
@@ -236,7 +236,7 @@ async function saveFilterGroup() {
   if (currFilterGroup.items.length === 0) {
     return
   }
-  const filters = props.filters ? JSON.parse(JSON.stringify(props.filters)) : []
+  const filters = props.filters ? toRaw(props.filters) : []
   if (selectedFilterGroupIdx.value === undefined) {
     filters.push(currFilterGroup)
   }

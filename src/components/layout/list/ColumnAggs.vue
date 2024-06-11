@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { h, ref } from 'vue'
+import { h, ref, toRaw } from 'vue'
 import type { AggregateKind, TableDataResp } from '../../../props'
 import { showAggMappingByDataKind, translateAggregateKind } from '../../../props'
 import MenuComp, { MenuOffsetKind, MenuSizeKind } from '../../common/Menu.vue'
@@ -36,7 +36,7 @@ function showAggsContextMenu(event: MouseEvent, colIdx: number) {
 }
 
 async function changeColumnAggs(aggKind: AggregateKind, colIdx: number) {
-  const aggs = JSON.parse(JSON.stringify(props.layoutAggs))
+  const aggs = toRaw(props.layoutAggs)
   aggs[props.columnsConf[colIdx].name] = aggKind
   await eb.modifyLayout({
     aggs,

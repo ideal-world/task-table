@@ -38,7 +38,7 @@ export async function loadData(moreForGroupedValue?: any, returnOnlyAggs?: boole
   }
 
   const resp = await events.loadData(
-    showColumns,
+    toRaw(showColumns),
     layout.quickSearchContent && toRaw(layout.quickSearchContent),
     layout.filters && toRaw(layout.filters),
     layout.sorts && toRaw(layout.sorts),
@@ -124,6 +124,7 @@ export async function loadData(moreForGroupedValue?: any, returnOnlyAggs?: boole
 }
 
 export async function newData(newRecords: { [key: string]: any }[]): Promise<boolean> {
+  newRecords = toRaw(newRecords)
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.newData) {
@@ -137,6 +138,7 @@ export async function newData(newRecords: { [key: string]: any }[]): Promise<boo
 }
 
 export async function copyData(targetRecordPks: any[]): Promise<boolean> {
+  targetRecordPks = toRaw(targetRecordPks)
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.copyData) {
@@ -150,6 +152,8 @@ export async function copyData(targetRecordPks: any[]): Promise<boolean> {
 }
 
 export async function modifyData(changedRecords: { [key: string]: any }[]): Promise<boolean> {
+  changedRecords = toRaw(changedRecords)
+
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.modifyData) {
@@ -163,6 +167,8 @@ export async function modifyData(changedRecords: { [key: string]: any }[]): Prom
 }
 
 export async function deleteData(deletedRecordPks: any[]): Promise<boolean> {
+  deletedRecordPks = toRaw(deletedRecordPks)
+
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.deleteData) {
@@ -178,6 +184,8 @@ export async function deleteData(deletedRecordPks: any[]): Promise<boolean> {
 }
 
 export async function selectData(selectedRecordPks: any[]): Promise<boolean> {
+  selectedRecordPks = toRaw(selectedRecordPks)
+
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.selectData) {
@@ -202,6 +210,8 @@ export async function clickCell(clickedRecordPk: any, clickedColumnName: string)
 }
 
 export async function loadCellDictItems(columnName: string, filterValue?: any, slice?: TableDataQuerySliceProps): Promise<TableCellDictItemsResp> {
+  slice = toRaw(slice)
+
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.loadCellDictItems) {
@@ -213,6 +223,9 @@ export async function loadCellDictItems(columnName: string, filterValue?: any, s
 }
 
 export async function loadCellDictItemsWithMultiConds(conds: { [columnName: string]: any[] }, slice?: TableDataQuerySliceProps): Promise<{ [columnName: string]: TableCellDictItemsResp }> {
+  conds = toRaw(conds)
+  slice = toRaw(slice)
+
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.loadCellDictItemsWithMultiConds) {
@@ -224,6 +237,8 @@ export async function loadCellDictItemsWithMultiConds(conds: { [columnName: stri
 }
 
 export async function modifyStyles(changedStyles: TableStyleConf): Promise<boolean> {
+  changedStyles = toRaw(changedStyles)
+
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.modifyStyles) {
@@ -247,6 +262,24 @@ export async function modifyStyles(changedStyles: TableStyleConf): Promise<boole
 }
 
 export async function newLayout(newLayoutProps: TableLayoutKernelProps): Promise<boolean> {
+  newLayoutProps = {
+    title: newLayoutProps.title,
+    layoutKind: newLayoutProps.layoutKind,
+    icon: newLayoutProps.icon,
+    columns: toRaw(newLayoutProps.columns),
+    quickSearch: newLayoutProps.quickSearch,
+    filters: toRaw(newLayoutProps.filters),
+    sorts: toRaw(newLayoutProps.sorts),
+    group: toRaw(newLayoutProps.group),
+    aggs: toRaw(newLayoutProps.aggs),
+    defaultSlice: toRaw(newLayoutProps.defaultSlice),
+    groupSlices: toRaw(newLayoutProps.groupSlices),
+    subDataShowKind: newLayoutProps.subDataShowKind,
+    showSelectColumn: newLayoutProps.showSelectColumn,
+    actionColumnRender: newLayoutProps.actionColumnRender,
+    actionColumnWidth: newLayoutProps.actionColumnWidth,
+  }
+
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.newLayout) {
@@ -272,7 +305,7 @@ export async function newLayout(newLayoutProps: TableLayoutKernelProps): Promise
   })
   tableLayoutsConf.push({
     id: layoutId,
-    ...convertTableLayoutKernelPropsToTableLayoutKernelConf(newLayoutProps, tableBasicConf.columns),
+    ...convertTableLayoutKernelPropsToTableLayoutKernelConf(newLayoutProps, tableBasicConf),
   })
 
   await loadData(undefined, undefined, layoutId)
@@ -280,6 +313,24 @@ export async function newLayout(newLayoutProps: TableLayoutKernelProps): Promise
 }
 
 export async function modifyLayout(changedLayoutProps: TableLayoutModifyProps, byGroupValue?: any): Promise<boolean> {
+  changedLayoutProps = {
+    title: changedLayoutProps.title,
+    icon: changedLayoutProps.icon,
+    quickSearchContent: changedLayoutProps.quickSearchContent,
+    filters: toRaw(changedLayoutProps.filters),
+    sorts: toRaw(changedLayoutProps.sorts),
+    group: toRaw(changedLayoutProps.group),
+    removeGroup: changedLayoutProps.removeGroup,
+    aggs: toRaw(changedLayoutProps.aggs),
+    defaultSlice: toRaw(changedLayoutProps.defaultSlice),
+    groupSlices: toRaw(changedLayoutProps.groupSlices),
+    newColumn: toRaw(changedLayoutProps.newColumn),
+    changedColumn: toRaw(changedLayoutProps.changedColumn),
+    deletedColumnName: changedLayoutProps.deletedColumnName,
+    columnSortedNames: toRaw(changedLayoutProps.columnSortedNames),
+    subDataShowKind: changedLayoutProps.subDataShowKind,
+  }
+
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.modifyLayout) {
