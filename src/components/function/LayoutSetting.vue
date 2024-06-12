@@ -5,7 +5,7 @@ import { LayoutKind, SubDataShowKind, type TableLayoutKernelProps, type TableLay
 
 import MenuComp, { MenuOffsetKind, MenuSizeKind } from '../common/Menu.vue'
 import type { TableBasicConf, TableLayoutConf } from '../conf'
-import { getDefaultLayoutColumnConf } from '../conf'
+import { convertLayoutColumnConfToLayoutColumnProps, getDefaultLayoutColumnProps } from '../conf'
 
 import locales from '../../locales'
 import * as eb from '../eventbus'
@@ -50,7 +50,9 @@ async function copyLayout() {
     title: `${props.layoutConf.title} - Copy`,
     layoutKind: props.layoutConf.layoutKind,
     icon: props.layoutConf.icon,
-    columns: props.layoutConf.columns,
+    columns: props.layoutConf.columns.map((column) => {
+      return convertLayoutColumnConfToLayoutColumnProps(toRaw(column))
+    }),
     filters: props.layoutConf.filters,
     sorts: props.layoutConf.sorts,
     group: props.layoutConf.group,
@@ -69,8 +71,8 @@ async function createNewLayout(layoutKind: LayoutKind) {
     title: t('layout.title.default'),
     layoutKind,
     icon: iconSvg.TEXT,
-    columns: props.basicConf.columns.filter(column => column.defaultShow).map((column) => {
-      return getDefaultLayoutColumnConf(toRaw(column))
+    columns: props.basicConf.columns.filter(column => !column.hide).map((column) => {
+      return getDefaultLayoutColumnProps(toRaw(column))
     }),
     defaultSlice: props.basicConf.defaultSlice,
     subDataShowKind: SubDataShowKind.FOLD_SUB_DATA,
@@ -86,7 +88,7 @@ async function createNewLayout(layoutKind: LayoutKind) {
   <div class="iw-divider cursor-pointer iw-table-setting-title">
     {{ $t('layout.settingTitle') }}
   </div>
-  <div style="display: none;">
+  <div>
     <div class="flex justify-between">
       <button
         class="iw-btn m-1 flex-1"

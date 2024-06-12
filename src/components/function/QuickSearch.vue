@@ -13,9 +13,7 @@ const showInput = ref(false)
 
 async function setQuickSearchContent(e: Event) {
   const target = e.target as HTMLInputElement
-  await eb.modifyLayout({
-    quickSearchContent: target.value,
-  })
+  await eb.setQuickSearchContent(target.value)
 }
 
 function handleQuickShow() {

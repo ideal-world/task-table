@@ -1,5 +1,5 @@
 import * as iconSvg from '../assets/icon'
-import type { AggregateKind, TableColumnProps, TableDataFilterProps, TableDataGroupProps, TableDataGroupResp, TableDataResp, TableDataSliceProps, TableDataSortProps, TableLayoutColumnProps, TableLayoutKernelProps, TableProps, TableStyleProps } from '../props'
+import type { AggregateKind, TableColumnProps, TableCommonColumnProps, TableDataFilterProps, TableDataGroupProps, TableDataGroupResp, TableDataResp, TableDataSliceProps, TableDataSortProps, TableLayoutColumnProps, TableLayoutKernelProps, TableProps, TableStyleProps } from '../props'
 import { DataKind, LayoutKind, OperatorKind, SizeKind, SubDataShowKind } from '../props'
 
 export interface TableBasicConf {
@@ -8,14 +8,28 @@ export interface TableBasicConf {
   parentPkColumnName?: string
   columns: TableColumnConf[]
   styles: TableStyleConf
+  quickSearchContent?: string
   defaultSlice: TableDataSliceProps
   defaultShowSelectColumn: boolean
-  defaultActionColumnRender?: (record: { [key: string]: any }) => any
+  defaultActionColumnRender?: (record: { [key: string]: any }, layoutKind: LayoutKind) => any
   defaultActionColumnWidth: number
 }
 
-export interface TableColumnConf {
+export interface TableCommonColumnConf {
   name: string
+  wrap: boolean
+  fixed: boolean
+  width: number
+  hide: boolean
+  planStart: boolean
+  planEnd: boolean
+  realStart: boolean
+  realEnd: boolean
+  styles: { [key: string]: string }
+  render?: (record: { [key: string]: any }, layoutKind: LayoutKind) => any
+}
+
+export interface TableColumnConf extends TableCommonColumnConf {
   title: string
   icon: string
   dataKind: DataKind
@@ -26,25 +40,53 @@ export interface TableColumnConf {
   kindDateTimeFormat?: string
   groupable: boolean
   sortable: boolean
-  defaultShow: boolean
-  render?: (record: { [key: string]: any }, columnName: string) => any
+}
+
+export function convertCommonColumnPropsToCommonColumnConf(commonColumnProps: TableCommonColumnProps): TableCommonColumnConf {
+  return {
+    name: commonColumnProps.name,
+    wrap: commonColumnProps.wrap ?? false,
+    fixed: commonColumnProps.fixed ?? false,
+    width: commonColumnProps.width ?? 200,
+    hide: commonColumnProps.hide ?? false,
+    planStart: commonColumnProps.planStart ?? false,
+    planEnd: commonColumnProps.planEnd ?? false,
+    realStart: commonColumnProps.realStart ?? false,
+    realEnd: commonColumnProps.realEnd ?? false,
+    styles: commonColumnProps.styles ?? {},
+    render: commonColumnProps.render,
+  }
+}
+
+export function convertCommonColumnConfToCommonColumnProps(commonColumnConf: TableCommonColumnConf): TableCommonColumnProps {
+  return {
+    name: commonColumnConf.name,
+    wrap: commonColumnConf.wrap,
+    fixed: commonColumnConf.fixed,
+    width: commonColumnConf.width,
+    hide: commonColumnConf.hide,
+    planStart: commonColumnConf.planStart,
+    planEnd: commonColumnConf.planEnd,
+    realStart: commonColumnConf.realStart,
+    realEnd: commonColumnConf.realEnd,
+    styles: commonColumnConf.styles,
+    render: commonColumnConf.render,
+  }
 }
 
 export function convertTableColumnPropsToTableColumnConf(props: TableColumnProps): TableColumnConf {
   return {
-    name: props.name,
     title: props.title,
     dataKind: props.dataKind ?? DataKind.TEXT,
     icon: props.icon ?? getDefaultIconByDataKind(props.dataKind ?? DataKind.TEXT),
-    dataEditable: props.dataEditable ?? true,
+    dataEditable: props.dataEditable ?? false,
     useDict: props.useDict ?? false,
     dictEditable: props.dictEditable ?? false,
     multiValue: props.multiValue ?? false,
     kindDateTimeFormat: props.kindDateTimeFormat,
     groupable: props.groupable ?? false,
     sortable: props.sortable ?? false,
-    defaultShow: props.defaultShow ?? false,
-    render: props.render,
+    ...convertCommonColumnPropsToCommonColumnConf(props),
   }
 }
 
@@ -53,7 +95,6 @@ export interface TableLayoutKernelConf {
   layoutKind: LayoutKind
   icon: string
   columns: TableLayoutColumnConf[]
-  quickSearchContent?: string
   filters?: TableDataFilterProps[]
   sorts?: TableDataSortProps[]
   group?: TableDataGroupProps
@@ -62,7 +103,7 @@ export interface TableLayoutKernelConf {
   defaultSlice: TableDataSliceProps
   subDataShowKind: SubDataShowKind
   showSelectColumn: boolean
-  actionColumnRender?: (record: { [key: string]: any }) => any
+  actionColumnRender?: (record: { [key: string]: any }, layoutKind: LayoutKind) => any
   actionColumnWidth: number
   data?: TableDataResp | TableDataGroupResp[]
   selectedDataPks: any[]
@@ -76,7 +117,6 @@ export function convertTableLayoutKernelPropsToTableLayoutKernelConf(props: Tabl
     columns: props.columns.map((column) => {
       return convertTableLayoutColumnPropsToTableLayoutColumnConf(column, basicConf.columns.find(tableColumn => tableColumn.name === column.name)!)
     }),
-    quickSearchContent: props.quickSearch && '',
     filters: props.filters,
     sorts: props.sorts,
     group: props.group,
@@ -94,45 +134,34 @@ export interface TableLayoutConf extends TableLayoutKernelConf {
   id: string
 }
 
-export interface TableLayoutColumnConf {
-  name: string
-  wrap: boolean
-  fixed: boolean
-  width: number
-  hide: boolean
-  dateStart: boolean
-  dateEnd: boolean
-  styles: { [key: string]: string }
-  render?: (record: { [key: string]: any }, columnName: string) => any
+export interface TableLayoutColumnConf extends TableCommonColumnConf {
 }
 
-export function convertTableLayoutColumnPropsToTableLayoutColumnConf(props: TableLayoutColumnProps, tableColumn: TableColumnConf): TableLayoutColumnConf {
+export function convertTableLayoutColumnPropsToTableLayoutColumnConf(layoutColumnProps: TableLayoutColumnProps, tableColumnConf: TableColumnConf): TableLayoutColumnConf {
   return {
-    name: props.name,
-    wrap: props.wrap ?? true,
-    fixed: props.fixed ?? false,
-    width: props.width ?? 200,
-    hide: props.hide ?? false,
-    dateStart: props.dateStart ?? false,
-    dateEnd: props.dateEnd ?? false,
-    styles: props.styles ?? {},
-    render: props.render
-      ? props.render
-      : tableColumn.render,
+    name: layoutColumnProps.name,
+    wrap: layoutColumnProps.wrap ?? tableColumnConf.wrap,
+    fixed: layoutColumnProps.fixed ?? tableColumnConf.fixed,
+    width: layoutColumnProps.width ?? tableColumnConf.width,
+    hide: layoutColumnProps.hide ?? tableColumnConf.hide,
+    planStart: layoutColumnProps.planStart ?? tableColumnConf.planStart,
+    planEnd: layoutColumnProps.planEnd ?? tableColumnConf.planEnd,
+    realStart: layoutColumnProps.realStart ?? tableColumnConf.realStart,
+    realEnd: layoutColumnProps.realEnd ?? tableColumnConf.realEnd,
+    styles: layoutColumnProps.styles ?? tableColumnConf.styles,
+    render: layoutColumnProps.render ?? tableColumnConf.render,
   }
 }
 
-export function getDefaultLayoutColumnConf(columnProps: TableColumnProps): TableLayoutColumnConf {
+export function getDefaultLayoutColumnProps(tableColumnConf: TableColumnConf): TableLayoutColumnProps {
   return {
-    name: columnProps.name,
-    wrap: true,
-    fixed: false,
-    width: 200,
-    hide: false,
-    dateStart: false,
-    dateEnd: false,
-    styles: {},
-    render: columnProps.render,
+    ...convertCommonColumnConfToCommonColumnProps(tableColumnConf),
+  }
+}
+
+export function convertLayoutColumnConfToLayoutColumnProps(layoutColumnConf: TableLayoutColumnConf): TableLayoutColumnProps {
+  return {
+    ...convertCommonColumnConfToCommonColumnProps(layoutColumnConf),
   }
 }
 
@@ -330,6 +359,7 @@ export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]]
       fetchNumber: 10,
       fetchNumbers: [5, 10, 20, 30, 50, 100],
     },
+    quickSearchContent: props.quickSearch && '',
     defaultShowSelectColumn: props.defaultShowSelectColumn ?? false,
     defaultActionColumnRender: props.defaultActionColumnRender,
     defaultActionColumnWidth: props.defaultActionColumnWidth ?? 100,
@@ -346,24 +376,10 @@ export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]]
     const pkIdx = layout.columns.findIndex(column => column.name === basicConf.pkColumnName)
     if (pkIdx !== -1) {
       const pkColumn = layout.columns[pkIdx]!
-      pkColumn.dateEnd = false
-      pkColumn.dateStart = false
       pkColumn.hide = false
       pkColumn.wrap = false
       layout.columns.splice(pkIdx, 1)
       layout.columns.splice(0, 0, pkColumn)
-    }
-    else {
-      layout.columns.splice(0, 0, {
-        name: basicConf.columns.find(column => column.name === basicConf.pkColumnName)!.name,
-        wrap: false,
-        fixed: false,
-        width: 200,
-        hide: false,
-        dateStart: false,
-        dateEnd: false,
-        styles: {},
-      })
     }
   })
   return [basicConf, layoutsConf]

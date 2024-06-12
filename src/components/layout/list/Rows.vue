@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import dayjs from 'dayjs'
 import * as iconSvg from '../../../assets/icon'
+import type { LayoutKind } from '../../../props'
 import { DATA_DICT_POSTFIX, DataKind, SubDataShowKind } from '../../../props'
 
 import type { CachedColumnConf, TableStyleConf } from '../../conf'
@@ -14,9 +15,10 @@ const props = defineProps<{
   pkKindIsNumber: boolean
   columnsConf: CachedColumnConf[]
   layoutId: string
+  layoutKind: LayoutKind
   stylesConf: TableStyleConf
   showSelectColumn: boolean
-  actionColumnRender?: (record: { [key: string]: any }) => any
+  actionColumnRender?: (record: { [key: string]: any }, layoutKind: LayoutKind) => any
   setColumnStyles: (colIdx: number) => any
 }>()
 </script>
@@ -55,7 +57,7 @@ const props = defineProps<{
       :class="`${props.stylesConf.cellClass} iw-list-cell iw-list-data-cell flex items-center bg-base-100 border-l border-l-base-300 ${column.wrap ? 'break-words flex-wrap' : 'whitespace-nowrap overflow-hidden text-ellipsis flex-nowrap'}`"
       :data-column-name="column.name" :style="{ ...column.styles, ...props.setColumnStyles(colIdx + 1) }"
     >
-      <div v-if="column.render" v-html="column.render(row, column.name)" />
+      <div v-if="column.render" v-html="column.render(row, props.layoutKind)" />
       <div v-else-if="column.dataKind === DataKind.DATE || column.dataKind === DataKind.TIME || column.dataKind === DataKind.DATETIME">
         {{ column.kindDateTimeFormat ? dayjs(row[column.name]).format(column.kindDateTimeFormat) : row[column.name] }}
       </div>
@@ -80,7 +82,7 @@ const props = defineProps<{
       v-if="props.actionColumnRender"
       :class="`${props.stylesConf.cellClass} iw-list-cell flex justify-center items-center bg-base-100 border-l border-l-base-300 whitespace-nowrap flex-nowrap`"
       :style="props.setColumnStyles(-2)"
-      v-html="props.actionColumnRender(row)"
+      v-html="props.actionColumnRender(row, props.layoutKind)"
     />
   </div>
 </template>

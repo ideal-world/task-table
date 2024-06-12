@@ -1,5 +1,5 @@
 import type { Ref } from 'vue'
-import { nextTick, toRaw } from 'vue'
+import { toRaw } from 'vue'
 import locales from '../locales'
 import type { TableCellDictItemsResp, TableDataGroupResp, TableDataQuerySliceProps, TableDataResp, TableEventProps, TableLayoutKernelProps, TableLayoutModifyProps } from '../props'
 import { SubDataShowKind } from '../props'
@@ -40,7 +40,7 @@ export async function loadData(moreForGroupedValue?: any, returnOnlyAggs?: boole
 
   const resp = await events.loadData(
     toRaw(showColumns),
-    layout.quickSearchContent && toRaw(layout.quickSearchContent),
+    tableBasicConf.quickSearchContent,
     layout.filters && toRaw(layout.filters),
     layout.sorts && toRaw(layout.sorts),
     layout.group && toRaw(layout.group),
@@ -262,13 +262,18 @@ export async function modifyStyles(changedStyles: TableStyleConf): Promise<boole
   return true
 }
 
+export async function setQuickSearchContent(quickSearchContent: string): Promise<boolean> {
+  tableBasicConf.quickSearchContent = quickSearchContent
+  await loadData()
+  return true
+}
+
 export async function newLayout(newLayoutProps: TableLayoutKernelProps): Promise<boolean> {
   newLayoutProps = {
     title: newLayoutProps.title,
     layoutKind: newLayoutProps.layoutKind,
     icon: newLayoutProps.icon,
     columns: toRaw(newLayoutProps.columns),
-    quickSearch: newLayoutProps.quickSearch,
     filters: toRaw(newLayoutProps.filters),
     sorts: toRaw(newLayoutProps.sorts),
     group: toRaw(newLayoutProps.group),
@@ -317,7 +322,6 @@ export async function modifyLayout(changedLayoutProps: TableLayoutModifyProps, b
   changedLayoutProps = {
     title: changedLayoutProps.title,
     icon: changedLayoutProps.icon,
-    quickSearchContent: changedLayoutProps.quickSearchContent,
     filters: toRaw(changedLayoutProps.filters),
     sorts: toRaw(changedLayoutProps.sorts),
     group: toRaw(changedLayoutProps.group),
@@ -344,7 +348,6 @@ export async function modifyLayout(changedLayoutProps: TableLayoutModifyProps, b
 
   changedLayoutProps.title && (layout.title = changedLayoutProps.title)
   changedLayoutProps.icon && (layout.icon = changedLayoutProps.icon)
-  changedLayoutProps.quickSearchContent && (layout.quickSearchContent = changedLayoutProps.quickSearchContent)
   changedLayoutProps.filters && (layout.filters = [...changedLayoutProps.filters])
   changedLayoutProps.sorts && (layout.sorts = [...changedLayoutProps.sorts])
   changedLayoutProps.group && (layout.group = changedLayoutProps.group)

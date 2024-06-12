@@ -37,12 +37,12 @@ onMounted(() => {
     /></a>
   <MenuComp ref="tableSettingCompRef">
     <BasicSettingComp :layout-conf="props.layoutConf" />
+    <LayoutSettingComp :basic-conf="props.basicConf" :layout-conf="props.layoutConf" :layout-length="props.layoutLength" />
     <template v-if="props.basicConf.parentPkColumnName">
       <SubDataShowSettingComp :sub-data-show-kind="props.layoutConf.subDataShowKind" />
     </template>
     <GroupSettingComp :group="props.layoutConf.group" :columns-conf="props.basicConf.columns" />
     <ColumnShowSettingComp :layout-column-conf="props.layoutConf.columns" :basic-conf="props.basicConf" />
-    <LayoutSettingComp :basic-conf="props.basicConf" :layout-conf="props.layoutConf" :layout-length="props.layoutLength" />
     <div class="iw-divider cursor-pointer iw-table-setting-title">
       {{ $t('_.table.moreSettingTitle') }}
     </div>

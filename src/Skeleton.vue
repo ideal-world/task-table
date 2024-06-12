@@ -24,11 +24,12 @@ const currentLayoutId = ref<string>(tableLayoutsConf[0].id)
 watch(tableLayoutsConf, () => {
   // Reset the current layout after the layout is deleted
   currentLayoutId.value = tableLayoutsConf[tableLayoutsConf.length - 1] && tableLayoutsConf[tableLayoutsConf.length - 1].id
+  setHeight()
 })
 
 Event.init(tableBasicConf, tableLayoutsConf, currentLayoutId, props.events)
 
-onMounted(async () => {
+function setHeight() {
   // Set table height
   Array.prototype.forEach.call(document.getElementsByClassName('iw-tt'), (ttEle) => {
     const outHeight = ttEle.parentElement?.clientHeight
@@ -39,6 +40,10 @@ onMounted(async () => {
       layoutEle.getElementsByClassName('iw-tt-table')[0].style.height = `${outHeight - headerHeight - toolbarHeight - footerHeight}px`
     })
   })
+}
+
+onMounted(async () => {
+  setHeight()
   IwUtils.delegateEvent(`#iw-tt-${tableBasicConf.id}`, 'click', '.iw-tt-header__item', (e: Event) => {
     const target = e.target as HTMLElement
     const layoutId = target.dataset.layoutId
@@ -99,10 +104,10 @@ onMounted(async () => {
       </ScrollableComp>
       <div class="flex items-center">
         <QuickSearchComp
-          v-if="props.layouts.find(layout => layout.id === currentLayoutId)?.quickSearch"
+          v-if="props.quickSearch"
           class="mx-2"
-          :placeholder="props.layouts.find(layout => layout.id === currentLayoutId)?.quickSearch?.placeholder!"
-          :search-content="tableLayoutsConf.find(layout => layout.id === currentLayoutId)?.quickSearchContent"
+          :placeholder="props.quickSearch.placeholder"
+          :search-content="tableBasicConf.quickSearchContent"
         />
         <TableSettingComp
           :basic-conf="tableBasicConf"

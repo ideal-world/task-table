@@ -2,7 +2,7 @@
 import type { Ref } from 'vue'
 import { onMounted, ref, toRaw } from 'vue'
 import { IwEvents } from '../src'
-import type { TableCellDictItemProps, TableCellDictItemsResp, TableColumnProps, TableDataFilterProps, TableDataGroupProps, TableDataGroupResp, TableDataQuerySliceProps, TableDataResp, TableDataSortProps, TableEventProps, TableLayoutKernelProps, TableLayoutModifyProps, TableLayoutProps, TableStyleProps } from '../src/props'
+import type { TableCellDictItemProps, TableCellDictItemsResp, TableDataFilterProps, TableDataGroupProps, TableDataGroupResp, TableDataQuerySliceProps, TableDataResp, TableDataSortProps, TableEventProps, TableLayoutKernelProps, TableLayoutModifyProps, TableProps, TableStyleProps } from '../src/props'
 import { AggregateKind, DATA_DICT_POSTFIX, DataKind, LayoutKind, OperatorKind } from '../src/props'
 import { IwUtils } from '../src/utils'
 
@@ -12,84 +12,79 @@ const NAME_DICT = [{ title: '星航', value: 'xh', avatar: 'https://pic1.zhimg.c
 const STATS_DICT = [{ title: '初始化', value: 'init', color: '#43ad7f7f' }, { title: '进行中', value: 'progress' }, { title: '有风险', value: 'risk', color: '#be14807f' }, { title: '已完成', value: 'finish' }, { title: '已关闭', value: 'close' }]
 
 const DATA: { [key: string]: any }[] = [
-  { no: 1, pno: null, name: 'xh', stats: ['init'], phone: 'Phone1', addr: 'Addr1 Addr1 Addr1 Addr1 Addr1 Addr1', time: Date.now() },
-  { no: 2, pno: null, name: 'xh', stats: ['init'], phone: 'Phone2', addr: 'Addr2', time: '2023-10-24' },
-  { no: 3, pno: 1, name: 'xh', stats: ['progress', 'risk'], phone: 'Phone3', addr: 'Addr3', time: '2023-10-25' },
-  { no: 4, pno: 1, name: 'xh', stats: ['init'], phone: 'Phone4', addr: 'Addr4', time: '2023-10-26' },
-  { no: 5, pno: 1, name: 'xh', stats: ['init'], phone: 'Phone5', addr: 'Addr5', time: '2023-10-27' },
-  { no: 6, pno: null, name: 'xh', stats: ['init'], phone: 'Phone6', addr: 'Addr6', time: '2023-10-28' },
-  { no: 7, pno: null, name: 'xh', stats: ['init'], phone: 'Phone7', addr: 'Addr7', time: '2023-10-29' },
-  { no: 8, pno: 4, name: 'xh', stats: ['init'], phone: 'Phone8', addr: 'Addr8', time: '2023-10-30' },
-  { no: 9, pno: 4, name: 'xh', stats: ['init'], phone: 'Phone9', addr: 'Addr9', time: '2023-10-31' },
-  { no: 10, pno: 8, name: 'xh', stats: ['close'], phone: 'Phone10', addr: 'Addr10', time: '2023-11-1' },
-  { no: 11, pno: null, name: 'xh', stats: ['close'], phone: 'Phone11', addr: 'Addr11', time: '2023-11-2' },
-  { no: 12, pno: null, name: 'xh', stats: ['close'], phone: 'Phone12', addr: 'Addr12', time: '2023-11-3' },
-  { no: 13, pno: null, name: 'xh', stats: ['close'], phone: 'Phone13', addr: 'Addr13', time: '2023-11-4' },
-  { no: 14, pno: null, name: 'xh', stats: ['close'], phone: 'Phone14', addr: 'Addr14', time: '2023-11-5' },
-  { no: 15, pno: null, name: 'xh', stats: ['close'], phone: 'Phone15', addr: 'Addr15', time: '2023-11-6' },
-  { no: 16, pno: 8, name: 'xh', stats: ['close'], phone: 'Phone16', addr: 'Addr16', time: '2023-11-7' },
-  { no: 17, pno: null, name: 'xh', stats: ['finish'], phone: 'Phone17', addr: 'Addr17', time: '2023-11-8' },
-  { no: 18, pno: null, name: 'xy', stats: ['finish'], phone: 'Phone18', addr: 'Addr18', time: '2023-11-9' },
-  { no: 19, pno: null, name: 'xy', stats: ['finish'], phone: 'Phone19', addr: 'Addr19', time: '2023-11-10' },
-  { no: 20, pno: null, name: 'xh', stats: ['finish'], phone: 'Phone20', addr: 'Addr20', time: '2023-11-11' },
-  { no: 21, pno: null, name: 'xh', stats: ['finish'], phone: 'Phone21', addr: 'Addr21', time: '2023-11-12' },
-  { no: 22, pno: 1, name: 'xh', stats: ['finish'], phone: 'Phone22', addr: 'Addr22', time: '2023-11-13' },
-  { no: 23, pno: null, name: 'xh', stats: ['finish'], phone: 'Phone23', addr: 'Addr23', time: '2023-11-14' },
-  { no: 24, pno: null, name: 'xh', stats: ['progress', 'risk'], phone: 'Phone24', addr: 'Addr24', time: '2023-11-15' },
-  { no: 25, pno: null, name: 'xh', stats: ['close'], phone: 'Phone25', addr: 'Addr25', time: '2023-11-16' },
-  { no: 26, pno: null, name: 'xy', stats: ['close'], phone: 'Phone26', addr: 'Addr26', time: '2023-11-17' },
-  { no: 27, pno: null, name: 'xy', stats: ['close'], phone: 'Phone27', addr: 'Addr27', time: '2023-11-18' },
-  { no: 28, pno: null, name: 'xh', stats: ['close'], phone: 'Phone28', addr: 'Addr28', time: '2023-11-19' },
-  { no: 29, pno: null, name: 'xh', stats: ['close'], phone: 'Phone29', addr: 'Addr29', time: '2023-11-20' },
+  { no: 1, pno: null, name: 'v1.0优化任务集合', creator: 'xh', stats: ['init'], planStartTime: Date.now(), planEndTime: '2024-01-24' },
+  { no: 2, pno: null, name: '测试报告导出', creator: 'xh', stats: ['init'], planStartTime: '2023-09-14', planEndTime: '2024-09-24', realStartTime: '2023-09-15', realEndTime: '2023-09-24' },
+  { no: 3, pno: 1, name: '平台支持修改工程下默认分支', creator: 'xh', stats: ['progress', 'risk'], planStartTime: '2023-10-25', planEndTime: '2024-11-24' },
+  { no: 4, pno: 1, name: '工作项优化', creator: 'xh', stats: ['init'], planStartTime: '2023-10-26', planEndTime: '2023-11-25' },
+  { no: 5, pno: 1, name: '作业执行日志实时获取并增加搜索和支持定位', creator: 'xh', stats: ['init'], planStartTime: '2023-10-27', planEndTime: '2023-11-30' },
+  { no: 6, pno: null, name: '制品文件支持下载和删除', creator: 'xh', stats: ['init'], planStartTime: '2023-10-28', planEndTime: '2023-11-28' },
+  { no: 7, pno: null, name: '测试报告模板增加模板内容', creator: 'xh', stats: ['init'], planStartTime: '2023-10-29', planEndTime: '2023-11-25' },
+  { no: 8, pno: 4, name: '工作项报表导出', creator: 'xh', stats: ['init'], planStartTime: '2023-10-30', planEndTime: '2023-11-24' },
+  { no: 9, pno: 4, name: '工作项列表中显示关联的工作项数量', creator: 'xh', stats: ['init'], planStartTime: '2023-10-31', planEndTime: '2023-11-24' },
+  { no: 10, pno: 8, name: '报表导出组件支持动态字段', creator: 'xh', stats: ['close'], planStartTime: '2023-11-1', planEndTime: '2023-11-24' },
+  { no: 11, pno: null, name: '项目新增字段项目类型', creator: 'xh', stats: ['close'], planStartTime: '2023-11-2' },
+  { no: 12, pno: null, name: '账号新增用工性质字段', creator: 'xh', stats: ['close'], planStartTime: '2023-11-3' },
+  { no: 13, pno: null, name: '报表的纬度支持相关属性', creator: 'xh', stats: ['close'], planStartTime: '2023-11-4', planEndTime: '2023-12-24' },
+  { no: 14, pno: null, name: '人员提供接口筛选', creator: 'xh', stats: ['close'], planStartTime: '2023-11-5', planEndTime: '2023-12-24' },
+  { no: 15, pno: null, name: '报表支持一个主题选多次', creator: 'xh', stats: ['close'], planStartTime: '2023-11-6' },
+  { no: 16, pno: 8, name: '执行用例结果页面增加创缺陷按钮', creator: 'xh', stats: ['close'], planStartTime: '2023-11-7' },
+  { no: 17, pno: null, name: '资源实例根据时间添加倒序排列', creator: 'xh', stats: ['finish'], planStartTime: '2023-11-8' },
+  { no: 18, pno: null, name: '新建引用已经归档的版本', creator: 'xy', stats: ['finish'], planStartTime: '2023-11-9', planEndTime: '2023-12-24' },
+  { no: 19, pno: null, name: '归档镜像包依赖包合并查询', creator: 'xy', stats: ['finish'], planStartTime: '2023-11-10', planEndTime: '2023-12-24' },
+  { no: 20, pno: null, name: '制品文件支持下载和删除', creator: 'xh', stats: ['finish'], planStartTime: '2023-11-11' },
+  { no: 21, pno: null, name: '作业支持定时执行', creator: 'xh', stats: ['finish'], planStartTime: '2023-11-12', planEndTime: '2023-11-24' },
+  { no: 22, pno: 1, name: '执行过程中打印变量', creator: 'xh', stats: ['finish'], planStartTime: '2023-11-13' },
+  { no: 23, pno: null, name: 'MinIO路径按项目隔离', creator: 'xh', stats: ['finish'], planStartTime: '2023-11-14' },
+  { no: 24, pno: null, name: '附件支持预览', creator: 'xh', stats: ['progress', 'risk'], planStartTime: '2023-11-15', planEndTime: '2023-12-24' },
+  { no: 25, pno: null, name: '模板及工作流逻辑优化', creator: 'xh', stats: ['close'], planStartTime: '2023-11-16' },
+  { no: 26, pno: null, name: '工作流支持EDA异步消息', creator: 'xy', stats: ['close'], planStartTime: '2023-11-17', planEndTime: '2024-01-24' },
+  { no: 27, pno: null, name: '工程提交记录支持建立分支货标签', creator: 'xy', stats: ['close'], planStartTime: '2023-11-18', planEndTime: '2024-01-24' },
+  { no: 28, pno: null, name: '报表统计增加数据跳转功能', creator: 'xh', stats: ['close'], planStartTime: '2023-11-19' },
+  { no: 29, pno: null, name: '代码评审与合并', creator: 'xh', stats: ['close'], planStartTime: '2023-11-20' },
 ]
 
-const COLUMNS: Ref<TableColumnProps[]> = ref([
-  { name: 'no', title: '序号', dataKind: DataKind.NUMBER, dataEditable: false, sortable: true, defaultShow: true },
-  { name: 'pno', title: '父序号', dataKind: DataKind.NUMBER, dataEditable: false },
-  { name: 'name', title: '姓名', useDict: true, dictEditable: true, sortable: true, groupable: true, defaultShow: true },
-  { name: 'phone', title: '手机', sortable: true, render: (record: { [key: string]: any }, columnName: string) => {
-    return `<strong>+86</strong> ${record[columnName]}`
+const columns = [
+  { name: 'no', title: 'ID', dataKind: DataKind.NUMBER, dataEditable: false, sortable: true },
+  { name: 'pno', title: '父ID', dataKind: DataKind.NUMBER, dataEditable: false, hide: true },
+  { name: 'name', title: '名称', sortable: true, width: 300, render: (record: { [key: string]: any }, _layoutKind: LayoutKind) => {
+    return record.stats.includes('risk') ? `<span style='color:red'>${record.name}</span>` : record.name
   } },
+  { name: 'creator', title: '创建人', useDict: true, dictEditable: true, sortable: true, groupable: true },
   { name: 'stats', title: '状态', useDict: true, dictEditable: true, multiValue: true, sortable: true, groupable: true },
-  { name: 'addr', title: '地址' },
-  { name: 'time', title: '时间', dataKind: DataKind.DATETIME, sortable: true },
-])
+  { name: 'planStartTime', title: '计划开始时间', dataKind: DataKind.DATETIME, sortable: true },
+  { name: 'planEndTime', title: '计划结束时间', dataKind: DataKind.DATETIME, sortable: true },
+  { name: 'realStartTime', title: '实现开始时间', dataKind: DataKind.DATETIME, sortable: true },
+  { name: 'realEndTime', title: '实现结束时间', dataKind: DataKind.DATETIME, sortable: true },
+]
 
-const LAYOUTS: Ref<TableLayoutProps[]> = ref([{
+const layouts = [{
   id: 'hi',
   title: 'HI',
   layoutKind: LayoutKind.LIST,
-  showSelectColumn: true,
-  actionColumnRender: (record: { [key: string]: any }) => {
-    return `<button class="btn-row-delete" data-id='${record.no}'>删除</button>`
-  },
   columns: [{
     name: 'name',
   }, {
     name: 'stats',
   }, {
+    name: 'creator',
+  }, {
     name: 'no',
     width: 80,
     styles: { cursor: 'pointer' },
   }, {
-    name: 'addr',
+    name: 'planStartTime',
   }, {
-    name: 'phone',
+    name: 'planEndTime',
   }, {
-    name: 'time',
+    name: 'realStartTime',
+  }, {
+    name: 'realEndTime',
   }],
-  quickSearch:{
+  quickSearch: {
     placeholder: '请输入姓名',
   },
   aggs: { name: AggregateKind.MIN },
-  defaultSlice: {
-    offsetNumber: 0,
-    fetchNumber: 10,
-    fetchNumbers: [5, 10, 20, 30, 50],
-  },
-}])
-
-const STYLES: Ref<TableStyleProps> = ref({})
+}]
 
 function getDictValue(columnName: string, dataValue: any) {
   if (columnName === 'name') {
@@ -134,7 +129,7 @@ const events: TableEventProps = {
                 // eslint-disable-next-line eqeqeq
                 return d[item.columnName] == item.value
               case OperatorKind.NE:
-                 // eslint-disable-next-line eqeqeq
+                // eslint-disable-next-line eqeqeq
                 return d[item.columnName] != item.value
               case OperatorKind.LT:
                 return d[item.columnName] < item.value
@@ -339,7 +334,9 @@ const events: TableEventProps = {
 
   copyData: async (targetRecordPks: any[]): Promise<{ [key: string]: any }[]> => {
     const newRecords = targetRecordPks.map((pk) => {
-      const record = DATA.find(d => d.no === pk)
+      // 不区别类型
+    // eslint-disable-next-line eqeqeq
+      const record = DATA.find(d => d.no == pk)
       return JSON.parse(JSON.stringify(record))
     })
     newRecords.forEach((record) => {
@@ -380,13 +377,15 @@ const events: TableEventProps = {
   },
 
   modifyStyles: async (changedStyleProps: TableStyleProps): Promise<boolean> => {
-    STYLES.value = changedStyleProps
+    // eslint-disable-next-line ts/no-use-before-define
+    tableProps.value.styles = changedStyleProps
     return true
   },
 
   newLayout: async (newLayoutProps: TableLayoutKernelProps): Promise<string> => {
     const id = Date.now().toString()
-    LAYOUTS.value.push({
+    // eslint-disable-next-line ts/no-use-before-define
+    tableProps.value.layouts.push({
       id,
       ...newLayoutProps,
     })
@@ -394,7 +393,8 @@ const events: TableEventProps = {
   },
 
   modifyLayout: async (changedLayoutId: string, changedLayoutProps: TableLayoutModifyProps): Promise<boolean> => {
-    const currLayout = LAYOUTS.value.find((layout) => { return layout.id === changedLayoutId })!
+    // eslint-disable-next-line ts/no-use-before-define
+    const currLayout = tableProps.value.layouts.find((layout) => { return layout.id === changedLayoutId })!
     if (changedLayoutProps.title) {
       currLayout.title = changedLayoutProps.title
     }
@@ -443,7 +443,8 @@ const events: TableEventProps = {
   },
 
   deleteLayout: async (deletedLayoutId: string): Promise<boolean> => {
-    LAYOUTS.value.splice(LAYOUTS.value.findIndex((layout) => { return layout.id === deletedLayoutId }), 1)
+    // eslint-disable-next-line ts/no-use-before-define
+    tableProps.value.layouts.splice(tableProps.value.layouts.findIndex((layout) => { return layout.id === deletedLayoutId }), 1)
     return true
   },
 
@@ -510,9 +511,31 @@ const events: TableEventProps = {
   },
 }
 
+const tableProps: Ref<TableProps> = ref({
+  pkColumnName: 'no',
+  parentPkColumnName: 'pno',
+  columns,
+  layouts,
+  events,
+  defaultSlice: {
+    offsetNumber: 0,
+    fetchNumber: 10,
+    fetchNumbers: [5, 10, 20, 30, 50],
+  },
+  styles: {},
+  defaultShowSelectColumn: true,
+  defaultActionColumnRender: (record: { [key: string]: any }, _layoutKind: LayoutKind) => {
+    return `<button class="btn-row-delete" style="margin-right:2px" data-id='${record.no}'>删除</button> <button class="btn-row-copy" data-id='${record.no}'>复制</button>`
+  },
+  defaultActionColumnWidth: 200,
+})
+
 onMounted(() => {
   IwUtils.delegateEvent('.iw-tt', 'click', '.btn-row-delete', (e) => {
     IwEvents.deleteData([(e.target as HTMLElement).dataset.id])
+  })
+  IwUtils.delegateEvent('.iw-tt', 'click', '.btn-row-copy', (e) => {
+    IwEvents.copyData([(e.target as HTMLElement).dataset.id])
   })
 },
 )
@@ -521,9 +544,6 @@ onMounted(() => {
 <template>
   <div>选择中的行Id: {{ selectedRecordPks }}</div>
   <div style="height: 600px">
-    <iw-task-table
-      pk-column-name="no" parent-pk-column-name="pno" :columns="COLUMNS" :events="events" :layouts="LAYOUTS"
-      :styles="STYLES"
-    />
+    <iw-task-table v-bind="tableProps" />
   </div>
 </template>

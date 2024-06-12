@@ -200,14 +200,29 @@ export interface TableProps {
   layouts: TableLayoutProps[]
   events: TableEventProps
   styles?: TableStyleProps
+  quickSearch?: TableDataQuickSearchProps
   defaultSlice?: TableDataSliceProps
   defaultShowSelectColumn?: boolean
-  defaultActionColumnRender?: (record: { [key: string]: any }) => any
+  defaultActionColumnRender?: (record: { [key: string]: any }, layoutKind: LayoutKind) => any
   defaultActionColumnWidth?: number
 }
 
-export interface TableColumnProps {
+export interface TableCommonColumnProps {
   name: string
+  wrap?: boolean
+  fixed?: boolean
+  width?: number
+  hide?: boolean
+  planStart?: boolean
+  planEnd?: boolean
+  realStart?: boolean
+  realEnd?: boolean
+  styles?: { [key: string]: string }
+  // Overwrite the value of TableColumnProps
+  render?: (record: { [key: string]: any }, layoutKind: LayoutKind) => any
+}
+
+export interface TableColumnProps extends TableCommonColumnProps {
   title: string
   icon?: string
   dataKind?: DataKind
@@ -218,10 +233,6 @@ export interface TableColumnProps {
   kindDateTimeFormat?: string
   groupable?: boolean
   sortable?: boolean
-  // 默认是否显示在新布局中
-  // Default whether to display in the new layout
-  defaultShow?: boolean
-  render?: (record: { [key: string]: any }, columnName: string) => any
 }
 
 export interface TableLayoutKernelProps {
@@ -229,7 +240,6 @@ export interface TableLayoutKernelProps {
   layoutKind: LayoutKind
   icon?: string
   columns: TableLayoutColumnProps[]
-  quickSearch?: TableDataQuickSearchProps
   // OR relationship between groups
   filters?: TableDataFilterProps[]
   sorts?: TableDataSortProps[]
@@ -240,7 +250,7 @@ export interface TableLayoutKernelProps {
   groupSlices?: { [key: string]: TableDataSliceProps }
   subDataShowKind?: SubDataShowKind
   showSelectColumn?: boolean
-  actionColumnRender?: (record: { [key: string]: any }) => any
+  actionColumnRender?: (record: { [key: string]: any }, layoutKind: LayoutKind) => any
   actionColumnWidth?: number
 }
 
@@ -248,17 +258,7 @@ export interface TableLayoutProps extends TableLayoutKernelProps {
   id: string
 }
 
-export interface TableLayoutColumnProps {
-  name: string
-  wrap?: boolean
-  fixed?: boolean
-  width?: number
-  hide?: boolean
-  dateStart?: boolean
-  dateEnd?: boolean
-  styles?: { [key: string]: string }
-  // Overwrite the value of TableColumnProps
-  render?: (record: { [key: string]: any }, columnName: string) => any
+export interface TableLayoutColumnProps extends TableCommonColumnProps {
 }
 
 export interface TableStyleProps {
