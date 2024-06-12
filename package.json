@@ -1,7 +1,7 @@
 {
   "name": "@idealworld/task-table",
   "type": "module",
-  "version": "0.0.1-alpha.2",
+  "version": "0.1.0-alpha.1",
   "description": "Table component to support task management",
   "authors": [
     {
