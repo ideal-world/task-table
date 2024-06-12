@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { inject, onMounted, ref, watch } from 'vue'
 import * as iconSvg from '../../../assets/icon'
-import { FUN_CLOSE_CONTEXT_MENU_TYPE } from '../../common/Menu.vue'
-import type { CachedColumnConf } from '../../conf'
-import * as eb from '../../eventbus'
 import type { TableLayoutModifyProps } from '../../../props'
+import { FUN_CLOSE_CONTEXT_MENU_TYPE } from '../../common/Menu.vue'
+import { type CachedColumnConf, convertLayoutColumnConfToLayoutColumnProps } from '../../conf'
+import * as eb from '../../eventbus'
 
 const props = defineProps<{
   curColumnConf: CachedColumnConf
@@ -27,28 +27,16 @@ async function setFixedColumn() {
   if (oldFixedColumnConf && oldFixedColumnConf.name !== props.curColumnConf.name) {
     const changedLayoutReq: TableLayoutModifyProps = {
       changedColumn: {
-        name: oldFixedColumnConf.name,
-        wrap: oldFixedColumnConf.wrap,
+        ...convertLayoutColumnConfToLayoutColumnProps(oldFixedColumnConf),
         fixed: false,
-        width: oldFixedColumnConf.width,
-        hide: oldFixedColumnConf.hide,
-        dateStart: oldFixedColumnConf.dateStart,
-        dateEnd: oldFixedColumnConf.dateEnd,
-        render: oldFixedColumnConf.render,
       },
     }
     await eb.modifyLayout(changedLayoutReq)
   }
   const changedLayoutReq: TableLayoutModifyProps = {
     changedColumn: {
-      name: props.curColumnConf.name,
-      wrap: props.curColumnConf.wrap,
+      ...convertLayoutColumnConfToLayoutColumnProps(props.curColumnConf),
       fixed: !props.curColumnConf.fixed,
-      width: props.curColumnConf.width,
-      hide: props.curColumnConf.hide,
-      dateStart: props.curColumnConf.dateStart,
-      dateEnd: props.curColumnConf.dateEnd,
-      render: props.curColumnConf.render,
     },
   }
   await eb.modifyLayout(changedLayoutReq)

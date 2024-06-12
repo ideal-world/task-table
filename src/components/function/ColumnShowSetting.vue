@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { TableLayoutModifyProps } from '../../props'
-import type { TableBasicConf, TableLayoutColumnConf } from '../conf'
+import { type TableBasicConf, type TableLayoutColumnConf, convertLayoutColumnConfToLayoutColumnProps } from '../conf'
 import * as eb from '../eventbus'
 
 const props = defineProps<{
@@ -11,14 +11,8 @@ const props = defineProps<{
 async function setShowToggleColumn(columnConf: TableLayoutColumnConf) {
   const changedLayoutReq: TableLayoutModifyProps = {
     changedColumn: {
-      name: columnConf.name,
-      wrap: columnConf.wrap,
-      fixed: columnConf.fixed,
-      width: columnConf.width,
+      ...convertLayoutColumnConfToLayoutColumnProps(columnConf),
       hide: !columnConf.hide,
-      dateStart: columnConf.dateStart,
-      dateEnd: columnConf.dateEnd,
-      render: columnConf.render,
     },
   }
   await eb.modifyLayout(changedLayoutReq)
@@ -39,7 +33,7 @@ async function setShowToggleColumn(columnConf: TableLayoutColumnConf) {
       </span>
       <input
         type="checkbox" class="iw-toggle iw-toggle-xs"
-        :checked="!props.layoutColumnConf.find(col => col.name === column.name)?.hide ?? false"
+        :checked="!props.layoutColumnConf.find(col => col.name === column.name)!.hide"
         @click="setShowToggleColumn(column)"
       >
     </div>

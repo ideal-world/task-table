@@ -21,7 +21,7 @@ const tableBasicConf = reactive<TableBasicConf>(_tableBasicConf)
 const tableLayoutsConf = reactive<TableLayoutConf[]>(_tableLayoutsConf)
 const currentLayoutId = ref<string>(tableLayoutsConf[0].id)
 
-watch(tableLayoutsConf, (newConf, oldConf) => {
+watch(tableLayoutsConf, () => {
   // TODO
   // if (newConf.length !== oldConf.length) {
   // Reset the current layout after the layout is deleted

@@ -3,7 +3,7 @@ import { inject, onMounted, ref, watch } from 'vue'
 import * as iconSvg from '../../../assets/icon'
 import type { TableLayoutModifyProps } from '../../../props'
 import { FUN_CLOSE_CONTEXT_MENU_TYPE } from '../../common/Menu.vue'
-import type { CachedColumnConf } from '../../conf'
+import { type CachedColumnConf, convertLayoutColumnConfToLayoutColumnProps } from '../../conf'
 import * as eb from '../../eventbus'
 
 const props = defineProps<{
@@ -28,14 +28,8 @@ async function setWrapColumn() {
   if (props.curColumnConf) {
     const changedLayoutReq: TableLayoutModifyProps = {
       changedColumn: {
-        name: props.curColumnConf.name,
+        ...convertLayoutColumnConfToLayoutColumnProps(props.curColumnConf),
         wrap: !props.curColumnConf.wrap,
-        fixed: props.curColumnConf.fixed,
-        width: props.curColumnConf.width,
-        hide: props.curColumnConf.hide,
-        dateStart: props.curColumnConf.dateStart,
-        dateEnd: props.curColumnConf.dateEnd,
-        render: props.curColumnConf.render,
       },
     }
     await eb.modifyLayout(changedLayoutReq)

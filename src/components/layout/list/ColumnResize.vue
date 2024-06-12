@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
-import type { CachedColumnConf } from '../../conf'
-import * as eb from '../../eventbus'
-import type { TableLayoutModifyProps } from '../../../props'
+import { onMounted } from 'vue';
+import type { TableLayoutModifyProps } from '../../../props';
+import { type CachedColumnConf, convertLayoutColumnConfToLayoutColumnProps } from '../../conf';
+import * as eb from '../../eventbus';
 
 const props = defineProps<{
   columnsConf: CachedColumnConf[]
@@ -43,14 +43,7 @@ onMounted(() => {
     if (curColumnConf) {
       const changedLayoutReq: TableLayoutModifyProps = {
         changedColumn: {
-          name: curColumnConf.name,
-          wrap: curColumnConf.wrap,
-          fixed: curColumnConf.fixed,
-          width: curColumnConf.width,
-          hide: curColumnConf.hide,
-          dateStart: curColumnConf.dateStart,
-          dateEnd: curColumnConf.dateEnd,
-          render: curColumnConf.render,
+          ...convertLayoutColumnConfToLayoutColumnProps(curColumnConf),
         },
       }
       await eb.modifyLayout(changedLayoutReq)
