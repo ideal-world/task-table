@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import * as eb from '../eventbus'
-import * as iconSvg from '../../assets/icon'
+import { ref } from 'vue';
+import * as iconSvg from '../../assets/icon';
+import * as eb from '../eventbus';
 
 const props = defineProps<{
   placeholder: string

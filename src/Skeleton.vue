@@ -21,10 +21,13 @@ const tableBasicConf = reactive<TableBasicConf>(_tableBasicConf)
 const tableLayoutsConf = reactive<TableLayoutConf[]>(_tableLayoutsConf)
 const currentLayoutId = ref<string>(tableLayoutsConf[0].id)
 
-watch(tableLayoutsConf, () => {
+watch(tableLayoutsConf, (newConf, oldConf) => {
+  // TODO
+  // if (newConf.length !== oldConf.length) {
   // Reset the current layout after the layout is deleted
-  currentLayoutId.value = tableLayoutsConf[tableLayoutsConf.length - 1] && tableLayoutsConf[tableLayoutsConf.length - 1].id
-  setHeight()
+    currentLayoutId.value = tableLayoutsConf[tableLayoutsConf.length - 1] && tableLayoutsConf[tableLayoutsConf.length - 1].id
+    setHeight()
+  // }
 })
 
 Event.init(tableBasicConf, tableLayoutsConf, currentLayoutId, props.events)

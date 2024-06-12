@@ -264,7 +264,9 @@ export async function modifyStyles(changedStyles: TableStyleConf): Promise<boole
 
 export async function setQuickSearchContent(quickSearchContent: string): Promise<boolean> {
   tableBasicConf.quickSearchContent = quickSearchContent
-  await loadData()
+  tableLayoutsConf.forEach((layout) => {
+    loadData(undefined, undefined, layout.id)
+  })
   return true
 }
 

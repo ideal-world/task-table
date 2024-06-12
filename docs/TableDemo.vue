@@ -80,9 +80,6 @@ const layouts = [{
   }, {
     name: 'realEndTime',
   }],
-  quickSearch: {
-    placeholder: '请输入姓名',
-  },
   aggs: { name: AggregateKind.MIN },
 }]
 
@@ -517,6 +514,9 @@ const tableProps: Ref<TableProps> = ref({
   columns,
   layouts,
   events,
+  quickSearch: {
+    placeholder: '请输入姓名',
+  },
   defaultSlice: {
     offsetNumber: 0,
     fetchNumber: 10,
