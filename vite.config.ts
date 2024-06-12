@@ -2,6 +2,7 @@ import * as path from 'node:path'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import Components from 'unplugin-vue-components/vite'
+// import { visualizer } from 'rollup-plugin-visualizer'
 
 export default defineConfig({
   plugins: [
@@ -11,6 +12,8 @@ export default defineConfig({
       extensions: ['vue'],
       dts: 'components.d.ts',
     }),
+    // Use to analyze package size
+    // visualizer({ open: true }),
   ],
   build: {
     lib: {
@@ -29,6 +32,7 @@ export default defineConfig({
       },
     },
     emptyOutDir: false,
+    sourcemap: false,
   },
   test: {
     globals: true,
