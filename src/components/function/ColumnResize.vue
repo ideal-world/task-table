@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
-import type { TableLayoutModifyProps } from '../../../props';
-import { type CachedColumnConf, convertLayoutColumnConfToLayoutColumnProps } from '../../conf';
-import * as eb from '../../eventbus';
+import type { TableLayoutModifyProps } from '../../props';
+import { type CachedColumnConf, convertLayoutColumnConfToLayoutColumnProps } from '../conf';
+import * as eb from '../eventbus';
 
 const props = defineProps<{
   columnsConf: CachedColumnConf[]
@@ -13,7 +13,7 @@ let currCellRect: DOMRect
 let isDragging = false
 
 onMounted(() => {
-  const listHeaderEle = document.getElementsByClassName('iw-list-header')[0] as HTMLElement
+  const listHeaderEle = document.getElementsByClassName('iw-column-header')[0] as HTMLElement
   const dragDiv = document.createElement('div')
   dragDiv.style.position = 'fixed'
   dragDiv.style.display = 'none'
@@ -63,7 +63,7 @@ onMounted(() => {
 
   listHeaderEle.addEventListener('pointermove', (event) => {
     const targetEle = event.target as HTMLElement
-    if (!targetEle.classList.contains('iw-list-header-cell'))
+    if (!targetEle.classList.contains('iw-column-header-cell'))
       return
 
     isDragging = false

@@ -6,12 +6,8 @@ import { DataKind, SubDataShowKind } from '../../../props'
 import type { CachedColumnConf, TableBasicConf, TableLayoutConf } from '../../conf'
 import { registerCellClickListener } from '../../function/CellClick'
 import PaginationComp from '../../function/Pagination.vue'
-import { registerTreeRowToggleListener } from '../../function/RowTree'
 import RowSelectComp from '../../function/RowSelect.vue'
-import ColumnAggsComp from './ListColumnAggs.vue'
-import { setFixedColumnStyles } from './ListColumnFixed.vue'
-import HeaderComp from './ListHeader.vue'
-import RowsComp from './ListRows.vue'
+import { registerTreeRowToggleListener } from '../../function/RowTree'
 
 const props = defineProps<
   {
@@ -48,7 +44,6 @@ function setColumnStyles(colIdx: number) {
   else {
     styles.width = `${columnsWithoutHideConf.value[colIdx].width}px`
   }
-  setFixedColumnStyles(styles, colIdx, columnsWithoutHideConf.value, COLUMN_SELECT_WIDTH)
   return styles
 }
 
@@ -68,7 +63,7 @@ onMounted(() => {
 <template>
   <div
     ref="listCompRef"
-    :class="`iw-list iw-row-select-container relative iw-list--size${props.basic.styles.size}`"
+    :class="`iw-list relative iw-list--size${props.basic.styles.size}`"
     :style="setTableWidth()"
   >
     <HeaderComp :columns-conf="columnsWithoutHideConf" :layout="props.layout" :basic="props.basic" :set-column-styles="setColumnStyles" />

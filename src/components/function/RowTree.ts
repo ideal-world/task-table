@@ -47,8 +47,8 @@ export function renderTreeToggleHandler(hasSubData: boolean): string {
 export function registerTreeRowToggleListener(rowsEle: HTMLDivElement) {
   IwUtils.delegateEvent(rowsEle, 'click', `.${iconSvg.EXPAND}`, (e) => {
     const ele = e.target as HTMLElement
-    const currPk = getParentWithClass(ele, 'iw-list-data-row')!.dataset.pk!
-    rowsEle.querySelectorAll(`.iw-list-data-row[data-parent-pk="${currPk}"]`).forEach((node) => {
+    const currPk = getParentWithClass(ele, 'iw-data-row')!.dataset.pk!
+    rowsEle.querySelectorAll(`.iw-data-row[data-parent-pk="${currPk}"]`).forEach((node) => {
       (node as HTMLElement).style.display = 'flex'
     })
     ele.classList.remove(iconSvg.EXPAND)
@@ -57,7 +57,7 @@ export function registerTreeRowToggleListener(rowsEle: HTMLDivElement) {
   })
   IwUtils.delegateEvent(rowsEle, 'click', `.${iconSvg.SHRINK}`, (e) => {
     const ele = e.target as HTMLElement
-    const currPk = getParentWithClass(ele, 'iw-list-data-row')!.dataset.pk!
+    const currPk = getParentWithClass(ele, 'iw-data-row')!.dataset.pk!
     recursionShrinkRows(rowsEle, currPk)
     ele.classList.remove(iconSvg.SHRINK)
     ele.classList.add(iconSvg.EXPAND)
@@ -65,7 +65,7 @@ export function registerTreeRowToggleListener(rowsEle: HTMLDivElement) {
   })
 
   function recursionShrinkRows(rowsEle: HTMLElement, currPk: any) {
-    rowsEle.querySelectorAll(`.iw-list-data-row[data-parent-pk="${currPk}"]`).forEach((node) => {
+    rowsEle.querySelectorAll(`.iw-data-row[data-parent-pk="${currPk}"]`).forEach((node) => {
       const shrinkEle = (node as HTMLElement).querySelector(`.${iconSvg.SHRINK}`)
       if (shrinkEle) {
         shrinkEle.classList.remove(iconSvg.SHRINK)

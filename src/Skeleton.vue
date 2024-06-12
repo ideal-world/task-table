@@ -9,6 +9,7 @@ import PaginationComp from './components/function/Pagination.vue'
 import QuickSearchComp from './components/function/QuickSearch.vue'
 import RowSortSettingComp from './components/function/RowSortSetting.vue'
 import TableSettingComp from './components/function/TableSetting.vue'
+import GanttComp from './components/layout/gantt/Gantt.vue'
 import ListComp from './components/layout/list/List.vue'
 import type { TableProps } from './props'
 import { LayoutKind } from './props'
@@ -128,7 +129,8 @@ onMounted(async () => {
           </ScrollableComp>
         </div>
         <div class="iw-tt-table overflow-auto w-full">
-          <ListComp :key="layout.id" :layout="layout" :basic="tableBasicConf" />
+          <ListComp v-if="layout.layoutKind === LayoutKind.LIST" :key="layout.id" :layout="layout" :basic="tableBasicConf" />
+          <GanttComp v-if="layout.layoutKind === LayoutKind.GANTT" :key="layout.id" :layout="layout" :basic="tableBasicConf" />
         </div>
         <div
           :class="`${tableBasicConf.styles.footerClass} iw-tt-footer flex justify-between p-1 min-h-0`"
@@ -136,7 +138,7 @@ onMounted(async () => {
           <div>
             <slot name="customActionBar" />
           </div>
-          <template v-if="layout.layoutKind === LayoutKind.LIST && layout.data && !Array.isArray(layout.data)">
+          <template v-if="(layout.layoutKind === LayoutKind.LIST || layout.layoutKind === LayoutKind.GANTT) && layout.data && !Array.isArray(layout.data)">
             <PaginationComp :default-slice="layout.defaultSlice" :total-number="layout.data.totalNumber" />
           </template>
         </div>
