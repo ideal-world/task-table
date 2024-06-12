@@ -18,6 +18,7 @@ const props = defineProps<
   }
 >()
 const ganttCompRef: Ref<HTMLDivElement | null> = ref(null)
+const tableCompRef: Ref<HTMLElement | null> = ref(null)
 const ganttInfo: Ref<GanttInfo> = ref()
 
 const COLUMN_SELECT_WIDTH = props.layout.showSelectColumn ? 25 : 0
@@ -37,17 +38,14 @@ function setColumnStyles(colIdx: number) {
 // ColIdx of select column = -1
 // ColIdx of gantt timeline column = -2
   const styles: any = {}
-  if (colIdx === -1) {
+  if (colIdx === 0) {
+    styles.width = `${tableCompRef.value?.offsetWidth - props.layout.ganttTimelineWidth}px`
+  }
+  else if (colIdx === -1) {
     styles.width = `${COLUMN_SELECT_WIDTH}px`
   }
   else if (colIdx === -2) {
     styles.width = `${props.layout.ganttTimelineWidth}px`
-    // fixed timeline column
-    styles.position = 'sticky'
-    styles.zIndex = 1099
-    styles.right = `0px`
-    // class: base-300
-    styles.borderLeft = '3px solid oklch(var(--b3))'
   }
   else {
     styles.width = `${columnsWithoutHideConf.value[colIdx].width}px`
@@ -55,16 +53,17 @@ function setColumnStyles(colIdx: number) {
   return styles
 }
 
-function setTableWidth() {
+function setListWidth() {
   const styles: any = {}
   // 2px for border
-  styles.width = `${props.layout.columns.filter(column => !column.hide).reduce((count, col) => count + col.width, COLUMN_SELECT_WIDTH + props.layout.ganttTimelineWidth + 2)}px`
+  styles.width = `${props.layout.columns.filter(column => !column.hide).reduce((count, col) => count + col.width, COLUMN_SELECT_WIDTH + 2)}px`
   return styles
 }
 
 onMounted(() => {
   props.layout.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA && registerTreeRowToggleListener(ganttCompRef.value!)
   registerCellClickListener(ganttCompRef.value!)
+  tableCompRef.value = ganttCompRef.value?.closest('.iw-tt-table') as HTMLElement
 })
 </script>
 
@@ -72,10 +71,9 @@ onMounted(() => {
   <div
     ref="ganttCompRef"
     :class="`iw-gantt iw-row-select-container relative iw-gantt--size${props.basic.styles.size}`"
-    :style="setTableWidth()"
   >
-    <HeaderComp :columns-conf="columnsWithoutHideConf" :layout="props.layout" :basic="props.basic" :set-column-styles="setColumnStyles" :gantt-info="ganttInfo" />
-    <template v-if="props.layout.data && !Array.isArray(props.layout.data)">
+    <HeaderComp :columns-conf="columnsWithoutHideConf" :layout="props.layout" :basic="props.basic" :set-column-styles="setColumnStyles" :set-list-width="setListWidth" :gantt-info="ganttInfo" />
+    <!-- <template v-if="props.layout.data && !Array.isArray(props.layout.data)">
       <RowsComp
         :records="props.layout.data.records"
         :pk-column-name="props.basic.pkColumnName"
@@ -113,7 +111,7 @@ onMounted(() => {
           <PaginationComp :default-slice="layout.defaultSlice" :group-slices="layout.groupSlices" :group-value="groupData.groupValue" :total-number="groupData.totalNumber" />
         </div>
       </template>
-    </template>
+    </template> -->
     <RowSelectComp
       v-if="props.layout.showSelectColumn"
       :selected-pks="props.layout.selectedDataPks" :pk-column-name="props.basic.pkColumnName"

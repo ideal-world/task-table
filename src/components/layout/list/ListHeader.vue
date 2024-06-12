@@ -15,7 +15,7 @@ const props = defineProps<{
 
 const selectedColumnConf = ref<CachedColumnConf | undefined>()
 
-const listHeaderCompRef = ref<InstanceType<typeof HTMLElement>>()
+const headerCompRef = ref<InstanceType<typeof HTMLElement>>()
 
 const headerMenuCompRef = ref<InstanceType<typeof MenuComp>>()
 
@@ -26,12 +26,13 @@ function showHeaderContextMenu(event: MouseEvent, columName: string) {
 }
 
 onMounted(() => {
-  columnResize.init(listHeaderCompRef.value!,props.columnsConf)
+  columnResize.init(headerCompRef.value!, props.columnsConf)
 })
 </script>
 
 <template>
-  <div ref="listHeaderCompRef"
+  <div
+    ref="headerCompRef"
     :class="`${props.basic.styles.headerClass} iw-column-header flex items-center sticky top-0 z-[1500] bg-base-200 border-t border-t-base-300 border-b border-b-base-300 border-r border-r-base-300`"
   >
     <div
@@ -58,7 +59,6 @@ onMounted(() => {
       {{ $t('layout.action.title') }}
     </div>
   </div>
-  <ColumnResizeComp :columns-conf="columnsConf" />
   <MenuComp ref="headerMenuCompRef" class="text-sm">
     <template v-if="selectedColumnConf">
       <div
