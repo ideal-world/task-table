@@ -130,8 +130,8 @@ onMounted(async () => {
           </ScrollableComp>
         </div>
         <div class="iw-tt-table overflow-auto w-full">
-          <ListComp v-if="layout.layoutKind === LayoutKind.LIST" :key="layout.id" :layout="layout" :basic="tableBasicConf" />
-          <GanttComp v-if="layout.layoutKind === LayoutKind.GANTT" :key="layout.id" :layout="layout" :basic="tableBasicConf" />
+          <ListComp v-if="layout.layoutKind === LayoutKind.LIST" :layout="layout" :basic="tableBasicConf" />
+          <GanttComp v-else-if="layout.layoutKind === LayoutKind.GANTT" :layout="layout" :basic="tableBasicConf" />
         </div>
         <div
           :class="`${tableBasicConf.styles.footerClass} iw-tt-footer flex justify-between p-1 min-h-0`"

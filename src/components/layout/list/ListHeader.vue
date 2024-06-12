@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import MenuComp from '../../common/Menu.vue'
 import type { CachedColumnConf, TableBasicConf, TableLayoutConf } from '../../conf'
-import ColumnResizeComp from '../../function/ColumnResize.vue'
+import * as columnResize from '../../function/ColumnResize'
 import ColumnFixedComp from './ListColumnFixed.vue'
 import ColumnWrapComp from './ListColumnWrap.vue'
 
@@ -15,6 +15,8 @@ const props = defineProps<{
 
 const selectedColumnConf = ref<CachedColumnConf | undefined>()
 
+const listHeaderCompRef = ref<InstanceType<typeof HTMLElement>>()
+
 const headerMenuCompRef = ref<InstanceType<typeof MenuComp>>()
 
 function showHeaderContextMenu(event: MouseEvent, columName: string) {
@@ -22,15 +24,19 @@ function showHeaderContextMenu(event: MouseEvent, columName: string) {
   const targetEle = event.target as HTMLElement
   headerMenuCompRef.value?.show(targetEle)
 }
+
+onMounted(() => {
+  columnResize.init(listHeaderCompRef.value!,props.columnsConf)
+})
 </script>
 
 <template>
-  <div
+  <div ref="listHeaderCompRef"
     :class="`${props.basic.styles.headerClass} iw-column-header flex items-center sticky top-0 z-[1500] bg-base-200 border-t border-t-base-300 border-b border-b-base-300 border-r border-r-base-300`"
   >
     <div
       v-if="props.layout.showSelectColumn"
-      :class="`${props.basic.styles.cellClass} iw-list-cell iw-column-header-cell flex justify-center items-center bg-base-200 border-l border-l-base-300 hover:cursor-pointer`"
+      :class="`${props.basic.styles.cellClass} iw-list-cell iw-column-header-cell flex justify-center items-center bg-base-200 border-l border-l-base-300`"
       :style="props.setColumnStyles(-1)"
     >
       <input type="checkbox" class="iw-row-select-all-cell__chk iw-checkbox iw-checkbox-xs">
@@ -46,7 +52,7 @@ function showHeaderContextMenu(event: MouseEvent, columName: string) {
     </div>
     <div
       v-if="props.layout.actionColumnRender"
-      :class="`${props.basic.styles.cellClass} iw-list-cell iw-column-header-cell flex justify-center items-center bg-base-200 border-l border-l-base-300 hover:cursor-pointer`"
+      :class="`${props.basic.styles.cellClass} iw-list-cell iw-column-header-cell flex justify-center items-center bg-base-200 border-l border-l-base-300`"
       :style="props.setColumnStyles(-2)"
     >
       {{ $t('layout.action.title') }}

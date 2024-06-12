@@ -1,5 +1,5 @@
 import * as iconSvg from '../assets/icon'
-import type { AggregateKind, TableColumnProps, TableCommonColumnProps, TableDataFilterProps, TableDataGroupProps, TableDataGroupResp, TableDataResp, TableDataSliceProps, TableDataSortProps, TableLayoutColumnProps, TableLayoutKernelProps, TableProps, TableStyleProps } from '../props'
+import type { AggregateKind, GanttShowKind, TableColumnProps, TableCommonColumnProps, TableDataFilterProps, TableDataGroupProps, TableDataGroupResp, TableDataResp, TableDataSliceProps, TableDataSortProps, TableLayoutColumnProps, TableLayoutKernelProps, TableProps, TableStyleProps } from '../props'
 import { DataKind, LayoutKind, OperatorKind, SizeKind, SubDataShowKind } from '../props'
 
 export interface TableBasicConf {
@@ -13,6 +13,8 @@ export interface TableBasicConf {
   defaultShowSelectColumn: boolean
   defaultActionColumnRender?: (record: { [key: string]: any }, layoutKind: LayoutKind) => any
   defaultActionColumnWidth: number
+  defaultGanttShowKind?: GanttShowKind
+  defaultGanttTimelineWidth: number
 }
 
 export interface TableCommonColumnConf {
@@ -105,6 +107,9 @@ export interface TableLayoutKernelConf {
   showSelectColumn: boolean
   actionColumnRender?: (record: { [key: string]: any }, layoutKind: LayoutKind) => any
   actionColumnWidth: number
+  ganttShowKind?: GanttShowKind
+  ganttTimelineWidth: number
+
   data?: TableDataResp | TableDataGroupResp[]
   selectedDataPks: any[]
 }
@@ -126,6 +131,8 @@ export function convertTableLayoutKernelPropsToTableLayoutKernelConf(props: Tabl
     showSelectColumn: props.showSelectColumn ?? basicConf.defaultShowSelectColumn,
     actionColumnRender: props.actionColumnRender ?? basicConf.defaultActionColumnRender,
     actionColumnWidth: props.actionColumnWidth ?? basicConf.defaultActionColumnWidth,
+    ganttShowKind: props.ganttShowKind ?? basicConf.defaultGanttShowKind,
+    ganttTimelineWidth: props.ganttTimelineWidth ?? basicConf.defaultGanttTimelineWidth,
     selectedDataPks: [],
   }
 }
@@ -363,6 +370,8 @@ export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]]
     defaultShowSelectColumn: props.defaultShowSelectColumn ?? false,
     defaultActionColumnRender: props.defaultActionColumnRender,
     defaultActionColumnWidth: props.defaultActionColumnWidth ?? 100,
+    defaultGanttShowKind: props.defaultGanttShowKind,
+    defaultGanttTimelineWidth: props.defaultGanttTimelineWidth ?? 400,
   }
   const layoutsConf: TableLayoutConf[] = []
   props.layouts.forEach((layout) => {

@@ -145,6 +145,26 @@ export function translateSubDataShowKind(subDataShowKind: SubDataShowKind): stri
   }
 }
 
+export enum GanttShowKind {
+  DAY = 'DAY',
+  WEEK = 'WEEK',
+  MONTH = 'MONTH',
+  YEAR = 'YEAR',
+}
+
+export function translateGanttShowKind(ganttShowKind: GanttShowKind): string {
+  switch (ganttShowKind) {
+    case GanttShowKind.DAY:
+      return t('gantt.kind.DAY')
+    case GanttShowKind.WEEK:
+      return t('gantt.kind.WEEK')
+    case GanttShowKind.MONTH:
+      return t('gantt.kind.MONTH')
+    case GanttShowKind.YEAR:
+      return t('gantt.kind.YEAR')
+  }
+}
+
 export interface AggItem {
   kind: AggregateKind
   title: string
@@ -205,6 +225,8 @@ export interface TableProps {
   defaultShowSelectColumn?: boolean
   defaultActionColumnRender?: (record: { [key: string]: any }, layoutKind: LayoutKind) => any
   defaultActionColumnWidth?: number
+  defaultGanttShowKind?: GanttShowKind
+  defaultGanttTimelineWidth?: number
 }
 
 export interface TableCommonColumnProps {
@@ -252,6 +274,8 @@ export interface TableLayoutKernelProps {
   showSelectColumn?: boolean
   actionColumnRender?: (record: { [key: string]: any }, layoutKind: LayoutKind) => any
   actionColumnWidth?: number
+  ganttShowKind?: GanttShowKind
+  ganttTimelineWidth?: number
 }
 
 export interface TableLayoutProps extends TableLayoutKernelProps {
