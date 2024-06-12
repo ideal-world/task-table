@@ -41,21 +41,10 @@ export function filterTreeDataPks(filterPks: any[], records: { [key: string]: an
 }
 
 export function renderTreeToggleHandler(hasSubData: boolean): string {
-  return `${hasSubData ? `<i class="${iconSvg.EXPAND} cursor-pointer" />` : ``}`
+  return `${hasSubData ? `<i class="${iconSvg.SHRINK} cursor-pointer" />` : ``}`
 }
 
 export function registerTreeRowToggleListener(rowsEle: HTMLDivElement) {
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      mutation.type === 'childList' && mutation.addedNodes.forEach((node) => {
-        if (node instanceof HTMLElement && node.classList.contains('iw-list-data-fold') && node.dataset.parentPk !== undefined) {
-          node.style.display = 'none'
-        }
-      })
-    })
-  })
-  observer.observe(rowsEle, { childList: true, subtree: true })
-
   IwUtils.delegateEvent(rowsEle, 'click', `.${iconSvg.EXPAND}`, (e) => {
     const ele = e.target as HTMLElement
     const currPk = getParentWithClass(ele, 'iw-list-data-row')!.dataset.pk!
