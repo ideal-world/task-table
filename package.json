@@ -3,14 +3,17 @@
   "type": "module",
   "version": "0.0.1-alpha.2",
   "description": "Table component to support task management",
-  "authors": [{
-    "name": "gudaoxuri",
-    "email": "i@sunisle.org",
-    "url": "https://idealworld.group/"
-  }, {
-    "name": "ankang",
-    "email": "610575769@qq.com"
-  }],
+  "authors": [
+    {
+      "name": "gudaoxuri",
+      "email": "i@sunisle.org",
+      "url": "https://idealworld.group/"
+    },
+    {
+      "name": "ankang",
+      "email": "610575769@qq.com"
+    }
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -55,28 +58,28 @@
     "vue-i18n": "^9.13.1"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^2.19.1",
-    "@types/node": "^20.12.13",
+    "@antfu/eslint-config": "^2.21.1",
+    "@types/node": "^20.14.2",
     "@types/sortablejs": "^1.15.8",
-    "@vitejs/plugin-vue": "^5.0.4",
+    "@vitejs/plugin-vue": "^5.0.5",
     "@vitest/ui": "^1.6.0",
     "autoprefixer": "^10.4.19",
-    "daisyui": "^4.11.1",
-    "eslint": "^9.3.0",
+    "daisyui": "^4.12.2",
+    "eslint": "^9.4.0",
     "happy-dom": "^14.12.0",
     "postcss": "^8.4.38",
     "postcss-import": "^16.1.0",
     "postcss-nesting": "^12.1.5",
     "rimraf": "^5.0.7",
-    "tailwindcss": "^3.4.3",
+    "tailwindcss": "^3.4.4",
     "typedoc": "^0.25.13",
     "typedoc-plugin-markdown": "^4.0.3",
     "typedoc-vitepress-theme": "^1.0.0",
     "typescript": "^5.4.5",
     "unplugin-vue-components": "^0.27.0",
-    "vite": "^5.2.12",
-    "vitepress": "^1.2.2",
+    "vite": "^5.2.13",
+    "vitepress": "^1.2.3",
     "vitest": "^1.6.0",
-    "vue-tsc": "^2.0.19"
+    "vue-tsc": "^2.0.21"
   }
 }
