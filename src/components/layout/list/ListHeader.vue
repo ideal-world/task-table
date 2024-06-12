@@ -2,9 +2,9 @@
 import { ref } from 'vue'
 import MenuComp from '../../common/Menu.vue'
 import type { CachedColumnConf, TableBasicConf, TableLayoutConf } from '../../conf'
-import ColumnFixedComp from './ColumnFixed.vue'
-import ColumnResizeComp from './ColumnResize.vue'
-import ColumnWrapComp from './ColumnWrap.vue'
+import ColumnResizeComp from '../../function/ColumnResize.vue'
+import ColumnFixedComp from './ListColumnFixed.vue'
+import ColumnWrapComp from './ListColumnWrap.vue'
 
 const props = defineProps<{
   columnsConf: CachedColumnConf[]
@@ -26,18 +26,18 @@ function showHeaderContextMenu(event: MouseEvent, columName: string) {
 
 <template>
   <div
-    :class="`${props.basic.styles.headerClass} iw-list-header flex items-center sticky top-0 z-[1500] bg-base-200 border-t border-t-base-300 border-b border-b-base-300 border-r border-r-base-300`"
+    :class="`${props.basic.styles.headerClass} iw-column-header flex items-center sticky top-0 z-[1500] bg-base-200 border-t border-t-base-300 border-b border-b-base-300 border-r border-r-base-300`"
   >
     <div
       v-if="props.layout.showSelectColumn"
-      :class="`${props.basic.styles.cellClass} iw-list-cell iw-list-header-cell flex justify-center items-center bg-base-200 border-l border-l-base-300 hover:cursor-pointer`"
+      :class="`${props.basic.styles.cellClass} iw-list-cell iw-column-header-cell flex justify-center items-center bg-base-200 border-l border-l-base-300 hover:cursor-pointer`"
       :style="props.setColumnStyles(-1)"
     >
-      <input type="checkbox" class="iw-list-select-all-cell__chk iw-checkbox iw-checkbox-xs">
+      <input type="checkbox" class="iw-row-select-all-cell__chk iw-checkbox iw-checkbox-xs">
     </div>
     <div
       v-for="(column, colIdx) in columnsConf" :key="`${props.layout.id}-${column.name}`"
-      :class="`${props.basic.styles.cellClass} iw-list-cell iw-list-header-cell ${column.name !== props.basic.pkColumnName ? 'iw-list-header-normal-cell' : ''} flex items-center bg-base-200 border-l border-l-base-300 hover:cursor-pointer`"
+      :class="`${props.basic.styles.cellClass} iw-list-cell iw-column-header-cell ${column.name !== props.basic.pkColumnName ? 'iw-list-header-normal-cell' : ''} flex items-center bg-base-200 border-l border-l-base-300 hover:cursor-pointer`"
       :data-column-name="column.name"
       :style="props.setColumnStyles(colIdx)"
       @click="(event: MouseEvent) => showHeaderContextMenu(event, column.name)"
@@ -46,7 +46,7 @@ function showHeaderContextMenu(event: MouseEvent, columName: string) {
     </div>
     <div
       v-if="props.layout.actionColumnRender"
-      :class="`${props.basic.styles.cellClass} iw-list-cell iw-list-header-cell flex justify-center items-center bg-base-200 border-l border-l-base-300 hover:cursor-pointer`"
+      :class="`${props.basic.styles.cellClass} iw-list-cell iw-column-header-cell flex justify-center items-center bg-base-200 border-l border-l-base-300 hover:cursor-pointer`"
       :style="props.setColumnStyles(-2)"
     >
       {{ $t('layout.action.title') }}
