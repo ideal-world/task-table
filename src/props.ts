@@ -228,6 +228,10 @@ export interface TableProps {
   defaultShowAggs?: boolean
   defaultGanttShowKind?: GanttShowKind
   defaultGanttTimelineWidth?: number
+  defaultGanttPlanStartTimeColumnName?: string
+  defaultGanttPlanEndTimeColumnName?: string
+  defaultGanttRealStartTimeColumnName?: string
+  defaultGanttRealEndTimeColumnName?: string
 }
 
 export interface TableCommonColumnProps {
@@ -236,11 +240,9 @@ export interface TableCommonColumnProps {
   fixed?: boolean
   width?: number
   hide?: boolean
-  planStart?: boolean
-  planEnd?: boolean
-  realStart?: boolean
-  realEnd?: boolean
   styles?: { [key: string]: string }
+  // Header column classification
+  categoryTitle?: string
   // Overwrite the value of TableColumnProps
   render?: (record: { [key: string]: any }, layoutKind: LayoutKind) => any
 }
@@ -277,6 +279,10 @@ export interface TableLayoutKernelProps {
   actionColumnWidth?: number
   ganttShowKind?: GanttShowKind
   ganttTimelineWidth?: number
+  ganttPlanStartTimeColumnName?: string
+  ganttPlanEndTimeColumnName?: string
+  ganttRealStartTimeColumnName?: string
+  ganttRealEndTimeColumnName?: string
 }
 
 export interface TableLayoutProps extends TableLayoutKernelProps {
@@ -330,6 +336,8 @@ export interface TableEventProps {
   newLayout?: (newLayoutProps: TableLayoutKernelProps) => Promise<string>
   modifyLayout?: (changedLayoutId: string, changedLayoutProps: TableLayoutModifyProps) => Promise<boolean>
   deleteLayout?: (deletedLayoutId: string) => Promise<boolean>
+
+  loadHolidays?: (startTime: Date, endTime: Date) => Promise<Date[]>
 }
 
 export interface TableLayoutModifyProps {

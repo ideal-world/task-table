@@ -39,13 +39,13 @@ const props = defineProps<{
   >
     <div
       v-if="props.showSelectColumn"
-      :class="`${props.stylesConf.cellClass} iw-list-cell flex justify-center items-center bg-base-100 border-l border-l-base-300 whitespace-nowrap flex-nowrap`"
+      :class="`${props.stylesConf.cellClass} iw-list-cell flex justify-center items-center bg-base-100 whitespace-nowrap flex-nowrap`"
       :style="props.setColumnStyles(-1)"
     >
       <input type="checkbox" class="iw-row-select-cell__chk iw-checkbox iw-checkbox-xs">
     </div>
     <div
-      :class="`${props.stylesConf.cellClass} iw-list-cell iw-data-cell flex items-center bg-base-100 border-l border-l-base-300 whitespace-nowrap flex-nowrap`"
+      :class="`${props.stylesConf.cellClass} iw-list-cell iw-data-cell flex items-center bg-base-100 ${props.showSelectColumn && 'border-l border-l-base-300 '} whitespace-nowrap flex-nowrap`"
       :data-column-name="props.pkColumnName" :style="{ ...props.columnsConf[0].styles, ...props.setColumnStyles(0) }"
     >
       <div v-if="props.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA && props.parentPkColumnName" class="flex justify-end" :style="{ width: `${15 * (row[NODE_DEPTH_FLAG] + 1)}px` }" v-html="renderTreeToggleHandler(props.records[idx + 1] && row[props.pkColumnName] === props.records[idx + 1][props.parentPkColumnName])" />

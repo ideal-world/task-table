@@ -1,6 +1,6 @@
 import * as iconSvg from '../assets/icon'
-import type { AggregateKind, GanttShowKind, TableColumnProps, TableCommonColumnProps, TableDataFilterProps, TableDataGroupProps, TableDataGroupResp, TableDataResp, TableDataSliceProps, TableDataSortProps, TableLayoutColumnProps, TableLayoutKernelProps, TableProps, TableStyleProps } from '../props'
-import { DataKind, LayoutKind, OperatorKind, SizeKind, SubDataShowKind } from '../props'
+import type { AggregateKind, TableColumnProps, TableCommonColumnProps, TableDataFilterProps, TableDataGroupProps, TableDataGroupResp, TableDataResp, TableDataSliceProps, TableDataSortProps, TableLayoutColumnProps, TableLayoutKernelProps, TableProps, TableStyleProps } from '../props'
+import { DataKind, GanttShowKind, LayoutKind, OperatorKind, SizeKind, SubDataShowKind } from '../props'
 
 export interface TableBasicConf {
   id: string
@@ -16,6 +16,10 @@ export interface TableBasicConf {
   defaultShowAggs: boolean
   defaultGanttShowKind?: GanttShowKind
   defaultGanttTimelineWidth: number
+  defaultGanttPlanStartTimeColumnName?: string
+  defaultGanttPlanEndTimeColumnName?: string
+  defaultGanttRealStartTimeColumnName?: string
+  defaultGanttRealEndTimeColumnName?: string
 }
 
 export interface TableCommonColumnConf {
@@ -24,11 +28,8 @@ export interface TableCommonColumnConf {
   fixed: boolean
   width: number
   hide: boolean
-  planStart: boolean
-  planEnd: boolean
-  realStart: boolean
-  realEnd: boolean
   styles: { [key: string]: string }
+  categoryTitle?: string
   render?: (record: { [key: string]: any }, layoutKind: LayoutKind) => any
 }
 
@@ -52,11 +53,8 @@ export function convertCommonColumnPropsToCommonColumnConf(commonColumnProps: Ta
     fixed: commonColumnProps.fixed ?? false,
     width: commonColumnProps.width ?? 200,
     hide: commonColumnProps.hide ?? false,
-    planStart: commonColumnProps.planStart ?? false,
-    planEnd: commonColumnProps.planEnd ?? false,
-    realStart: commonColumnProps.realStart ?? false,
-    realEnd: commonColumnProps.realEnd ?? false,
     styles: commonColumnProps.styles ?? {},
+    categoryTitle: commonColumnProps.categoryTitle,
     render: commonColumnProps.render,
   }
 }
@@ -68,11 +66,8 @@ export function convertCommonColumnConfToCommonColumnProps(commonColumnConf: Tab
     fixed: commonColumnConf.fixed,
     width: commonColumnConf.width,
     hide: commonColumnConf.hide,
-    planStart: commonColumnConf.planStart,
-    planEnd: commonColumnConf.planEnd,
-    realStart: commonColumnConf.realStart,
-    realEnd: commonColumnConf.realEnd,
     styles: commonColumnConf.styles,
+    categoryTitle: commonColumnConf.categoryTitle,
     render: commonColumnConf.render,
   }
 }
@@ -108,8 +103,12 @@ export interface TableLayoutKernelConf {
   showSelectColumn: boolean
   actionColumnRender?: (record: { [key: string]: any }, layoutKind: LayoutKind) => any
   actionColumnWidth: number
-  ganttShowKind?: GanttShowKind
+  ganttShowKind: GanttShowKind
   ganttTimelineWidth: number
+  ganttPlanStartTimeColumnName?: string
+  ganttPlanEndTimeColumnName?: string
+  ganttRealStartTimeColumnName?: string
+  ganttRealEndTimeColumnName?: string
 
   data?: TableDataResp | TableDataGroupResp[]
   selectedDataPks: any[]
@@ -132,8 +131,12 @@ export function convertTableLayoutKernelPropsToTableLayoutKernelConf(props: Tabl
     showSelectColumn: props.showSelectColumn ?? basicConf.defaultShowSelectColumn,
     actionColumnRender: props.actionColumnRender ?? basicConf.defaultActionColumnRender,
     actionColumnWidth: props.actionColumnWidth ?? basicConf.defaultActionColumnWidth,
-    ganttShowKind: props.ganttShowKind ?? basicConf.defaultGanttShowKind,
+    ganttShowKind: props.ganttShowKind ?? basicConf.defaultGanttShowKind ?? GanttShowKind.DAY,
     ganttTimelineWidth: props.ganttTimelineWidth ?? basicConf.defaultGanttTimelineWidth,
+    ganttPlanStartTimeColumnName: props.ganttPlanStartTimeColumnName ?? basicConf.defaultGanttPlanStartTimeColumnName,
+    ganttPlanEndTimeColumnName: props.ganttPlanEndTimeColumnName ?? basicConf.defaultGanttPlanEndTimeColumnName,
+    ganttRealStartTimeColumnName: props.ganttRealStartTimeColumnName ?? basicConf.defaultGanttRealStartTimeColumnName,
+    ganttRealEndTimeColumnName: props.ganttRealEndTimeColumnName ?? basicConf.defaultGanttRealEndTimeColumnName,
     selectedDataPks: [],
   }
 }
@@ -152,11 +155,8 @@ export function convertTableLayoutColumnPropsToTableLayoutColumnConf(layoutColum
     fixed: layoutColumnProps.fixed ?? tableColumnConf.fixed,
     width: layoutColumnProps.width ?? tableColumnConf.width,
     hide: layoutColumnProps.hide ?? tableColumnConf.hide,
-    planStart: layoutColumnProps.planStart ?? tableColumnConf.planStart,
-    planEnd: layoutColumnProps.planEnd ?? tableColumnConf.planEnd,
-    realStart: layoutColumnProps.realStart ?? tableColumnConf.realStart,
-    realEnd: layoutColumnProps.realEnd ?? tableColumnConf.realEnd,
     styles: layoutColumnProps.styles ?? tableColumnConf.styles,
+    categoryTitle: layoutColumnProps.categoryTitle ?? tableColumnConf.categoryTitle,
     render: layoutColumnProps.render ?? tableColumnConf.render,
   }
 }
@@ -374,6 +374,10 @@ export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]]
     defaultShowAggs: props.defaultShowAggs ?? false,
     defaultGanttShowKind: props.defaultGanttShowKind,
     defaultGanttTimelineWidth: props.defaultGanttTimelineWidth ?? 400,
+    defaultGanttPlanStartTimeColumnName: props.defaultGanttPlanStartTimeColumnName,
+    defaultGanttPlanEndTimeColumnName: props.defaultGanttPlanEndTimeColumnName,
+    defaultGanttRealStartTimeColumnName: props.defaultGanttRealStartTimeColumnName,
+    defaultGanttRealEndTimeColumnName: props.defaultGanttRealEndTimeColumnName,
   }
   const layoutsConf: TableLayoutConf[] = []
   props.layouts.forEach((layout) => {

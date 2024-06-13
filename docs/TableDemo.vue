@@ -13,8 +13,8 @@ const STATS_DICT = [{ title: '初始化', value: 'init', color: '#43ad7f7f' }, {
 
 const DATA: { [key: string]: any }[] = [
   { no: 1, pno: null, name: 'v1.0优化任务集合', creator: 'xh', stats: ['init'], planStartTime: Date.now(), planEndTime: '2024-01-24' },
-  { no: 2, pno: null, name: '测试报告导出', creator: 'xh', stats: ['init'], planStartTime: '2023-09-14', planEndTime: '2024-09-24', realStartTime: '2023-09-15', realEndTime: '2023-09-24' },
-  { no: 3, pno: 1, name: '平台支持修改工程下默认分支', creator: 'xh', stats: ['progress', 'risk'], planStartTime: '2023-10-25', planEndTime: '2024-11-24' },
+  { no: 2, pno: null, name: '测试报告导出', creator: 'xh', stats: ['init'], planStartTime: '2023-09-14', planEndTime: '2024-01-30', realStartTime: '2023-09-15', realEndTime: '2023-09-24' },
+  { no: 3, pno: 1, name: '平台支持修改工程下默认分支', creator: 'xh', stats: ['progress', 'risk'], planStartTime: '2023-10-25', planEndTime: '2024-01-29' },
   { no: 4, pno: 1, name: '工作项优化', creator: 'xh', stats: ['init'], planStartTime: '2023-10-26', planEndTime: '2023-11-25' },
   { no: 5, pno: 1, name: '作业执行日志实时获取并增加搜索和支持定位', creator: 'xh', stats: ['init'], planStartTime: '2023-10-27', planEndTime: '2023-11-30' },
   { no: 6, pno: null, name: '制品文件支持下载和删除', creator: 'xh', stats: ['init'], planStartTime: '2023-10-28', planEndTime: '2023-11-28' },
@@ -58,8 +58,8 @@ const columns = [
   { name: 'stats', title: '状态', useDict: true, dictEditable: true, multiValue: true, sortable: true, groupable: true },
   { name: 'planStartTime', title: '计划开始时间', dataKind: DataKind.DATETIME, sortable: true },
   { name: 'planEndTime', title: '计划结束时间', dataKind: DataKind.DATETIME, sortable: true },
-  { name: 'realStartTime', title: '实现开始时间', dataKind: DataKind.DATETIME, sortable: true },
-  { name: 'realEndTime', title: '实现结束时间', dataKind: DataKind.DATETIME, sortable: true },
+  { name: 'realStartTime', title: '实际开始时间', dataKind: DataKind.DATETIME, sortable: true },
+  { name: 'realEndTime', title: '实际结束时间', dataKind: DataKind.DATETIME, sortable: true },
 ]
 
 const layouts = [{
@@ -97,6 +97,30 @@ const layouts = [{
     name: 'planStartTime',
   }, {
     name: 'planEndTime',
+  }, {
+    name: 'realStartTime',
+  }, {
+    name: 'realEndTime',
+  }],
+  aggs: { name: AggregateKind.MIN },
+}, {
+  id: 'hi3',
+  title: 'multiple header demo',
+  layoutKind: LayoutKind.LIST,
+  columns: [{
+    name: 'name',
+  }, {
+    name: 'creator',
+  }, {
+    name: 'stats',
+  }, {
+    name: 'no',
+  }, {
+    name: 'planStartTime',
+    categoryTitle: 'Time',
+  }, {
+    name: 'planEndTime',
+    categoryTitle: 'Time',
   }, {
     name: 'realStartTime',
   }, {
@@ -467,6 +491,42 @@ const events: TableEventProps = {
     return true
   },
 
+  loadHolidays: async (_startTime: Date, _endTime: Date): Promise<Date[]> => {
+    return [
+      new Date('2023-10-01'),
+      new Date('2023-10-07'),
+      new Date('2023-10-08'),
+      new Date('2023-10-14'),
+      new Date('2023-10-15'),
+      new Date('2023-10-21'),
+      new Date('2023-10-22'),
+      new Date('2023-10-28'),
+      new Date('2023-10-29'),
+      new Date('2023-11-04'),
+      new Date('2023-11-05'),
+      new Date('2023-11-11'),
+      new Date('2023-11-12'),
+      new Date('2023-11-18'),
+      new Date('2023-11-19'),
+      new Date('2023-11-25'),
+      new Date('2023-11-26'),
+      new Date('2023-12-02'),
+      new Date('2023-12-03'),
+      new Date('2023-12-09'),
+      new Date('2023-12-10'),
+      new Date('2023-12-16'),
+      new Date('2023-12-17'),
+      new Date('2023-12-23'),
+      new Date('2023-12-24'),
+      new Date('2023-12-30'),
+      new Date('2023-12-21'),
+      new Date('2024-01-06'),
+      new Date('2024-01-07'),
+      new Date('2024-01-13'),
+      new Date('2024-01-14'),
+    ]
+  },
+
   loadCellDictItems: async (columnName: string, filterValue?: any, slice?: TableDataQuerySliceProps): Promise<TableCellDictItemsResp> => {
     if (columnName === 'name') {
       let nameDict: TableCellDictItemProps[] = JSON.parse(JSON.stringify(NAME_DICT))
@@ -552,6 +612,8 @@ const tableProps: Ref<TableProps> = ref({
   defaultActionColumnWidth: 100,
   defaultShowAggs: true,
   defaultGanttTimelineWidth: 300,
+  defaultGanttPlanStartTimeColumnName: 'planStartTime',
+  defaultGanttPlanEndTimeColumnName: 'planEndTime',
 })
 
 onMounted(() => {
@@ -561,8 +623,7 @@ onMounted(() => {
   IwUtils.delegateEvent('.iw-tt', 'click', '.btn-row-copy', (e) => {
     IwEvents.copyData([(e.target as HTMLElement).dataset.id])
   })
-},
-)
+})
 </script>
 
 <template>
