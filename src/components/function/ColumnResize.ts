@@ -1,19 +1,12 @@
-<script setup lang="ts">
-import { onMounted } from 'vue';
-import type { TableLayoutModifyProps } from '../../props';
-import { type CachedColumnConf, convertLayoutColumnConfToLayoutColumnProps } from '../conf';
-import * as eb from '../eventbus';
-
-const props = defineProps<{
-  columnsConf: CachedColumnConf[]
-}>()
+import type { TableLayoutModifyProps } from '../../props'
+import { type CachedColumnConf, convertLayoutColumnConfToLayoutColumnProps } from '../conf'
+import * as eb from '../eventbus'
 
 let currColumnName = ''
 let currCellRect: DOMRect
 let isDragging = false
 
-onMounted(() => {
-  const listHeaderEle = document.getElementsByClassName('iw-column-header')[0] as HTMLElement
+export function init(headerEle: HTMLElement, columnsConf: CachedColumnConf[]) {
   const dragDiv = document.createElement('div')
   dragDiv.style.position = 'fixed'
   dragDiv.style.display = 'none'
@@ -25,7 +18,7 @@ onMounted(() => {
   subDragDiv.style.flex = '1'
   subDragDiv.classList.add('bg-base-300')
   dragDiv.appendChild(subDragDiv)
-  listHeaderEle.appendChild(dragDiv)
+  headerEle.appendChild(dragDiv)
 
   dragDiv.addEventListener('pointerdown', (event: PointerEvent) => {
     isDragging = true
@@ -39,7 +32,7 @@ onMounted(() => {
     const targetEle = e.target as HTMLElement
     targetEle.releasePointerCapture(e.pointerId)
 
-    const curColumnConf = props.columnsConf.find(item => item.name === currColumnName)
+    const curColumnConf = columnsConf.find(item => item.name === currColumnName)
     if (curColumnConf) {
       const changedLayoutReq: TableLayoutModifyProps = {
         changedColumn: {
@@ -56,12 +49,12 @@ onMounted(() => {
 
     dragDiv.style.left = `${(event as MouseEvent).clientX - 12}px`
     const newWidth = (event as MouseEvent).clientX - currCellRect.left
-    const columnConf = props.columnsConf.find(col => col.name === currColumnName)
+    const columnConf = columnsConf.find(col => col.name === currColumnName)
     if (columnConf)
       columnConf.width = newWidth
   })
 
-  listHeaderEle.addEventListener('pointermove', (event) => {
+  headerEle.addEventListener('pointermove', (event) => {
     const targetEle = event.target as HTMLElement
     if (!targetEle.classList.contains('iw-column-header-cell'))
       return
@@ -78,9 +71,4 @@ onMounted(() => {
       currCellRect = targetEleRect
     }
   })
-})
-</script>
-
-<template>
-  <div />
-</template>
+}

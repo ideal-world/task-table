@@ -147,5 +147,13 @@
     "columnWrap": {
       "title": "Break words"
     }
+  },
+  "gantt": {
+    "kind": {
+      "DAY": "Day",
+      "WEEK": "Week",
+      "MONTH": "Month",
+      "YEAR": "Year"
+    }
   }
 }

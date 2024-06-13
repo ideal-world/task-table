@@ -147,5 +147,13 @@
     "columnWrap": {
       "title": "换行"
     }
+  },
+  "gantt": {
+    "kind": {
+      "DAY": "日",
+      "WEEK": "周",
+      "MONTH": "月",
+      "YEAR": "年"
+    }
   }
 }

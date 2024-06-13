@@ -44,10 +44,15 @@ const DATA: { [key: string]: any }[] = [
 ]
 
 const columns = [
-  { name: 'no', title: 'ID', dataKind: DataKind.NUMBER, dataEditable: false, sortable: true },
+  { name: 'no', title: 'ID', dataKind: DataKind.NUMBER, dataEditable: false, sortable: true, width: 80, styles: { cursor: 'pointer' } },
   { name: 'pno', title: '父ID', dataKind: DataKind.NUMBER, dataEditable: false, hide: true },
-  { name: 'name', title: '名称', sortable: true, width: 300, render: (record: { [key: string]: any }, _layoutKind: LayoutKind) => {
-    return record.stats.includes('risk') ? `<span style='color:red'>${record.name}</span>` : record.name
+  { name: 'name', title: '名称', sortable: true, width: 300, render: (record: { [key: string]: any }, layoutKind: LayoutKind) => {
+    if (layoutKind === LayoutKind.LIST) {
+      return record.stats.includes('risk') ? `<span style='color:red'>${record.name}</span>` : record.name
+    }
+    else {
+      return record.name
+    }
   } },
   { name: 'creator', title: '创建人', useDict: true, dictEditable: true, sortable: true, groupable: true },
   { name: 'stats', title: '状态', useDict: true, dictEditable: true, multiValue: true, sortable: true, groupable: true },
@@ -58,8 +63,27 @@ const columns = [
 ]
 
 const layouts = [{
-  id: 'hi',
-  title: 'HI',
+  id: 'hi1',
+  title: 'gantt demo',
+  layoutKind: LayoutKind.GANTT,
+  columns: [{
+    name: 'name',
+  }, {
+    name: 'creator',
+  }, {
+    name: 'no',
+  }, {
+    name: 'planStartTime',
+  }, {
+    name: 'planEndTime',
+  }, {
+    name: 'realStartTime',
+  }, {
+    name: 'realEndTime',
+  }],
+}, {
+  id: 'hi2',
+  title: 'list demo',
   layoutKind: LayoutKind.LIST,
   columns: [{
     name: 'name',
@@ -69,8 +93,6 @@ const layouts = [{
     name: 'creator',
   }, {
     name: 'no',
-    width: 80,
-    styles: { cursor: 'pointer' },
   }, {
     name: 'planStartTime',
   }, {
@@ -84,7 +106,7 @@ const layouts = [{
 }]
 
 function getDictValue(columnName: string, dataValue: any) {
-  if (columnName === 'name') {
+  if (columnName === 'creator') {
     return NAME_DICT.find(dict => dict.value === dataValue)!.title
   }
   else if (columnName === 'stats') {
@@ -97,8 +119,8 @@ function getDictValue(columnName: string, dataValue: any) {
 
 function attachDict(data: { [key: string]: any }[]) {
   return data.map((d) => {
-    if (d.name) {
-      d[`name${DATA_DICT_POSTFIX}`] = [NAME_DICT.find(dict => dict.value === d.name)!]
+    if (d.creator) {
+      d[`creator${DATA_DICT_POSTFIX}`] = [NAME_DICT.find(dict => dict.value === d.creator)!]
     }
     if (d.stats) {
       d[`stats${DATA_DICT_POSTFIX}`] = d.stats.map((s) => { return STATS_DICT.find(dict => dict.value === s)! })
@@ -527,7 +549,8 @@ const tableProps: Ref<TableProps> = ref({
   defaultActionColumnRender: (record: { [key: string]: any }, _layoutKind: LayoutKind) => {
     return `<button class="btn-row-delete" style="margin-right:2px" data-id='${record.no}'>删除</button> <button class="btn-row-copy" data-id='${record.no}'>复制</button>`
   },
-  defaultActionColumnWidth: 200,
+  defaultActionColumnWidth: 100,
+  defaultGanttTimelineWidth: 300
 })
 
 onMounted(() => {

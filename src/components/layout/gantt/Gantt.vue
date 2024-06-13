@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import type { Ref } from 'vue'
 import { computed, onMounted, ref } from 'vue'
-import type { TableDataResp } from '../../../props'
 import { DataKind, SubDataShowKind } from '../../../props'
 import type { CachedColumnConf, TableBasicConf, TableLayoutConf } from '../../conf'
 import { registerCellClickListener } from '../../function/CellClick'
 import PaginationComp from '../../function/Pagination.vue'
 import RowSelectComp from '../../function/RowSelect.vue'
 import { registerTreeRowToggleListener } from '../../function/RowTree'
+import HeaderComp from './GanttHeader.vue'
+import RowsComp from './GanttRows.vue'
+import type { GanttInfo } from './gantt'
 
 const props = defineProps<
   {
@@ -15,10 +17,11 @@ const props = defineProps<
     basic: TableBasicConf
   }
 >()
-const listCompRef: Ref<HTMLDivElement | null> = ref(null)
+const ganttCompRef: Ref<HTMLDivElement | null> = ref(null)
+const tableCompRef: Ref<HTMLElement | null> = ref(null)
+const ganttInfo: Ref<GanttInfo> = ref()
 
 const COLUMN_SELECT_WIDTH = props.layout.showSelectColumn ? 25 : 0
-const COLUMN_ACTION_WIDTH = props.layout.actionColumnRender ? props.layout.actionColumnWidth : 0
 
 const pkKindIsNumber = props.basic.columns.some(col => col.name === props.basic.pkColumnName && [DataKind.NUMBER, DataKind.SERIAL].includes(col.dataKind))
 
@@ -33,13 +36,16 @@ const columnsWithoutHideConf = computed<CachedColumnConf[]>(() => {
 
 function setColumnStyles(colIdx: number) {
 // ColIdx of select column = -1
-// ColIdx of action column = -2
+// ColIdx of gantt timeline column = -2
   const styles: any = {}
-  if (colIdx === -1) {
+  if (colIdx === 0) {
+    styles.width = `${tableCompRef.value?.offsetWidth - props.layout.ganttTimelineWidth}px`
+  }
+  else if (colIdx === -1) {
     styles.width = `${COLUMN_SELECT_WIDTH}px`
   }
   else if (colIdx === -2) {
-    styles.width = `${COLUMN_ACTION_WIDTH}px`
+    styles.width = `${props.layout.ganttTimelineWidth}px`
   }
   else {
     styles.width = `${columnsWithoutHideConf.value[colIdx].width}px`
@@ -47,27 +53,27 @@ function setColumnStyles(colIdx: number) {
   return styles
 }
 
-function setTableWidth() {
+function setListWidth() {
   const styles: any = {}
   // 2px for border
-  styles.width = `${props.layout.columns.filter(column => !column.hide).reduce((count, col) => count + col.width, COLUMN_SELECT_WIDTH + COLUMN_ACTION_WIDTH + 2)}px`
+  styles.width = `${props.layout.columns.filter(column => !column.hide).reduce((count, col) => count + col.width, COLUMN_SELECT_WIDTH + 2)}px`
   return styles
 }
 
 onMounted(() => {
-  props.layout.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA && registerTreeRowToggleListener(listCompRef.value!)
-  registerCellClickListener(listCompRef.value!)
+  props.layout.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA && registerTreeRowToggleListener(ganttCompRef.value!)
+  registerCellClickListener(ganttCompRef.value!)
+  tableCompRef.value = ganttCompRef.value?.closest('.iw-tt-table') as HTMLElement
 })
 </script>
 
 <template>
   <div
-    ref="listCompRef"
-    :class="`iw-list relative iw-list--size${props.basic.styles.size}`"
-    :style="setTableWidth()"
+    ref="ganttCompRef"
+    :class="`iw-gantt iw-row-select-container relative iw-gantt--size${props.basic.styles.size}`"
   >
-    <HeaderComp :columns-conf="columnsWithoutHideConf" :layout="props.layout" :basic="props.basic" :set-column-styles="setColumnStyles" />
-    <template v-if="props.layout.data && !Array.isArray(props.layout.data)">
+    <HeaderComp :columns-conf="columnsWithoutHideConf" :layout="props.layout" :basic="props.basic" :set-column-styles="setColumnStyles" :set-list-width="setListWidth" :gantt-info="ganttInfo" />
+    <!-- <template v-if="props.layout.data && !Array.isArray(props.layout.data)">
       <RowsComp
         :records="props.layout.data.records"
         :pk-column-name="props.basic.pkColumnName"
@@ -82,31 +88,9 @@ onMounted(() => {
         :action-column-render="props.layout.actionColumnRender"
         :set-column-styles="setColumnStyles"
       />
-      <ColumnAggsComp
-        v-if="layout.aggs"
-        :layout-id="props.layout.id"
-        :layout-aggs="layout.aggs"
-        :data-basic="layout.data as TableDataResp"
-        :show-select-column="layout.showSelectColumn"
-        :show-action-column="layout.actionColumnRender !== undefined"
-        :columns-conf="columnsWithoutHideConf" :styles-conf="props.basic.styles"
-        :set-column-styles="setColumnStyles"
-      />
     </template>
     <template v-else-if="props.layout.data && Array.isArray(props.layout.data)">
       <template v-for="groupData in props.layout.data" :key="`${props.layout.id}-${groupData.groupValue}`">
-        <ColumnAggsComp
-          v-if="layout.aggs"
-          :layout-id="props.layout.id"
-          :layout-aggs="layout.aggs"
-          :data-basic="groupData"
-          :show-select-column="layout.showSelectColumn"
-          :show-action-column="layout.actionColumnRender !== undefined"
-          :columns-conf="columnsWithoutHideConf" :styles-conf="props.basic.styles"
-          :group-column-name="props.layout.group?.columnName"
-          :group-value="groupData.groupShowTitle ?? groupData.groupValue"
-          :set-column-styles="setColumnStyles"
-        />
         <RowsComp
           :records="groupData.records"
           :pk-column-name="props.basic.pkColumnName"
@@ -127,7 +111,7 @@ onMounted(() => {
           <PaginationComp :default-slice="layout.defaultSlice" :group-slices="layout.groupSlices" :group-value="groupData.groupValue" :total-number="groupData.totalNumber" />
         </div>
       </template>
-    </template>
+    </template> -->
     <RowSelectComp
       v-if="props.layout.showSelectColumn"
       :selected-pks="props.layout.selectedDataPks" :pk-column-name="props.basic.pkColumnName"
@@ -137,34 +121,34 @@ onMounted(() => {
 </template>
 
 <style lang="css">
-.iw-list--size-xs {
+.iw-gantt--size-xs {
   @apply text-xs;
 
-  .iw-list-cell {
+  .iw-gantt-cell {
     @apply p-0
   }
 }
 
-.iw-list--size-sm {
+.iw-gantt--size-sm {
   @apply text-sm;
 
-  .iw-list-cell {
+  .iw-gantt-cell {
     @apply p-[1px]
   }
 }
 
-.iw-list--size {
+.iw-gantt--size {
   @apply text-base;
 
-  .iw-list-cell {
+  .iw-gantt-cell {
     @apply p-[2px] pl-[4px]
   }
 }
 
-.iw-list--size-lg {
+.iw-gantt--size-lg {
   @apply text-lg;
 
-  .iw-list-cell {
+  .iw-gantt-cell {
     @apply p-1.5
   }
 }

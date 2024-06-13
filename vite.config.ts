@@ -23,7 +23,7 @@ export default defineConfig({
       fileName: format => `task-table.${format}.js`,
     },
     rollupOptions: {
-      external: ['vue', 'vue-i18n', 'octicons-css', 'sortablejs', 'dayjs'],
+      external: ['vue', 'vue-i18n', 'sortablejs', 'dayjs'],
       output: {
         exports: 'named',
         globals: {
@@ -33,9 +33,5 @@ export default defineConfig({
     },
     emptyOutDir: false,
     sourcemap: false,
-  },
-  test: {
-    globals: true,
-    environment: 'happy-dom',
-  },
+  }
 })
