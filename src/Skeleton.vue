@@ -128,7 +128,7 @@ onMounted(async () => {
             <FilterSettingComp :layout-id="layout.id" :filters="layout.filters" :columns-conf="tableBasicConf.columns" />
           </ScrollableComp>
         </div>
-        <div class="iw-tt-table overflow-auto w-full">
+        <div class="iw-tt-table overflow-auto w-full border border-base-300">
           <ListComp v-if="layout.layoutKind === LayoutKind.LIST" :layout="layout" :basic="tableBasicConf" />
           <GanttComp v-else-if="layout.layoutKind === LayoutKind.GANTT" :layout="layout" :basic="tableBasicConf" />
         </div>

@@ -10,11 +10,11 @@ const props = defineProps<{
   pkKindIsNumber: boolean
 }>()
 
-const currentCompRef = ref<HTMLElement | null>(null)
+const currentRef = ref<HTMLElement | null>(null)
 let listEle: HTMLElement
 
 onMounted(() => {
-  listEle = currentCompRef.value!.closest('.iw-row-select-container')! as HTMLElement
+  listEle = currentRef.value!.closest('.iw-row-select-container')! as HTMLElement
   IwUtils.delegateEvent(listEle, 'click', '.iw-row-select-cell__chk', onSelectToggle)
   IwUtils.delegateEvent(listEle, 'click', '.iw-row-select-all-cell__chk', onSelectAllToggle)
 })
@@ -95,5 +95,5 @@ function indeterminateSelect(rowEle: HTMLElement, listEle: HTMLElement) {
 </script>
 
 <template>
-  <div ref="currentCompRef" />
+  <div ref="currentRef" />
 </template>
