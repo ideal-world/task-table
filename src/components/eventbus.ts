@@ -30,6 +30,18 @@ export async function watch() {
   })
 }
 
+const EVENT_EXECUTE_HANDLER: {
+  loadDataAfter: ((data: TableDataResp | TableDataGroupResp[], layoutId: string) => Promise<void>)[]
+} = {
+  loadDataAfter: [],
+}
+
+export function registerLoadDataAfterEvent(event: (data: TableDataResp | TableDataGroupResp[], layoutId: string) => Promise<void>) {
+  EVENT_EXECUTE_HANDLER.loadDataAfter.push(event)
+}
+
+// -------------------
+
 export async function loadData(moreForGroupedValue?: any, returnOnlyAggs?: boolean, layoutId?: string) {
   const layout = layoutId ? tableLayoutsConf.find(layout => layout.id === layoutId)! : tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
@@ -122,6 +134,9 @@ export async function loadData(moreForGroupedValue?: any, returnOnlyAggs?: boole
     showAlert(t('_.event.loadDataInvalidScene'), 2, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
     throw new Error('[events.loadData]  Invalid scene')
   }
+  EVENT_EXECUTE_HANDLER.loadDataAfter.forEach(async (event) => {
+    await event(layout.data!, layout.id)
+  })
 }
 
 export async function newData(newRecords: { [key: string]: any }[]): Promise<boolean> {
@@ -286,6 +301,12 @@ export async function newLayout(newLayoutProps: TableLayoutKernelProps): Promise
     showSelectColumn: newLayoutProps.showSelectColumn,
     actionColumnRender: newLayoutProps.actionColumnRender,
     actionColumnWidth: newLayoutProps.actionColumnWidth,
+    ganttShowKind: newLayoutProps.ganttShowKind,
+    ganttTimelineWidth: newLayoutProps.ganttTimelineWidth,
+    ganttPlanStartTimeColumnName: newLayoutProps.ganttPlanStartTimeColumnName,
+    ganttPlanEndTimeColumnName: newLayoutProps.ganttPlanEndTimeColumnName,
+    ganttRealStartTimeColumnName: newLayoutProps.ganttRealStartTimeColumnName,
+    ganttRealEndTimeColumnName: newLayoutProps.ganttRealEndTimeColumnName,
   }
 
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
@@ -310,6 +331,12 @@ export async function newLayout(newLayoutProps: TableLayoutKernelProps): Promise
     showSelectColumn: newLayoutProps.showSelectColumn,
     actionColumnRender: newLayoutProps.actionColumnRender,
     actionColumnWidth: newLayoutProps.actionColumnWidth,
+    ganttShowKind: newLayoutProps.ganttShowKind,
+    ganttTimelineWidth: newLayoutProps.ganttTimelineWidth,
+    ganttPlanStartTimeColumnName: newLayoutProps.ganttPlanStartTimeColumnName,
+    ganttPlanEndTimeColumnName: newLayoutProps.ganttPlanEndTimeColumnName,
+    ganttRealStartTimeColumnName: newLayoutProps.ganttRealStartTimeColumnName,
+    ganttRealEndTimeColumnName: newLayoutProps.ganttRealEndTimeColumnName,
   })
   tableLayoutsConf.push({
     id: layoutId,
@@ -407,6 +434,19 @@ export async function deleteLayout(deletedLayoutId: string): Promise<boolean> {
   tableLayoutsConf.splice(oldColumnIdx, 1)
   return true
 }
+
+export async function loadHolidays(startTime: Date, endTime: Date): Promise<Date[]> {
+  const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
+
+  if (!events.loadHolidays) {
+    showAlert(t('_.event.notConfigured', { name: 'loadHolidays' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    throw new Error('[events.loadHolidays] Event not Configured')
+  }
+
+  return await events.loadHolidays(startTime, endTime)
+}
+
+// -------------------
 
 const TABLE_DOM_CHANGED_HANDLER: {
   addNodeEvents: ((node: HTMLElement) => void)[]
