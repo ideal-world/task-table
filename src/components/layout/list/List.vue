@@ -6,8 +6,8 @@ import { DataKind, SubDataShowKind } from '../../../props'
 import type { CachedColumnConf, TableBasicConf, TableLayoutConf } from '../../conf'
 import { registerCellClickListener } from '../../function/CellClick'
 import PaginationComp from '../../function/Pagination.vue'
-import { registerTreeRowToggleListener } from '../../function/RowTree'
 import RowSelectComp from '../../function/RowSelect.vue'
+import { registerTreeRowToggleListener } from '../../function/RowTree'
 import ColumnAggsComp from './ListColumnAggs.vue'
 import { setFixedColumnStyles } from './ListColumnFixed.vue'
 import HeaderComp from './ListHeader.vue'
@@ -19,10 +19,10 @@ const props = defineProps<
     basic: TableBasicConf
   }
 >()
-const listCompRef: Ref<HTMLDivElement | null> = ref(null)
+const listRef: Ref<HTMLDivElement | null> = ref(null)
 
-const COLUMN_SELECT_WIDTH = props.layout.showSelectColumn ? 25 : 0
-const COLUMN_ACTION_WIDTH = props.layout.actionColumnRender ? props.layout.actionColumnWidth : 0
+const selectColumnWidth = computed(() => props.layout.showSelectColumn ? 25 : 0)
+const actionColumnWidth = computed(() => props.layout.actionColumnRender ? props.layout.actionColumnWidth : 0)
 
 const pkKindIsNumber = props.basic.columns.some(col => col.name === props.basic.pkColumnName && [DataKind.NUMBER, DataKind.SERIAL].includes(col.dataKind))
 
@@ -40,34 +40,34 @@ function setColumnStyles(colIdx: number) {
 // ColIdx of action column = -2
   const styles: any = {}
   if (colIdx === -1) {
-    styles.width = `${COLUMN_SELECT_WIDTH}px`
+    styles.width = `${selectColumnWidth.value}px`
   }
   else if (colIdx === -2) {
-    styles.width = `${COLUMN_ACTION_WIDTH}px`
+    styles.width = `${actionColumnWidth.value}px`
   }
   else {
     styles.width = `${columnsWithoutHideConf.value[colIdx].width}px`
   }
-  setFixedColumnStyles(styles, colIdx, columnsWithoutHideConf.value, COLUMN_SELECT_WIDTH)
+  setFixedColumnStyles(styles, colIdx, columnsWithoutHideConf.value, selectColumnWidth.value)
   return styles
 }
 
 function setTableWidth() {
   const styles: any = {}
   // 2px for border
-  styles.width = `${props.layout.columns.filter(column => !column.hide).reduce((count, col) => count + col.width, COLUMN_SELECT_WIDTH + COLUMN_ACTION_WIDTH + 2)}px`
+  styles.width = `${props.layout.columns.filter(column => !column.hide).reduce((count, col) => count + col.width, selectColumnWidth.value + actionColumnWidth.value + 2)}px`
   return styles
 }
 
 onMounted(() => {
-  props.layout.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA && registerTreeRowToggleListener(listCompRef.value!)
-  registerCellClickListener(listCompRef.value!)
+  props.layout.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA && registerTreeRowToggleListener(listRef.value!)
+  registerCellClickListener(listRef.value!)
 })
 </script>
 
 <template>
   <div
-    ref="listCompRef"
+    ref="listRef"
     :class="`iw-list iw-row-select-container relative iw-list--size${props.basic.styles.size}`"
     :style="setTableWidth()"
   >
