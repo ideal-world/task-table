@@ -21,12 +21,21 @@ const [_tableBasicConf, _tableLayoutsConf] = initConf(props)
 const tableBasicConf = reactive<TableBasicConf>(_tableBasicConf)
 const tableLayoutsConf = reactive<TableLayoutConf[]>(_tableLayoutsConf)
 const currentLayoutId = ref<string>(tableLayoutsConf[0].id)
+const scrollableCompRefs = ref()
 
 watch(
   () => tableLayoutsConf.length,
-  () => {
-    currentLayoutId.value = tableLayoutsConf[tableLayoutsConf.length - 1] && tableLayoutsConf[tableLayoutsConf.length - 1].id
+  (_newVal, oldVal) => {
+    if (oldVal) {
+      currentLayoutId.value = tableLayoutsConf[tableLayoutsConf.length - 1] && tableLayoutsConf[tableLayoutsConf.length - 1].id
+    }
+    else {
+      currentLayoutId.value = tableLayoutsConf[0] && tableLayoutsConf[0].id
+    }
     setHeight()
+  },
+  {
+    immediate: true,
   },
 )
 
@@ -45,6 +54,15 @@ function setHeight() {
   })
 }
 
+function reSetScrollableWidth(layoutId: string) {
+  const curScrollComp = scrollableCompRefs.value.find((ele: { $el: { dataset: { layoutId: string } } }) => ele.$el.dataset.layoutId === layoutId)
+  setTimeout(() => {
+    if (curScrollComp.$el.children[1].style.width && curScrollComp.$el.children[1].style.width === '0px') {
+      curScrollComp.reSetMainWidth(true)
+    }
+  })
+}
+
 onMounted(async () => {
   setHeight()
   IwUtils.delegateEvent(`#iw-tt-${tableBasicConf.id}`, 'click', '.iw-tt-header__item', (e: Event) => {
@@ -52,6 +70,7 @@ onMounted(async () => {
     const layoutId = target.dataset.layoutId
     if (layoutId) {
       currentLayoutId.value = layoutId
+      reSetScrollableWidth(layoutId)
     }
   })
   await Event.watch()
@@ -124,7 +143,7 @@ onMounted(async () => {
         <div class="iw-tt-toolbar flex items-center h-8 p-0.5">
           <RowSortSettingComp :layout-id="layout.id" :sorts="layout.sorts" :columns-conf="tableBasicConf.columns" />
           <div class="iw-divider iw-divider-horizontal m-0.5" />
-          <ScrollableComp class="flex-1">
+          <ScrollableComp ref="scrollableCompRefs" class="flex-1" :data-layout-id="layout.id">
             <FilterSettingComp :layout-id="layout.id" :filters="layout.filters" :columns-conf="tableBasicConf.columns" />
           </ScrollableComp>
         </div>

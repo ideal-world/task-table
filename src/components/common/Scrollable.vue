@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import * as iconSvg from '../../assets/icon'
 
 const scrollableRef = ref<HTMLElement | null>(null)
@@ -27,6 +27,26 @@ onMounted(() => {
   observer.observe(contentEle)
 })
 
+function reSetMainWidth(reset?: boolean) {
+  if (!reset)
+    return
+
+  const scrollableEle = scrollableRef.value!
+  const mainEle = scrollableMainRef.value!
+
+  mainEle.style.width = `${scrollableEle.offsetWidth - controllerButtonRef.value!.offsetWidth * 2}px`
+
+  const contentEle = scrollableContentRef.value!
+  if (mainEle.offsetWidth <= contentEle.offsetWidth) {
+    showLeftButton.value = true
+    showRightButton.value = true
+  }
+  else {
+    showLeftButton.value = false
+    showRightButton.value = false
+  }
+}
+
 function offsetLeft() {
   const mainEle = scrollableMainRef.value!
   mainEle.scrollLeft = Math.max(mainEle.scrollLeft - 200, 0)
@@ -36,6 +56,10 @@ function offsetRight() {
   const mainEle = scrollableMainRef.value!
   mainEle.scrollLeft = Math.min(mainEle.scrollLeft + 200, mainEle.offsetWidth)
 }
+
+defineExpose({
+  reSetMainWidth,
+})
 </script>
 
 <template>
