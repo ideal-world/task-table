@@ -225,6 +225,7 @@ export interface TableProps {
   defaultShowSelectColumn?: boolean
   defaultActionColumnRender?: (record: { [key: string]: any }, layoutKind: LayoutKind) => any
   defaultActionColumnWidth?: number
+  defaultShowAggs?: boolean
   defaultGanttShowKind?: GanttShowKind
   defaultGanttTimelineWidth?: number
 }

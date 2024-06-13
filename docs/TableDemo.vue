@@ -550,7 +550,8 @@ const tableProps: Ref<TableProps> = ref({
     return `<button class="btn-row-delete" style="margin-right:2px" data-id='${record.no}'>删除</button> <button class="btn-row-copy" data-id='${record.no}'>复制</button>`
   },
   defaultActionColumnWidth: 100,
-  defaultGanttTimelineWidth: 300
+  defaultShowAggs: true,
+  defaultGanttTimelineWidth: 300,
 })
 
 onMounted(() => {

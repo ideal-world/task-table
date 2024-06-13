@@ -13,6 +13,7 @@ export interface TableBasicConf {
   defaultShowSelectColumn: boolean
   defaultActionColumnRender?: (record: { [key: string]: any }, layoutKind: LayoutKind) => any
   defaultActionColumnWidth: number
+  defaultShowAggs: boolean
   defaultGanttShowKind?: GanttShowKind
   defaultGanttTimelineWidth: number
 }
@@ -125,7 +126,7 @@ export function convertTableLayoutKernelPropsToTableLayoutKernelConf(props: Tabl
     filters: props.filters,
     sorts: props.sorts,
     group: props.group,
-    aggs: props.aggs,
+    aggs: props.aggs ?? basicConf.defaultShowAggs ? {} : undefined,
     defaultSlice: props.defaultSlice ?? basicConf.defaultSlice,
     subDataShowKind: props.subDataShowKind ?? SubDataShowKind.FOLD_SUB_DATA,
     showSelectColumn: props.showSelectColumn ?? basicConf.defaultShowSelectColumn,
@@ -370,6 +371,7 @@ export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]]
     defaultShowSelectColumn: props.defaultShowSelectColumn ?? false,
     defaultActionColumnRender: props.defaultActionColumnRender,
     defaultActionColumnWidth: props.defaultActionColumnWidth ?? 100,
+    defaultShowAggs: props.defaultShowAggs ?? false,
     defaultGanttShowKind: props.defaultGanttShowKind,
     defaultGanttTimelineWidth: props.defaultGanttTimelineWidth ?? 400,
   }
