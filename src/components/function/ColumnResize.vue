@@ -1,83 +1,76 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import type { TableLayoutModifyProps } from '../../props';
-import { type CachedColumnConf, convertLayoutColumnConfToLayoutColumnProps } from '../conf';
-import * as eb from '../eventbus';
 
 const props = defineProps<{
-  columnsConf: CachedColumnConf[]
+  resizeItemClass: string
+  resizeItemId?: string
+  resizeContainerClass?: string
+  handleLeft?: boolean
+  setSize: (width: number, itemId?: string) => Promise<void>
 }>()
 
 const columnResizeRef = ref<InstanceType<typeof HTMLElement>>()
 
-let currColumnName = ''
-let currCellRect: DOMRect
+let currItemEle: HTMLElement
 let isDragging = false
 
 onMounted(() => {
-  const listHeaderEle = columnResizeRef.value!.closest('.iw-column-header') as HTMLElement
+  const resizeEle = columnResizeRef.value!.closest(`.${props.resizeContainerClass ?? props.resizeItemClass}`) as HTMLElement
   const dragDiv = document.createElement('div')
   dragDiv.style.position = 'fixed'
   dragDiv.style.display = 'none'
-  dragDiv.style.zIndex = '1000'
+  dragDiv.style.zIndex = '1600'
   dragDiv.style.width = '24px'
   dragDiv.style.padding = '2px 10px'
   dragDiv.style.cursor = 'ew-resize'
   const subDragDiv = document.createElement('div')
   subDragDiv.style.flex = '1'
-  subDragDiv.classList.add('bg-base-300')
+  subDragDiv.classList.add('bg-info')
   dragDiv.appendChild(subDragDiv)
-  listHeaderEle.appendChild(dragDiv)
+  resizeEle.appendChild(dragDiv)
 
-  dragDiv.addEventListener('pointerdown', (event: PointerEvent) => {
+  dragDiv.addEventListener('pointerdown', (e: PointerEvent) => {
     isDragging = true
-    const targetEle = event.target as HTMLElement
-    targetEle.setPointerCapture(event.pointerId)
+    dragDiv.setPointerCapture(e.pointerId)
   })
 
   dragDiv.addEventListener('pointerup', async (e: PointerEvent) => {
     isDragging = false
     dragDiv.style.display = 'none'
-    const targetEle = e.target as HTMLElement
-    targetEle.releasePointerCapture(e.pointerId)
-
-    const curColumnConf = props.columnsConf.find(item => item.name === currColumnName)
-    if (curColumnConf) {
-      const changedLayoutReq: TableLayoutModifyProps = {
-        changedColumn: {
-          ...convertLayoutColumnConfToLayoutColumnProps(curColumnConf),
-        },
-      }
-      await eb.modifyLayout(changedLayoutReq)
-    }
+    dragDiv.releasePointerCapture(e.pointerId)
+    const newWidth = props.handleLeft
+      ? currItemEle.offsetWidth - (e.clientX - currItemEle.getBoundingClientRect().left)
+      : e.clientX - currItemEle.getBoundingClientRect().left
+    const currResizeItemId = props.resizeItemId ? currItemEle.dataset[props.resizeItemId] : undefined
+    await props.setSize(newWidth, currResizeItemId)
   })
 
-  dragDiv.addEventListener('pointermove', (event) => {
+  dragDiv.addEventListener('pointermove', (e) => {
     if (!isDragging)
       return
-
-    dragDiv.style.left = `${(event as MouseEvent).clientX - 12}px`
-    const newWidth = (event as MouseEvent).clientX - currCellRect.left
-    const columnConf = props.columnsConf.find(col => col.name === currColumnName)
-    if (columnConf)
-      columnConf.width = newWidth
+    dragDiv.style.left = `${e.clientX - 12}px`
   })
 
-  listHeaderEle.addEventListener('pointermove', (event) => {
-    const targetEle = event.target as HTMLElement
-    if (!targetEle.classList.contains('iw-column-header-cell'))
+  resizeEle.addEventListener('pointermove', (e) => {
+    if (isDragging)
       return
+
+    const targetEle = (e.target as HTMLElement).closest(`.${props.resizeItemClass}`)
+    if (!targetEle || !(targetEle instanceof HTMLElement)) {
+      return
+    }
 
     isDragging = false
     dragDiv.style.display = 'none'
     const targetEleRect = targetEle.getBoundingClientRect()
-    if (targetEleRect.right - (event as MouseEvent).clientX < 5) {
+    if (!props.handleLeft && targetEleRect.right - e.clientX < 5
+      || props.handleLeft && e.clientX - targetEleRect.left < 5
+    ) {
       dragDiv.style.display = 'flex'
       dragDiv.style.height = `${targetEleRect.height + 6}px`
-      dragDiv.style.left = `${targetEleRect.right - 12}px`
       dragDiv.style.top = `${targetEleRect.top - 4}px`
-      currColumnName = targetEle.dataset.columnName ?? ''
-      currCellRect = targetEleRect
+      dragDiv.style.left = !props.handleLeft ? `${targetEleRect.right - 12}px` : `${targetEleRect.left - 12}px`
+      currItemEle = targetEle
     }
   })
 })

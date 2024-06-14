@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import type { TableLayoutModifyProps } from '../../../props'
 import MenuComp from '../../common/Menu.vue'
-import type { CachedColumnConf, TableBasicConf, TableLayoutConf } from '../../conf'
+import { type CachedColumnConf, type TableBasicConf, type TableLayoutConf, convertLayoutColumnConfToLayoutColumnProps } from '../../conf'
+import * as eb from '../../eventbus'
 import ColumnResizeComp from '../../function/ColumnResize.vue'
 import ColumnFixedComp from './ListColumnFixed.vue'
 import ColumnWrapComp from './ListColumnWrap.vue'
@@ -48,17 +50,30 @@ const cateColumns = computed(() => {
   })
   return cateColumns
 })
+
+async function setNewWidth(newWidth: number, columnName?: string) {
+  const columnConf = props.columnsConf.find(col => col.name === columnName)
+  if (columnConf) {
+    const changedLayoutReq: TableLayoutModifyProps = {
+      changedColumn: {
+        ...convertLayoutColumnConfToLayoutColumnProps(columnConf),
+        width: newWidth,
+      },
+    }
+    await eb.modifyLayout(changedLayoutReq)
+  }
+}
 </script>
 
 <template>
   <div
     ref="headerRef"
-    :class="`${props.basic.styles.headerClass} iw-column-header flex flex-col sticky top-0 z-[1500] bg-base-200 border-b border-b-base-300`"
+    :class="`${props.basic.styles.headerClass} flex flex-col sticky top-0 z-[1500] bg-base-200 border-b border-b-base-300`"
   >
     <div v-if="hasCateColumn" class="flex items-center">
       <div
         v-if="props.layout.showSelectColumn"
-        :class="`${props.basic.styles.cellClass} iw-list-cell iw-column-header-cell flex justify-center items-center bg-base-200`"
+        :class="`${props.basic.styles.cellClass} iw-list-cell flex justify-center items-center bg-base-200`"
         :style="props.setColumnStyles(-1)"
       >
         &nbsp;
@@ -67,44 +82,46 @@ const cateColumns = computed(() => {
         v-for="(cateColumn, colIdx) in cateColumns"
         :key="`${props.layout.id}-${colIdx}`"
         :style="`width:${cateColumn.width}px`"
-        :class="`${props.basic.styles.cellClass} iw-list-cell flex justify-center items-center bg-base-200 ${cateColumn.title && 'border-b border-b-base-300'} ${(colIdx !== 0 || props.layout.showSelectColumn) && 'border-l border-l-base-300'}`"
+        :title="cateColumn.title"
+        :class="`${props.basic.styles.cellClass} iw-list-cell flex justify-center items-center bg-base-200 ${cateColumn.title && 'border-b border-b-base-300'} ${(colIdx !== 0 || props.layout.showSelectColumn) && 'border-l border-l-base-300'} whitespace-nowrap overflow-hidden text-ellipsis flex-nowrap`"
       >
         {{ cateColumn.title ? cateColumn.title : '&nbsp;' }}
       </div>
       <div
         v-if="props.layout.actionColumnRender"
-        :class="`${props.basic.styles.cellClass} iw-list-cell iw-column-header-cell flex justify-center items-center bg-base-200 border-l border-l-base-300`"
+        :class="`${props.basic.styles.cellClass} iw-list-cell flex justify-center items-center bg-base-200 border-l border-l-base-300`"
         :style="props.setColumnStyles(-2)"
       >
         &nbsp;
       </div>
     </div>
-    <div class="flex items-center">
+    <div class="iw-column-header flex items-center">
       <div
         v-if="props.layout.showSelectColumn"
-        :class="`${props.basic.styles.cellClass} iw-list-cell iw-column-header-cell flex justify-center items-center bg-base-200`"
+        :class="`${props.basic.styles.cellClass} iw-list-cell flex justify-center items-center bg-base-200`"
         :style="props.setColumnStyles(-1)"
       >
         <input type="checkbox" class="iw-row-select-all-cell__chk iw-checkbox iw-checkbox-xs">
       </div>
       <div
         v-for="(column, colIdx) in columnsConf" :key="`${props.layout.id}-${column.name}`"
-        :class="`${props.basic.styles.cellClass} iw-list-cell iw-column-header-cell ${column.name !== props.basic.pkColumnName ? 'iw-list-header-normal-cell' : ''} flex items-center bg-base-200 ${(colIdx !== 0 || props.layout.showSelectColumn) && 'border-l border-l-base-300'} hover:cursor-pointer`"
+        :class="`${props.basic.styles.cellClass} iw-list-cell iw-resize-item ${column.name !== props.basic.pkColumnName ? 'iw-list-header-normal-cell' : ''} flex items-center bg-base-200 ${(colIdx !== 0 || props.layout.showSelectColumn) && 'border-l border-l-base-300'} whitespace-nowrap overflow-hidden text-ellipsis flex-nowrap hover:cursor-pointer`"
         :data-column-name="column.name"
         :style="props.setColumnStyles(colIdx)"
+        :title="column.title"
         @click="(event: MouseEvent) => showHeaderContextMenu(event, column.name)"
       >
         <i :class="`${column.icon} mr-1`" /> {{ column.title }}
       </div>
       <div
         v-if="props.layout.actionColumnRender"
-        :class="`${props.basic.styles.cellClass} iw-list-cell iw-column-header-cell flex justify-center items-center bg-base-200 border-l border-l-base-300`"
+        :class="`${props.basic.styles.cellClass} iw-list-cell flex justify-center items-center bg-base-200 border-l border-l-base-300`"
         :style="props.setColumnStyles(-2)"
       >
         {{ $t('layout.action.title') }}
       </div>
+      <ColumnResizeComp resize-item-class="iw-resize-item" resize-item-id="columnName" resize-container-class="iw-column-header" :set-size="setNewWidth" />
     </div>
-    <ColumnResizeComp :columns-conf="columnsConf" />
   </div>
   <MenuComp ref="headerMenuCompRef" class="text-sm">
     <template v-if="selectedColumnConf">
