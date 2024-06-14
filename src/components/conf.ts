@@ -18,8 +18,8 @@ export interface TableBasicConf {
   defaultGanttTimelineWidth: number
   defaultGanttPlanStartTimeColumnName?: string
   defaultGanttPlanEndTimeColumnName?: string
-  defaultGanttRealStartTimeColumnName?: string
-  defaultGanttRealEndTimeColumnName?: string
+  defaultGanttActualStartTimeColumnName?: string
+  defaultGanttActualEndTimeColumnName?: string
 }
 
 export interface TableCommonColumnConf {
@@ -107,8 +107,8 @@ export interface TableLayoutKernelConf {
   ganttTimelineWidth: number
   ganttPlanStartTimeColumnName?: string
   ganttPlanEndTimeColumnName?: string
-  ganttRealStartTimeColumnName?: string
-  ganttRealEndTimeColumnName?: string
+  ganttActualStartTimeColumnName?: string
+  ganttActualEndTimeColumnName?: string
 
   data?: TableDataResp | TableDataGroupResp[]
   selectedDataPks: any[]
@@ -135,8 +135,8 @@ export function convertTableLayoutKernelPropsToTableLayoutKernelConf(props: Tabl
     ganttTimelineWidth: props.ganttTimelineWidth ?? basicConf.defaultGanttTimelineWidth,
     ganttPlanStartTimeColumnName: props.ganttPlanStartTimeColumnName ?? basicConf.defaultGanttPlanStartTimeColumnName,
     ganttPlanEndTimeColumnName: props.ganttPlanEndTimeColumnName ?? basicConf.defaultGanttPlanEndTimeColumnName,
-    ganttRealStartTimeColumnName: props.ganttRealStartTimeColumnName ?? basicConf.defaultGanttRealStartTimeColumnName,
-    ganttRealEndTimeColumnName: props.ganttRealEndTimeColumnName ?? basicConf.defaultGanttRealEndTimeColumnName,
+    ganttActualStartTimeColumnName: props.ganttActualStartTimeColumnName ?? basicConf.defaultGanttActualStartTimeColumnName,
+    ganttActualEndTimeColumnName: props.ganttActualEndTimeColumnName ?? basicConf.defaultGanttActualEndTimeColumnName,
     selectedDataPks: [],
   }
 }
@@ -376,8 +376,8 @@ export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]]
     defaultGanttTimelineWidth: props.defaultGanttTimelineWidth ?? 400,
     defaultGanttPlanStartTimeColumnName: props.defaultGanttPlanStartTimeColumnName,
     defaultGanttPlanEndTimeColumnName: props.defaultGanttPlanEndTimeColumnName,
-    defaultGanttRealStartTimeColumnName: props.defaultGanttRealStartTimeColumnName,
-    defaultGanttRealEndTimeColumnName: props.defaultGanttRealEndTimeColumnName,
+    defaultGanttActualStartTimeColumnName: props.defaultGanttActualStartTimeColumnName,
+    defaultGanttActualEndTimeColumnName: props.defaultGanttActualEndTimeColumnName,
   }
   const layoutsConf: TableLayoutConf[] = []
   props.layouts.forEach((layout) => {

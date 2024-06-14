@@ -12,8 +12,8 @@ const NAME_DICT = [{ title: '星航', value: 'xh', avatar: 'https://pic1.zhimg.c
 const STATS_DICT = [{ title: '初始化', value: 'init', color: '#43ad7f7f' }, { title: '进行中', value: 'progress' }, { title: '有风险', value: 'risk', color: '#be14807f' }, { title: '已完成', value: 'finish' }, { title: '已关闭', value: 'close' }]
 
 const DATA: { [key: string]: any }[] = [
-  { no: 1, pno: null, name: 'v1.0优化任务集合', creator: 'xh', stats: ['init'], planStartTime: Date.now(), planEndTime: '2024-01-24' },
-  { no: 2, pno: null, name: '测试报告导出', creator: 'xh', stats: ['init'], planStartTime: '2023-09-14', planEndTime: '2024-01-30', realStartTime: '2023-09-15', realEndTime: '2023-09-24' },
+  { no: 1, pno: null, name: 'v1.0优化任务集合', creator: 'xh', stats: ['init'], planStartTime: '2023-09-10' },
+  { no: 2, pno: null, name: '测试报告导出', creator: 'xh', stats: ['init'], planStartTime: '2023-09-14', planEndTime: '2024-01-30', actualStartTime: '2023-09-15', actualEndTime: '2023-09-24' },
   { no: 3, pno: 1, name: '平台支持修改工程下默认分支', creator: 'xh', stats: ['progress', 'risk'], planStartTime: '2023-10-25', planEndTime: '2024-01-29' },
   { no: 4, pno: 1, name: '工作项优化', creator: 'xh', stats: ['init'], planStartTime: '2023-10-26', planEndTime: '2023-11-25' },
   { no: 5, pno: 1, name: '作业执行日志实时获取并增加搜索和支持定位', creator: 'xh', stats: ['init'], planStartTime: '2023-10-27', planEndTime: '2023-11-30' },
@@ -58,8 +58,8 @@ const columns = [
   { name: 'stats', title: '状态', useDict: true, dictEditable: true, multiValue: true, sortable: true, groupable: true },
   { name: 'planStartTime', title: '计划开始时间', dataKind: DataKind.DATETIME, sortable: true },
   { name: 'planEndTime', title: '计划结束时间', dataKind: DataKind.DATETIME, sortable: true },
-  { name: 'realStartTime', title: '实际开始时间', dataKind: DataKind.DATETIME, sortable: true },
-  { name: 'realEndTime', title: '实际结束时间', dataKind: DataKind.DATETIME, sortable: true },
+  { name: 'actualStartTime', title: '实际开始时间', dataKind: DataKind.DATETIME, sortable: true },
+  { name: 'actualEndTime', title: '实际结束时间', dataKind: DataKind.DATETIME, sortable: true },
 ]
 
 const layouts = [{
@@ -77,9 +77,9 @@ const layouts = [{
   }, {
     name: 'planEndTime',
   }, {
-    name: 'realStartTime',
+    name: 'actualStartTime',
   }, {
-    name: 'realEndTime',
+    name: 'actualEndTime',
   }],
 }, {
   id: 'hi2',
@@ -98,9 +98,9 @@ const layouts = [{
   }, {
     name: 'planEndTime',
   }, {
-    name: 'realStartTime',
+    name: 'actualStartTime',
   }, {
-    name: 'realEndTime',
+    name: 'actualEndTime',
   }],
   aggs: { name: AggregateKind.MIN },
 }, {
@@ -122,9 +122,9 @@ const layouts = [{
     name: 'planEndTime',
     categoryTitle: 'Time',
   }, {
-    name: 'realStartTime',
+    name: 'actualStartTime',
   }, {
-    name: 'realEndTime',
+    name: 'actualEndTime',
   }],
   aggs: { name: AggregateKind.MIN },
 }]
@@ -617,9 +617,11 @@ const tableProps: Ref<TableProps> = ref({
   },
   defaultActionColumnWidth: 100,
   defaultShowAggs: true,
-  defaultGanttTimelineWidth: 300,
+  defaultGanttTimelineWidth: 500,
   defaultGanttPlanStartTimeColumnName: 'planStartTime',
   defaultGanttPlanEndTimeColumnName: 'planEndTime',
+  defaultGanttActualStartTimeColumnName: 'actualStartTime',
+  defaultGanttActualEndTimeColumnName: 'actualEndTime',
 })
 
 onMounted(() => {

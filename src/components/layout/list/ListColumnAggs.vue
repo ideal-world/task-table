@@ -55,7 +55,7 @@ async function changeColumnAggs(aggKind: AggregateKind, colIdx: number) {
     <template v-for="(column, colIdx) in props.columnsConf" :key="`${props.layoutId}-${column.name}`">
       <div
         v-if="colIdx === 0"
-        :class="`${props.styleConf.cellClass} iw-list-cell iw-list-agg-cell flex items-center justify-end pr-1 bg-base-100 border-solid border-b border-b-base-300 border-l border-l-base-300`" :data-column-name="column.name"
+        :class="`${props.styleConf.cellClass} iw-list-cell iw-list-agg-cell flex items-center justify-end pr-1 bg-base-100 border-solid border-b border-b-base-300 border-l border-l-base-300 whitespace-nowrap flex-nowrap`" :data-column-name="column.name"
         :style="props.setColumnStyles(0)"
       >
         <span v-if="props.groupColumnName" class="iw-list-agg-cell__group font-bold flex-grow pl-1">{{ props.groupValue }}</span>
@@ -64,7 +64,7 @@ async function changeColumnAggs(aggKind: AggregateKind, colIdx: number) {
       </div>
       <div
         v-else
-        :class="`${props.styleConf.cellClass} iw-list-cell iw-list-agg-cell cursor-pointer flex items-center justify-end pr-1 bg-base-100 border-solid border-b border-b-base-300 border-l border-l-base-300 hover:bg-base-200`" :data-column-name="column.name"
+        :class="`${props.styleConf.cellClass} iw-list-cell iw-list-agg-cell cursor-pointer flex items-center justify-end pr-1 bg-base-100 border-solid border-b border-b-base-300 border-l border-l-base-300 hover:bg-base-200 whitespace-nowrap flex-nowrap`" :data-column-name="column.name"
         :style="props.setColumnStyles(colIdx)" @click="(event: MouseEvent) => showAggsContextMenu(event, colIdx)"
       >
         <template v-if="props.layoutAggs && props.layoutAggs[column.name]">

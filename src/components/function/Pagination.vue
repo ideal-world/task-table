@@ -13,18 +13,18 @@ const props = defineProps<{
 }>()
 const fetchNumberSelectCompRef = ref<InstanceType<typeof MenuComp>>()
 
-function getRealSlice(): TableDataSliceProps {
+function getActualSlice(): TableDataSliceProps {
   return props.groupValue && props.groupSlices && props.groupSlices[props.groupValue]
     ? props.groupSlices[props.groupValue]
     : props.defaultSlice
 }
 
 function getTotalPage() {
-  return Math.ceil(props.totalNumber / getRealSlice().fetchNumber)
+  return Math.ceil(props.totalNumber / getActualSlice().fetchNumber)
 }
 
 function getCurrentPage() {
-  return Math.ceil(getRealSlice().offsetNumber / getRealSlice().fetchNumber) + 1
+  return Math.ceil(getActualSlice().offsetNumber / getActualSlice().fetchNumber) + 1
 }
 
 function getShowPages(): number[] {
@@ -122,11 +122,11 @@ async function setSlice(newPage?: number, newFetchNumber?: number) {
       <i :class="iconSvg.LAST" />
     </button>
     <button class="iw-btn ml-1 mr-1 iw-btn-xs" @click="(e) => { fetchNumberSelectCompRef?.show(e.target as HTMLElement, MenuOffsetKind.MEDIUM_BOTTOM, MenuSizeKind.MINI) }">
-      {{ getRealSlice().fetchNumber }}
+      {{ getActualSlice().fetchNumber }}
     </button>
     <MenuComp ref="fetchNumberSelectCompRef">
       <div
-        v-for="number in getRealSlice().fetchNumbers" :key="number"
+        v-for="number in getActualSlice().fetchNumbers" :key="number"
         class="p-2 hover:cursor-pointer text-xs"
         @click="setFetchNumber(number)"
       >

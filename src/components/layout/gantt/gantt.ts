@@ -1,6 +1,9 @@
 import dayjs from 'dayjs'
 import weekOfYear from 'dayjs/plugin/weekOfYear'
+import locales from '../../../locales'
 import { GanttShowKind } from '../../../props'
+
+const { t } = locales.global
 
 dayjs.extend(weekOfYear)
 
@@ -8,7 +11,7 @@ export const TIMELINE_COLUMN_WIDTH = 25
 
 export interface GanttInfo {
   timeline: TimelineInfo[]
-  ganttShowKind?: GanttShowKind
+  ganttShowKind: GanttShowKind
 }
 
 export interface TimelineInfo {
@@ -22,48 +25,47 @@ export interface TimelineInfo {
   today?: boolean
 }
 
-export function getStartAndEndDay(records: { [key: string]: any }[], planStartTimeColumnName?: string, planEndTimeColumnName?: string, realStartTimeColumnName?: string, realEndTimeColumnName?: string): { startDate: Date, endDate: Date } {
-  let startDate = new Date('9999-12-31')
-  let endDate = new Date('1970-01-01')
+export function getStartAndEndDay(records: { [key: string]: any }[], planStartTimeColumnName?: string, planEndTimeColumnName?: string, actualStartTimeColumnName?: string, actualEndTimeColumnName?: string): { startDate: Date, endDate: Date } {
+  let timelineStartDate = new Date('9999-12-31')
+  let timelineEndDate = new Date('1970-01-01')
   records.forEach((d) => {
-    if (planStartTimeColumnName && d[planStartTimeColumnName]) {
-      const planDate = d[planStartTimeColumnName] instanceof Date ? d[planStartTimeColumnName] : new Date(d[planStartTimeColumnName])
-      if (startDate > planDate) {
-        startDate = planDate
+    if (planStartTimeColumnName && planEndTimeColumnName) {
+      const startDate = d[planStartTimeColumnName] ? d[planStartTimeColumnName] instanceof Date ? d[planStartTimeColumnName] : new Date(d[planStartTimeColumnName]) : null
+      const endDate = d[planEndTimeColumnName] ? d[planEndTimeColumnName] instanceof Date ? d[planEndTimeColumnName] : new Date(d[planEndTimeColumnName]) : null
+      if (startDate && endDate && startDate > endDate) {
+        throw new Error(t('gantt.error.startDateGreaterThanEndDate', { startDate: dayjs(startDate).format('YYYY-MM-DD HH:mm:ss.SSS'), endDate: dayjs(endDate).format('YYYY-MM-DD HH:mm:ss.SSS') }))
+      }
+      else if (startDate && timelineStartDate > startDate) {
+        timelineStartDate = startDate
+      }
+      else if (endDate && timelineEndDate < endDate) {
+        timelineEndDate = endDate
       }
     }
-    if (planEndTimeColumnName && d[planEndTimeColumnName]) {
-      const planDate = d[planEndTimeColumnName] instanceof Date ? d[planEndTimeColumnName] : new Date(d[planEndTimeColumnName])
-      if (endDate < planDate) {
-        endDate = planDate
+    if (actualStartTimeColumnName && actualEndTimeColumnName) {
+      const startDate = d[actualStartTimeColumnName] ? d[actualStartTimeColumnName] instanceof Date ? d[actualStartTimeColumnName] : new Date(d[actualStartTimeColumnName]) : null
+      const endDate = d[actualEndTimeColumnName] ? d[actualEndTimeColumnName] instanceof Date ? d[actualEndTimeColumnName] : new Date(d[actualEndTimeColumnName]) : null
+      if (startDate && endDate && startDate > endDate) {
+        throw new Error(t('gantt.error.startDateGreaterThanEndDate', { startDate: dayjs(startDate).format('YYYY-MM-DD HH:mm:ss.SSS'), endDate: dayjs(endDate).format('YYYY-MM-DD HH:mm:ss.SSS') }))
       }
-    }
-    if (realStartTimeColumnName && d[realStartTimeColumnName]) {
-      const realDate = d[realStartTimeColumnName] instanceof Date ? d[realStartTimeColumnName] : new Date(d[realStartTimeColumnName])
-      if (startDate > realDate) {
-        startDate = realDate
+      else if (startDate && timelineStartDate > startDate) {
+        timelineStartDate = startDate
       }
-      if (endDate < realDate) {
-        endDate = realDate
-      }
-    }
-    if (realEndTimeColumnName && d[realEndTimeColumnName]) {
-      const realDate = d[realEndTimeColumnName] instanceof Date ? d[realEndTimeColumnName] : new Date(d[realEndTimeColumnName])
-      if (endDate < realDate) {
-        endDate = realDate
+      else if (endDate && timelineEndDate < endDate) {
+        timelineEndDate = endDate
       }
     }
   })
-  if (startDate > endDate || startDate === new Date('9999-12-31') || endDate === new Date('1970-01-01')) {
+  if (timelineStartDate > timelineEndDate || timelineStartDate === new Date('9999-12-31') || timelineEndDate === new Date('1970-01-01')) {
     // Use the previous and next 10 days of the current time
-    startDate = dayjs().subtract(10, 'day').toDate()
-    endDate = dayjs().add(10, 'day').toDate()
+    timelineStartDate = dayjs().subtract(10, 'day').toDate()
+    timelineEndDate = dayjs().add(10, 'day').toDate()
   }
   else {
-    startDate = dayjs(startDate).subtract(10, 'day').toDate()
-    endDate = dayjs(endDate).add(10, 'day').toDate()
+    timelineStartDate = dayjs(timelineStartDate).subtract(10, 'day').toDate()
+    timelineEndDate = dayjs(timelineEndDate).add(10, 'day').toDate()
   }
-  return { startDate, endDate }
+  return { startDate: timelineStartDate, endDate: timelineEndDate }
 }
 
 export function generateTimeline(showKind: GanttShowKind, startDate: Date, endDate: Date, holidays: Date[]): TimelineInfo[] {

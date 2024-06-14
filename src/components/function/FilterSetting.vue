@@ -222,7 +222,7 @@ async function saveFilterGroup() {
     items: selectedFilterGroup.value?.filter(item =>
       item.operator === OperatorKind.IS_EMPTY || item.operator === OperatorKind.NOT_EMPTY || item.values.length > 0,
     ).map((item) => {
-      const realValue = item.operator === OperatorKind.IS_EMPTY || item.operator === OperatorKind.NOT_EMPTY
+      const actualValue = item.operator === OperatorKind.IS_EMPTY || item.operator === OperatorKind.NOT_EMPTY
         ? undefined
         : item.operator === OperatorKind.IN || item.operator === OperatorKind.NOT_IN
           ? item.values
@@ -230,7 +230,7 @@ async function saveFilterGroup() {
       return {
         columnName: item.columnName,
         operator: item.operator,
-        value: realValue,
+        value: actualValue,
       }
     }) ?? [],
   }

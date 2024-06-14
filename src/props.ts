@@ -230,8 +230,8 @@ export interface TableProps {
   defaultGanttTimelineWidth?: number
   defaultGanttPlanStartTimeColumnName?: string
   defaultGanttPlanEndTimeColumnName?: string
-  defaultGanttRealStartTimeColumnName?: string
-  defaultGanttRealEndTimeColumnName?: string
+  defaultGanttActualStartTimeColumnName?: string
+  defaultGanttActualEndTimeColumnName?: string
 }
 
 export interface TableCommonColumnProps {
@@ -281,8 +281,8 @@ export interface TableLayoutKernelProps {
   ganttTimelineWidth?: number
   ganttPlanStartTimeColumnName?: string
   ganttPlanEndTimeColumnName?: string
-  ganttRealStartTimeColumnName?: string
-  ganttRealEndTimeColumnName?: string
+  ganttActualStartTimeColumnName?: string
+  ganttActualEndTimeColumnName?: string
 }
 
 export interface TableLayoutProps extends TableLayoutKernelProps {

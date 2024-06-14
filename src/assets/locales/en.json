@@ -155,7 +155,10 @@
       "MONTH": "Month",
       "YEAR": "Year"
     },
+    "planTimeTitle": "Planned time",
+    "actualTimeTitle": "Actual time",
     "error": {
+      "startDateGreaterThanEndDate": "The start date [{startDate}] is greater than the end date [{endDate}] ",
       "timeColumnNotExist": "Not found the field corresponding to the planned or actual time"
     }
   }

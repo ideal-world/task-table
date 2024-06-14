@@ -8,7 +8,6 @@ import { AlertKind, showAlert } from '../../common/Alert'
 import type { TableBasicConf, TableLayoutConf } from '../../conf'
 import * as eb from '../../eventbus'
 import ColumnResizeComp from '../../function/ColumnResize.vue'
-import PaginationComp from '../../function/Pagination.vue'
 import ListComp from '../list/List.vue'
 import { type GanttInfo, TIMELINE_COLUMN_WIDTH, generateTimeline, getStartAndEndDay } from './gantt'
 import GanttTimelineHeaderComp from './GanttTimelineHeader.vue'
@@ -29,31 +28,48 @@ const ganttInfo: Ref<GanttInfo | null> = ref(null)
 
 async function generateGanttInfo(data: TableDataResp | TableDataGroupResp[]) {
   if ((props.layout.ganttPlanStartTimeColumnName === undefined || props.layout.ganttPlanEndTimeColumnName === undefined)
-    && (props.layout.ganttRealStartTimeColumnName === undefined || props.layout.ganttRealEndTimeColumnName === undefined)) {
+    && (props.layout.ganttActualStartTimeColumnName === undefined || props.layout.ganttActualEndTimeColumnName === undefined)) {
     showAlert(t('gantt.error.timeColumnNotExist'), 2, AlertKind.WARNING, getParentWithClass(ganttRef.value, 'iw-tt')!)
     return
   }
 
   let timelineStartDate: Date | null = null
   let timelineEndDate: Date | null = null
+  let hasError = false
   // Determine the start and end time of the timeline based on the returned data
   if (Array.isArray(data)) {
     data.forEach((groupData) => {
       groupData.records.forEach((d) => {
-        const { startDate, endDate } = getStartAndEndDay(d.records, props.layout.ganttPlanStartTimeColumnName, props.layout.ganttPlanEndTimeColumnName, props.layout.ganttRealStartTimeColumnName, props.layout.ganttRealEndTimeColumnName)
-        if (timelineStartDate === null || startDate < timelineStartDate) {
-          timelineStartDate = startDate
+        try {
+          const { startDate, endDate } = getStartAndEndDay(d.records, props.layout.ganttPlanStartTimeColumnName, props.layout.ganttPlanEndTimeColumnName, props.layout.ganttActualStartTimeColumnName, props.layout.ganttActualEndTimeColumnName)
+          if (timelineStartDate === null || startDate < timelineStartDate) {
+            timelineStartDate = startDate
+          }
+          if (timelineEndDate === null || endDate > timelineEndDate) {
+            timelineEndDate = endDate
+          }
         }
-        if (timelineEndDate === null || endDate > timelineEndDate) {
-          timelineEndDate = endDate
+        catch (e: any) {
+          showAlert(e.message, 2, AlertKind.WARNING, getParentWithClass(ganttRef.value, 'iw-tt')!)
+          hasError = true
         }
       })
     })
   }
   else {
-    const { startDate, endDate } = getStartAndEndDay(data.records, props.layout.ganttPlanStartTimeColumnName, props.layout.ganttPlanEndTimeColumnName, props.layout.ganttRealStartTimeColumnName, props.layout.ganttRealEndTimeColumnName)
-    timelineStartDate = startDate
-    timelineEndDate = endDate
+    try {
+      const { startDate, endDate } = getStartAndEndDay(data.records, props.layout.ganttPlanStartTimeColumnName, props.layout.ganttPlanEndTimeColumnName, props.layout.ganttActualStartTimeColumnName, props.layout.ganttActualEndTimeColumnName)
+      timelineStartDate = startDate
+      timelineEndDate = endDate
+    }
+    catch (e: any) {
+      showAlert(e.message, 2, AlertKind.WARNING, getParentWithClass(ganttRef.value, 'iw-tt')!)
+      hasError = true
+      return
+    }
+  }
+  if (hasError) {
+    return
   }
   // Package timeline information
   const holidays = await eb.loadHolidays(timelineStartDate as Date, timelineEndDate as Date)
@@ -64,7 +80,7 @@ async function generateGanttInfo(data: TableDataResp | TableDataGroupResp[]) {
   }
 }
 
-function getTimelineRealWidth() {
+function getTimelineActualWidth() {
   const styles: any = {}
   styles.width = `${ganttInfo.value!.timeline.length * TIMELINE_COLUMN_WIDTH}px`
   return styles
@@ -72,10 +88,10 @@ function getTimelineRealWidth() {
 
 onMounted(() => {
   // Remove aggregation & action bar functions in this layout
-  props.layout.aggs = undefined
   props.layout.actionColumnRender = undefined
   props.layout.columns.map((col) => {
     col.categoryTitle = ''
+    col.wrap = false
     return col
   })
   ganttWith.value = ganttRef.value!.offsetWidth
@@ -105,13 +121,13 @@ async function setNewWidth(newWidth: number, _itemId?: string) {
       <ListComp :layout="props.layout" :basic="props.basic" />
     </div>
     <div
-      class="iw-gantt-timeline-container overflow-auto border-l border-l-base-300 border-l-2"
+      class="iw-gantt-timeline-container overflow-auto border-l-2 border-l-base-300"
       :style="`width: ${props.layout.ganttTimelineWidth}px`"
     >
       <div
         v-if="ganttInfo"
         :class="`iw-gantt-timeline relative iw-gantt-timeline--size${props.basic.styles.size}`"
-        :style="getTimelineRealWidth()"
+        :style="getTimelineActualWidth()"
       >
         <GanttTimelineHeaderComp :gantt-info="ganttInfo" :layout-id="props.layout.id" :style-conf="props.basic.styles" />
         <template v-if="props.layout.data && !Array.isArray(props.layout.data)">
@@ -120,27 +136,25 @@ async function setNewWidth(newWidth: number, _itemId?: string) {
             :pk-column-name="props.basic.pkColumnName"
             :parent-pk-column-name="props.basic.parentPkColumnName"
             :sub-data-show-kind="props.layout.subDataShowKind"
-            :layout-id="props.layout.id"
+            :layout="props.layout"
             :style-conf="props.basic.styles"
             :gantt-info="ganttInfo"
           />
         </template>
         <template v-else-if="props.layout.data && Array.isArray(props.layout.data)">
           <template v-for="groupData in props.layout.data" :key="`${props.layout.id}-${groupData.groupValue}`">
+            <div
+              :class="`${props.basic.styles.rowClass} iw-gantt-timeline-row flex bg-base-100 border-b border-b-base-300 border-r border-r-base-300`"
+            >&nbsp;</div>
             <GanttTimelineRowComp
               :records="groupData.records"
               :pk-column-name="props.basic.pkColumnName"
               :parent-pk-column-name="props.basic.parentPkColumnName"
               :sub-data-show-kind="props.layout.subDataShowKind"
-              :layout-id="props.layout.id"
+              :layout="props.layout"
               :style-conf="props.basic.styles"
               :gantt-info="ganttInfo"
             />
-            <div
-              class="flex justify-end p-2 min-h-0"
-            >
-              <PaginationComp :default-slice="layout.defaultSlice" :group-slices="layout.groupSlices" :group-value="groupData.groupValue" :total-number="groupData.totalNumber" />
-            </div>
           </template>
         </template>
       </div>

@@ -305,8 +305,8 @@ export async function newLayout(newLayoutProps: TableLayoutKernelProps): Promise
     ganttTimelineWidth: newLayoutProps.ganttTimelineWidth,
     ganttPlanStartTimeColumnName: newLayoutProps.ganttPlanStartTimeColumnName,
     ganttPlanEndTimeColumnName: newLayoutProps.ganttPlanEndTimeColumnName,
-    ganttRealStartTimeColumnName: newLayoutProps.ganttRealStartTimeColumnName,
-    ganttRealEndTimeColumnName: newLayoutProps.ganttRealEndTimeColumnName,
+    ganttActualStartTimeColumnName: newLayoutProps.ganttActualStartTimeColumnName,
+    ganttActualEndTimeColumnName: newLayoutProps.ganttActualEndTimeColumnName,
   }
 
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
@@ -335,8 +335,8 @@ export async function newLayout(newLayoutProps: TableLayoutKernelProps): Promise
     ganttTimelineWidth: newLayoutProps.ganttTimelineWidth,
     ganttPlanStartTimeColumnName: newLayoutProps.ganttPlanStartTimeColumnName,
     ganttPlanEndTimeColumnName: newLayoutProps.ganttPlanEndTimeColumnName,
-    ganttRealStartTimeColumnName: newLayoutProps.ganttRealStartTimeColumnName,
-    ganttRealEndTimeColumnName: newLayoutProps.ganttRealEndTimeColumnName,
+    ganttActualStartTimeColumnName: newLayoutProps.ganttActualStartTimeColumnName,
+    ganttActualEndTimeColumnName: newLayoutProps.ganttActualEndTimeColumnName,
   })
   tableLayoutsConf.push({
     id: layoutId,
@@ -417,7 +417,7 @@ export async function modifyLayout(changedLayoutProps: TableLayoutModifyProps, b
   if (changedLayoutProps.quickSearchContent || changedLayoutProps.filters || changedLayoutProps.sorts
     || changedLayoutProps.group || changedLayoutProps.removeGroup || changedLayoutProps.aggs
     || changedLayoutProps.defaultSlice || changedLayoutProps.groupSlices || changedLayoutProps.subDataShowKind
-    || changedLayoutProps.newColumn || changedLayoutProps.changedColumn || changedLayoutProps.deletedColumnName
+    || changedLayoutProps.newColumn || changedLayoutProps.deletedColumnName
   ) {
     if (Object.entries(changedLayoutProps).length === 1 && changedLayoutProps.aggs) {
       await loadData(byGroupValue, true)

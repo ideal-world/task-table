@@ -155,7 +155,10 @@
       "MONTH": "月",
       "YEAR": "年"
     },
+    "planTimeTitle": "计划时间",
+    "actualTimeTitle": "实际时间",
     "error": {
+      "startDateGreaterThanEndDate": "存在开始时间 [{startDate}] 大于结束时间 [{endDate}]的错误数据",
       "timeColumnNotExist": "找不到计划或实际时间对应的字段"
     }
   }
