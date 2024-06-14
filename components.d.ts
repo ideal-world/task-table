@@ -19,6 +19,7 @@ declare module 'vue' {
     GanttRows: typeof import('./src/components/layout/gantt/GanttRows.vue')['default']
     GanttTimeline: typeof import('./src/components/layout/gantt/GanttTimeline.vue')['default']
     GanttTimelineHeader: typeof import('./src/components/layout/gantt/GanttTimelineHeader.vue')['default']
+    GanttTimelineRows: typeof import('./src/components/layout/gantt/GanttTimelineRows.vue')['default']
     GroupSetting: typeof import('./src/components/function/GroupSetting.vue')['default']
     IconPicker: typeof import('./src/components/common/IconPicker.vue')['default']
     LayoutSetting: typeof import('./src/components/function/LayoutSetting.vue')['default']
@@ -37,7 +38,9 @@ declare module 'vue' {
     Scrollable: typeof import('./src/components/common/Scrollable.vue')['default']
     Skeleton: typeof import('./src/Skeleton.vue')['default']
     SubDataShowSetting: typeof import('./src/components/function/SubDataShowSetting.vue')['default']
+    TableResizeSetting: typeof import('./src/components/function/TableResizeSetting.vue')['default']
     TableSetting: typeof import('./src/components/function/TableSetting.vue')['default']
+    TableThemeSetting: typeof import('./src/components/function/TableThemeSetting.vue')['default']
     ThemeSetting: typeof import('./src/components/function/ThemeSetting.vue')['default']
   }
 }

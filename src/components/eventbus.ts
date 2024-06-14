@@ -363,6 +363,8 @@ export async function modifyLayout(changedLayoutProps: TableLayoutModifyProps, b
     deletedColumnName: changedLayoutProps.deletedColumnName,
     columnSortedNames: toRaw(changedLayoutProps.columnSortedNames),
     subDataShowKind: changedLayoutProps.subDataShowKind,
+    ganttShowKind: changedLayoutProps.ganttShowKind,
+    ganttTimelineWidth: changedLayoutProps.ganttTimelineWidth,
   }
 
   const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
@@ -409,12 +411,20 @@ export async function modifyLayout(changedLayoutProps: TableLayoutModifyProps, b
     leftColumnIdx !== -1 && layout.columns.splice(leftColumnIdx, 1, layout.columns[rightColumnIdx])
     rightColumnIdx !== -1 && layout.columns.splice(rightColumnIdx, 1, tmpColumn)
   }
+  changedLayoutProps.ganttShowKind && (layout.ganttShowKind = changedLayoutProps.ganttShowKind)
+  changedLayoutProps.ganttTimelineWidth && (layout.ganttTimelineWidth = changedLayoutProps.ganttTimelineWidth)
 
-  if (Object.entries(changedLayoutProps).length === 1 && changedLayoutProps.aggs) {
-    await loadData(byGroupValue, true)
-  }
-  else {
-    await loadData(byGroupValue)
+  if (changedLayoutProps.quickSearchContent || changedLayoutProps.filters || changedLayoutProps.sorts
+    || changedLayoutProps.group || changedLayoutProps.removeGroup || changedLayoutProps.aggs
+    || changedLayoutProps.defaultSlice || changedLayoutProps.groupSlices || changedLayoutProps.subDataShowKind
+    || changedLayoutProps.newColumn || changedLayoutProps.changedColumn || changedLayoutProps.deletedColumnName
+  ) {
+    if (Object.entries(changedLayoutProps).length === 1 && changedLayoutProps.aggs) {
+      await loadData(byGroupValue, true)
+    }
+    else {
+      await loadData(byGroupValue)
+    }
   }
   return true
 }

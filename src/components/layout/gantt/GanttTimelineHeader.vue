@@ -8,7 +8,7 @@ import { TIMELINE_COLUMN_WIDTH } from './gantt'
 const props = defineProps<{
   layoutId: string
   ganttInfo: GanttInfo
-  styles: TableStyleConf
+  styleConf: TableStyleConf
 }>()
 
 function getCateColumTimeline() {
@@ -25,25 +25,26 @@ function getCateColumTimeline() {
 
 <template>
   <div
-    :class="`${props.styles.headerClass} flex items-center flex-col bg-base-200`"
+    :class="`${props.styleConf.headerClass} flex items-center flex-col bg-base-200`"
   >
     <div v-if="ganttInfo.ganttShowKind !== GanttShowKind.YEAR" class="flex items-center">
       <div
-        v-for="cateColumTimeline in getCateColumTimeline()" :key="`${layoutId}-${cateColumTimeline.cateTitle}`"
+        v-for="(cateColumTimeline, idx) in getCateColumTimeline()" :key="`${layoutId}-${idx}`"
         :style="`width:${cateColumTimeline.offset * TIMELINE_COLUMN_WIDTH}px`"
-        :class="`${props.styles.cellClass} iw-gantt-timeline-cell flex justify-center items-center bg-base-200 border-b border-b-base-300 border-l border-l-base-300`"
+        :title="`${cateColumTimeline.cateTitle}`"
+        :class="`${props.styleConf.cellClass} iw-gantt-timeline-cell flex justify-center items-center bg-base-200 border-b border-b-base-300 ${idx !== 0 && 'border-l border-l-base-300'} whitespace-nowrap overflow-hidden text-ellipsis flex-nowrap`"
       >
         {{ cateColumTimeline.cateTitle }}
       </div>
     </div>
     <div class="flex items-center">
       <div
-        v-for="timeline in ganttInfo.timeline" :key="`${layoutId}-${timeline.categoryTitle}-${timeline.value}`"
+        v-for="(timeline, idx) in ganttInfo.timeline" :key="`${layoutId}-${idx}`"
         :data-value="timeline.value"
         :data-group-value="timeline.categoryTitle"
         :style="`width: ${TIMELINE_COLUMN_WIDTH}px`"
         :title="`${timeline.value} (${timeline.categoryTitle})`"
-        :class="`${props.styles.cellClass} iw-gantt-timeline-cell flex justify-center items-center bg-base-200 border-l border-l-base-300`"
+        :class="`${props.styleConf.cellClass} iw-gantt-timeline-cell flex justify-center items-center bg-base-200 ${idx !== 0 && 'border-l border-l-base-300'}`"
       >
         {{ timeline.value }}
       </div>

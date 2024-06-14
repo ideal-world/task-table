@@ -356,6 +356,8 @@ export interface TableLayoutModifyProps {
   newColumn?: TableLayoutColumnProps
   changedColumn?: TableLayoutColumnProps
   deletedColumnName?: string
+  ganttShowKind?: GanttShowKind
+  ganttTimelineWidth?: number
 }
 
 export interface TableDataSortProps {

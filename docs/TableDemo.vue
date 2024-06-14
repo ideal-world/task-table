@@ -482,6 +482,12 @@ const events: TableEventProps = {
     if (changedLayoutProps.deletedColumnName) {
       currLayout.columns.splice(currLayout.columns.findIndex((col) => { return col.name === changedLayoutProps.deletedColumnName }), 1)
     }
+    if (changedLayoutProps.ganttShowKind) {
+      currLayout.ganttShowKind = changedLayoutProps.ganttShowKind
+    }
+    if (changedLayoutProps.ganttTimelineWidth) {
+      currLayout.ganttTimelineWidth = changedLayoutProps.ganttTimelineWidth
+    }
     return true
   },
 
