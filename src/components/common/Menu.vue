@@ -9,7 +9,7 @@ const is_init = ref<boolean>(false)
 const DIFF_OFFSET = 10
 
 const contextmenuMathRandom = computed(() =>
-  Math.floor(Math.random() * 1000000),
+  IwUtils.getRandomString(12),
 )
 
 async function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: MenuOffsetKind = MenuOffsetKind.MEDIUM_TOP, size: MenuSizeKind | MenuCustomSize = MenuSizeKind.MEDIUM, force: boolean = false, boundaryEle?: HTMLElement,

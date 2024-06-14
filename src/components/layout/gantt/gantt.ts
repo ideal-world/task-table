@@ -35,10 +35,10 @@ export function getStartAndEndDay(records: { [key: string]: any }[], planStartTi
       if (startDate && endDate && startDate > endDate) {
         throw new Error(t('gantt.error.startDateGreaterThanEndDate', { startDate: dayjs(startDate).format('YYYY-MM-DD HH:mm:ss.SSS'), endDate: dayjs(endDate).format('YYYY-MM-DD HH:mm:ss.SSS') }))
       }
-      else if (startDate && (!timelineStartDate || timelineStartDate > startDate)) {
+      if (startDate && (!timelineStartDate || timelineStartDate > startDate)) {
         timelineStartDate = startDate
       }
-      else if (endDate && (!timelineEndDate || timelineEndDate < endDate)) {
+      if (endDate && (!timelineEndDate || timelineEndDate < endDate)) {
         timelineEndDate = endDate
       }
     }
@@ -48,10 +48,10 @@ export function getStartAndEndDay(records: { [key: string]: any }[], planStartTi
       if (startDate && endDate && startDate > endDate) {
         throw new Error(t('gantt.error.startDateGreaterThanEndDate', { startDate: dayjs(startDate).format('YYYY-MM-DD HH:mm:ss.SSS'), endDate: dayjs(endDate).format('YYYY-MM-DD HH:mm:ss.SSS') }))
       }
-      else if (startDate && (!timelineStartDate || timelineStartDate > startDate)) {
+      if (startDate && (!timelineStartDate || timelineStartDate > startDate)) {
         timelineStartDate = startDate
       }
-      else if (endDate && (!timelineEndDate || timelineEndDate < endDate)) {
+      if (endDate && (!timelineEndDate || timelineEndDate < endDate)) {
         timelineEndDate = endDate
       }
     }

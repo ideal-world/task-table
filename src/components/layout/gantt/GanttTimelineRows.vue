@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import type { Dayjs } from 'dayjs'
 import dayjs from 'dayjs'
-import { nextTick, onMounted, ref, watch } from 'vue'
+import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { GanttShowKind, SubDataShowKind } from '../../../props'
 
 import type { TableLayoutConf, TableStyleConf } from '../../conf'
+import { registerRowTreeTriggerEvent, unregisterRowTreeTriggerEvent } from '../../function/RowTree'
 import type { GanttInfo } from './gantt'
 import { TIMELINE_COLUMN_WIDTH } from './gantt'
 
@@ -52,6 +53,44 @@ function setTimelineBar(barEle: HTMLElement, timelineRowEle: HTMLElement, plan: 
   barEle.style.display = `block`
 }
 
+function drawDataRelLine(globalOffsetTop: number, currTimelineEle: HTMLElement, parentTimelineEle: HTMLElement) {
+  function doDrawDataRelLine(x1: number, y1: number, x2: number, y2: number) {
+    const svgEle = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
+    svgEle.style.position = 'absolute'
+    svgEle.style.top = `${0}px`
+    svgEle.style.left = `${0}px`
+    svgEle.style.width = '100%'
+    svgEle.style.height = '100%'
+    svgEle.style.pointerEvents = 'none'
+    ganttTimelineRef.value!.appendChild(svgEle)
+
+    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path')
+    const curve = `M ${x1},${y1} C ${(x1 + x2) / 2},${y1} ${(x1 + x2) / 2},${y2} ${x2},${y2}`
+    path.setAttribute('d', curve)
+    path.setAttribute('stroke', 'black')
+    path.setAttribute('fill', 'transparent')
+    svgEle.appendChild(path)
+  }
+  const hasStartTime = currTimelineEle.dataset.startTime && parentTimelineEle.dataset.startTime
+  const hasEndTime = currTimelineEle.dataset.endTime && parentTimelineEle.dataset.endTime
+  const offsetHeight = globalOffsetTop - (currTimelineEle.getBoundingClientRect().top - parentTimelineEle.getBoundingClientRect().top) + currTimelineEle.offsetHeight
+  if (hasStartTime) {
+    const x1 = currTimelineEle.offsetLeft
+    const y1 = globalOffsetTop + currTimelineEle.offsetTop + currTimelineEle.offsetHeight / 2
+    const x2 = parentTimelineEle.offsetLeft + 2
+    const y2 = offsetHeight + currTimelineEle.offsetHeight / 2
+
+    doDrawDataRelLine(x1, y1, x2, y2)
+  }
+  if (hasEndTime) {
+    const x1 = currTimelineEle.offsetLeft + currTimelineEle.offsetWidth
+    const y1 = globalOffsetTop + currTimelineEle.offsetTop + currTimelineEle.offsetHeight / 2
+    const x2 = parentTimelineEle.offsetLeft + parentTimelineEle.offsetWidth - 2
+    const y2 = offsetHeight + currTimelineEle.offsetHeight / 2
+    doDrawDataRelLine(x1, y1, x2, y2)
+  }
+}
+
 function generateTimelineBar() {
   ganttTimelineRef.value?.querySelectorAll('.iw-gantt-timeline-plan-bar').forEach((ele) => {
     const barEle = ele as HTMLElement
@@ -69,25 +108,58 @@ function generateTimelineBar() {
   })
 }
 
+function generateDataRelLine() {
+  ganttTimelineRef.value!.querySelectorAll('svg').forEach((ele) => {
+    ele.remove()
+  })
+  if (props.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA) {
+    ganttTimelineRef.value?.querySelectorAll('.iw-gantt-timeline-row[data-parent-pk]').forEach((ele) => {
+      const currRowEle = ele as HTMLElement
+      if (currRowEle.style.display === 'none') {
+        return
+      }
+      const parentRowEle = ganttTimelineRef.value?.querySelector(`.iw-gantt-timeline-row[data-pk="${currRowEle.dataset.parentPk!}"]`)
+      if (parentRowEle) {
+        drawDataRelLine(currRowEle.offsetTop, currRowEle.querySelector('.iw-gantt-timeline-plan-bar')!, parentRowEle.querySelector('.iw-gantt-timeline-plan-bar')!)
+      }
+    })
+  }
+}
+
 watch(() => props.ganttInfo, () => {
   nextTick(() => {
     generateTimelineBar()
+    generateDataRelLine()
   })
 })
 
+let rowTreeEventId: string | null = null
 onMounted(() => {
   generateTimelineBar()
+  generateDataRelLine()
+
+  rowTreeEventId = registerRowTreeTriggerEvent(async (dataPk, hide) => {
+    if (ganttTimelineRef.value) {
+      const rowEle = ganttTimelineRef.value?.querySelector(`.iw-gantt-timeline-row[data-pk="${dataPk}"]`) as HTMLElement
+      rowEle.style.display = hide ? 'none' : 'flex'
+      generateDataRelLine()
+    }
+  })
+})
+
+onUnmounted(() => {
+  unregisterRowTreeTriggerEvent(rowTreeEventId!)
 })
 </script>
 
 <template>
-  <div ref="ganttTimelineRef">
+  <div ref="ganttTimelineRef" class="relative">
     <div
       v-for="row in props.records"
-      :key="`${layout.id}-${row[props.pkColumnName]}-${props.subDataShowKind}`"
-      :data-pk="row[props.pkColumnName] "
+      :key="`${layout.id}-${row[props.pkColumnName]}`"
+      :data-pk="row[props.pkColumnName]"
       :data-parent-pk="props.parentPkColumnName ? row[props.parentPkColumnName] : undefined"
-      :class="`${props.styleConf.rowClass} iw-gantt-timeline-row ${props.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA ? 'iw-data-fold' : ''} flex bg-base-100 border-b border-b-base-300 border-r border-r-base-300`"
+      :class="`${props.styleConf.rowClass} relative iw-gantt-timeline-row flex bg-base-100 border-b border-b-base-300 border-r border-r-base-300`"
     >
       <div
         v-for="(timeline, idx) in ganttInfo.timeline" :key="`${layout.id}-${idx}`"

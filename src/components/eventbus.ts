@@ -4,6 +4,7 @@ import locales from '../locales'
 import type { TableCellDictItemsResp, TableDataGroupResp, TableDataQuerySliceProps, TableDataResp, TableEventProps, TableLayoutKernelProps, TableLayoutModifyProps } from '../props'
 import { SubDataShowKind } from '../props'
 
+import { IwUtils } from '../utils'
 import { getParentWithClass } from '../utils/basic'
 import { AlertKind, showAlert } from './common/Alert'
 import { type TableBasicConf, type TableLayoutConf, type TableStyleConf, convertTableLayoutColumnPropsToTableLayoutColumnConf, convertTableLayoutKernelPropsToTableLayoutKernelConf } from './conf'
@@ -31,13 +32,27 @@ export async function watch() {
 }
 
 const EVENT_EXECUTE_HANDLER: {
-  loadDataAfter: ((data: TableDataResp | TableDataGroupResp[], layoutId: string) => Promise<void>)[]
+  loadDataAfter: {
+    id: string
+    event: (data: TableDataResp | TableDataGroupResp[], layoutId: string) => Promise<void>
+  }[]
 } = {
   loadDataAfter: [],
 }
 
-export function registerLoadDataAfterEvent(event: (data: TableDataResp | TableDataGroupResp[], layoutId: string) => Promise<void>) {
-  EVENT_EXECUTE_HANDLER.loadDataAfter.push(event)
+export function registerLoadDataAfterEvent(event: (data: TableDataResp | TableDataGroupResp[], layoutId: string) => Promise<void>): string {
+  const id = `iw-table-load-data-after-${IwUtils.getRandomString(12)}`
+  EVENT_EXECUTE_HANDLER.loadDataAfter.push({
+    id,
+    event,
+  })
+  return id
+}
+
+export function unregisterLoadDataAfterEvent(id: string) {
+  const index = EVENT_EXECUTE_HANDLER.loadDataAfter.findIndex(item => item.id === id)
+  if (index !== -1)
+    EVENT_EXECUTE_HANDLER.loadDataAfter.splice(index, 1)
 }
 
 // -------------------
@@ -134,8 +149,8 @@ export async function loadData(moreForGroupedValue?: any, returnOnlyAggs?: boole
     showAlert(t('_.event.loadDataInvalidScene'), 2, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
     throw new Error('[events.loadData]  Invalid scene')
   }
-  EVENT_EXECUTE_HANDLER.loadDataAfter.forEach(async (event) => {
-    await event(layout.data!, layout.id)
+  EVENT_EXECUTE_HANDLER.loadDataAfter.forEach(async (item) => {
+    await item.event(layout.data!, layout.id)
   })
 }
 

@@ -1,6 +1,7 @@
 import * as iconSvg from '../assets/icon'
 import type { AggregateKind, TableColumnProps, TableCommonColumnProps, TableDataFilterProps, TableDataGroupProps, TableDataGroupResp, TableDataResp, TableDataSliceProps, TableDataSortProps, TableLayoutColumnProps, TableLayoutKernelProps, TableProps, TableStyleProps } from '../props'
 import { DataKind, GanttShowKind, LayoutKind, OperatorKind, SizeKind, SubDataShowKind } from '../props'
+import { IwUtils } from '../utils'
 
 export interface TableBasicConf {
   id: string
@@ -357,7 +358,7 @@ export function initConf(props: TableProps): [TableBasicConf, TableLayoutConf[]]
     return convertTableColumnPropsToTableColumnConf(column)
   })
   const basicConf: TableBasicConf = {
-    id: props.id ?? `iw-table${Math.floor(Math.random() * 1000000)}`,
+    id: props.id ?? `iw-table${IwUtils.getRandomString(8)}`,
     pkColumnName: props.pkColumnName,
     parentPkColumnName: props.parentPkColumnName,
     columns,

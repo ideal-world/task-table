@@ -1,6 +1,8 @@
 <script setup lang="ts">
+
 import { GanttShowKind } from '../../../props'
 import { IwUtils } from '../../../utils'
+
 import type { TableStyleConf } from '../../conf'
 import type { GanttInfo, TimelineInfo } from './gantt'
 import { TIMELINE_COLUMN_WIDTH } from './gantt'

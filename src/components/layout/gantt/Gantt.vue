@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import type { Ref } from 'vue'
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
+import * as iconSvg from '../../../assets/icon'
 import locales from '../../../locales'
-import type { TableDataGroupResp, TableDataResp, TableLayoutModifyProps } from '../../../props'
+import { GanttShowKind, type TableDataGroupResp, type TableDataResp, type TableLayoutModifyProps, translateGanttShowKind } from '../../../props'
 import { getParentWithClass } from '../../../utils/basic'
 import { AlertKind, showAlert } from '../../common/Alert'
+import MenuComp, { MenuOffsetKind, MenuSizeKind } from '../../common/Menu.vue'
 import type { TableBasicConf, TableLayoutConf } from '../../conf'
 import * as eb from '../../eventbus'
 import ColumnResizeComp from '../../function/ColumnResize.vue'
@@ -27,6 +29,8 @@ const ganttListRef: Ref<HTMLElement | null> = ref(null)
 const ganttTimelineRef: Ref<HTMLElement | null> = ref(null)
 const ganttWith: Ref<number> = ref(0)
 const ganttInfo: Ref<GanttInfo | null> = ref(null)
+
+const showKindCompRef = ref<InstanceType<typeof MenuComp>>()
 
 async function generateGanttInfo(data: TableDataResp | TableDataGroupResp[]) {
   if ((props.layout.ganttPlanStartTimeColumnName === undefined || props.layout.ganttPlanEndTimeColumnName === undefined)
@@ -103,7 +107,7 @@ onMounted(() => {
   })
 })
 
-eb.registerLoadDataAfterEvent(async (data: TableDataResp | TableDataGroupResp[], layoutId: string) => {
+const loadDataEventId = eb.registerLoadDataAfterEvent(async (data: TableDataResp | TableDataGroupResp[], layoutId: string) => {
   if (props.layout.id !== layoutId) {
     return
   }
@@ -116,12 +120,23 @@ async function setNewWidth(newWidth: number, _itemId?: string) {
   }
   await eb.modifyLayout(changedLayoutReq)
 }
+
+async function changeShowKind(showKind: GanttShowKind) {
+  const changedLayoutReq: TableLayoutModifyProps = {
+    ganttShowKind: showKind,
+  }
+  await eb.modifyLayout(changedLayoutReq)
+}
+
+onUnmounted(() => {
+  eb.unregisterLoadDataAfterEvent(loadDataEventId)
+})
 </script>
 
 <template>
   <div
     ref="ganttRef"
-    class="iw-gantt flex h-full"
+    class="iw-gantt flex h-full relative"
   >
     <div ref="ganttListRef" class="overflow-y-hidden overflow-x-auto" :style="`width: ${ganttWith - props.layout.ganttTimelineWidth}px`">
       <ListComp :layout="props.layout" :basic="props.basic" />
@@ -180,6 +195,39 @@ async function setNewWidth(newWidth: number, _itemId?: string) {
       </div>
       <ColumnResizeComp resize-item-class="iw-gantt-timeline-container" handle-left :set-size="setNewWidth" />
     </div>
+    <button
+      class="iw-btn iw-btn-outline iw-btn-xs absolute right-1 top-1 z-[1600]"
+      @click="(e) => { showKindCompRef?.show(e.target as HTMLElement, MenuOffsetKind.RIGHT_TOP, MenuSizeKind.MINI) }"
+    >
+      <span class="mr-0.5">{{ translateGanttShowKind(props.layout.ganttShowKind) }}</span>
+      <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />
+      <MenuComp ref="showKindCompRef">
+        <div
+          class="p-2 hover:cursor-pointer text-xs"
+          @click="changeShowKind(GanttShowKind.DAY)"
+        >
+          {{ translateGanttShowKind(GanttShowKind.DAY) }}
+        </div>
+        <div
+          class="p-2 hover:cursor-pointer text-xs"
+          @click="changeShowKind(GanttShowKind.WEEK)"
+        >
+          {{ translateGanttShowKind(GanttShowKind.WEEK) }}
+        </div>
+        <div
+          class="p-2 hover:cursor-pointer text-xs"
+          @click="changeShowKind(GanttShowKind.MONTH)"
+        >
+          {{ translateGanttShowKind(GanttShowKind.MONTH) }}
+        </div>
+        <div
+          class="p-2 hover:cursor-pointer text-xs"
+          @click="changeShowKind(GanttShowKind.YEAR)"
+        >
+          {{ translateGanttShowKind(GanttShowKind.YEAR) }}
+        </div>
+      </MenuComp>
+    </button>
   </div>
 </template>
 
