@@ -8,9 +8,9 @@ import BasicSettingComp from './BasicSetting.vue'
 import ColumnShowSettingComp from './ColumnShowSetting.vue'
 import GroupSettingComp from './GroupSetting.vue'
 import LayoutSettingComp from './LayoutSetting.vue'
-import ResizeSettingComp from './ResizeSetting.vue'
 import SubDataShowSettingComp from './SubDataShowSetting.vue'
-import ThemeSettingComp from './ThemeSetting.vue'
+import TableResizeSettingComp from './TableResizeSetting.vue'
+import TableThemeSettingComp from './TableThemeSetting.vue'
 
 const props = defineProps<{
   basicConf: TableBasicConf
@@ -47,8 +47,8 @@ onMounted(() => {
       {{ $t('_.table.moreSettingTitle') }}
     </div>
     <div style="display: none;">
-      <ResizeSettingComp :size="props.basicConf.styles.size" :styles="props.basicConf.styles" />
-      <ThemeSettingComp :styles="props.basicConf.styles" />
+      <TableResizeSettingComp :size="props.basicConf.styles.size" :styles="props.basicConf.styles" />
+      <TableThemeSettingComp :styles="props.basicConf.styles" />
     </div>
   </MenuComp>
 </template>
