@@ -101,24 +101,25 @@ async function setSlice(newPage?: number, newFetchNumber?: number) {
 
 <template>
   <div style="position: sticky; right: 0; " class="z-[3000]">
-    <button v-if="getCurrentPage() > 2" class="iw-btn iw-btn-ghost pl-1 pr-1 iw-btn-xs" @click="setCurrentPage(1)">
+    <button v-if="getCurrentPage() > 2" class="iw-btn iw-btn-ghost px-1 iw-btn-xs" @click="setCurrentPage(1)">
       <i :class="iconSvg.FIRST" />
     </button>
-    <button v-if="getCurrentPage() > 1" class="iw-btn iw-btn-ghost pl-1 pr-1 ml-1 iw-btn-xs" @click="setCurrentPage(getCurrentPage() - 1)">
+    <button v-if="getCurrentPage() > 1" class="iw-btn iw-btn-ghost px-1 ml-1 iw-btn-xs" @click="setCurrentPage(getCurrentPage() - 1)">
       <i :class="iconSvg.PREVIOUS" />
     </button>
     <button
       v-for="page in getShowPages()"
       :key="page"
       :class="`iw-btn iw-btn-ghost pl-3 pr-3 ml-1 iw-btn-xs ${page === getCurrentPage() ? 'iw-btn-active' : ''}`"
+      :disabled="page === getCurrentPage()"
       @click="setCurrentPage(page)"
     >
       {{ page }}
     </button>
-    <button v-if="getCurrentPage() < getTotalPage()" class="iw-btn iw-btn-ghost pl-1 pr-1 ml-1 iw-btn-xs" @click="setCurrentPage(getCurrentPage() + 1)">
+    <button v-if="getCurrentPage() < getTotalPage()" class="iw-btn iw-btn-ghost px-1 ml-1 iw-btn-xs" @click="setCurrentPage(getCurrentPage() + 1)">
       <i :class="iconSvg.NEXT" />
     </button>
-    <button v-if="getCurrentPage() < getTotalPage() - 1" class="iw-btn iw-btn-ghost pl-1 pr-1 ml-1 iw-btn-xs" @click="setCurrentPage(getTotalPage())">
+    <button v-if="getCurrentPage() < getTotalPage() - 1" class="iw-btn iw-btn-ghost px-1 ml-1 iw-btn-xs" @click="setCurrentPage(getTotalPage())">
       <i :class="iconSvg.LAST" />
     </button>
     <button class="iw-btn ml-1 mr-1 iw-btn-xs" @click="(e) => { fetchNumberSelectCompRef?.show(e.target as HTMLElement, MenuOffsetKind.MEDIUM_BOTTOM, MenuSizeKind.MINI) }">

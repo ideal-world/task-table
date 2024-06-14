@@ -25,7 +25,7 @@ function getCateColumTimeline() {
 
 <template>
   <div
-    :class="`${props.styleConf.headerClass} flex items-center flex-col bg-base-200`"
+    :class="`${props.styleConf.headerClass} flex items-center flex-col sticky top-0 z-[1500] bg-base-200`"
   >
     <div v-if="ganttInfo.ganttShowKind !== GanttShowKind.YEAR" class="flex items-center">
       <div

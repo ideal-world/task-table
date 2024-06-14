@@ -26,8 +26,8 @@ export interface TimelineInfo {
 }
 
 export function getStartAndEndDay(records: { [key: string]: any }[], planStartTimeColumnName?: string, planEndTimeColumnName?: string, actualStartTimeColumnName?: string, actualEndTimeColumnName?: string): { startDate: Date, endDate: Date } {
-  let timelineStartDate = new Date('9999-12-31')
-  let timelineEndDate = new Date('1970-01-01')
+  let timelineStartDate: Date | null = null
+  let timelineEndDate: Date | null = null
   records.forEach((d) => {
     if (planStartTimeColumnName && planEndTimeColumnName) {
       const startDate = d[planStartTimeColumnName] ? d[planStartTimeColumnName] instanceof Date ? d[planStartTimeColumnName] : new Date(d[planStartTimeColumnName]) : null
@@ -35,10 +35,10 @@ export function getStartAndEndDay(records: { [key: string]: any }[], planStartTi
       if (startDate && endDate && startDate > endDate) {
         throw new Error(t('gantt.error.startDateGreaterThanEndDate', { startDate: dayjs(startDate).format('YYYY-MM-DD HH:mm:ss.SSS'), endDate: dayjs(endDate).format('YYYY-MM-DD HH:mm:ss.SSS') }))
       }
-      else if (startDate && timelineStartDate > startDate) {
+      else if (startDate && (!timelineStartDate || timelineStartDate > startDate)) {
         timelineStartDate = startDate
       }
-      else if (endDate && timelineEndDate < endDate) {
+      else if (endDate && (!timelineEndDate || timelineEndDate < endDate)) {
         timelineEndDate = endDate
       }
     }
@@ -48,23 +48,34 @@ export function getStartAndEndDay(records: { [key: string]: any }[], planStartTi
       if (startDate && endDate && startDate > endDate) {
         throw new Error(t('gantt.error.startDateGreaterThanEndDate', { startDate: dayjs(startDate).format('YYYY-MM-DD HH:mm:ss.SSS'), endDate: dayjs(endDate).format('YYYY-MM-DD HH:mm:ss.SSS') }))
       }
-      else if (startDate && timelineStartDate > startDate) {
+      else if (startDate && (!timelineStartDate || timelineStartDate > startDate)) {
         timelineStartDate = startDate
       }
-      else if (endDate && timelineEndDate < endDate) {
+      else if (endDate && (!timelineEndDate || timelineEndDate < endDate)) {
         timelineEndDate = endDate
       }
     }
   })
-  if (timelineStartDate > timelineEndDate || timelineStartDate === new Date('9999-12-31') || timelineEndDate === new Date('1970-01-01')) {
+  if (!timelineStartDate && !timelineEndDate) {
     // Use the previous and next 10 days of the current time
     timelineStartDate = dayjs().subtract(10, 'day').toDate()
     timelineEndDate = dayjs().add(10, 'day').toDate()
   }
-  else {
-    timelineStartDate = dayjs(timelineStartDate).subtract(10, 'day').toDate()
-    timelineEndDate = dayjs(timelineEndDate).add(10, 'day').toDate()
+  else if (timelineStartDate && !timelineEndDate) {
+    timelineEndDate = dayjs(timelineStartDate).add(1, 'day').toDate()
   }
+  else if (!timelineStartDate && timelineEndDate) {
+    timelineStartDate = dayjs(timelineEndDate).subtract(1, 'day').toDate()
+  }
+  else if (timelineStartDate! > timelineEndDate!) {
+    // Switch
+    const temp = timelineStartDate
+    timelineStartDate = timelineEndDate
+    timelineEndDate = temp
+  }
+
+  timelineStartDate = dayjs(timelineStartDate).subtract(10, 'day').toDate()
+  timelineEndDate = dayjs(timelineEndDate).add(10, 'day').toDate()
   return { startDate: timelineStartDate, endDate: timelineEndDate }
 }
 

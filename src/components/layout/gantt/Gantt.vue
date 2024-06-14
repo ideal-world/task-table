@@ -23,6 +23,8 @@ const props = defineProps<
 const { t } = locales.global
 
 const ganttRef: Ref<HTMLElement | null> = ref(null)
+const ganttListRef: Ref<HTMLElement | null> = ref(null)
+const ganttTimelineRef: Ref<HTMLElement | null> = ref(null)
 const ganttWith: Ref<number> = ref(0)
 const ganttInfo: Ref<GanttInfo | null> = ref(null)
 
@@ -39,21 +41,19 @@ async function generateGanttInfo(data: TableDataResp | TableDataGroupResp[]) {
   // Determine the start and end time of the timeline based on the returned data
   if (Array.isArray(data)) {
     data.forEach((groupData) => {
-      groupData.records.forEach((d) => {
-        try {
-          const { startDate, endDate } = getStartAndEndDay(d.records, props.layout.ganttPlanStartTimeColumnName, props.layout.ganttPlanEndTimeColumnName, props.layout.ganttActualStartTimeColumnName, props.layout.ganttActualEndTimeColumnName)
-          if (timelineStartDate === null || startDate < timelineStartDate) {
-            timelineStartDate = startDate
-          }
-          if (timelineEndDate === null || endDate > timelineEndDate) {
-            timelineEndDate = endDate
-          }
+      try {
+        const { startDate, endDate } = getStartAndEndDay(groupData.records, props.layout.ganttPlanStartTimeColumnName, props.layout.ganttPlanEndTimeColumnName, props.layout.ganttActualStartTimeColumnName, props.layout.ganttActualEndTimeColumnName)
+        if (timelineStartDate === null || startDate < timelineStartDate) {
+          timelineStartDate = startDate
         }
-        catch (e: any) {
-          showAlert(e.message, 2, AlertKind.WARNING, getParentWithClass(ganttRef.value, 'iw-tt')!)
-          hasError = true
+        if (timelineEndDate === null || endDate > timelineEndDate) {
+          timelineEndDate = endDate
         }
-      })
+      }
+      catch (e: any) {
+        showAlert(e.message, 2, AlertKind.WARNING, getParentWithClass(ganttRef.value, 'iw-tt')!)
+        hasError = true
+      }
     })
   }
   else {
@@ -95,6 +95,12 @@ onMounted(() => {
     return col
   })
   ganttWith.value = ganttRef.value!.offsetWidth
+
+  ganttTimelineRef.value!.addEventListener('scroll', () => {
+    ganttListRef.value!.scrollTo({
+      top: ganttTimelineRef.value!.scrollTop,
+    })
+  })
 })
 
 eb.registerLoadDataAfterEvent(async (data: TableDataResp | TableDataGroupResp[], layoutId: string) => {
@@ -117,10 +123,11 @@ async function setNewWidth(newWidth: number, _itemId?: string) {
     ref="ganttRef"
     class="iw-gantt flex h-full"
   >
-    <div class="overflow-auto" :style="`width: ${ganttWith - props.layout.ganttTimelineWidth}px`">
+    <div ref="ganttListRef" class="overflow-y-hidden overflow-x-auto" :style="`width: ${ganttWith - props.layout.ganttTimelineWidth}px`">
       <ListComp :layout="props.layout" :basic="props.basic" />
     </div>
     <div
+      ref="ganttTimelineRef"
       class="iw-gantt-timeline-container overflow-auto border-l-2 border-l-base-300"
       :style="`width: ${props.layout.ganttTimelineWidth}px`"
     >
@@ -144,8 +151,12 @@ async function setNewWidth(newWidth: number, _itemId?: string) {
         <template v-else-if="props.layout.data && Array.isArray(props.layout.data)">
           <template v-for="groupData in props.layout.data" :key="`${props.layout.id}-${groupData.groupValue}`">
             <div
-              :class="`${props.basic.styles.rowClass} iw-gantt-timeline-row flex bg-base-100 border-b border-b-base-300 border-r border-r-base-300`"
-            >&nbsp;</div>
+              :class="`${props.basic.styles.rowClass} iw-gantt-timeline-row flex bg-base-100 border-y border-y-base-300 border-r border-r-base-300 text-sm`"
+            >
+              <div class="iw-gantt-timeline-cell">
+                &nbsp;
+              </div>
+            </div>
             <GanttTimelineRowComp
               :records="groupData.records"
               :pk-column-name="props.basic.pkColumnName"
@@ -155,6 +166,15 @@ async function setNewWidth(newWidth: number, _itemId?: string) {
               :style-conf="props.basic.styles"
               :gantt-info="ganttInfo"
             />
+            <div
+              class="flex justify-end p-2 min-h-0"
+            >
+              <div>
+                <button class="iw-btn ml-1 iw-btn-xs" style="visibility: hidden;">
+                  For placeholder only, highly aligned with paging controls
+                </button>
+              </div>
+            </div>
           </template>
         </template>
       </div>

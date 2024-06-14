@@ -2,9 +2,7 @@
 import type { Dayjs } from 'dayjs'
 import dayjs from 'dayjs'
 import { nextTick, onMounted, ref, watch } from 'vue'
-import type { TableDataGroupResp, TableDataResp } from '../../../props'
 import { GanttShowKind, SubDataShowKind } from '../../../props'
-import * as eb from '../../eventbus'
 
 import type { TableLayoutConf, TableStyleConf } from '../../conf'
 import type { GanttInfo } from './gantt'
@@ -102,7 +100,7 @@ onMounted(() => {
       ${timeline.holiday && 'bg-base-200'}
       ${idx !== 0 && 'border-l border-l-base-300'}`"
       >
-        <div v-if="timeline.today" class="bg-info pl-0.5 h-3/4" />
+        <div v-if="timeline.today" class="bg-accent pl-0.5 mr-0.5 h-3/4" />
         <template v-else>
             &nbsp;
         </template>
