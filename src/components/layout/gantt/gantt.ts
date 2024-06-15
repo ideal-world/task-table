@@ -1,17 +1,36 @@
+import type { Dayjs } from 'dayjs'
 import dayjs from 'dayjs'
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore'
 import weekOfYear from 'dayjs/plugin/weekOfYear'
+import weekday from 'dayjs/plugin/weekday'
 import locales from '../../../locales'
 import { GanttShowKind } from '../../../props'
 
 const { t } = locales.global
 
 dayjs.extend(weekOfYear)
+dayjs.extend(weekday)
+dayjs.extend(isSameOrBefore)
 
-export const TIMELINE_COLUMN_WIDTH = 25
+const TIMELINE_COLUMN_WIDTH = 25
 
 export interface GanttInfo {
   timeline: TimelineInfo[]
   ganttShowKind: GanttShowKind
+  holidays: Dayjs[]
+}
+
+export function getTimelineColumnWidth(ganttShowKind: GanttShowKind) {
+  switch (ganttShowKind) {
+    case GanttShowKind.DAY:
+      return TIMELINE_COLUMN_WIDTH
+    case GanttShowKind.WEEK:
+      return TIMELINE_COLUMN_WIDTH * 2
+    case GanttShowKind.MONTH:
+      return TIMELINE_COLUMN_WIDTH * 4
+    case GanttShowKind.YEAR:
+      return TIMELINE_COLUMN_WIDTH * 8
+  }
 }
 
 export interface TimelineInfo {
@@ -79,25 +98,24 @@ export function getStartAndEndDay(records: { [key: string]: any }[], planStartTi
   return { startDate: timelineStartDate, endDate: timelineEndDate }
 }
 
-export function generateTimeline(showKind: GanttShowKind, startDate: Date, endDate: Date, holidays: Date[]): TimelineInfo[] {
-  const holidayJs = holidays.map(d => dayjs(d))
+export function generateTimeline(showKind: GanttShowKind, startDate: Date, endDate: Date, holidays: Dayjs[]): TimelineInfo[] {
   let timelineStartDate = dayjs(startDate)
   const timelineEndDate = dayjs(endDate)
   const timelineInfo: TimelineInfo[] = []
   switch (showKind) {
     case GanttShowKind.DAY:
-      while (timelineStartDate.isBefore(timelineEndDate)) {
+      while (timelineStartDate.isSameOrBefore(timelineEndDate, 'day')) {
         timelineInfo.push({
           value: timelineStartDate.date(),
           categoryTitle: `${timelineStartDate.format('YYYY-MM')}`,
-          holiday: holidayJs.some(d => d.isSame(timelineStartDate, 'day')),
+          holiday: holidays.some(d => d.isSame(timelineStartDate, 'day')),
           today: timelineStartDate.isSame(dayjs(), 'day'),
         })
         timelineStartDate = timelineStartDate.add(1, 'day')
       }
       break
     case GanttShowKind.WEEK:
-      while (timelineStartDate.isBefore(timelineEndDate)) {
+      while (timelineStartDate.isSameOrBefore(timelineEndDate, 'week')) {
         timelineInfo.push({
           value: timelineStartDate.week(),
           categoryTitle: `${timelineStartDate.year()}`,
@@ -106,7 +124,7 @@ export function generateTimeline(showKind: GanttShowKind, startDate: Date, endDa
       }
       break
     case GanttShowKind.MONTH:
-      while (timelineStartDate.isBefore(timelineEndDate)) {
+      while (timelineStartDate.isSameOrBefore(timelineEndDate, 'month')) {
         timelineInfo.push({
           value: timelineStartDate.month() + 1,
           categoryTitle: `${timelineStartDate.year()}`,
@@ -115,7 +133,7 @@ export function generateTimeline(showKind: GanttShowKind, startDate: Date, endDa
       }
       break
     case GanttShowKind.YEAR:
-      while (timelineStartDate.isBefore(timelineEndDate)) {
+      while (timelineStartDate.isSameOrBefore(timelineEndDate, 'year')) {
         timelineInfo.push({
           value: timelineStartDate.year(),
         })
@@ -124,4 +142,17 @@ export function generateTimeline(showKind: GanttShowKind, startDate: Date, endDa
       break
   }
   return timelineInfo
+}
+
+export function getWeekdays(startDate: Date, endDate: Date, holidays: Dayjs[]): number {
+  let timelineStartDate = dayjs(startDate)
+  const timelineEndDate = dayjs(endDate)
+  let weekdays = 0
+  while (timelineStartDate.isSameOrBefore(timelineEndDate, 'day')) {
+    if (!holidays.some(d => d.isSame(timelineStartDate, 'day'))) {
+      weekdays++
+    }
+    timelineStartDate = timelineStartDate.add(1, 'day')
+  }
+  return weekdays
 }

@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import dayjs from 'dayjs'
 import type { Ref } from 'vue'
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import * as iconSvg from '../../../assets/icon'
 import locales from '../../../locales'
 import { GanttShowKind, type TableDataGroupResp, type TableDataResp, type TableLayoutModifyProps, translateGanttShowKind } from '../../../props'
@@ -11,7 +12,7 @@ import type { TableBasicConf, TableLayoutConf } from '../../conf'
 import * as eb from '../../eventbus'
 import ColumnResizeComp from '../../function/ColumnResize.vue'
 import ListComp from '../list/List.vue'
-import { type GanttInfo, TIMELINE_COLUMN_WIDTH, generateTimeline, getStartAndEndDay } from './gantt'
+import { type GanttInfo, generateTimeline, getStartAndEndDay, getTimelineColumnWidth } from './gantt'
 import GanttTimelineHeaderComp from './GanttTimelineHeader.vue'
 import GanttTimelineRowComp from './GanttTimelineRows.vue'
 
@@ -76,17 +77,18 @@ async function generateGanttInfo(data: TableDataResp | TableDataGroupResp[]) {
     return
   }
   // Package timeline information
-  const holidays = await eb.loadHolidays(timelineStartDate as Date, timelineEndDate as Date)
+  const holidays = (await eb.loadHolidays(timelineStartDate as Date, timelineEndDate as Date)).map(holiday => dayjs(holiday))
   const timeline = generateTimeline(props.layout.ganttShowKind, timelineStartDate as Date, timelineEndDate as Date, holidays)
   ganttInfo.value = {
     timeline,
     ganttShowKind: props.layout.ganttShowKind,
+    holidays,
   }
 }
 
 function getTimelineActualWidth() {
   const styles: any = {}
-  styles.width = `${ganttInfo.value!.timeline.length * TIMELINE_COLUMN_WIDTH}px`
+  styles.width = `${ganttInfo.value!.timeline.length * getTimelineColumnWidth(ganttInfo.value!.ganttShowKind)}px`
   return styles
 }
 
@@ -105,13 +107,25 @@ onMounted(() => {
       top: ganttTimelineRef.value!.scrollTop,
     })
   })
+  ganttTimelineRef.value!.addEventListener('wheel', (e) => {
+    e.preventDefault()
+    ganttTimelineRef.value!.scrollTo({
+      left: ganttTimelineRef.value!.scrollLeft + e.deltaY,
+    })
+  })
+  ganttListRef.value!.addEventListener('wheel', (e) => {
+    e.preventDefault()
+    ganttListRef.value!.scrollTo({
+      left: ganttListRef.value!.scrollLeft + e.deltaY,
+    })
+  })
 })
 
-const loadDataEventId = eb.registerLoadDataAfterEvent(async (data: TableDataResp | TableDataGroupResp[], layoutId: string) => {
-  if (props.layout.id !== layoutId) {
+watch(props.layout, async () => {
+  if (!props.layout.data) {
     return
   }
-  await generateGanttInfo(data)
+  await generateGanttInfo(props.layout.data)
 })
 
 async function setNewWidth(newWidth: number, _itemId?: string) {
@@ -126,11 +140,8 @@ async function changeShowKind(showKind: GanttShowKind) {
     ganttShowKind: showKind,
   }
   await eb.modifyLayout(changedLayoutReq)
+  showKindCompRef.value?.close()
 }
-
-onUnmounted(() => {
-  eb.unregisterLoadDataAfterEvent(loadDataEventId)
-})
 </script>
 
 <template>
@@ -196,38 +207,38 @@ onUnmounted(() => {
       <ColumnResizeComp resize-item-class="iw-gantt-timeline-container" handle-left :set-size="setNewWidth" />
     </div>
     <button
-      class="iw-btn iw-btn-outline iw-btn-xs absolute right-1 top-1 z-[1600]"
+      class="iw-btn iw-btn-outline iw-btn-xs bg-base-200 absolute right-1 top-1 z-[1600]"
       @click="(e) => { showKindCompRef?.show(e.target as HTMLElement, MenuOffsetKind.RIGHT_TOP, MenuSizeKind.MINI) }"
     >
       <span class="mr-0.5">{{ translateGanttShowKind(props.layout.ganttShowKind) }}</span>
       <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />
-      <MenuComp ref="showKindCompRef">
-        <div
-          class="p-2 hover:cursor-pointer text-xs"
-          @click="changeShowKind(GanttShowKind.DAY)"
-        >
-          {{ translateGanttShowKind(GanttShowKind.DAY) }}
-        </div>
-        <div
-          class="p-2 hover:cursor-pointer text-xs"
-          @click="changeShowKind(GanttShowKind.WEEK)"
-        >
-          {{ translateGanttShowKind(GanttShowKind.WEEK) }}
-        </div>
-        <div
-          class="p-2 hover:cursor-pointer text-xs"
-          @click="changeShowKind(GanttShowKind.MONTH)"
-        >
-          {{ translateGanttShowKind(GanttShowKind.MONTH) }}
-        </div>
-        <div
-          class="p-2 hover:cursor-pointer text-xs"
-          @click="changeShowKind(GanttShowKind.YEAR)"
-        >
-          {{ translateGanttShowKind(GanttShowKind.YEAR) }}
-        </div>
-      </MenuComp>
     </button>
+    <MenuComp ref="showKindCompRef">
+      <div
+        class="p-2 hover:cursor-pointer text-xs"
+        @click="changeShowKind(GanttShowKind.DAY)"
+      >
+        {{ translateGanttShowKind(GanttShowKind.DAY) }}
+      </div>
+      <div
+        class="p-2 hover:cursor-pointer text-xs"
+        @click="changeShowKind(GanttShowKind.WEEK)"
+      >
+        {{ translateGanttShowKind(GanttShowKind.WEEK) }}
+      </div>
+      <div
+        class="p-2 hover:cursor-pointer text-xs"
+        @click="changeShowKind(GanttShowKind.MONTH)"
+      >
+        {{ translateGanttShowKind(GanttShowKind.MONTH) }}
+      </div>
+      <div
+        class="p-2 hover:cursor-pointer text-xs"
+        @click="changeShowKind(GanttShowKind.YEAR)"
+      >
+        {{ translateGanttShowKind(GanttShowKind.YEAR) }}
+      </div>
+    </MenuComp>
   </div>
 </template>
 

@@ -1,11 +1,9 @@
 <script setup lang="ts">
+import { GanttShowKind } from '../../../props';
+import { IwUtils } from '../../../utils';
 
-import { GanttShowKind } from '../../../props'
-import { IwUtils } from '../../../utils'
-
-import type { TableStyleConf } from '../../conf'
-import type { GanttInfo, TimelineInfo } from './gantt'
-import { TIMELINE_COLUMN_WIDTH } from './gantt'
+import type { TableStyleConf } from '../../conf';
+import { type GanttInfo, type TimelineInfo, getTimelineColumnWidth } from './gantt';
 
 const props = defineProps<{
   layoutId: string
@@ -32,7 +30,7 @@ function getCateColumTimeline() {
     <div v-if="ganttInfo.ganttShowKind !== GanttShowKind.YEAR" class="flex items-center">
       <div
         v-for="(cateColumTimeline, idx) in getCateColumTimeline()" :key="`${layoutId}-${idx}`"
-        :style="`width:${cateColumTimeline.offset * TIMELINE_COLUMN_WIDTH}px`"
+        :style="`width:${cateColumTimeline.offset * getTimelineColumnWidth(props.ganttInfo.ganttShowKind)}px`"
         :title="`${cateColumTimeline.cateTitle}`"
         :class="`${props.styleConf.cellClass} iw-gantt-timeline-cell flex justify-center items-center bg-base-200 border-b border-b-base-300 ${idx !== 0 && 'border-l border-l-base-300'} whitespace-nowrap overflow-hidden text-ellipsis flex-nowrap`"
       >
@@ -44,7 +42,7 @@ function getCateColumTimeline() {
         v-for="(timeline, idx) in ganttInfo.timeline" :key="`${layoutId}-${idx}`"
         :data-value="timeline.value"
         :data-group-value="timeline.categoryTitle"
-        :style="`width: ${TIMELINE_COLUMN_WIDTH}px`"
+        :style="`width: ${getTimelineColumnWidth(props.ganttInfo.ganttShowKind)}px`"
         :title="`${timeline.value} (${timeline.categoryTitle})`"
         :class="`${props.styleConf.cellClass} iw-gantt-timeline-cell flex justify-center items-center bg-base-200 ${idx !== 0 && 'border-l border-l-base-300'}`"
       >

@@ -157,6 +157,7 @@
     },
     "planTimeTitle": "Planned time",
     "actualTimeTitle": "Actual time",
+    "totalWeekDays": "Total {days} weekday(s)",
     "error": {
       "startDateGreaterThanEndDate": "The start date [{startDate}] is greater than the end date [{endDate}] ",
       "timeColumnNotExist": "Not found the field corresponding to the planned or actual time"

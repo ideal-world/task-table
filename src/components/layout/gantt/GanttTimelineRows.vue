@@ -2,12 +2,12 @@
 import type { Dayjs } from 'dayjs'
 import dayjs from 'dayjs'
 import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import locales from '../../../locales'
 import { GanttShowKind, SubDataShowKind } from '../../../props'
 
 import type { TableLayoutConf, TableStyleConf } from '../../conf'
 import { registerRowTreeTriggerEvent, unregisterRowTreeTriggerEvent } from '../../function/RowTree'
-import type { GanttInfo } from './gantt'
-import { TIMELINE_COLUMN_WIDTH } from './gantt'
+import { type GanttInfo, getTimelineColumnWidth, getWeekdays } from './gantt'
 
 const props = defineProps<{
   records: { [key: string]: any }[]
@@ -19,33 +19,44 @@ const props = defineProps<{
   ganttInfo: GanttInfo
 }>()
 
+const { t } = locales.global
+
 const ganttTimelineRef = ref<HTMLElement | null>(null)
 
 function setTimelineBar(barEle: HTMLElement, timelineRowEle: HTMLElement, plan: boolean, startTime?: Dayjs, endTime?: Dayjs) {
   const searchTime = startTime || (endTime!)
   const hasStartAndEndTime = startTime && endTime
   let cellEle: HTMLElement
+  let left: number
   let width: number
 
+  const timelineColumnWidth = getTimelineColumnWidth(props.ganttInfo.ganttShowKind)
   switch (props.ganttInfo.ganttShowKind) {
     case GanttShowKind.DAY:
       cellEle = timelineRowEle.querySelector(`.iw-gantt-timeline-value-cell[data-value="${searchTime.date()}"][data-group-value="${searchTime.format('YYYY-MM')}"]`) as HTMLElement
-      width = hasStartAndEndTime ? endTime.diff(startTime, 'day') * TIMELINE_COLUMN_WIDTH : 0
+      // Center a cell
+      left = cellEle.offsetLeft + (hasStartAndEndTime ? timelineColumnWidth / 2 : timelineColumnWidth / 4)
+      width = hasStartAndEndTime ? endTime.diff(startTime, 'day') * timelineColumnWidth : 0
       break
     case GanttShowKind.WEEK:
       cellEle = timelineRowEle.querySelector(`.iw-gantt-timeline-value-cell[data-value="${searchTime.week()}"][data-group-value="${searchTime.year()}"]`) as HTMLElement
-      width = hasStartAndEndTime ? endTime.diff(startTime, 'week') * TIMELINE_COLUMN_WIDTH : 0
+      // Add a deviation of the week day,
+      // if a small rectangle is displayed at the start or end time,
+      // the width of this rectangle needs to be compensated for 1/2, otherwise it will overflow.
+      left = cellEle.offsetLeft + timelineColumnWidth * (startTime ?? endTime!).weekday() / 6 + (hasStartAndEndTime ? 0 : -6)
+      width = hasStartAndEndTime ? endTime.diff(startTime, 'week', true) * timelineColumnWidth : 0
       break
     case GanttShowKind.MONTH:
       cellEle = timelineRowEle.querySelector(`.iw-gantt-timeline-value-cell[data-value="${searchTime.month() + 1}"][data-group-value="${searchTime.year()}"]`) as HTMLElement
-      width = hasStartAndEndTime ? endTime.diff(startTime, 'month') * TIMELINE_COLUMN_WIDTH : 0
+      left = cellEle.offsetLeft + timelineColumnWidth * (startTime ?? endTime!).date() / (startTime ?? endTime!).daysInMonth() + (hasStartAndEndTime ? 0 : -6)
+      width = hasStartAndEndTime ? endTime.diff(startTime, 'month', true) * timelineColumnWidth : 0
       break
     case GanttShowKind.YEAR:
       cellEle = timelineRowEle.querySelector(`.iw-gantt-timeline-value-cell[data-value="${searchTime.year()}"]`) as HTMLElement
-      width = hasStartAndEndTime ? endTime.diff(startTime, 'year') * TIMELINE_COLUMN_WIDTH : 0
+      left = cellEle.offsetLeft + timelineColumnWidth * (startTime ?? endTime!).month() / 11 + (hasStartAndEndTime ? 0 : -6)
+      width = hasStartAndEndTime ? endTime.diff(startTime, 'year', true) * timelineColumnWidth : 0
       break
   }
-  const left = cellEle.offsetLeft + (width !== 0 ? TIMELINE_COLUMN_WIDTH / 2 : TIMELINE_COLUMN_WIDTH / 4)
   const top = cellEle.offsetTop + cellEle.offsetHeight / 2 - 6 + (plan ? 0 : 2)
   barEle.style.left = `${left}px`
   barEle.style.top = `${top}px`
@@ -126,6 +137,18 @@ function generateDataRelLine() {
   }
 }
 
+function getTimelineBarTitle(row: { [key: string]: any }, plan: boolean) {
+  const startTime = row[plan ? props.layout.ganttPlanStartTimeColumnName! : props.layout.ganttActualStartTimeColumnName!]
+  const endTime = row[plan ? props.layout.ganttPlanEndTimeColumnName! : props.layout.ganttActualEndTimeColumnName!]
+  if (startTime && endTime) {
+    const weekdays = getWeekdays(startTime, endTime, props.ganttInfo.holidays)
+    return `${plan ? t('gantt.planTimeTitle') : t('gantt.actualTimeTitle')}: ${startTime ?? ''} / ${endTime ?? ''} ${t('gantt.totalWeekDays', { days: weekdays })}`
+  }
+  else {
+    return `${plan ? t('gantt.planTimeTitle') : t('gantt.actualTimeTitle')}: ${startTime ?? ''} / ${t('gantt.endTime')}: ${endTime ?? ''}`
+  }
+}
+
 watch(() => props.ganttInfo, () => {
   nextTick(() => {
     generateTimelineBar()
@@ -165,7 +188,7 @@ onUnmounted(() => {
         v-for="(timeline, idx) in ganttInfo.timeline" :key="`${layout.id}-${idx}`"
         :data-value="timeline.value"
         :data-group-value="timeline.categoryTitle"
-        :style="`width: ${TIMELINE_COLUMN_WIDTH}px`"
+        :style="`width: ${getTimelineColumnWidth(props.ganttInfo.ganttShowKind)}px`"
         :title="`${timeline.value} (${timeline.categoryTitle})`"
         :class="`${props.styleConf.cellClass}
       iw-gantt-timeline-cell iw-gantt-timeline-value-cell flex justify-center items-center bg-base-100
@@ -180,14 +203,14 @@ onUnmounted(() => {
       <div
         v-if="layout.ganttPlanStartTimeColumnName && layout.ganttPlanEndTimeColumnName && (row[layout.ganttPlanStartTimeColumnName] || row[layout.ganttPlanEndTimeColumnName])"
         class="iw-gantt-timeline-plan-bar absolute hidden p-1 border-2 border-info rounded"
-        :title="`${$t('gantt.planTimeTitle')}: ${row[layout.ganttPlanStartTimeColumnName] ?? ''}-${row[layout.ganttPlanEndTimeColumnName] ?? ''}`"
+        :title="getTimelineBarTitle(row, true)"
         :data-start-time="row[layout.ganttPlanStartTimeColumnName]"
         :data-end-time="row[layout.ganttPlanEndTimeColumnName]"
       />
       <div
         v-if="layout.ganttActualStartTimeColumnName && layout.ganttActualEndTimeColumnName && (row[layout.ganttActualStartTimeColumnName] || row[layout.ganttActualEndTimeColumnName])"
         class="iw-gantt-timeline-actual-bar absolute hidden p-1 bg-success rounded-sm"
-        :title="`${$t('gantt.actualTimeTitle')}: ${row[layout.ganttActualStartTimeColumnName] ?? ''}-${row[layout.ganttActualEndTimeColumnName] ?? ''}`"
+        :title="getTimelineBarTitle(row, false)"
         :data-start-time="row[layout.ganttActualStartTimeColumnName]"
         :data-end-time="row[layout.ganttActualEndTimeColumnName]"
       />
