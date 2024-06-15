@@ -1,6 +1,8 @@
-import { convertTableStylePropsToTableStyleConf } from './components/conf'
 import * as eb from './components/eventbus'
-import type { TableCellDictItemsResp, TableDataQuerySliceProps, TableLayoutKernelProps, TableLayoutModifyProps, TableStyleProps } from './props'
+import type { FeatureUseDictItemsResp } from './features/useDict/useDictProps'
+import type { DataQuerySliceReq } from './props/basicProps'
+import type { LayoutModifyProps, LayoutProps } from './props/layoutProps'
+import type { TableStyleProps } from './props/tableProps'
 
 export async function loadData(moreForGroupedValue?: any, returnOnlyAggs?: boolean, layoutId?: string) {
   await eb.loadData(moreForGroupedValue, returnOnlyAggs, layoutId)
@@ -26,23 +28,23 @@ export async function selectData(selectedRecordPks: any[]): Promise<boolean> {
   return await eb.selectData(selectedRecordPks)
 }
 
-export async function loadCellDictItems(columnName: string, filterValue?: any, slice?: TableDataQuerySliceProps): Promise<TableCellDictItemsResp> {
+export async function loadCellDictItems(columnName: string, filterValue?: any, slice?: DataQuerySliceReq): Promise<FeatureUseDictItemsResp> {
   return await eb.loadCellDictItems(columnName, filterValue, slice)
 }
 
-export async function loadCellDictItemsWithMultiConds(conds: { [columnName: string]: any[] }, slice?: TableDataQuerySliceProps): Promise<{ [columnName: string]: TableCellDictItemsResp }> {
+export async function loadCellDictItemsWithMultiConds(conds: { [columnName: string]: any[] }, slice?: DataQuerySliceReq): Promise<{ [columnName: string]: FeatureUseDictItemsResp }> {
   return await eb.loadCellDictItemsWithMultiConds(conds, slice)
 }
 
 export async function modifyStyles(changedStyles: TableStyleProps): Promise<boolean> {
-  return await eb.modifyStyles(convertTableStylePropsToTableStyleConf(changedStyles))
+  return await eb.modifyStyles(changedStyles)
 }
 
-export async function newLayout(newLayoutProps: TableLayoutKernelProps): Promise<boolean> {
+export async function newLayout(newLayoutProps: LayoutProps): Promise<boolean> {
   return await eb.newLayout(newLayoutProps)
 }
 
-export async function modifyLayout(changedLayoutProps: TableLayoutModifyProps): Promise<boolean> {
+export async function modifyLayout(changedLayoutProps: LayoutModifyProps): Promise<boolean> {
   return await eb.modifyLayout(changedLayoutProps)
 }
 

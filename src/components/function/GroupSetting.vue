@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import * as iconSvg from '../../assets/icon';
-import type { TableDataGroupProps } from '../../props';
-import type { TableColumnConf } from '../conf';
-import * as eb from '../eventbus';
+import * as iconSvg from '../../assets/icon'
+import type { DataGroupProps } from '../../props/basicProps'
+import type { TableColumnConf } from '../Initializer'
+import * as eb from '../eventbus'
 
 const props = defineProps<{
-  group?: TableDataGroupProps
+  group?: DataGroupProps
   columnsConf: TableColumnConf[]
 }>()
 

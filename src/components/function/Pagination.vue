@@ -1,19 +1,19 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import * as iconSvg from '../../assets/icon'
-import type { TableDataSliceProps, TableLayoutModifyProps } from '../../props'
+import type { DataSliceProps, TableLayoutModifyProps } from '../../props'
 import MenuComp, { MenuOffsetKind, MenuSizeKind } from '../common/Menu.vue'
 import * as eb from '../eventbus'
 
 const props = defineProps<{
-  defaultSlice: TableDataSliceProps
-  groupSlices?: { [key: string]: TableDataSliceProps }
+  defaultSlice: DataSliceProps
+  groupSlices?: { [key: string]: DataSliceProps }
   groupValue?: string
   totalNumber: number
 }>()
 const fetchNumberSelectCompRef = ref<InstanceType<typeof MenuComp>>()
 
-function getActualSlice(): TableDataSliceProps {
+function getActualSlice(): DataSliceProps {
   return props.groupValue && props.groupSlices && props.groupSlices[props.groupValue]
     ? props.groupSlices[props.groupValue]
     : props.defaultSlice

@@ -4,11 +4,11 @@ import type { Ref } from 'vue'
 import { onMounted, ref, watch } from 'vue'
 import * as iconSvg from '../../../assets/icon'
 import locales from '../../../locales'
-import { GanttShowKind, type TableDataGroupResp, type TableDataResp, type TableLayoutModifyProps, translateGanttShowKind } from '../../../props'
+import { type DataGroupResp, type DataResp, GanttShowKind, type TableLayoutModifyProps, translateGanttShowKind } from '../../../props'
 import { getParentWithClass } from '../../../utils/basic'
 import { AlertKind, showAlert } from '../../common/Alert'
 import MenuComp, { MenuOffsetKind, MenuSizeKind } from '../../common/Menu.vue'
-import type { TableBasicConf, TableLayoutConf } from '../../conf'
+import type { TableBasicConf, TableLayoutConf } from '../../Initializer'
 import * as eb from '../../eventbus'
 import ColumnResizeComp from '../../function/ColumnResize.vue'
 import ListComp from '../list/List.vue'
@@ -33,7 +33,7 @@ const ganttInfo: Ref<GanttInfo | null> = ref(null)
 
 const showKindCompRef = ref<InstanceType<typeof MenuComp>>()
 
-async function generateGanttInfo(data: TableDataResp | TableDataGroupResp[]) {
+async function generateGanttInfo(data: DataResp | DataGroupResp[]) {
   if ((props.layout.ganttPlanStartTimeColumnName === undefined || props.layout.ganttPlanEndTimeColumnName === undefined)
     && (props.layout.ganttActualStartTimeColumnName === undefined || props.layout.ganttActualEndTimeColumnName === undefined)) {
     showAlert(t('gantt.error.timeColumnNotExist'), 2, AlertKind.WARNING, getParentWithClass(ganttRef.value, 'iw-tt')!)

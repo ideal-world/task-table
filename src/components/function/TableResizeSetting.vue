@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { inject } from 'vue'
 import * as iconSvg from '../../assets/icon'
-import type { TableStyleConf } from '../conf'
+import type { TableStyleConf } from '../Initializer'
 import * as eb from '../eventbus'
-import { SizeKind } from '../../props'
+import { SizeKind } from '../../props/basicProps'
 
 const props = defineProps<{
   styles: TableStyleConf

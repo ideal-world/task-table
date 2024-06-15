@@ -1,77 +1,55 @@
 import type { Ref } from 'vue'
 import { toRaw } from 'vue'
 import locales from '../locales'
-import type { TableCellDictItemsResp, TableDataGroupResp, TableDataQuerySliceProps, TableDataResp, TableEventProps, TableLayoutKernelProps, TableLayoutModifyProps } from '../props'
-import { SubDataShowKind } from '../props'
 
-import { IwUtils } from '../utils'
+import type { FeatureGroupDataResp } from '../features/groupData/groupDataProps'
+import type { FeatureUseDictItemsResp } from '../features/useDict/useDictProps'
+import type { DataQuerySliceReq, DataResp } from '../props/basicProps'
+import { SubDataShowKind } from '../props/enumsProps'
+import type { TableEventProps } from '../props/eventsProps'
+import type { LayoutModifyProps, LayoutProps } from '../props/layoutProps'
+import type { TableStyleProps } from '../props/tableProps'
 import { getParentWithClass } from '../utils/basic'
+import { deepToRaw } from '../utils/vueHelper'
 import { AlertKind, showAlert } from './common/Alert'
-import { type TableBasicConf, type TableLayoutConf, type TableStyleConf, convertTableLayoutColumnPropsToTableLayoutColumnConf, convertTableLayoutKernelPropsToTableLayoutKernelConf } from './conf'
 import { sortByTree } from './function/RowTree'
+import type { LayoutConf, TableConf } from './initializer'
 
 const { t } = locales.global
 
 let events: TableEventProps
-let tableBasicConf: TableBasicConf
-let tableLayoutsConf: TableLayoutConf[]
+let tableConf: TableConf
+let layoutsConf: LayoutConf[]
 let currentLayoutId: Ref<string>
 
-export async function init(_tableBasicConf: TableBasicConf, _tableLayoutsConf: TableLayoutConf[], _currentLayoutId: Ref<string>, _events: TableEventProps) {
-  tableBasicConf = _tableBasicConf
-  tableLayoutsConf = _tableLayoutsConf
+export async function init(_tableBConf: TableConf, _layoutsConf: LayoutConf[], _currentLayoutId: Ref<string>, _events: TableEventProps) {
+  tableConf = _tableBConf
+  layoutsConf = _layoutsConf
   currentLayoutId = _currentLayoutId
   events = _events
 }
 
 export async function watch() {
-  initTableDomChangedListener()
-  tableLayoutsConf.forEach((layout) => {
+  layoutsConf.forEach((layout) => {
     loadData(undefined, undefined, layout.id)
   })
 }
 
-const EVENT_EXECUTE_HANDLER: {
-  loadDataAfter: {
-    id: string
-    event: (data: TableDataResp | TableDataGroupResp[], layoutId: string) => Promise<void>
-  }[]
-} = {
-  loadDataAfter: [],
-}
-
-export function registerLoadDataAfterEvent(event: (data: TableDataResp | TableDataGroupResp[], layoutId: string) => Promise<void>): string {
-  const id = `iw-table-load-data-after-${IwUtils.getRandomString(12)}`
-  EVENT_EXECUTE_HANDLER.loadDataAfter.push({
-    id,
-    event,
-  })
-  return id
-}
-
-export function unregisterLoadDataAfterEvent(id: string) {
-  const index = EVENT_EXECUTE_HANDLER.loadDataAfter.findIndex(item => item.id === id)
-  if (index !== -1)
-    EVENT_EXECUTE_HANDLER.loadDataAfter.splice(index, 1)
-}
-
-// -------------------
-
 export async function loadData(moreForGroupedValue?: any, returnOnlyAggs?: boolean, layoutId?: string) {
-  const layout = layoutId ? tableLayoutsConf.find(layout => layout.id === layoutId)! : tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
+  const layout = layoutId ? layoutsConf.find(layout => layout.id === layoutId)! : layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   const showColumns = layout.columns.filter(column => !column.hide).map(column => column.name).slice()
-  if (tableBasicConf.parentPkColumnName && layout.columns.findIndex(column => column.name === tableBasicConf.parentPkColumnName) === -1) {
-    showColumns.push(tableBasicConf.parentPkColumnName)
+  if (tableConf.parentPkColumnName && layout.columns.findIndex(column => column.name === tableConf.parentPkColumnName) === -1) {
+    showColumns.push(tableConf.parentPkColumnName)
   }
 
   const resp = await events.loadData(
     toRaw(showColumns),
-    tableBasicConf.quickSearchContent,
-    layout.filters && toRaw(layout.filters),
-    layout.sorts && toRaw(layout.sorts),
-    layout.group && toRaw(layout.group),
-    layout.aggs && toRaw(layout.aggs),
+    tableConf.features.quickSearch?.quickSearchContent,
+    layout.features.filterData && toRaw(layout.features.filterData.filters),
+    layout.features.sortData && toRaw(layout.features.sortData.sorts),
+    layout.features.groupData && toRaw(layout.features.groupData.group),
+    layout.features.aggData && toRaw(layout.features.aggData.aggs),
     layout.subDataShowKind === SubDataShowKind.ONLY_PARENT_DATA,
     moreForGroupedValue,
     moreForGroupedValue && layout.groupSlices && layout.groupSlices[moreForGroupedValue as string]
@@ -80,21 +58,21 @@ export async function loadData(moreForGroupedValue?: any, returnOnlyAggs?: boole
           fetchNumber: layout.groupSlices[moreForGroupedValue as string].fetchNumber,
         }
       : {
-          offsetNumber: layout.defaultSlice.offsetNumber,
-          fetchNumber: layout.defaultSlice.fetchNumber,
+          offsetNumber: layout.slice.offsetNumber,
+          fetchNumber: layout.slice.fetchNumber,
         },
     returnOnlyAggs,
   )
 
-  if (!moreForGroupedValue && !layout.group) {
+  if (!moreForGroupedValue && !layout.features.groupData?.group) {
     // Load data without grouping
     if (!Array.isArray(resp)) {
       if (!returnOnlyAggs) {
-        resp.records = layout.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA ? sortByTree(resp.records, tableBasicConf.pkColumnName, tableBasicConf.parentPkColumnName) : resp.records
+        resp.records = layout.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA ? sortByTree(resp.records, tableConf.pkColumnName, tableConf.parentPkColumnName) : resp.records
         layout.data = resp
       }
       else {
-        (layout.data as TableDataResp).aggs = resp.aggs
+        (layout.data as DataResp).aggs = resp.aggs
       }
     }
     else {
@@ -102,18 +80,18 @@ export async function loadData(moreForGroupedValue?: any, returnOnlyAggs?: boole
       throw new Error('[events.loadData]  Invalid scene')
     }
   }
-  else if (!moreForGroupedValue && layout.group) {
+  else if (!moreForGroupedValue && layout.features.groupData?.group) {
     // Load all grouped data
     if (Array.isArray(resp)) {
       if (!returnOnlyAggs) {
         resp.forEach((groupData) => {
-          groupData.records = layout.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA ? sortByTree(groupData.records, tableBasicConf.pkColumnName, tableBasicConf.parentPkColumnName) : groupData.records
+          groupData.records = layout.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA ? sortByTree(groupData.records, tableConf.pkColumnName, tableConf.parentPkColumnName) : groupData.records
         })
         layout.data = resp
       }
       else {
         resp.forEach((groupData) => {
-          (layout.data as TableDataGroupResp[]).find(d => d.groupValue === groupData.groupValue)!.aggs = groupData.aggs
+          (layout.data as FeatureGroupDataResp[]).find(d => d.groupValue === groupData.groupValue)!.aggs = groupData.aggs
         })
       }
     }
@@ -128,13 +106,13 @@ export async function loadData(moreForGroupedValue?: any, returnOnlyAggs?: boole
       if (!returnOnlyAggs) {
         const groupData = layout.data.find(d => d.groupValue === moreForGroupedValue)
         if (groupData) {
-          groupData.records = layout.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA ? sortByTree(resp.records, tableBasicConf.pkColumnName, tableBasicConf.parentPkColumnName) : resp.records
+          groupData.records = layout.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA ? sortByTree(resp.records, tableConf.pkColumnName, tableConf.parentPkColumnName) : resp.records
           groupData.aggs = resp.aggs
           groupData.totalNumber = resp.totalNumber
         }
       }
       else {
-        const groupData = (layout.data as TableDataGroupResp[]).find(d => d.groupValue === moreForGroupedValue)
+        const groupData = (layout.data as FeatureGroupDataResp[]).find(d => d.groupValue === moreForGroupedValue)
         if (groupData) {
           groupData.aggs = resp.aggs
         }
@@ -149,14 +127,11 @@ export async function loadData(moreForGroupedValue?: any, returnOnlyAggs?: boole
     showAlert(t('_.event.loadDataInvalidScene'), 2, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
     throw new Error('[events.loadData]  Invalid scene')
   }
-  EVENT_EXECUTE_HANDLER.loadDataAfter.forEach(async (item) => {
-    await item.event(layout.data!, layout.id)
-  })
 }
 
 export async function newData(newRecords: { [key: string]: any }[]): Promise<boolean> {
   newRecords = toRaw(newRecords)
-  const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
+  const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.newData) {
     showAlert(t('_.event.notConfigured', { name: 'newData' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
@@ -170,7 +145,7 @@ export async function newData(newRecords: { [key: string]: any }[]): Promise<boo
 
 export async function copyData(targetRecordPks: any[]): Promise<boolean> {
   targetRecordPks = toRaw(targetRecordPks)
-  const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
+  const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.copyData) {
     showAlert(t('_.event.notConfigured', { name: 'copyData' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
@@ -185,7 +160,7 @@ export async function copyData(targetRecordPks: any[]): Promise<boolean> {
 export async function modifyData(changedRecords: { [key: string]: any }[]): Promise<boolean> {
   changedRecords = toRaw(changedRecords)
 
-  const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
+  const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.modifyData) {
     showAlert(t('_.event.notConfigured', { name: 'modifyData' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
@@ -200,7 +175,7 @@ export async function modifyData(changedRecords: { [key: string]: any }[]): Prom
 export async function deleteData(deletedRecordPks: any[]): Promise<boolean> {
   deletedRecordPks = toRaw(deletedRecordPks)
 
-  const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
+  const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.deleteData) {
     showAlert(t('_.event.notConfigured', { name: 'deleteData' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
@@ -217,33 +192,39 @@ export async function deleteData(deletedRecordPks: any[]): Promise<boolean> {
 export async function selectData(selectedRecordPks: any[]): Promise<boolean> {
   selectedRecordPks = toRaw(selectedRecordPks)
 
-  const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
+  const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
+
+  if (!layout.features.selectData) {
+    showAlert(t('_.feature.notEnabled', { name: t('_.feature.selectDataTitle') }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    throw new Error('[feature.selectData] Feature not enabled')
+  }
 
   if (!events.selectData) {
     showAlert(t('_.event.notConfigured', { name: 'selectData' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
     throw new Error('[events.selectData] Event not Configured')
   }
+
   if (!await events.selectData(selectedRecordPks)) {
     return false
   }
-  layout.selectedDataPks = selectedRecordPks
+  layout.features.selectData.selectedDataPks = selectedRecordPks
   return true
 }
 
 export async function clickCell(clickedRecordPk: any, clickedColumnName: string): Promise<boolean> {
-  const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
+  const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.clickCell) {
     showAlert(t('_.event.notConfigured', { name: 'clickCell' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
     throw new Error('[events.clickCell] Event not Configured')
   }
-  return await events.clickCell(clickedRecordPk, clickedColumnName, layout.id, layout.layoutKind)
+  return await events.clickCell(clickedRecordPk, clickedColumnName, layout.id!, layout.layoutKind)
 }
 
-export async function loadCellDictItems(columnName: string, filterValue?: any, slice?: TableDataQuerySliceProps): Promise<TableCellDictItemsResp> {
+export async function loadCellDictItems(columnName: string, filterValue?: any, slice?: DataQuerySliceReq): Promise<FeatureUseDictItemsResp> {
   slice = toRaw(slice)
 
-  const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
+  const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.loadCellDictItems) {
     showAlert(t('_.event.notConfigured', { name: 'loadCellDictItems' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
@@ -253,11 +234,11 @@ export async function loadCellDictItems(columnName: string, filterValue?: any, s
   return await events.loadCellDictItems(columnName, filterValue, slice)
 }
 
-export async function loadCellDictItemsWithMultiConds(conds: { [columnName: string]: any[] }, slice?: TableDataQuerySliceProps): Promise<{ [columnName: string]: TableCellDictItemsResp }> {
+export async function loadCellDictItemsWithMultiConds(conds: { [columnName: string]: any[] }, slice?: DataQuerySliceReq): Promise<{ [columnName: string]: FeatureUseDictItemsResp }> {
   conds = toRaw(conds)
   slice = toRaw(slice)
 
-  const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
+  const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.loadCellDictItemsWithMultiConds) {
     showAlert(t('_.event.notConfigured', { name: 'loadCellDictItemsWithMultiConds' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
@@ -267,174 +248,105 @@ export async function loadCellDictItemsWithMultiConds(conds: { [columnName: stri
   return await events.loadCellDictItemsWithMultiConds(conds, slice)
 }
 
-export async function modifyStyles(changedStyles: TableStyleConf): Promise<boolean> {
+export async function modifyStyles(changedStyles: TableStyleProps): Promise<boolean> {
   changedStyles = toRaw(changedStyles)
 
-  const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
+  const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.modifyStyles) {
     showAlert(t('_.event.notConfigured', { name: 'modifyStyles' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
     throw new Error('[events.modifyStyles] Event not Configured')
   }
 
-  if (!await events.modifyStyles({
-    size: changedStyles.size,
-    tableClass: changedStyles.tableClass,
-    headerClass: changedStyles.headerClass,
-    rowClass: changedStyles.rowClass,
-    cellClass: changedStyles.cellClass,
-    aggClass: changedStyles.aggClass,
-  })) {
+  if (!await events.modifyStyles(changedStyles)) {
     return false
   }
 
-  tableBasicConf.styles = changedStyles
+  tableConf.styles = changedStyles
   return true
 }
 
 export async function setQuickSearchContent(quickSearchContent: string): Promise<boolean> {
-  tableBasicConf.quickSearchContent = quickSearchContent
-  tableLayoutsConf.forEach((layout) => {
+  const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
+
+  if (!tableConf.features.quickSearch) {
+    showAlert(t('_.feature.notEnabled', { name: t('_.feature.quickSearchTitle') }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    throw new Error('[feature.quickSearch] Feature not enabled')
+  }
+
+  tableConf.features.quickSearch.quickSearchContent = quickSearchContent
+  layoutsConf.forEach((layout) => {
     loadData(undefined, undefined, layout.id)
   })
   return true
 }
 
-export async function newLayout(newLayoutProps: TableLayoutKernelProps): Promise<boolean> {
-  newLayoutProps = {
-    title: newLayoutProps.title,
-    layoutKind: newLayoutProps.layoutKind,
-    icon: newLayoutProps.icon,
-    columns: toRaw(newLayoutProps.columns),
-    filters: toRaw(newLayoutProps.filters),
-    sorts: toRaw(newLayoutProps.sorts),
-    group: toRaw(newLayoutProps.group),
-    aggs: toRaw(newLayoutProps.aggs),
-    defaultSlice: toRaw(newLayoutProps.defaultSlice),
-    groupSlices: toRaw(newLayoutProps.groupSlices),
-    subDataShowKind: newLayoutProps.subDataShowKind,
-    showSelectColumn: newLayoutProps.showSelectColumn,
-    actionColumnRender: newLayoutProps.actionColumnRender,
-    actionColumnWidth: newLayoutProps.actionColumnWidth,
-    ganttShowKind: newLayoutProps.ganttShowKind,
-    ganttTimelineWidth: newLayoutProps.ganttTimelineWidth,
-    ganttPlanStartTimeColumnName: newLayoutProps.ganttPlanStartTimeColumnName,
-    ganttPlanEndTimeColumnName: newLayoutProps.ganttPlanEndTimeColumnName,
-    ganttActualStartTimeColumnName: newLayoutProps.ganttActualStartTimeColumnName,
-    ganttActualEndTimeColumnName: newLayoutProps.ganttActualEndTimeColumnName,
-  }
+export async function newLayout(newLayoutProps: LayoutProps): Promise<boolean> {
+  newLayoutProps = deepToRaw(newLayoutProps)
 
-  const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
+  const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.newLayout) {
     showAlert(t('_.event.notConfigured', { name: 'newLayout' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
     throw new Error('[events.newLayout] Event not Configured')
   }
 
-  const layoutId = await events.newLayout({
-    title: newLayoutProps.title,
-    layoutKind: newLayoutProps.layoutKind,
-    icon: newLayoutProps.icon,
-    columns: newLayoutProps.columns,
-    filters: newLayoutProps.filters,
-    sorts: newLayoutProps.sorts,
-    group: newLayoutProps.group,
-    aggs: newLayoutProps.aggs,
-    defaultSlice: newLayoutProps.defaultSlice,
-    groupSlices: newLayoutProps.groupSlices,
-    subDataShowKind: newLayoutProps.subDataShowKind,
-    showSelectColumn: newLayoutProps.showSelectColumn,
-    actionColumnRender: newLayoutProps.actionColumnRender,
-    actionColumnWidth: newLayoutProps.actionColumnWidth,
-    ganttShowKind: newLayoutProps.ganttShowKind,
-    ganttTimelineWidth: newLayoutProps.ganttTimelineWidth,
-    ganttPlanStartTimeColumnName: newLayoutProps.ganttPlanStartTimeColumnName,
-    ganttPlanEndTimeColumnName: newLayoutProps.ganttPlanEndTimeColumnName,
-    ganttActualStartTimeColumnName: newLayoutProps.ganttActualStartTimeColumnName,
-    ganttActualEndTimeColumnName: newLayoutProps.ganttActualEndTimeColumnName,
-  })
-  tableLayoutsConf.push({
+  const layoutId = await events.newLayout(newLayoutProps)
+  layoutsConf.push({
     id: layoutId,
-    ...convertTableLayoutKernelPropsToTableLayoutKernelConf(newLayoutProps, tableBasicConf),
+    ...newLayoutProps,
   })
 
   await loadData(undefined, undefined, layoutId)
   return true
 }
 
-export async function modifyLayout(changedLayoutProps: TableLayoutModifyProps, byGroupValue?: any): Promise<boolean> {
-  changedLayoutProps = {
-    title: changedLayoutProps.title,
-    icon: changedLayoutProps.icon,
-    filters: toRaw(changedLayoutProps.filters),
-    sorts: toRaw(changedLayoutProps.sorts),
-    group: toRaw(changedLayoutProps.group),
-    removeGroup: changedLayoutProps.removeGroup,
-    aggs: toRaw(changedLayoutProps.aggs),
-    defaultSlice: toRaw(changedLayoutProps.defaultSlice),
-    groupSlices: toRaw(changedLayoutProps.groupSlices),
-    newColumn: toRaw(changedLayoutProps.newColumn),
-    changedColumn: toRaw(changedLayoutProps.changedColumn),
-    deletedColumnName: changedLayoutProps.deletedColumnName,
-    columnSortedNames: toRaw(changedLayoutProps.columnSortedNames),
-    subDataShowKind: changedLayoutProps.subDataShowKind,
-    ganttShowKind: changedLayoutProps.ganttShowKind,
-    ganttTimelineWidth: changedLayoutProps.ganttTimelineWidth,
-  }
+export async function modifyLayout(changedLayoutProps: LayoutModifyProps, byGroupValue?: any): Promise<boolean> {
+  changedLayoutProps = deepToRaw(changedLayoutProps)
 
-  const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
+  const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.modifyLayout) {
     showAlert(t('_.event.notConfigured', { name: 'modifyLayout' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
     throw new Error('[events.modifyLayout] Event not Configured')
   }
 
-  if (!await events.modifyLayout(layout.id, changedLayoutProps))
+  if (!await events.modifyLayout(currentLayoutId.value, changedLayoutProps))
     return false
 
+  // Process basic
   changedLayoutProps.title && (layout.title = changedLayoutProps.title)
   changedLayoutProps.icon && (layout.icon = changedLayoutProps.icon)
-  changedLayoutProps.filters && (layout.filters = [...changedLayoutProps.filters])
-  changedLayoutProps.sorts && (layout.sorts = [...changedLayoutProps.sorts])
-  changedLayoutProps.group && (layout.group = changedLayoutProps.group)
-  if (changedLayoutProps.removeGroup) {
-    layout.group = undefined
-  }
-  changedLayoutProps.aggs && (layout.aggs = changedLayoutProps.aggs)
-  changedLayoutProps.defaultSlice && (layout.defaultSlice = changedLayoutProps.defaultSlice)
+  changedLayoutProps.slice && (layout.slice = changedLayoutProps.slice)
   changedLayoutProps.groupSlices && (layout.groupSlices = changedLayoutProps.groupSlices)
   changedLayoutProps.subDataShowKind && (layout.subDataShowKind = changedLayoutProps.subDataShowKind)
-
-  if (changedLayoutProps.newColumn) {
-    layout.columns.push(convertTableLayoutColumnPropsToTableLayoutColumnConf(changedLayoutProps.newColumn, tableBasicConf.columns.find(column => column.name === changedLayoutProps.newColumn?.name)!))
-  }
-
+  changedLayoutProps.newColumn && (layout.columns.push(changedLayoutProps.newColumn))
   if (changedLayoutProps.changedColumn) {
     const oldLayoutColumnIdx = layout.columns.findIndex(column => column.name === changedLayoutProps.changedColumn?.name)
-    oldLayoutColumnIdx !== -1 && layout.columns.splice(oldLayoutColumnIdx, 1, convertTableLayoutColumnPropsToTableLayoutColumnConf(changedLayoutProps.changedColumn, tableBasicConf.columns.find(column => column.name === changedLayoutProps.changedColumn?.name)!))
+    oldLayoutColumnIdx !== -1 && layout.columns.splice(oldLayoutColumnIdx, 1, changedLayoutProps.changedColumn)
   }
-
   if (changedLayoutProps.deletedColumnName) {
     const oldLayoutColumnIdx = layout.columns.findIndex(column => column.name === changedLayoutProps.deletedColumnName)
     oldLayoutColumnIdx !== -1 && layout.columns.splice(oldLayoutColumnIdx, 1)
   }
+  // Process features
+  changedLayoutProps.features.groupData?.modify && layout.features.groupData && (layout.features.groupData.group = changedLayoutProps.features.groupData.modify)
+  changedLayoutProps.features.groupData?.remove && layout.features.groupData && (layout.features.groupData.group = undefined)
+  changedLayoutProps.features.filterData?.filters && layout.features.filterData && (layout.features.filterData.filters = [...changedLayoutProps.features.filterData.filters])
+  changedLayoutProps.features.sortData?.sorts && layout.features.sortData && (layout.features.sortData.sorts = [...changedLayoutProps.features.sortData.sorts])
+  changedLayoutProps.features.aggData?.aggs && layout.features.aggData && (layout.features.aggData.aggs = changedLayoutProps.features.aggData.aggs)
+  changedLayoutProps.features.selectData?.selectedDataPks && layout.features.selectData && (layout.features.selectData.selectedDataPks = [...changedLayoutProps.features.selectData.selectedDataPks])
+  changedLayoutProps.features.editData?.columnNames && layout.features.editData && (layout.features.editData.columnNames = [...changedLayoutProps.features.editData.columnNames])
+  changedLayoutProps.features.actionColumn?.width && layout.features.actionColumn && (layout.features.actionColumn.width = changedLayoutProps.features.actionColumn.width)
+  changedLayoutProps.features.ganttLayout?.showKind && layout.features.ganttLayout && (layout.features.ganttLayout.showKind = changedLayoutProps.features.ganttLayout.showKind)
+  changedLayoutProps.features.ganttLayout?.timelineWidth && layout.features.ganttLayout && (layout.features.ganttLayout.timelineWidth = changedLayoutProps.features.ganttLayout.timelineWidth)
 
-  if (changedLayoutProps.columnSortedNames) {
-    const leftColumnIdx = layout.columns.findIndex(column => column.name === changedLayoutProps.columnSortedNames![0])
-    const rightColumnIdx = layout.columns.findIndex(column => column.name === changedLayoutProps.columnSortedNames![1])
-    const tmpColumn = layout.columns[leftColumnIdx]
-    leftColumnIdx !== -1 && layout.columns.splice(leftColumnIdx, 1, layout.columns[rightColumnIdx])
-    rightColumnIdx !== -1 && layout.columns.splice(rightColumnIdx, 1, tmpColumn)
-  }
-  changedLayoutProps.ganttShowKind && (layout.ganttShowKind = changedLayoutProps.ganttShowKind)
-  changedLayoutProps.ganttTimelineWidth && (layout.ganttTimelineWidth = changedLayoutProps.ganttTimelineWidth)
-
-  if (changedLayoutProps.quickSearchContent || changedLayoutProps.filters || changedLayoutProps.sorts
-    || changedLayoutProps.group || changedLayoutProps.removeGroup || changedLayoutProps.aggs
-    || changedLayoutProps.defaultSlice || changedLayoutProps.groupSlices || changedLayoutProps.subDataShowKind
+  if (changedLayoutProps.features.filterData || changedLayoutProps.features.sortData
+    || changedLayoutProps.features.groupData || changedLayoutProps.features.aggData
+    || changedLayoutProps.slice || changedLayoutProps.groupSlices || changedLayoutProps.subDataShowKind
     || changedLayoutProps.newColumn || changedLayoutProps.deletedColumnName
   ) {
-    if (Object.entries(changedLayoutProps).length === 1 && changedLayoutProps.aggs) {
+    if (Object.entries(changedLayoutProps).length === 1 && changedLayoutProps.features.aggData?.aggs) {
       await loadData(byGroupValue, true)
     }
     else {
@@ -445,7 +357,7 @@ export async function modifyLayout(changedLayoutProps: TableLayoutModifyProps, b
 }
 
 export async function deleteLayout(deletedLayoutId: string): Promise<boolean> {
-  const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
+  const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.deleteLayout) {
     showAlert(t('_.event.notConfigured', { name: 'deleteLayout' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
@@ -455,13 +367,13 @@ export async function deleteLayout(deletedLayoutId: string): Promise<boolean> {
   if (!await events.deleteLayout(deletedLayoutId))
     return false
 
-  const oldColumnIdx = tableLayoutsConf.findIndex(layout => layout.id === deletedLayoutId)!
-  tableLayoutsConf.splice(oldColumnIdx, 1)
+  const oldColumnIdx = layoutsConf.findIndex(layout => layout.id === deletedLayoutId)!
+  layoutsConf.splice(oldColumnIdx, 1)
   return true
 }
 
 export async function loadHolidays(startTime: Date, endTime: Date): Promise<Date[]> {
-  const layout = tableLayoutsConf.find(layout => layout.id === currentLayoutId.value)!
+  const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.loadHolidays) {
     showAlert(t('_.event.notConfigured', { name: 'loadHolidays' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
@@ -469,52 +381,4 @@ export async function loadHolidays(startTime: Date, endTime: Date): Promise<Date
   }
 
   return await events.loadHolidays(startTime, endTime)
-}
-
-// -------------------
-
-const TABLE_DOM_CHANGED_HANDLER: {
-  addNodeEvents: ((node: HTMLElement) => void)[]
-  removedNodeEvents: ((node: HTMLElement) => void)[]
-} = {
-  addNodeEvents: [],
-  removedNodeEvents: [],
-}
-
-export function registerTableDomAddedEvent(event: (node: HTMLElement) => void) {
-  TABLE_DOM_CHANGED_HANDLER.addNodeEvents.push(event)
-}
-
-export function registerTableDomRemovedEvent(event: (node: HTMLElement) => void) {
-  TABLE_DOM_CHANGED_HANDLER.removedNodeEvents.push(event)
-}
-
-function initTableDomChangedListener() {
-  const observer = new MutationObserver((mutations) => {
-    mutations.filter(mutation => mutation.type === 'childList').forEach((mutation) => {
-      if (mutation.addedNodes.length > 0 && TABLE_DOM_CHANGED_HANDLER.addNodeEvents.length > 0) {
-        mutation.addedNodes.forEach((node) => {
-          if (!(node instanceof HTMLElement)) {
-            return
-          }
-          TABLE_DOM_CHANGED_HANDLER.addNodeEvents.forEach((event) => {
-            event(node)
-          })
-        })
-      }
-      else if (mutation.removedNodes.length > 0 && TABLE_DOM_CHANGED_HANDLER.removedNodeEvents.length > 0) {
-        mutation.removedNodes.forEach((node) => {
-          if (!(node instanceof HTMLElement)) {
-            return
-          }
-          TABLE_DOM_CHANGED_HANDLER.removedNodeEvents.forEach((event) => {
-            event(node)
-          })
-        })
-      }
-    })
-  })
-  document.querySelectorAll('.iw-tt').forEach((ele) => {
-    observer.observe(ele as HTMLElement, { childList: true, subtree: true })
-  })
 }

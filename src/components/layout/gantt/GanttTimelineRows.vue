@@ -3,9 +3,9 @@ import type { Dayjs } from 'dayjs'
 import dayjs from 'dayjs'
 import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import locales from '../../../locales'
-import { GanttShowKind, SubDataShowKind } from '../../../props'
+import { GanttShowKind, SubDataShowKind } from '../../../props/basicProps'
 
-import type { TableLayoutConf, TableStyleConf } from '../../conf'
+import type { TableLayoutConf, TableStyleConf } from '../../Initializer'
 import { registerRowTreeTriggerEvent, unregisterRowTreeTriggerEvent } from '../../function/RowTree'
 import { type GanttInfo, getTimelineColumnWidth, getWeekdays } from './gantt'
 

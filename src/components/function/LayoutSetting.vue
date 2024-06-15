@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { ref, toRaw } from 'vue'
 import * as iconSvg from '../../assets/icon'
-import { LayoutKind, SubDataShowKind, type TableLayoutKernelProps, type TableLayoutModifyProps } from '../../props'
+import { type LayoutKernelProps, LayoutKind, SubDataShowKind, type TableLayoutModifyProps } from '../../props'
 
 import MenuComp, { MenuOffsetKind, MenuSizeKind } from '../common/Menu.vue'
-import type { TableBasicConf, TableLayoutConf } from '../conf'
-import { convertLayoutColumnConfToLayoutColumnProps, getDefaultLayoutColumnProps } from '../conf'
+import type { TableBasicConf, TableLayoutConf } from '../Initializer'
+import { convertLayoutColumnConfToLayoutColumnProps, getDefaultLayoutColumnProps } from '../Initializer'
 
 import locales from '../../locales'
 import * as eb from '../eventbus'
@@ -67,7 +67,7 @@ async function copyLayout() {
 }
 
 async function createNewLayout(layoutKind: LayoutKind) {
-  const newLayout: TableLayoutKernelProps = {
+  const newLayout: LayoutKernelProps = {
     title: t('layout.title.default'),
     layoutKind,
     icon: iconSvg.TEXT,

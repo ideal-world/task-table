@@ -3,7 +3,7 @@ import { inject, onMounted, ref, watch } from 'vue'
 import * as iconSvg from '../../../assets/icon'
 import type { TableLayoutModifyProps } from '../../../props'
 import { FUN_CLOSE_CONTEXT_MENU_TYPE } from '../../common/Menu.vue'
-import { type CachedColumnConf, convertLayoutColumnConfToLayoutColumnProps } from '../../conf'
+import { type CachedColumnConf, convertLayoutColumnConfToLayoutColumnProps } from '../../Initializer'
 import * as eb from '../../eventbus'
 
 const props = defineProps<{

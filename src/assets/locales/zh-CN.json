@@ -54,6 +54,20 @@
     },
     "table": {
       "moreSettingTitle": "更多设置"
+    },
+    "feature": {
+      "notEnabled": "功能[{name}]没有启用",
+      "actionColumnTitle": "操作列",
+      "aggDataTitle": "聚合数据",
+      "filterDataTitle": "过滤数据",
+      "groupDataTitle": "分组数据",
+      "sortDataTitle": "排序数据",
+      "editDataTitle": "编辑数据",
+      "selectDataTitle": "选择数据",
+      "ganttLayoutTitle" : "甘特视图",
+      "multiLayoutsTitle":"多视图",
+      "quickSearchTitle": "快速搜索",
+      "useDictTitle": "字典"
     }
   },
   "layout": {

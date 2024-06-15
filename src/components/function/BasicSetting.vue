@@ -5,7 +5,7 @@ import type { TableLayoutModifyProps } from '../../props'
 import IconPickerComp from '../common/IconPicker.vue'
 import type MenuComp from '../common/Menu.vue'
 import { MenuOffsetKind } from '../common/Menu.vue'
-import type { TableLayoutConf } from '../conf'
+import type { TableLayoutConf } from '../Initializer'
 import * as eb from '../eventbus'
 
 const props = defineProps<{

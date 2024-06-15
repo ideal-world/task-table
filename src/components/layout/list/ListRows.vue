@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import dayjs from 'dayjs'
 import * as iconSvg from '../../../assets/icon'
-import type { LayoutKind } from '../../../props'
-import { DATA_DICT_POSTFIX, DataKind, SubDataShowKind } from '../../../props'
+import type { LayoutKind } from '../../../props/basicProps'
+import { DATA_DICT_POSTFIX, DataKind, SubDataShowKind } from '../../../props/basicProps'
 
-import type { CachedColumnConf, TableStyleConf } from '../../conf'
+import type { CachedColumnConf, TableStyleConf } from '../../Initializer'
 import { NODE_DEPTH_FLAG, renderTreeToggleHandler } from '../../function/RowTree'
 
 const props = defineProps<{

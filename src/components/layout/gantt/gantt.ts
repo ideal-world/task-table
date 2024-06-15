@@ -4,7 +4,7 @@ import isSameOrBefore from 'dayjs/plugin/isSameOrBefore'
 import weekOfYear from 'dayjs/plugin/weekOfYear'
 import weekday from 'dayjs/plugin/weekday'
 import locales from '../../../locales'
-import { GanttShowKind } from '../../../props'
+import { GanttShowKind } from '../../../props/basicProps'
 
 const { t } = locales.global
 

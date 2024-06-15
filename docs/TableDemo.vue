@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import type { Ref } from 'vue'
-import { onMounted, ref, toRaw } from 'vue'
-import { IwEvents } from '../src'
-import type { TableCellDictItemProps, TableCellDictItemsResp, TableDataFilterProps, TableDataGroupProps, TableDataGroupResp, TableDataQuerySliceProps, TableDataResp, TableDataSortProps, TableEventProps, TableLayoutKernelProps, TableLayoutModifyProps, TableProps, TableStyleProps } from '../src/props'
-import { AggregateKind, DATA_DICT_POSTFIX, DataKind, LayoutKind, OperatorKind } from '../src/props'
-import { IwUtils } from '../src/utils'
+import type { Ref } from 'vue';
+import { onMounted, ref, toRaw } from 'vue';
+import { IwEvents, IwProps } from '../src';
+import { IwUtils } from '../src/utils';
 
 const selectedRecordPks: Ref<any[]> = ref([])
 
@@ -43,92 +41,6 @@ const DATA: { [key: string]: any }[] = [
   { no: 29, pno: null, name: '代码评审与合并', creator: 'xh', stats: ['close'], planStartTime: '2023-11-20' },
 ]
 
-const columns = [
-  { name: 'no', title: 'ID', dataKind: DataKind.NUMBER, dataEditable: false, sortable: true, width: 80, styles: { cursor: 'pointer' } },
-  { name: 'pno', title: '父ID', dataKind: DataKind.NUMBER, dataEditable: false, hide: true },
-  { name: 'name', title: '名称', sortable: true, width: 300, render: (record: { [key: string]: any }, layoutKind: LayoutKind) => {
-    if (layoutKind === LayoutKind.LIST) {
-      return record.stats.includes('risk') ? `<span style='color:red'>${record.name}</span>` : record.name
-    }
-    else {
-      return record.name
-    }
-  } },
-  { name: 'creator', title: '创建人', useDict: true, dictEditable: true, sortable: true, groupable: true },
-  { name: 'stats', title: '状态', useDict: true, dictEditable: true, multiValue: true, sortable: true, groupable: true },
-  { name: 'planStartTime', title: '计划开始时间', dataKind: DataKind.DATETIME, sortable: true },
-  { name: 'planEndTime', title: '计划结束时间', dataKind: DataKind.DATETIME, sortable: true },
-  { name: 'actualStartTime', title: '实际开始时间', dataKind: DataKind.DATETIME, sortable: true },
-  { name: 'actualEndTime', title: '实际结束时间', dataKind: DataKind.DATETIME, sortable: true },
-]
-
-const layouts = [{
-  id: 'hi1',
-  title: 'gantt demo',
-  layoutKind: LayoutKind.GANTT,
-  columns: [{
-    name: 'name',
-  }, {
-    name: 'creator',
-  }, {
-    name: 'no',
-  }, {
-    name: 'planStartTime',
-  }, {
-    name: 'planEndTime',
-  }, {
-    name: 'actualStartTime',
-  }, {
-    name: 'actualEndTime',
-  }],
-}, {
-  id: 'hi2',
-  title: 'list demo',
-  layoutKind: LayoutKind.LIST,
-  columns: [{
-    name: 'name',
-  }, {
-    name: 'stats',
-  }, {
-    name: 'creator',
-  }, {
-    name: 'no',
-  }, {
-    name: 'planStartTime',
-  }, {
-    name: 'planEndTime',
-  }, {
-    name: 'actualStartTime',
-  }, {
-    name: 'actualEndTime',
-  }],
-  aggs: { name: AggregateKind.MIN },
-}, {
-  id: 'hi3',
-  title: 'multiple header demo',
-  layoutKind: LayoutKind.LIST,
-  columns: [{
-    name: 'name',
-  }, {
-    name: 'creator',
-  }, {
-    name: 'stats',
-  }, {
-    name: 'no',
-  }, {
-    name: 'planStartTime',
-    categoryTitle: 'Time',
-  }, {
-    name: 'planEndTime',
-    categoryTitle: 'Time',
-  }, {
-    name: 'actualStartTime',
-  }, {
-    name: 'actualEndTime',
-  }],
-  aggs: { name: AggregateKind.MIN },
-}]
-
 function getDictValue(columnName: string, dataValue: any) {
   if (columnName === 'creator') {
     return NAME_DICT.find(dict => dict.value === dataValue)!.title
@@ -144,17 +56,17 @@ function getDictValue(columnName: string, dataValue: any) {
 function attachDict(data: { [key: string]: any }[]) {
   return data.map((d) => {
     if (d.creator) {
-      d[`creator${DATA_DICT_POSTFIX}`] = [NAME_DICT.find(dict => dict.value === d.creator)!]
+      d[`creator${IwProps.DATA_DICT_POSTFIX}`] = [NAME_DICT.find(dict => dict.value === d.creator)!]
     }
     if (d.stats) {
-      d[`stats${DATA_DICT_POSTFIX}`] = d.stats.map((s) => { return STATS_DICT.find(dict => dict.value === s)! })
+      d[`stats${IwProps.DATA_DICT_POSTFIX}`] = d.stats.map((s) => { return STATS_DICT.find(dict => dict.value === s)! })
     }
     return d
   })
 }
 
-const events: TableEventProps = {
-  loadData: async (columns?: string[], quickSearchContent?: string, filters?: TableDataFilterProps[], sorts?: TableDataSortProps[], group?: TableDataGroupProps, aggs?: { [key: string]: AggregateKind }, hideSubData?: boolean, byGroupValue?: any, slices?: TableDataQuerySliceProps, _returnOnlyAggs?: boolean): Promise<TableDataResp | TableDataGroupResp[]> => {
+const events: IwProps.TableEventProps = {
+  loadData: async (columns?: string[], quickSearchContent?: string, filters?: IwProps.FeatureFilterDataGroupProps[], sorts?: IwProps.FeatureSortDataItemProps[], group?: IwProps.FeatureGroupDataItemProps, aggs?: IwProps.FeatureAggDataItemProps[], hideSubData?: boolean, byGroupValue?: any, slices?: IwProps.DataQuerySliceReq, _returnOnlyAggs?: boolean): Promise<IwProps.DataResp | IwProps.FeatureGroupDataResp[]> => {
     let data: { [key: string]: any }[] = toRaw(DATA)
     if (quickSearchContent) {
       data = data.filter((d) => {
@@ -168,39 +80,39 @@ const events: TableEventProps = {
         data = data.filter((d) => {
           return filter.items.every((item) => {
             switch (item.operator) {
-              case OperatorKind.EQ:
+              case IwProps.OperatorKind.EQ:
                 // eslint-disable-next-line eqeqeq
                 return d[item.columnName] == item.value
-              case OperatorKind.NE:
+              case IwProps.OperatorKind.NE:
                 // eslint-disable-next-line eqeqeq
                 return d[item.columnName] != item.value
-              case OperatorKind.LT:
+              case IwProps.OperatorKind.LT:
                 return d[item.columnName] < item.value
-              case OperatorKind.LE:
+              case IwProps.OperatorKind.LE:
                 return d[item.columnName] <= item.value
-              case OperatorKind.GT:
+              case IwProps.OperatorKind.GT:
                 return d[item.columnName] > item.value
-              case OperatorKind.GE:
+              case IwProps.OperatorKind.GE:
                 return d[item.columnName] >= item.value
-              case OperatorKind.IN:
+              case IwProps.OperatorKind.IN:
                 return d[item.columnName].includes(item.value)
-              case OperatorKind.NOT_IN:
+              case IwProps.OperatorKind.NOT_IN:
                 return !d[item.columnName].includes(item.value)
-              case OperatorKind.CONTAINS:
+              case IwProps.OperatorKind.CONTAINS:
                 return d[item.columnName].includes(item.value)
-              case OperatorKind.NOT_CONTAINS:
+              case IwProps.OperatorKind.NOT_CONTAINS:
                 return !d[item.columnName].includes(item.value)
-              case OperatorKind.STARTWITH:
+              case IwProps.OperatorKind.STARTWITH:
                 return d[item.columnName].startsWith(item.value)
-              case OperatorKind.NOT_STARTWITH:
+              case IwProps.OperatorKind.NOT_STARTWITH:
                 return !d[item.columnName].startsWith(item.value)
-              case OperatorKind.ENDWITH:
+              case IwProps.OperatorKind.ENDWITH:
                 return d[item.columnName].endsWith(item.value)
-              case OperatorKind.NOT_ENDWITH:
+              case IwProps.OperatorKind.NOT_ENDWITH:
                 return !d[item.columnName].endsWith(item.value)
-              case OperatorKind.IS_EMPTY:
+              case IwProps.OperatorKind.IS_EMPTY:
                 return d[item.columnName] === ''
-              case OperatorKind.NOT_EMPTY:
+              case IwProps.OperatorKind.NOT_EMPTY:
                 return d[item.columnName] !== ''
               default:
                 return false
@@ -258,37 +170,36 @@ const events: TableEventProps = {
       return Object.entries(dataGroup).map(([groupKey, data]) => {
         const aggsResult = {}
         if (aggs) {
-          Object.keys(aggs).forEach((aggKey) => {
-            const agg = aggs[aggKey]
-            switch (agg) {
-              case AggregateKind.COUNT:
-                return aggsResult[aggKey] = data.filter(d => d[aggKey] !== undefined).length
-              case AggregateKind.SUM:
-                return aggsResult[aggKey] = data.reduce((acc, cur) => acc + cur[aggKey], 0)
-              case AggregateKind.AVG:
-                return aggsResult[aggKey] = data.reduce((acc, cur) => acc + cur[aggKey], 0) / data.length
-              case AggregateKind.MAX:
+          aggs.forEach((agg) => {
+            switch (agg.aggKind) {
+              case IwProps.FeatureAggDataKind.COUNT:
+                return aggsResult[agg.columnName] = data.filter(d => d[agg.columnName] !== undefined).length
+              case IwProps.FeatureAggDataKind.SUM:
+                return aggsResult[agg.columnName] = data.reduce((acc, cur) => acc + cur[agg.columnName], 0)
+              case IwProps.FeatureAggDataKind.AVG:
+                return aggsResult[agg.columnName] = data.reduce((acc, cur) => acc + cur[agg.columnName], 0) / data.length
+              case IwProps.FeatureAggDataKind.MAX:
                 if (data.length === 0) {
-                  return aggsResult[aggKey] = ''
+                  return aggsResult[agg.columnName] = ''
                 }
-                else if (typeof data[0][aggKey] === 'string') {
-                  return aggsResult[aggKey] = data.reduce((acc, cur) => acc[aggKey] > cur[aggKey] ? acc : cur)[aggKey]
+                else if (typeof data[0][agg.columnName] === 'string') {
+                  return aggsResult[agg.columnName] = data.reduce((acc, cur) => acc[agg.columnName] > cur[agg.columnName] ? acc : cur)[agg.columnName]
                 }
                 else {
-                  return aggsResult[aggKey] = Math.max(...data.map(d => d[aggKey]))
+                  return aggsResult[agg.columnName] = Math.max(...data.map(d => d[agg.columnName]))
                 }
-              case AggregateKind.MIN:
+              case IwProps.FeatureAggDataKind.MIN:
                 if (data.length === 0) {
-                  return aggsResult[aggKey] = ''
+                  return aggsResult[agg.columnName] = ''
                 }
-                else if (typeof data[0][aggKey] === 'string') {
-                  return aggsResult[aggKey] = data.reduce((acc, cur) => acc[aggKey] < cur[aggKey] ? acc : cur)[aggKey]
+                else if (typeof data[0][agg.columnName] === 'string') {
+                  return aggsResult[agg.columnName] = data.reduce((acc, cur) => acc[agg.columnName] < cur[agg.columnName] ? acc : cur)[agg.columnName]
                 }
                 else {
-                  return aggsResult[aggKey] = Math.min(...data.map(d => d[aggKey]))
+                  return aggsResult[agg.columnName] = Math.min(...data.map(d => d[agg.columnName]))
                 }
               default:
-                return aggsResult[aggKey] = data.filter(d => d[aggKey] !== undefined).length
+                return aggsResult[agg.columnName] = data.filter(d => d[agg.columnName] !== undefined).length
             }
           })
         }
@@ -312,37 +223,36 @@ const events: TableEventProps = {
     else {
       const aggsResult = {}
       if (aggs) {
-        Object.keys(aggs).forEach((aggKey) => {
-          const agg = aggs[aggKey]
-          switch (agg) {
-            case AggregateKind.COUNT:
-              return aggsResult[aggKey] = data.filter(d => d[aggKey] !== undefined).length
-            case AggregateKind.SUM:
-              return aggsResult[aggKey] = data.reduce((acc, cur) => acc + cur[aggKey], 0)
-            case AggregateKind.AVG:
-              return aggsResult[aggKey] = data.reduce((acc, cur) => acc + cur[aggKey], 0) / data.length
-            case AggregateKind.MAX:
+        aggs.forEach((agg) => {
+          switch (agg.aggKind) {
+            case IwProps.FeatureAggDataKind.COUNT:
+              return aggsResult[agg.columnName] = data.filter(d => d[agg.columnName] !== undefined).length
+            case IwProps.FeatureAggDataKind.SUM:
+              return aggsResult[agg.columnName] = data.reduce((acc, cur) => acc + cur[agg.columnName], 0)
+            case IwProps.FeatureAggDataKind.AVG:
+              return aggsResult[agg.columnName] = data.reduce((acc, cur) => acc + cur[agg.columnName], 0) / data.length
+            case IwProps.FeatureAggDataKind.MAX:
               if (data.length === 0) {
-                return aggsResult[aggKey] = ''
+                return aggsResult[agg.columnName] = ''
               }
-              else if (typeof data[0][aggKey] === 'string') {
-                return aggsResult[aggKey] = data.reduce((acc, cur) => acc[aggKey] > cur[aggKey] ? acc : cur)[aggKey]
+              else if (typeof data[0][agg.columnName] === 'string') {
+                return aggsResult[agg.columnName] = data.reduce((acc, cur) => acc[agg.columnName] > cur[agg.columnName] ? acc : cur)[agg.columnName]
               }
               else {
-                return aggsResult[aggKey] = Math.max(...data.map(d => d[aggKey]))
+                return aggsResult[agg.columnName] = Math.max(...data.map(d => d[agg.columnName]))
               }
-            case AggregateKind.MIN:
+            case IwProps.FeatureAggDataKind.MIN:
               if (data.length === 0) {
-                return aggsResult[aggKey] = ''
+                return aggsResult[agg.columnName] = ''
               }
-              else if (typeof data[0][aggKey] === 'string') {
-                return aggsResult[aggKey] = data.reduce((acc, cur) => acc[aggKey] < cur[aggKey] ? acc : cur)[aggKey]
+              else if (typeof data[0][agg.columnName] === 'string') {
+                return aggsResult[agg.columnName] = data.reduce((acc, cur) => acc[agg.columnName] < cur[agg.columnName] ? acc : cur)[agg.columnName]
               }
               else {
-                return aggsResult[aggKey] = Math.min(...data.map(d => d[aggKey]))
+                return aggsResult[agg.columnName] = Math.min(...data.map(d => d[agg.columnName]))
               }
             default:
-              return aggsResult[aggKey] = data.filter(d => d[aggKey] !== undefined).length
+              return aggsResult[agg.columnName] = data.filter(d => d[agg.columnName] !== undefined).length
           }
         })
       }
@@ -411,7 +321,7 @@ const events: TableEventProps = {
     return true
   },
 
-  clickCell: async (clickedRecordPk: any, clickedColumnName: string, _byLayoutId: string, _byLayoutKind: LayoutKind): Promise<boolean> => {
+  clickCell: async (clickedRecordPk: any, clickedColumnName: string, _byLayoutId: string, _byLayoutKind: IwProps.LayoutKind): Promise<boolean> => {
     if (clickedColumnName === 'no') {
       // eslint-disable-next-line no-alert
       alert(`点击了序号${clickedRecordPk}`)
@@ -419,13 +329,13 @@ const events: TableEventProps = {
     return true
   },
 
-  modifyStyles: async (changedStyleProps: TableStyleProps): Promise<boolean> => {
+  modifyStyles: async (changedStyleProps: IwProps.TableStyleProps): Promise<boolean> => {
     // eslint-disable-next-line ts/no-use-before-define
     tableProps.value.styles = changedStyleProps
     return true
   },
 
-  newLayout: async (newLayoutProps: TableLayoutKernelProps): Promise<string> => {
+  newLayout: async (newLayoutProps: IwProps.LayoutProps): Promise<string> => {
     const id = Date.now().toString()
     // eslint-disable-next-line ts/no-use-before-define
     tableProps.value.layouts.push({
@@ -435,7 +345,7 @@ const events: TableEventProps = {
     return id
   },
 
-  modifyLayout: async (changedLayoutId: string, changedLayoutProps: TableLayoutModifyProps): Promise<boolean> => {
+  modifyLayout: async (changedLayoutId: string, changedLayoutProps: IwProps.LayoutModifyProps): Promise<boolean> => {
     // eslint-disable-next-line ts/no-use-before-define
     const currLayout = tableProps.value.layouts.find((layout) => { return layout.id === changedLayoutId })!
     if (changedLayoutProps.title) {
@@ -444,33 +354,14 @@ const events: TableEventProps = {
     if (changedLayoutProps.icon) {
       currLayout.icon = changedLayoutProps.icon
     }
-    if (changedLayoutProps.filters) {
-      currLayout.filters = changedLayoutProps.filters
-    }
-    if (changedLayoutProps.sorts) {
-      currLayout.sorts = changedLayoutProps.sorts
-    }
-    if (changedLayoutProps.group) {
-      currLayout.group = changedLayoutProps.group
-    }
-    if (changedLayoutProps.aggs) {
-      currLayout.aggs = changedLayoutProps.aggs
-    }
-    if (changedLayoutProps.defaultSlice) {
-      currLayout.defaultSlice = changedLayoutProps.defaultSlice
+    if (changedLayoutProps.slice) {
+      currLayout.slice = changedLayoutProps.slice
     }
     if (changedLayoutProps.groupSlices) {
       currLayout.groupSlices = changedLayoutProps.groupSlices
     }
     if (changedLayoutProps.subDataShowKind) {
       currLayout.subDataShowKind = changedLayoutProps.subDataShowKind
-    }
-    if (changedLayoutProps.columnSortedNames) {
-      const leftColumnName = changedLayoutProps.columnSortedNames[0]
-      const rightColumnName = changedLayoutProps.columnSortedNames[1]
-      const leftIndex = currLayout.columns.findIndex((col) => { return col.name === leftColumnName })
-      const rightIndex = currLayout.columns.findIndex((col) => { return col.name === rightColumnName })
-      currLayout.columns.splice(rightIndex, 0, currLayout.columns.splice(leftIndex, 1)[0])
     }
     if (changedLayoutProps.newColumn) {
       currLayout.columns.push(changedLayoutProps.newColumn)
@@ -482,11 +373,36 @@ const events: TableEventProps = {
     if (changedLayoutProps.deletedColumnName) {
       currLayout.columns.splice(currLayout.columns.findIndex((col) => { return col.name === changedLayoutProps.deletedColumnName }), 1)
     }
-    if (changedLayoutProps.ganttShowKind) {
-      currLayout.ganttShowKind = changedLayoutProps.ganttShowKind
+
+    if (changedLayoutProps.features.filterData?.filters) {
+      currLayout.features.filterData!.filters = changedLayoutProps.features.filterData.filters
     }
-    if (changedLayoutProps.ganttTimelineWidth) {
-      currLayout.ganttTimelineWidth = changedLayoutProps.ganttTimelineWidth
+    if (changedLayoutProps.features.sortData?.sorts) {
+      currLayout.features.sortData!.sorts = changedLayoutProps.features.sortData.sorts
+    }
+    if (changedLayoutProps.features.groupData?.modify) {
+      currLayout.features.groupData!.group = changedLayoutProps.features.groupData.modify
+    }
+    if (changedLayoutProps.features.groupData?.remove) {
+      currLayout.features.groupData!.group = undefined
+    }
+    if (changedLayoutProps.features.aggData?.aggs) {
+      currLayout.features.aggData!.aggs = changedLayoutProps.features.aggData?.aggs
+    }
+    if (changedLayoutProps.features.editData?.columnNames) {
+      currLayout.features.editData!.columnNames = changedLayoutProps.features.editData?.columnNames
+    }
+    if (changedLayoutProps.features.selectData?.selectedDataPks) {
+      currLayout.features.selectData!.selectedDataPks = changedLayoutProps.features.selectData?.selectedDataPks
+    }
+    if (changedLayoutProps.features.actionColumn?.width) {
+      currLayout.features.actionColumn!.width = changedLayoutProps.features.actionColumn?.width
+    }
+    if (changedLayoutProps.features.ganttLayout?.showKind) {
+      currLayout.features.ganttLayout!.showKind = changedLayoutProps.features.ganttLayout?.showKind
+    }
+    if (changedLayoutProps.features.ganttLayout?.timelineWidth) {
+      currLayout.features.ganttLayout!.timelineWidth = changedLayoutProps.features.ganttLayout?.timelineWidth
     }
     return true
   },
@@ -533,9 +449,9 @@ const events: TableEventProps = {
     ]
   },
 
-  loadCellDictItems: async (columnName: string, filterValue?: any, slice?: TableDataQuerySliceProps): Promise<TableCellDictItemsResp> => {
+  loadCellDictItems: async (columnName: string, filterValue?: any, slice?: IwProps.DataQuerySliceReq): Promise<IwProps.FeatureUseDictItemsResp> => {
     if (columnName === 'name') {
-      let nameDict: TableCellDictItemProps[] = JSON.parse(JSON.stringify(NAME_DICT))
+      let nameDict: IwProps.FeatureUseDictItemProps[] = JSON.parse(JSON.stringify(NAME_DICT))
       if (filterValue) {
         nameDict = nameDict.filter((dict) => { return dict.title.includes(filterValue) || dict.value.includes(filterValue) })
       }
@@ -549,7 +465,7 @@ const events: TableEventProps = {
       }
     }
     else {
-      let statsDict: TableCellDictItemProps[] = JSON.parse(JSON.stringify(STATS_DICT))
+      let statsDict: IwProps.FeatureUseDictItemProps[] = JSON.parse(JSON.stringify(STATS_DICT))
       if (filterValue) {
         statsDict = statsDict.filter((dict) => { return dict.title.includes(filterValue) || dict.value.includes(filterValue) })
       }
@@ -564,11 +480,11 @@ const events: TableEventProps = {
     }
   },
 
-  loadCellDictItemsWithMultiConds: async (conds: { [columnName: string]: any[] }, slice?: TableDataQuerySliceProps): Promise<{ [columnName: string]: TableCellDictItemsResp }> => {
+  loadCellDictItemsWithMultiConds: async (conds: { [columnName: string]: any[] }, slice?: IwProps.DataQuerySliceReq): Promise<{ [columnName: string]: IwProps.FeatureUseDictItemsResp }> => {
     const resp = {}
     Object.entries(conds).forEach(([columnName, values]) => {
       if (columnName === 'name') {
-        let nameDict: TableCellDictItemProps[] = JSON.parse(JSON.stringify(NAME_DICT))
+        let nameDict: IwProps.FeatureUseDictItemProps[] = JSON.parse(JSON.stringify(NAME_DICT))
         nameDict = nameDict.filter((dict) => { return values.find(val => dict.title.includes(val) || dict.value.includes(val)) })
         const totalNumber = nameDict.length
         if (slice) {
@@ -580,7 +496,7 @@ const events: TableEventProps = {
         }
       }
       else {
-        let statsDict: TableCellDictItemProps[] = JSON.parse(JSON.stringify(STATS_DICT))
+        let statsDict: IwProps.FeatureUseDictItemProps[] = JSON.parse(JSON.stringify(STATS_DICT))
         statsDict = statsDict.filter((dict) => { return values.find(val => dict.title.includes(val) || dict.value.includes(val)) })
         const totalNumber = statsDict.length
         if (slice) {
@@ -596,33 +512,91 @@ const events: TableEventProps = {
   },
 }
 
-const tableProps: Ref<TableProps> = ref({
-  pkColumnName: 'no',
-  parentPkColumnName: 'pno',
-  columns,
-  layouts,
-  events,
-  quickSearch: {
-    placeholder: '请输入姓名',
-  },
-  defaultSlice: {
-    offsetNumber: 0,
-    fetchNumber: 10,
-    fetchNumbers: [5, 10, 20, 30, 50],
-  },
-  styles: {},
-  defaultShowSelectColumn: true,
-  defaultActionColumnRender: (record: { [key: string]: any }, _layoutKind: LayoutKind) => {
+const tableColumns = [
+  IwProps.TableColumnPropsBuilder.create('no').title('ID').dataKind(IwProps.DataKind.NUMBER).width(80).styles({ cursor: 'pointer' }).features({ sortData: true }).build(),
+  IwProps.TableColumnPropsBuilder.create('pno').title('父ID').dataKind(IwProps.DataKind.NUMBER).hide(true).build(),
+  IwProps.TableColumnPropsBuilder.create('name').title('名称').dataKind(IwProps.DataKind.NUMBER).width(300).render((record: { [key: string]: any }, layoutKind: IwProps.LayoutKind) => {
+    if (layoutKind === IwProps.LayoutKind.LIST) {
+      return record.stats.includes('risk') ? `<span style='color:red'>${record.name}</span>` : record.name
+    }
+    else {
+      return record.name
+    }
+  }).features({ sortData: true }).build(),
+  IwProps.TableColumnPropsBuilder.create('creator').title('创建人').features({ useDict: true, dictEditable: true, sortData: true, groupData: true }).build(),
+  IwProps.TableColumnPropsBuilder.create('stats').title('状态').multiValue(true).features({ useDict: true, dictEditable: true, sortData: true, groupData: true }).build(),
+  IwProps.TableColumnPropsBuilder.create('planStartTime').title('计划开始时间').dataKind(IwProps.DataKind.DATETIME).features({ sortData: true }).build(),
+  IwProps.TableColumnPropsBuilder.create('planEndTime').title('计划结束时间').dataKind(IwProps.DataKind.DATETIME).features({ sortData: true }).build(),
+  IwProps.TableColumnPropsBuilder.create('actualStartTime').title('实际开始时间').dataKind(IwProps.DataKind.DATETIME).features({ sortData: true }).build(),
+  IwProps.TableColumnPropsBuilder.create('actualEndTime').title('实际结束时间').dataKind(IwProps.DataKind.DATETIME).features({ sortData: true }).build(),
+]
+
+const slice = IwProps.DataSlicePropsBuilder.create().fetchNumbers([5, 10, 20, 30, 50]).build()
+
+const tableFeatures = {
+  multiLayouts: IwProps.FeatureMultiLayoutsInitPropsBuilder.create().build(),
+  quickSearch: IwProps.FeatureQuickSearchInitPropsBuilder.create('请输入姓名').build(),
+  settingTable: IwProps.FeatureSettingTableInitPropsBuilder.create().build(),
+  useDict: IwProps.FeatureUseDictInitPropsBuilder.create().build(),
+  ganttLayout: IwProps.FeatureGanttLayoutInitPropsBuilder.create('planStartTime', 'planEndTime').actualStartTimeColumnName('actualStartTime').actualEndTimeColumnName('actualEndTime').timelineWidth(500).build(),
+  actionColumn: IwProps.FeatureActionColumnInitPropsBuilder.create((record: { [key: string]: any }, _layoutKind: IwProps.LayoutKind) => {
     return `<button class="btn-row-delete" style="margin-right:2px" data-id='${record.no}'>删除</button> <button class="btn-row-copy" data-id='${record.no}'>复制</button>`
-  },
-  defaultActionColumnWidth: 100,
-  defaultShowAggs: true,
-  defaultGanttTimelineWidth: 500,
-  defaultGanttPlanStartTimeColumnName: 'planStartTime',
-  defaultGanttPlanEndTimeColumnName: 'planEndTime',
-  defaultGanttActualStartTimeColumnName: 'actualStartTime',
-  defaultGanttActualEndTimeColumnName: 'actualEndTime',
-})
+  }).width(100).build(),
+  selectData: IwProps.FeatureSelectDataInitPropsBuilder.create().build(),
+  aggData: IwProps.FeatureAggDataInitPropsBuilder.create().build(),
+  filterData: IwProps.FeatureFilterDataInitPropsBuilder.create().build(),
+  sortData: IwProps.FeatureSortDataInitPropsBuilder.create().build(),
+  groupData: IwProps.FeatureGroupDataInitPropsBuilder.create().build(),
+  editData: IwProps.FeatureEditDataInitPropsBuilder.create().build(),
+}
+
+const layouts = [
+  IwProps.LayoutPropsBuilder.extend('gantt demo', IwProps.LayoutKind.GANTT, 'no', tableColumns, slice, tableFeatures).columns([
+    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'name')!).build(),
+    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'creator')!).build(),
+    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'no')!).build(),
+    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'planStartTime')!).build(),
+    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'planEndTime')!).build(),
+    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'actualStartTime')!).build(),
+    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'actualEndTime')!).build(),
+  ]).build(),
+  IwProps.LayoutPropsBuilder.extend('list demo', IwProps.LayoutKind.LIST, 'no', tableColumns, slice, tableFeatures).columns([
+    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'name')!).build(),
+    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'stats')!).build(),
+    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'creator')!).build(),
+    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'no')!).build(),
+    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'planStartTime')!).build(),
+    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'planEndTime')!).build(),
+    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'actualStartTime')!).build(),
+    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'actualEndTime')!).build(),
+  ]).features({
+    aggData: IwProps.FeatureAggDataInitPropsBuilder.create().aggs([
+      {
+        columnName: 'name',
+        aggKind: IwProps.FeatureAggDataKind.MIN,
+      },
+    ]).build(),
+  }).build(),
+  IwProps.LayoutPropsBuilder.extend('multiple header demo', IwProps.LayoutKind.LIST, 'no', tableColumns, slice, tableFeatures).columns([
+    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'name')!).build(),
+    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'creator')!).build(),
+    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'stats')!).build(),
+    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'no')!).build(),
+    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'planStartTime')!).categoryTitle('Time').build(),
+    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'planEndTime')!).categoryTitle('Time').build(),
+    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'actualStartTime')!).build(),
+    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'actualEndTime')!).build(),
+  ]).features({
+    aggData: IwProps.FeatureAggDataInitPropsBuilder.create().aggs([
+      {
+        columnName: 'name',
+        aggKind: IwProps.FeatureAggDataKind.MIN,
+      },
+    ]).build(),
+  }).build(),
+]
+
+const tableProps: Ref<IwProps.TableProps> = ref(IwProps.TablePropsBuilder.create('no', tableColumns, layouts, events).parentPkColumnName('pno').features(tableFeatures).slice(slice).build())
 
 onMounted(() => {
   IwUtils.delegateEvent('.iw-tt', 'click', '.btn-row-delete', (e) => {

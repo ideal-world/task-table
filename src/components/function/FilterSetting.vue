@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { onMounted, ref, toRaw } from 'vue'
 import * as iconSvg from '../../assets/icon'
-import type { DataKind, TableCellDictItemProps, TableCellDictItemsResp, TableDataFilterItemProps, TableDataFilterProps, TableLayoutModifyProps } from '../../props'
+import type { CellDictItemProps, CellDictItemsResp, DataFilterItemProps, DataFilterProps, DataKind, TableLayoutModifyProps } from '../../props'
 import { OperatorKind, translateOperatorKind } from '../../props'
 import { IwUtils } from '../../utils'
 import MenuComp, { MenuOffsetKind, MenuSizeKind } from '../common/Menu.vue'
-import type { TableColumnConf } from '../conf'
-import { getInputTypeByDataKind, getOperatorKindsByDataKind } from '../conf'
+import type { TableColumnConf } from '../initializer'
+import { getInputTypeByDataKind, getOperatorKindsByDataKind } from '../initializer'
 import * as eb from '../eventbus'
 
 const props = defineProps<{
   layoutId: string
-  filters?: TableDataFilterProps[]
+  filters?: DataFilterProps[]
   columnsConf: TableColumnConf[]
 }>()
 
@@ -19,7 +19,7 @@ const filterGroupContainerCompRef = ref<InstanceType<typeof MenuComp>>()
 const filterColumnCompRef = ref<InstanceType<typeof MenuComp>>()
 const filterOpCompRef = ref<InstanceType<typeof MenuComp>>()
 const dictContainerCompRef = ref<InstanceType<typeof MenuComp>>()
-const queryDictItemsResp = ref<TableCellDictItemsResp>()
+const queryDictItemsResp = ref<CellDictItemsResp>()
 
 let filterGroupContainerEle: HTMLElement
 
@@ -37,7 +37,7 @@ const selectedFilterGroup = ref<FilterItemProps[] | undefined>()
 const selectedFilterGroupIdx = ref<number | undefined>()
 const selectedFilterItemIdx = ref<number | undefined>()
 // column name + '-' + column value -> dict item
-const mappingColumValueAndDictTitle = ref<{ [key: string | number]: TableCellDictItemProps }>({})
+const mappingColumValueAndDictTitle = ref<{ [key: string | number]: CellDictItemProps }>({})
 
 async function showFilterGroupContainer(e: Event, filterGroupIdx?: number) {
   selectedFilterGroupIdx.value = filterGroupIdx
@@ -45,7 +45,7 @@ async function showFilterGroupContainer(e: Event, filterGroupIdx?: number) {
   const targetEle = e.target as HTMLElement
   if (filterGroupIdx !== undefined) {
     const filterItems = toRaw(props.filters![filterGroupIdx].items)
-    selectedFilterGroup.value = filterItems.map((item: TableDataFilterItemProps) => {
+    selectedFilterGroup.value = filterItems.map((item: DataFilterItemProps) => {
       const columnConf = props.columnsConf.find(col => col.name === item.columnName)!
       return {
         columnName: item.columnName,
@@ -59,11 +59,11 @@ async function showFilterGroupContainer(e: Event, filterGroupIdx?: number) {
       }
     })
     // init mapping dict
-    let groupedFilterItems: { [key: string]: TableDataFilterItemProps[] } = IwUtils.groupBy(
-      filterItems.filter((item: TableDataFilterItemProps) => item.value !== undefined),
-      (item: TableDataFilterItemProps) => { return item.columnName },
+    let groupedFilterItems: { [key: string]: DataFilterItemProps[] } = IwUtils.groupBy(
+      filterItems.filter((item: DataFilterItemProps) => item.value !== undefined),
+      (item: DataFilterItemProps) => { return item.columnName },
     )
-    const queryConds: { [key: string]: any[] } = groupedFilterItems = Object.fromEntries(Object.entries(groupedFilterItems).map(([columnName, values]) => [columnName, values.map((item: TableDataFilterItemProps) => item.value!)]))
+    const queryConds: { [key: string]: any[] } = groupedFilterItems = Object.fromEntries(Object.entries(groupedFilterItems).map(([columnName, values]) => [columnName, values.map((item: DataFilterItemProps) => item.value!)]))
     const dictItemResp = await eb.loadCellDictItemsWithMultiConds(queryConds, {
       offsetNumber: 0,
       fetchNumber: Math.max(...Object.entries(queryConds).map(([_, values]) => values.length)),
@@ -88,7 +88,7 @@ async function deleteFilterGroup(filterGroupIdx: number) {
   })
 }
 
-function parseDict(columnName: string, value?: any): any | TableCellDictItemProps[] {
+function parseDict(columnName: string, value?: any): any | CellDictItemProps[] {
   if (value === undefined) {
     return ''
   }
@@ -218,7 +218,7 @@ async function saveFilterGroup() {
   if (selectedFilterGroup.value?.length === 0) {
     return
   }
-  const currFilterGroup: TableDataFilterProps = {
+  const currFilterGroup: DataFilterProps = {
     items: selectedFilterGroup.value?.filter(item =>
       item.operator === OperatorKind.IS_EMPTY || item.operator === OperatorKind.NOT_EMPTY || item.values.length > 0,
     ).map((item) => {

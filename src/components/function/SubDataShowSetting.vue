@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import * as iconSvg from '../../assets/icon'
-import type { TableLayoutModifyProps } from '../../props'
-import { SubDataShowKind } from '../../props'
+import type { TableLayoutModifyProps } from '../../props/basicProps'
+import { SubDataShowKind } from '../../props/basicProps'
 import * as eb from '../eventbus'
 
 const props = defineProps<{

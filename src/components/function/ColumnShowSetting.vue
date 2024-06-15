@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { TableLayoutModifyProps } from '../../props'
-import { type TableBasicConf, type TableLayoutColumnConf, convertLayoutColumnConfToLayoutColumnProps } from '../conf'
+import type { TableLayoutModifyProps } from '../../props/basicProps'
+import { type TableBasicConf, type TableLayoutColumnConf, convertLayoutColumnConfToLayoutColumnProps } from '../Initializer'
 import * as eb from '../eventbus'
 
 const props = defineProps<{

@@ -1,36 +1,38 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref, watch } from 'vue'
+import type { Ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import ScrollableComp from './components/common/Scrollable.vue'
-import type { TableBasicConf, TableLayoutConf } from './components/conf'
-import { initConf } from './components/conf'
-import * as Event from './components/eventbus'
+import * as eb from './components/eventbus'
 import FilterSettingComp from './components/function/FilterSetting.vue'
 import PaginationComp from './components/function/Pagination.vue'
 import QuickSearchComp from './components/function/QuickSearch.vue'
 import RowSortSettingComp from './components/function/RowSortSetting.vue'
 import TableSettingComp from './components/function/TableSetting.vue'
+import type { LayoutConf, TableConf } from './components/initializer'
+import { init } from './components/initializer'
 import GanttComp from './components/layout/gantt/Gantt.vue'
 import ListComp from './components/layout/list/List.vue'
-import type { TableProps } from './props'
-import { LayoutKind } from './props'
+import { LayoutKind } from './props/enumsProps'
+import type { TableProps } from './props/tableProps'
 import { IwUtils } from './utils'
 
-const props = defineProps<TableProps>()
-const [_tableBasicConf, _tableLayoutsConf] = initConf(props)
+const _props = defineProps<TableProps>()
+const { tableConf, layoutsConf, currentLayoutId }: {
+  tableConf: TableConf
+  layoutsConf: LayoutConf[]
+  currentLayoutId: Ref<string>
+} = init(_props)
 
-const tableBasicConf = reactive<TableBasicConf>(_tableBasicConf)
-const tableLayoutsConf = reactive<TableLayoutConf[]>(_tableLayoutsConf)
-const currentLayoutId = ref<string>(tableLayoutsConf[0].id)
 const scrollableCompRefs = ref()
 
 watch(
-  () => tableLayoutsConf.length,
+  () => layoutsConf.length,
   (_newVal, oldVal) => {
     if (oldVal) {
-      currentLayoutId.value = tableLayoutsConf[tableLayoutsConf.length - 1] && tableLayoutsConf[tableLayoutsConf.length - 1].id
+      currentLayoutId.value = layoutsConf[layoutsConf.length - 1].id!
     }
     else {
-      currentLayoutId.value = tableLayoutsConf[0] && tableLayoutsConf[0].id
+      currentLayoutId.value = layoutsConf[0].id!
     }
     setHeight()
   },
@@ -38,8 +40,6 @@ watch(
     immediate: true,
   },
 )
-
-Event.init(tableBasicConf, tableLayoutsConf, currentLayoutId, props.events)
 
 function setHeight() {
   // Set table height
@@ -65,7 +65,7 @@ function reSetScrollableWidth(layoutId: string) {
 
 onMounted(async () => {
   setHeight()
-  IwUtils.delegateEvent(`#iw-tt-${tableBasicConf.id}`, 'click', '.iw-tt-header__item', (e: Event) => {
+  IwUtils.delegateEvent(`#iw-tt-${tableConf.id}`, 'click', '.iw-tt-header__item', (e: Event) => {
     const target = e.target as HTMLElement
     const layoutId = target.dataset.layoutId
     if (layoutId) {
@@ -73,7 +73,7 @@ onMounted(async () => {
       reSetScrollableWidth(layoutId)
     }
   })
-  await Event.watch()
+  await eb.watch()
 })
 </script>
 
@@ -104,16 +104,19 @@ onMounted(async () => {
 -->
 <template>
   <div
-    :id="`iw-tt-${tableBasicConf.id}`"
-    :class="`${tableBasicConf.styles.tableClass} iw-tt w-full text-sm text-base-content bg-base-100 relative`"
+    :id="`iw-tt-${tableConf.id}`"
+    :class="`${tableConf.styles.tableClass} iw-tt w-full text-sm text-base-content bg-base-100 relative`"
   >
     <div
-      :class="`${tableBasicConf.styles.headerClass} iw-tt-header flex justify-between p-0 min-h-0`"
+      :class="`${tableConf.styles.headerClass} iw-tt-header flex justify-between p-0 min-h-0`"
     >
-      <ScrollableComp class="flex-1">
+      <ScrollableComp
+        v-if="tableConf.features.multiLayouts"
+        class="flex-1"
+      >
         <div class="tablist iw-tabs iw-tabs-sm iw-tabs-boxed">
           <a
-            v-for="layout in tableLayoutsConf"
+            v-for="layout in layoutsConf"
             :key="layout.id"
             :data-layout-id="layout.id"
             role="tab"
@@ -126,39 +129,39 @@ onMounted(async () => {
       </ScrollableComp>
       <div class="flex items-center">
         <QuickSearchComp
-          v-if="props.quickSearch"
+          v-if="tableConf.features.quickSearch"
           class="mx-2"
-          :placeholder="props.quickSearch.placeholder"
-          :search-content="tableBasicConf.quickSearchContent"
+          :placeholder="tableConf.features.quickSearch.placeholder"
+          :search-content="tableConf.features.quickSearch.quickSearchContent"
         />
         <TableSettingComp
-          :basic-conf="tableBasicConf"
-          :layout-conf="tableLayoutsConf.find(layout => layout.id === currentLayoutId)!"
-          :layout-length="tableLayoutsConf.length"
+          :basic-conf="tableConf"
+          :layout-conf="layoutsConf.find(layout => layout.id === currentLayoutId)!"
+          :layout-length="layoutsConf.length"
         />
       </div>
     </div>
-    <template v-for="layout in tableLayoutsConf" :key="layout.id">
+    <template v-for="layout in layoutsConf" :key="layout.id">
       <div v-show="currentLayoutId === layout.id" :id="`iw-tt-layout-${layout.id}`" class="iw-tt-layout">
         <div class="iw-tt-toolbar flex items-center h-8 p-0.5">
-          <RowSortSettingComp :layout-id="layout.id" :sorts="layout.sorts" :columns-conf="tableBasicConf.columns" />
+          <RowSortSettingComp v-if="layout.features.sortData" :layout-id="layout.id!" :sorts="layout.features.sortData.sorts" :columns-conf="tableConf.columns" />
           <div class="iw-divider iw-divider-horizontal m-0.5" />
-          <ScrollableComp ref="scrollableCompRefs" class="flex-1" :data-layout-id="layout.id">
-            <FilterSettingComp :layout-id="layout.id" :filters="layout.filters" :columns-conf="tableBasicConf.columns" />
+          <ScrollableComp v-if="layout.features.filterData" ref="scrollableCompRefs" class="flex-1" :data-layout-id="layout.id">
+            <FilterSettingComp :layout-id="layout.id!" :filters="layout.features.filterData.filters" :columns-conf="tableConf.columns" />
           </ScrollableComp>
         </div>
         <div class="iw-tt-table overflow-auto w-full border border-base-300">
-          <ListComp v-if="layout.layoutKind === LayoutKind.LIST" :layout="layout" :basic="tableBasicConf" />
-          <GanttComp v-else-if="layout.layoutKind === LayoutKind.GANTT" :layout="layout" :basic="tableBasicConf" />
+          <ListComp v-if="layout.layoutKind === LayoutKind.LIST" :layout="layout" :basic="tableConf" />
+          <GanttComp v-else-if="layout.layoutKind === LayoutKind.GANTT" :layout="layout" :basic="tableConf" />
         </div>
         <div
-          :class="`${tableBasicConf.styles.footerClass} iw-tt-footer flex justify-between p-1 min-h-0`"
+          :class="`${tableConf.styles.footerClass} iw-tt-footer flex justify-between p-1 min-h-0`"
         >
           <div>
             <slot name="customActionBar" />
           </div>
           <template v-if="(layout.layoutKind === LayoutKind.LIST || layout.layoutKind === LayoutKind.GANTT) && layout.data && !Array.isArray(layout.data)">
-            <PaginationComp :default-slice="layout.defaultSlice" :total-number="layout.data.totalNumber" />
+            <PaginationComp :default-slice="layout.slice" :total-number="layout.data.totalNumber" />
           </template>
         </div>
       </div>

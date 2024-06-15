@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue'
 import type { TableLayoutModifyProps } from '../../../props'
 import MenuComp from '../../common/Menu.vue'
-import { type CachedColumnConf, type TableBasicConf, type TableLayoutConf, convertLayoutColumnConfToLayoutColumnProps } from '../../conf'
+import { type CachedColumnConf, type TableBasicConf, type TableLayoutConf, convertLayoutColumnConfToLayoutColumnProps } from '../../Initializer'
 import * as eb from '../../eventbus'
 import ColumnResizeComp from '../../function/ColumnResize.vue'
 import ColumnFixedComp from './ListColumnFixed.vue'

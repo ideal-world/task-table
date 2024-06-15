@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import type { Ref } from 'vue'
 import { computed, onMounted, ref } from 'vue'
-import type { TableDataResp } from '../../../props'
+import type { DataResp } from '../../../props'
 import { DataKind, SubDataShowKind } from '../../../props'
-import type { CachedColumnConf, TableBasicConf, TableLayoutConf } from '../../conf'
+import type { CachedColumnConf, TableBasicConf, TableLayoutConf } from '../../Initializer'
 import { registerCellClickListener } from '../../function/CellClick'
 import PaginationComp from '../../function/Pagination.vue'
 import RowSelectComp from '../../function/RowSelect.vue'
@@ -91,7 +91,7 @@ onMounted(() => {
         v-if="layout.aggs"
         :layout-id="props.layout.id"
         :layout-aggs="layout.aggs"
-        :data-basic="layout.data as TableDataResp"
+        :data-basic="layout.data as DataResp"
         :show-select-column="layout.showSelectColumn"
         :show-action-column="layout.actionColumnRender !== undefined"
         :columns-conf="columnsWithoutHideConf" :style-conf="props.basic.styles"

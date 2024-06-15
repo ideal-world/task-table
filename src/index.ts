@@ -1,10 +1,10 @@
 import type { App } from 'vue'
 import { defineCustomElement } from 'vue'
 import './assets/main.css'
-import locales from './locales'
-import IwTaskTable from './Skeleton.vue'
-import * as IwProps from './props'
 import * as IwEvents from './events'
+import locales from './locales'
+import * as IwProps from './props/index'
+import IwTaskTable from './Skeleton.vue'
 
 export default (app: App): void => {
   app.use(locales).component('IwTaskTable', IwTaskTable)
@@ -19,7 +19,8 @@ declare module 'vue' {
 }
 
 export {
-  IwTaskTable,
-  IwProps,
   IwEvents,
+  IwProps,
+  IwTaskTable
 }
+

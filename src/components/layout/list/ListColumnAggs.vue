@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { h, ref, toRaw } from 'vue'
-import type { AggregateKind, TableDataResp } from '../../../props'
+import type { AggregateKind, DataResp } from '../../../props'
 import { showAggMappingByDataKind, translateAggregateKind } from '../../../props'
 import MenuComp, { MenuOffsetKind, MenuSizeKind } from '../../common/Menu.vue'
-import type { CachedColumnConf, TableStyleConf } from '../../conf'
+import type { CachedColumnConf, TableStyleConf } from '../../Initializer'
 import * as eb from '../../eventbus'
 
 const props = defineProps<{
@@ -11,7 +11,7 @@ const props = defineProps<{
   layoutAggs: { [key: string]: AggregateKind }
   showSelectColumn: boolean
   showActionColumn: boolean
-  dataBasic: TableDataResp
+  dataBasic: DataResp
   columnsConf: CachedColumnConf[]
   styleConf: TableStyleConf
   groupColumnName?: string

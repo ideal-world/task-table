@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { GanttShowKind } from '../../../props';
-import { IwUtils } from '../../../utils';
+import { GanttShowKind } from '../../../props/basicProps'
+import { IwUtils } from '../../../utils'
 
-import type { TableStyleConf } from '../../conf';
-import { type GanttInfo, type TimelineInfo, getTimelineColumnWidth } from './gantt';
+import type { TableStyleConf } from '../../Initializer'
+import { type GanttInfo, type TimelineInfo, getTimelineColumnWidth } from './gantt'
 
 const props = defineProps<{
   layoutId: string

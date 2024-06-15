@@ -2,14 +2,14 @@
 import Sortable from 'sortablejs'
 import { onMounted, ref, toRaw } from 'vue'
 import * as iconSvg from '../../assets/icon'
-import type { TableDataSortProps } from '../../props'
+import type { DataSortProps } from '../../props'
 import MenuComp, { MenuOffsetKind } from '../common/Menu.vue'
-import type { TableColumnConf } from '../conf'
+import type { TableColumnConf } from '../Initializer'
 import * as eb from '../eventbus'
 
 const props = defineProps<{
   layoutId: string
-  sorts?: TableDataSortProps[]
+  sorts?: DataSortProps[]
   columnsConf: TableColumnConf[]
 }>()
 
