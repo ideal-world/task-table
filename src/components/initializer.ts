@@ -1,25 +1,23 @@
 import type { Ref } from 'vue'
 import { reactive, ref } from 'vue'
-import type { FeatureGroupDataResp } from '../features/groupData/groupDataProps'
-import type { DataResp, DataSliceProps } from '../props/basicProps'
-import type { TableFeatureProps } from '../props/featuresProps'
-import type { LayoutColumnProps, LayoutProps } from '../props/layoutProps'
-import type { TableColumnProps, TableProps, TableStyleProps } from '../props/tableProps'
+import type { CommonFeatureProps, LayoutColumnProps, LayoutProps, TableColumnProps, TableProps, TableStyleProps } from '../props'
+import type { DataGroupResp, DataResp } from '../props/basicProps'
+import type { QuickSearchProps } from '../props/functionProps'
 import { deepToRaw } from '../utils/vueHelper'
 import * as eb from './eventbus'
 
-export interface TableConf {
+export interface TableConf extends CommonFeatureProps {
   id: string
   pkColumnName: string
   parentPkColumnName?: string
   columns: TableColumnProps[]
   styles: TableStyleProps
-  slice: DataSliceProps
-  features: TableFeatureProps
+  quickSearch?: QuickSearchProps
 }
 
 export interface LayoutConf extends LayoutProps {
-  data?: DataResp | FeatureGroupDataResp[]
+  data?: DataResp | DataGroupResp[]
+  selectedDataPks?: any[]
 }
 
 export interface CachedColumnConf extends TableColumnProps, LayoutColumnProps {
@@ -44,8 +42,20 @@ export function init(props: TableProps): {
     parentPkColumnName: rawProps.parentPkColumnName,
     columns: rawProps.columns,
     styles: rawProps.styles,
+    quickSearch: rawProps.quickSearch,
+
     slice: rawProps.slice,
-    features: rawProps.features,
+    showSelectColumn: rawProps.showSelectColumn,
+    subDataShowKind: rawProps.subDataShowKind,
+
+    actionColumn: rawProps.actionColumn,
+    gantt: rawProps.gantt,
+
+    filter: rawProps.filter,
+    group: rawProps.group,
+    sort: rawProps.sort,
+    agg: rawProps.agg,
+    edit: rawProps.edit,
   })
   const layoutsConf = reactive(rawProps.layouts)
   const currentLayoutId = ref(layoutsConf[0].id!)

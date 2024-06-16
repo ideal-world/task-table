@@ -5,6 +5,81 @@ const { t } = locales.global
 
 export const DATA_DICT_POSTFIX = '__dict'
 
+// --------------------------------------------------------- SizeKind ---------------------------------------------------------
+
+export enum SizeKind {
+  MINI = '-xs',
+  SMALL = '-sm',
+  MEDIUM = '',
+  LARGE = '-lg',
+}
+
+// --------------------------------------------------------- LayoutKind ---------------------------------------------------------
+
+export enum LayoutKind {
+  LIST = 'LIST',
+  GANTT = 'GANTT',
+  CALENDAR = 'CALENDAR',
+  KANBAN = 'KANBAN',
+  CHART = 'CHART',
+}
+
+export function getDefaultIconByLayoutKind(layoutKind: LayoutKind): string {
+  switch (layoutKind) {
+    case LayoutKind.CHART:
+      return iconSvg.CHART
+    case LayoutKind.CALENDAR:
+      return iconSvg.CALENDAR
+    case LayoutKind.KANBAN:
+      return iconSvg.KANBAN
+    case LayoutKind.GANTT:
+      return iconSvg.GANTT
+    default:
+      return iconSvg.TEXT
+  }
+}
+
+// --------------------------------------------------------- SubDataShowKind ---------------------------------------------------------
+
+export enum SubDataShowKind {
+  TILE_ALL_DATA = 'TILE_ALL_DATA',
+  ONLY_PARENT_DATA = 'ONLY_PARENT_DATA',
+  FOLD_SUB_DATA = 'FOLD_SUB_DATA',
+}
+
+export function translateSubDataShowKind(subDataShowKind: SubDataShowKind): string {
+  switch (subDataShowKind) {
+    case SubDataShowKind.TILE_ALL_DATA:
+      return t('function.subData.tileAllData')
+    case SubDataShowKind.ONLY_PARENT_DATA: return t('function.subData.onlyParentData')
+    case SubDataShowKind.FOLD_SUB_DATA: return t('function.subData.foldSubData')
+  }
+}
+
+// --------------------------------------------------------- GanttShowKind ---------------------------------------------------------
+
+export enum GanttShowKind {
+  DAY = 'DAY',
+  WEEK = 'WEEK',
+  MONTH = 'MONTH',
+  YEAR = 'YEAR',
+}
+
+export function translateGanttShowKind(ganttShowKind: GanttShowKind): string {
+  switch (ganttShowKind) {
+    case GanttShowKind.DAY:
+      return t('gantt.kind.DAY')
+    case GanttShowKind.WEEK:
+      return t('gantt.kind.WEEK')
+    case GanttShowKind.MONTH:
+      return t('gantt.kind.MONTH')
+    case GanttShowKind.YEAR:
+      return t('gantt.kind.YEAR')
+  }
+}
+
+// --------------------------------------------------------- DataKind ---------------------------------------------------------
+
 export enum DataKind {
   TEXT = 'TEXT',
   TEXTAREA = 'TEXTAREA',
@@ -155,6 +230,8 @@ export function getDefaultIconByDataKind(dataKind: DataKind): string {
   }
 }
 
+// --------------------------------------------------------- OperatorKind ---------------------------------------------------------
+
 export enum OperatorKind {
   EQ = '=',
   NE = '!=',
@@ -196,6 +273,81 @@ export function translateOperatorKind(operatorKind?: OperatorKind): string {
   }
 }
 
+// --------------------------------------------------------- AggKind ---------------------------------------------------------
+
+export enum AggregateKind {
+  SUM = 'SUM',
+  COUNT = 'COUNT',
+  MIN = 'MIN',
+  MAX = 'MAX',
+  AVG = 'AVG',
+  MEDIAN = 'MEDIAN',
+  STDDEV = 'STDDEV',
+  DISTINCT = 'DISTINCT',
+  // TODO
+}
+
+export function translateAggregateKind(aggKind: AggregateKind): string {
+  switch (aggKind) {
+    case AggregateKind.SUM:
+      return t('_.agg.sum')
+    case AggregateKind.COUNT: return t('_.agg.count')
+    case AggregateKind.MIN: return t('_.agg.min')
+    case AggregateKind.MAX: return t('_.agg.max')
+    case AggregateKind.AVG: return t('_.agg.avg')
+    case AggregateKind.MEDIAN: return t('_.agg.median')
+    case AggregateKind.STDDEV: return t('_.agg.stddev')
+    case AggregateKind.DISTINCT: return t('_.agg.distinct')
+  }
+}
+
+export interface AggItem {
+  kind: AggregateKind
+  title: string
+}
+
+export function showAggMappingByDataKind(dataKind: DataKind): AggItem[] {
+  const items = [
+    { kind: AggregateKind.COUNT, title: translateAggregateKind(AggregateKind.COUNT) },
+    { kind: AggregateKind.DISTINCT, title: translateAggregateKind(AggregateKind.DISTINCT) },
+  ]
+  switch (dataKind) {
+    case DataKind.SERIAL:
+    case DataKind.NUMBER:
+    case DataKind.AMOUNT:
+      items.push(...[
+        { kind: AggregateKind.SUM, title: translateAggregateKind(AggregateKind.SUM) },
+        { kind: AggregateKind.AVG, title: translateAggregateKind(AggregateKind.AVG) },
+        { kind: AggregateKind.MEDIAN, title: translateAggregateKind(AggregateKind.MEDIAN) },
+        { kind: AggregateKind.STDDEV, title: translateAggregateKind(AggregateKind.STDDEV) },
+        { kind: AggregateKind.MAX, title: translateAggregateKind(AggregateKind.MAX) },
+        { kind: AggregateKind.MIN, title: translateAggregateKind(AggregateKind.MIN) },
+        { kind: AggregateKind.DISTINCT, title: translateAggregateKind(AggregateKind.DISTINCT) },
+      ])
+      break
+    case DataKind.TEXT:
+    case DataKind.TEXTAREA:
+      items.push(...[
+        { kind: AggregateKind.MAX, title: translateAggregateKind(AggregateKind.MAX) },
+        { kind: AggregateKind.MIN, title: translateAggregateKind(AggregateKind.MIN) },
+        { kind: AggregateKind.DISTINCT, title: translateAggregateKind(AggregateKind.DISTINCT) },
+      ])
+      break
+    case DataKind.DATE:
+    case DataKind.DATETIME:
+    case DataKind.TIME:
+      items.push(...[
+        { kind: AggregateKind.MAX, title: translateAggregateKind(AggregateKind.MAX) },
+        { kind: AggregateKind.MIN, title: translateAggregateKind(AggregateKind.MIN) },
+        { kind: AggregateKind.DISTINCT, title: translateAggregateKind(AggregateKind.DISTINCT) },
+      ])
+      break
+    default:
+      break
+  }
+  return items
+}
+
 export function getOperatorKindsByDataKind(dataKind?: DataKind, multiValue?: boolean): OperatorKind[] {
   if (multiValue) {
     return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.IN, OperatorKind.NOT_IN, OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]
@@ -220,50 +372,5 @@ export function getOperatorKindsByDataKind(dataKind?: DataKind, multiValue?: boo
       default:
         return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.LT, OperatorKind.LE, OperatorKind.GT, OperatorKind.GE, OperatorKind.IN, OperatorKind.NOT_IN, OperatorKind.CONTAINS, OperatorKind.NOT_CONTAINS, OperatorKind.STARTWITH, OperatorKind.NOT_STARTWITH, OperatorKind.ENDWITH, OperatorKind.NOT_ENDWITH, OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]
     }
-  }
-}
-
-export enum SizeKind {
-  MINI = '-xs',
-  SMALL = '-sm',
-  MEDIUM = '',
-  LARGE = '-lg',
-}
-
-export enum LayoutKind {
-  LIST = 'LIST',
-  GANTT = 'GANTT',
-  CALENDAR = 'CALENDAR',
-  KANBAN = 'KANBAN',
-  CHART = 'CHART',
-}
-
-export function getDefaultIconByLayoutKind(layoutKind: LayoutKind): string {
-  switch (layoutKind) {
-    case LayoutKind.CHART:
-      return iconSvg.CHART
-    case LayoutKind.CALENDAR:
-      return iconSvg.CALENDAR
-    case LayoutKind.KANBAN:
-      return iconSvg.KANBAN
-    case LayoutKind.GANTT:
-      return iconSvg.GANTT
-    default:
-      return iconSvg.TEXT
-  }
-}
-
-export enum SubDataShowKind {
-  TILE_ALL_DATA = 'TILE_ALL_DATA',
-  ONLY_PARENT_DATA = 'ONLY_PARENT_DATA',
-  FOLD_SUB_DATA = 'FOLD_SUB_DATA',
-}
-
-export function translateSubDataShowKind(subDataShowKind: SubDataShowKind): string {
-  switch (subDataShowKind) {
-    case SubDataShowKind.TILE_ALL_DATA:
-      return t('layout.subData.tileAllData')
-    case SubDataShowKind.ONLY_PARENT_DATA: return t('layout.subData.onlyParentData')
-    case SubDataShowKind.FOLD_SUB_DATA: return t('layout.subData.foldSubData')
   }
 }

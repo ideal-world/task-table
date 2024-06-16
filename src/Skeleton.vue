@@ -12,7 +12,7 @@ import type { LayoutConf, TableConf } from './components/initializer'
 import { init } from './components/initializer'
 import GanttComp from './components/layout/gantt/Gantt.vue'
 import ListComp from './components/layout/list/List.vue'
-import { LayoutKind } from './props/enumsProps'
+import { LayoutKind } from './props/enumProps'
 import type { TableProps } from './props/tableProps'
 import { IwUtils } from './utils'
 
