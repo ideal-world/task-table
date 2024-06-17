@@ -3,19 +3,20 @@ import type { Dayjs } from 'dayjs'
 import dayjs from 'dayjs'
 import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import locales from '../../../locales'
-import { GanttShowKind, SubDataShowKind } from '../../../props/basicProps'
+import { GanttShowKind, SubDataShowKind } from '../../../props/enumProps'
 
-import type { TableLayoutConf, TableStyleConf } from '../../Initializer'
+import type { GanttLayoutProps, TableStyleProps } from '../../../props'
 import { registerRowTreeTriggerEvent, unregisterRowTreeTriggerEvent } from '../../function/RowTree'
 import { type GanttInfo, getTimelineColumnWidth, getWeekdays } from './gantt'
 
 const props = defineProps<{
+  layoutId: string
+  ganttProps: GanttLayoutProps
   records: { [key: string]: any }[]
   pkColumnName: string
   parentPkColumnName?: string
   subDataShowKind: SubDataShowKind
-  layout: TableLayoutConf
-  styleConf: TableStyleConf
+  styleProps: TableStyleProps
   ganttInfo: GanttInfo
 }>()
 
@@ -138,8 +139,8 @@ function generateDataRelLine() {
 }
 
 function getTimelineBarTitle(row: { [key: string]: any }, plan: boolean) {
-  const startTime = row[plan ? props.layout.ganttPlanStartTimeColumnName! : props.layout.ganttActualStartTimeColumnName!]
-  const endTime = row[plan ? props.layout.ganttPlanEndTimeColumnName! : props.layout.ganttActualEndTimeColumnName!]
+  const startTime = row[plan ? props.ganttProps.planStartTimeColumnName! : props.ganttProps.actualStartTimeColumnName!]
+  const endTime = row[plan ? props.ganttProps.planEndTimeColumnName! : props.ganttProps.actualEndTimeColumnName!]
   if (startTime && endTime) {
     const weekdays = getWeekdays(startTime, endTime, props.ganttInfo.holidays)
     return `${plan ? t('gantt.planTimeTitle') : t('gantt.actualTimeTitle')}: ${startTime ?? ''} / ${endTime ?? ''} ${t('gantt.totalWeekDays', { days: weekdays })}`
@@ -179,18 +180,18 @@ onUnmounted(() => {
   <div ref="ganttTimelineRef" class="relative">
     <div
       v-for="row in props.records"
-      :key="`${layout.id}-${row[props.pkColumnName]}`"
+      :key="`${props.layoutId}-${row[props.pkColumnName]}`"
       :data-pk="row[props.pkColumnName]"
       :data-parent-pk="props.parentPkColumnName ? row[props.parentPkColumnName] : undefined"
-      :class="`${props.styleConf.rowClass} relative iw-gantt-timeline-row flex bg-base-100 border-b border-b-base-300 border-r border-r-base-300`"
+      :class="`${props.styleProps.rowClass} relative iw-gantt-timeline-row flex bg-base-100 border-b border-b-base-300 border-r border-r-base-300`"
     >
       <div
-        v-for="(timeline, idx) in ganttInfo.timeline" :key="`${layout.id}-${idx}`"
+        v-for="(timeline, idx) in ganttInfo.timeline" :key="`${props.layoutId}-${idx}`"
         :data-value="timeline.value"
         :data-group-value="timeline.categoryTitle"
         :style="`width: ${getTimelineColumnWidth(props.ganttInfo.ganttShowKind)}px`"
         :title="`${timeline.value} (${timeline.categoryTitle})`"
-        :class="`${props.styleConf.cellClass}
+        :class="`${props.styleProps.cellClass}
       iw-gantt-timeline-cell iw-gantt-timeline-value-cell flex justify-center items-center bg-base-100
       ${timeline.holiday && 'bg-base-200'}
       ${idx !== 0 && 'border-l border-l-base-300'}`"
@@ -201,18 +202,18 @@ onUnmounted(() => {
         </template>
       </div>
       <div
-        v-if="layout.ganttPlanStartTimeColumnName && layout.ganttPlanEndTimeColumnName && (row[layout.ganttPlanStartTimeColumnName] || row[layout.ganttPlanEndTimeColumnName])"
+        v-if="row[props.ganttProps.planStartTimeColumnName] || row[props.ganttProps.planEndTimeColumnName]"
         class="iw-gantt-timeline-plan-bar absolute hidden p-1 border-2 border-info rounded"
         :title="getTimelineBarTitle(row, true)"
-        :data-start-time="row[layout.ganttPlanStartTimeColumnName]"
-        :data-end-time="row[layout.ganttPlanEndTimeColumnName]"
+        :data-start-time="row[props.ganttProps.planStartTimeColumnName]"
+        :data-end-time="row[props.ganttProps.planEndTimeColumnName]"
       />
       <div
-        v-if="layout.ganttActualStartTimeColumnName && layout.ganttActualEndTimeColumnName && (row[layout.ganttActualStartTimeColumnName] || row[layout.ganttActualEndTimeColumnName])"
+        v-if="props.ganttProps.actualStartTimeColumnName && props.ganttProps.actualEndTimeColumnName && (row[props.ganttProps.actualStartTimeColumnName] || row[props.ganttProps.actualEndTimeColumnName])"
         class="iw-gantt-timeline-actual-bar absolute hidden p-1 bg-success rounded-sm"
         :title="getTimelineBarTitle(row, false)"
-        :data-start-time="row[layout.ganttActualStartTimeColumnName]"
-        :data-end-time="row[layout.ganttActualEndTimeColumnName]"
+        :data-start-time="row[props.ganttProps.actualStartTimeColumnName]"
+        :data-end-time="row[props.ganttProps.actualEndTimeColumnName]"
       />
     </div>
   </div>

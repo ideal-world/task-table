@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import { inject, onMounted, ref, watch } from 'vue'
 import * as iconSvg from '../../../assets/icon'
-import type { TableLayoutModifyProps } from '../../../props'
+import type { LayoutModifyProps } from '../../../props'
 import { FUN_CLOSE_CONTEXT_MENU_TYPE } from '../../common/Menu.vue'
-import { type CachedColumnConf, convertLayoutColumnConfToLayoutColumnProps } from '../../Initializer'
+import type { ColumnConf } from '../../conf'
 import * as eb from '../../eventbus'
 
 const props = defineProps<{
-  curColumnConf: CachedColumnConf
-  columnsConf: CachedColumnConf[]
+  currentColumnConf: ColumnConf
   pkColumnName: string
 }>()
 
@@ -17,19 +16,19 @@ const closeContextMenuFun = inject(FUN_CLOSE_CONTEXT_MENU_TYPE)!
 const wrapInputRef = ref<HTMLInputElement>()
 
 onMounted(() => {
-  wrapInputRef.value && (wrapInputRef.value.checked = props.curColumnConf.wrap)
+  wrapInputRef.value && (wrapInputRef.value.checked = props.currentColumnConf.wrap)
 })
 
 watch(props, () => {
-  wrapInputRef.value && (wrapInputRef.value.checked = props.curColumnConf.wrap)
+  wrapInputRef.value && (wrapInputRef.value.checked = props.currentColumnConf.wrap)
 })
 
 async function setWrapColumn() {
-  if (props.curColumnConf) {
-    const changedLayoutReq: TableLayoutModifyProps = {
+  if (props.currentColumnConf) {
+    const changedLayoutReq: LayoutModifyProps = {
       changedColumn: {
-        ...convertLayoutColumnConfToLayoutColumnProps(props.curColumnConf),
-        wrap: !props.curColumnConf.wrap,
+        ...props.currentColumnConf,
+        wrap: !props.currentColumnConf.wrap,
       },
     }
     await eb.modifyLayout(changedLayoutReq)
@@ -39,7 +38,7 @@ async function setWrapColumn() {
 </script>
 
 <template>
-  <div v-if="props.curColumnConf.name !== props.pkColumnName" class="flex justify-between items-center w-full">
+  <div v-if="props.currentColumnConf.name !== props.pkColumnName" class="flex justify-between items-center w-full">
     <span>
       <i :class="iconSvg.WRAP" />
       <span> {{ $t('list.columnWrap.title') }}</span>

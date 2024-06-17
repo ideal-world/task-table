@@ -1,18 +1,16 @@
 <script setup lang="ts">
-import { inject } from 'vue'
-import * as iconSvg from '../../assets/icon'
-import type { TableStyleConf } from '../Initializer'
-import * as eb from '../eventbus'
-import { SizeKind } from '../../props/basicProps'
+import * as iconSvg from '../../assets/icon';
+import type { TableStyleModifyProps, TableStyleProps } from '../../props';
+import { SizeKind } from '../../props';
+import * as eb from '../eventbus';
 
 const props = defineProps<{
-  styles: TableStyleConf
+  styles: TableStyleProps
   size: SizeKind
 }>()
 
 async function setSize(newSize: SizeKind) {
-  const tableStyleConf: TableStyleConf = {
-    ...props.styles,
+  const tableStyleConf: TableStyleModifyProps = {
     size: newSize,
   }
   await eb.modifyStyles(tableStyleConf)

@@ -4,7 +4,7 @@ import isSameOrBefore from 'dayjs/plugin/isSameOrBefore'
 import weekOfYear from 'dayjs/plugin/weekOfYear'
 import weekday from 'dayjs/plugin/weekday'
 import locales from '../../../locales'
-import { GanttShowKind } from '../../../props/basicProps'
+import { GanttShowKind } from '../../../props/enumProps'
 
 const { t } = locales.global
 
@@ -44,22 +44,20 @@ export interface TimelineInfo {
   today?: boolean
 }
 
-export function getStartAndEndDay(records: { [key: string]: any }[], planStartTimeColumnName?: string, planEndTimeColumnName?: string, actualStartTimeColumnName?: string, actualEndTimeColumnName?: string): { startDate: Date, endDate: Date } {
+export function getStartAndEndDay(records: { [key: string]: any }[], planStartTimeColumnName: string, planEndTimeColumnName: string, actualStartTimeColumnName?: string, actualEndTimeColumnName?: string): { startDate: Date, endDate: Date } {
   let timelineStartDate: Date | null = null
   let timelineEndDate: Date | null = null
   records.forEach((d) => {
-    if (planStartTimeColumnName && planEndTimeColumnName) {
-      const startDate = d[planStartTimeColumnName] ? d[planStartTimeColumnName] instanceof Date ? d[planStartTimeColumnName] : new Date(d[planStartTimeColumnName]) : null
-      const endDate = d[planEndTimeColumnName] ? d[planEndTimeColumnName] instanceof Date ? d[planEndTimeColumnName] : new Date(d[planEndTimeColumnName]) : null
-      if (startDate && endDate && startDate > endDate) {
-        throw new Error(t('gantt.error.startDateGreaterThanEndDate', { startDate: dayjs(startDate).format('YYYY-MM-DD HH:mm:ss.SSS'), endDate: dayjs(endDate).format('YYYY-MM-DD HH:mm:ss.SSS') }))
-      }
-      if (startDate && (!timelineStartDate || timelineStartDate > startDate)) {
-        timelineStartDate = startDate
-      }
-      if (endDate && (!timelineEndDate || timelineEndDate < endDate)) {
-        timelineEndDate = endDate
-      }
+    const startDate = d[planStartTimeColumnName] ? d[planStartTimeColumnName] instanceof Date ? d[planStartTimeColumnName] : new Date(d[planStartTimeColumnName]) : null
+    const endDate = d[planEndTimeColumnName] ? d[planEndTimeColumnName] instanceof Date ? d[planEndTimeColumnName] : new Date(d[planEndTimeColumnName]) : null
+    if (startDate && endDate && startDate > endDate) {
+      throw new Error(t('gantt.error.startDateGreaterThanEndDate', { startDate: dayjs(startDate).format('YYYY-MM-DD HH:mm:ss.SSS'), endDate: dayjs(endDate).format('YYYY-MM-DD HH:mm:ss.SSS') }))
+    }
+    if (startDate && (!timelineStartDate || timelineStartDate > startDate)) {
+      timelineStartDate = startDate
+    }
+    if (endDate && (!timelineEndDate || timelineEndDate < endDate)) {
+      timelineEndDate = endDate
     }
     if (actualStartTimeColumnName && actualEndTimeColumnName) {
       const startDate = d[actualStartTimeColumnName] ? d[actualStartTimeColumnName] instanceof Date ? d[actualStartTimeColumnName] : new Date(d[actualStartTimeColumnName]) : null

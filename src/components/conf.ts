@@ -1,12 +1,13 @@
 import type { Ref } from 'vue'
 import { reactive, ref } from 'vue'
-import type { CommonFeatureProps, LayoutColumnProps, LayoutProps, TableColumnProps, TableProps, TableStyleProps } from '../props'
+import { type CommonFunctionProps, type LayoutColumnProps, type LayoutProps, type SimpleTableProps, type TableColumnProps, type TableStyleProps, generateTableProps } from '../props'
+
 import type { DataGroupResp, DataResp } from '../props/basicProps'
 import type { QuickSearchProps } from '../props/functionProps'
 import { deepToRaw } from '../utils/vueHelper'
 import * as eb from './eventbus'
 
-export interface TableConf extends CommonFeatureProps {
+export interface TableConf extends CommonFunctionProps {
   id: string
   pkColumnName: string
   parentPkColumnName?: string
@@ -17,10 +18,10 @@ export interface TableConf extends CommonFeatureProps {
 
 export interface LayoutConf extends LayoutProps {
   data?: DataResp | DataGroupResp[]
-  selectedDataPks?: any[]
+  selectedDataPks: any[]
 }
 
-export interface CachedColumnConf extends TableColumnProps, LayoutColumnProps {
+export interface ColumnConf extends TableColumnProps, LayoutColumnProps {
 }
 
 /**
@@ -28,13 +29,14 @@ export interface CachedColumnConf extends TableColumnProps, LayoutColumnProps {
  * @param props Original parameters
  * @returns Processed parameters
  */
-export function init(props: TableProps): {
+export function init(props: SimpleTableProps): {
   tableConf: TableConf
   layoutsConf: LayoutConf[]
   currentLayoutId: Ref<string>
 } {
+  const tableProps = generateTableProps(props)
   // Blocking external references
-  const rawProps = deepToRaw(props)
+  const rawProps = deepToRaw(tableProps)
   // Create a new reactive object
   const tableConf = reactive({
     id: rawProps.id,
@@ -57,8 +59,13 @@ export function init(props: TableProps): {
     agg: rawProps.agg,
     edit: rawProps.edit,
   })
-  const layoutsConf = reactive(rawProps.layouts)
-  const currentLayoutId = ref(layoutsConf[0].id!)
+  const layoutsConf = reactive(rawProps.layouts.map((layout) => {
+    return {
+      ...layout,
+      selectedDataPks: [],
+    }
+  }))
+  const currentLayoutId = ref(layoutsConf[0].id)
   // Initialize events
   eb.init(tableConf, layoutsConf, currentLayoutId, props.events)
   return {

@@ -1,11 +1,8 @@
 import * as eb from './components/eventbus'
-import type { FeatureUseDictItemsResp } from './features/useDict/useDictProps'
-import type { DataQuerySliceReq } from './props/basicProps'
-import type { LayoutModifyProps, LayoutProps } from './props/layoutProps'
-import type { TableStyleProps } from './props/tableProps'
+import type { DataQuerySliceReq, DictItemsResp, LayoutModifyProps, SimpleLayoutProps, TableStyleModifyProps } from './props'
 
-export async function loadData(moreForGroupedValue?: any, returnOnlyAggs?: boolean, layoutId?: string) {
-  await eb.loadData(moreForGroupedValue, returnOnlyAggs, layoutId)
+export async function loadData(moreForGroupedValue?: any, returnOnlyAgg?: boolean, layoutId?: string) {
+  await eb.loadData(moreForGroupedValue, returnOnlyAgg, layoutId)
 }
 
 export async function newData(newRecords: { [key: string]: any }[]): Promise<boolean> {
@@ -28,19 +25,19 @@ export async function selectData(selectedRecordPks: any[]): Promise<boolean> {
   return await eb.selectData(selectedRecordPks)
 }
 
-export async function loadCellDictItems(columnName: string, filterValue?: any, slice?: DataQuerySliceReq): Promise<FeatureUseDictItemsResp> {
+export async function loadCellDictItems(columnName: string, filterValue?: any, slice?: DataQuerySliceReq): Promise<DictItemsResp> {
   return await eb.loadCellDictItems(columnName, filterValue, slice)
 }
 
-export async function loadCellDictItemsWithMultiConds(conds: { [columnName: string]: any[] }, slice?: DataQuerySliceReq): Promise<{ [columnName: string]: FeatureUseDictItemsResp }> {
+export async function loadCellDictItemsWithMultiConds(conds: { [columnName: string]: any[] }, slice?: DataQuerySliceReq): Promise<{ [columnName: string]: DictItemsResp }> {
   return await eb.loadCellDictItemsWithMultiConds(conds, slice)
 }
 
-export async function modifyStyles(changedStyles: TableStyleProps): Promise<boolean> {
+export async function modifyStyles(changedStyles: TableStyleModifyProps): Promise<boolean> {
   return await eb.modifyStyles(changedStyles)
 }
 
-export async function newLayout(newLayoutProps: LayoutProps): Promise<boolean> {
+export async function newLayout(newLayoutProps: SimpleLayoutProps): Promise<boolean> {
   return await eb.newLayout(newLayoutProps)
 }
 

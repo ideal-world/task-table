@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import dayjs from 'dayjs'
 import * as iconSvg from '../../../assets/icon'
-import type { LayoutKind } from '../../../props/basicProps'
-import { DATA_DICT_POSTFIX, DataKind, SubDataShowKind } from '../../../props/basicProps'
 
-import type { CachedColumnConf, TableStyleConf } from '../../Initializer'
+import type { LayoutKind, TableStyleProps } from '../../../props'
+import { DATA_DICT_POSTFIX, DataKind, SubDataShowKind } from '../../../props/enumProps'
+import type { ColumnConf } from '../../conf'
 import { NODE_DEPTH_FLAG, renderTreeToggleHandler } from '../../function/RowTree'
 
 const props = defineProps<{
@@ -13,10 +13,10 @@ const props = defineProps<{
   parentPkColumnName?: string
   subDataShowKind: SubDataShowKind
   pkKindIsNumber: boolean
-  columnsConf: CachedColumnConf[]
+  columnsConf: ColumnConf[]
   layoutId: string
   layoutKind: LayoutKind
-  styleConf: TableStyleConf
+  styleProps: TableStyleProps
   showSelectColumn: boolean
   actionColumnRender?: (record: { [key: string]: any }, layoutKind: LayoutKind) => any
   setColumnStyles: (colIdx: number) => any
@@ -35,17 +35,17 @@ const props = defineProps<{
     :key="`${layoutId}-${row[props.pkColumnName]}-${props.subDataShowKind}`"
     :data-pk="row[props.pkColumnName] "
     :data-parent-pk="props.parentPkColumnName ? row[props.parentPkColumnName] : undefined"
-    :class="`${props.styleConf.rowClass} iw-list-row iw-data-row ${props.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA ? 'iw-data-fold' : ''} flex bg-base-100 border-b border-b-base-300 border-r border-r-base-300`"
+    :class="`${props.styleProps.rowClass} iw-list-row iw-data-row ${props.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA ? 'iw-data-fold' : ''} flex bg-base-100 border-b border-b-base-300 border-r border-r-base-300`"
   >
     <div
       v-if="props.showSelectColumn"
-      :class="`${props.styleConf.cellClass} iw-list-cell flex justify-center items-center bg-base-100 whitespace-nowrap flex-nowrap`"
+      :class="`${props.styleProps.cellClass} iw-list-cell flex justify-center items-center bg-base-100 whitespace-nowrap flex-nowrap`"
       :style="props.setColumnStyles(-1)"
     >
       <input type="checkbox" class="iw-row-select-cell__chk iw-checkbox iw-checkbox-xs">
     </div>
     <div
-      :class="`${props.styleConf.cellClass} iw-list-cell iw-data-cell flex items-center bg-base-100 ${props.showSelectColumn && 'border-l border-l-base-300 '} whitespace-nowrap flex-nowrap`"
+      :class="`${props.styleProps.cellClass} iw-list-cell iw-data-cell flex items-center bg-base-100 ${props.showSelectColumn && 'border-l border-l-base-300 '} whitespace-nowrap flex-nowrap`"
       :data-column-name="props.pkColumnName" :style="{ ...props.columnsConf[0].styles, ...props.setColumnStyles(0) }"
     >
       <div v-if="props.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA && props.parentPkColumnName" class="flex justify-end" :style="{ width: `${15 * (row[NODE_DEPTH_FLAG] + 1)}px` }" v-html="renderTreeToggleHandler(props.records[idx + 1] && row[props.pkColumnName] === props.records[idx + 1][props.parentPkColumnName])" />
@@ -54,7 +54,7 @@ const props = defineProps<{
     </div>
     <div
       v-for="(column, colIdx) in props.columnsConf.slice(1)" :key="`${props.layoutId}-${column.name}`"
-      :class="`${props.styleConf.cellClass} iw-list-cell iw-data-cell flex items-center bg-base-100 border-l border-l-base-300 ${column.wrap ? 'break-words flex-wrap' : 'whitespace-nowrap overflow-hidden text-ellipsis flex-nowrap'}`"
+      :class="`${props.styleProps.cellClass} iw-list-cell iw-data-cell flex items-center bg-base-100 border-l border-l-base-300 ${column.wrap ? 'break-words flex-wrap' : 'whitespace-nowrap overflow-hidden text-ellipsis flex-nowrap'}`"
       :data-column-name="column.name" :style="{ ...column.styles, ...props.setColumnStyles(colIdx + 1) }"
     >
       <div v-if="column.render" v-html="column.render(row, props.layoutKind)" />
@@ -80,7 +80,7 @@ const props = defineProps<{
     </div>
     <div
       v-if="props.actionColumnRender"
-      :class="`${props.styleConf.cellClass} iw-list-cell flex justify-center items-center bg-base-100 border-l border-l-base-300 whitespace-nowrap flex-nowrap`"
+      :class="`${props.styleProps.cellClass} iw-list-cell flex justify-center items-center bg-base-100 border-l border-l-base-300 whitespace-nowrap flex-nowrap`"
       :style="props.setColumnStyles(-2)"
       v-html="props.actionColumnRender(row, props.layoutKind)"
     />

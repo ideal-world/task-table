@@ -1,22 +1,22 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, toRaw } from 'vue'
 import * as iconSvg from '../../assets/icon'
-import type { DataSliceProps, TableLayoutModifyProps } from '../../props'
+import type { DataSliceProps, LayoutModifyProps } from '../../props'
 import MenuComp, { MenuOffsetKind, MenuSizeKind } from '../common/Menu.vue'
 import * as eb from '../eventbus'
 
 const props = defineProps<{
-  defaultSlice: DataSliceProps
+  slice: DataSliceProps
+  totalNumber: number
   groupSlices?: { [key: string]: DataSliceProps }
   groupValue?: string
-  totalNumber: number
 }>()
 const fetchNumberSelectCompRef = ref<InstanceType<typeof MenuComp>>()
 
 function getActualSlice(): DataSliceProps {
   return props.groupValue && props.groupSlices && props.groupSlices[props.groupValue]
     ? props.groupSlices[props.groupValue]
-    : props.defaultSlice
+    : props.slice
 }
 
 function getTotalPage() {
@@ -51,12 +51,12 @@ async function setFetchNumber(fetchNumber: number) {
 async function setSlice(newPage?: number, newFetchNumber?: number) {
   if (!props.groupValue) {
     const newSlice = {
-      offsetNumber: newPage ? (newPage - 1) * (newFetchNumber ?? props.defaultSlice.fetchNumber) : props.defaultSlice.offsetNumber,
-      fetchNumber: newFetchNumber ?? props.defaultSlice.fetchNumber,
-      fetchNumbers: props.defaultSlice.fetchNumbers,
+      offsetNumber: newPage ? (newPage - 1) * (newFetchNumber ?? props.slice.fetchNumber) : props.slice.offsetNumber,
+      fetchNumber: newFetchNumber ?? props.slice.fetchNumber,
+      fetchNumbers: props.slice.fetchNumbers,
     }
-    const changedLayoutReq: TableLayoutModifyProps = {
-      defaultSlice: newSlice,
+    const changedLayoutReq: LayoutModifyProps = {
+      slice: newSlice,
     }
     await eb.modifyLayout(changedLayoutReq)
   }
@@ -64,35 +64,31 @@ async function setSlice(newPage?: number, newFetchNumber?: number) {
     let newSlice
     if (props.groupSlices && props.groupSlices[props.groupValue]) {
       newSlice = {
-        ...props.groupSlices,
-        [props.groupValue]: {
-          offsetNumber: newPage ? (newPage - 1) * (newFetchNumber ?? props.groupSlices[props.groupValue].fetchNumber) : 0,
-          fetchNumber: newFetchNumber ?? props.groupSlices[props.groupValue].fetchNumber,
-          fetchNumbers: props.groupSlices[props.groupValue].fetchNumbers,
-        },
+        offsetNumber: newPage ? (newPage - 1) * (newFetchNumber ?? props.groupSlices[props.groupValue].fetchNumber) : 0,
+        fetchNumber: newFetchNumber ?? props.groupSlices[props.groupValue].fetchNumber,
+        fetchNumbers: props.groupSlices[props.groupValue].fetchNumbers,
       }
     }
     else if (props.groupSlices) {
       newSlice = {
-        ...props.groupSlices,
-        [props.groupValue]: {
-          offsetNumber: newPage ? (newPage - 1) * (newFetchNumber ?? props.defaultSlice.fetchNumber) : 0,
-          fetchNumber: newFetchNumber ?? props.defaultSlice.fetchNumber,
-          fetchNumbers: props.defaultSlice.fetchNumbers,
-        },
+        offsetNumber: newPage ? (newPage - 1) * (newFetchNumber ?? props.slice.fetchNumber) : 0,
+        fetchNumber: newFetchNumber ?? props.slice.fetchNumber,
+        fetchNumbers: props.slice.fetchNumbers,
       }
     }
     else {
       newSlice = {
-        [props.groupValue]: {
-          offsetNumber: newPage ? (newPage - 1) * (newFetchNumber ?? props.defaultSlice.fetchNumber) : 0,
-          fetchNumber: newFetchNumber ?? props.defaultSlice.fetchNumber,
-          fetchNumbers: props.defaultSlice.fetchNumbers,
-        },
+        offsetNumber: newPage ? (newPage - 1) * (newFetchNumber ?? props.slice.fetchNumber) : 0,
+        fetchNumber: newFetchNumber ?? props.slice.fetchNumber,
+        fetchNumbers: props.slice.fetchNumbers,
       }
     }
-    const changedLayoutReq: TableLayoutModifyProps = {
-      groupSlices: newSlice,
+    const groupSlices = toRaw(props.groupSlices)
+    groupSlices![props.groupValue!] = newSlice
+    const changedLayoutReq: LayoutModifyProps = {
+      group: {
+        slices: groupSlices,
+      },
     }
     await eb.modifyLayout(changedLayoutReq, props.groupValue)
   }

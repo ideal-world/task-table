@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import * as iconSvg from '../../assets/icon'
-import type { TableLayoutModifyProps } from '../../props/basicProps'
-import { SubDataShowKind } from '../../props/basicProps'
-import * as eb from '../eventbus'
+import * as iconSvg from '../../assets/icon';
+import type { LayoutModifyProps } from '../../props';
+import { SubDataShowKind } from '../../props';
+import * as eb from '../eventbus';
 
 const props = defineProps<{
   subDataShowKind: SubDataShowKind
 }>()
 
 async function setSubDataShow(subDataShowKind: SubDataShowKind) {
-  const changedLayoutReq: TableLayoutModifyProps = {
+  const changedLayoutReq: LayoutModifyProps = {
     subDataShowKind,
   }
   await eb.modifyLayout(changedLayoutReq)

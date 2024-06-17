@@ -11,7 +11,7 @@ export interface DataSliceProps extends DataQuerySliceReq {
 
 export interface QuickSearchProps {
   placeholder: string
-  quickSearchContent: string
+  searchContent?: string
 }
 
 export interface ActionColumnProps {
@@ -20,39 +20,43 @@ export interface ActionColumnProps {
 }
 
 export interface AggDataProps {
-  aggs: { [key: string]: AggregateKind }
+  items: AggDataItemProps[]
+}
+
+export interface AggDataItemProps {
+  columnName: string
+  aggKind: AggregateKind
 }
 
 export interface FilterDataProps {
   // OR relationship between groups
-  filters: FilterDataGroupProps[]
+  groups: FilterDataGroupProps[]
 }
 
 export interface FilterDataGroupProps {
   // AND relationship between items
-  items: FilterItemProps[]
+  items: FilterDataItemProps[]
 }
 
-export interface FilterItemProps {
+export interface FilterDataItemProps {
   columnName: string
   operator: OperatorKind
   value?: any
 }
 
 export interface GroupDataProps {
-  group: GroupDataItemProps
-  slices: { [key: string]: DataSliceProps }
+  item?: GroupDataItemProps
+  slices?: { [key: string]: DataSliceProps }
 }
 
 export interface GroupDataItemProps {
   columnName: string
-  groupOrderDesc: boolean
-  // useDict: boolean
+  orderDesc: boolean
   hideEmptyRecord: boolean
 }
 
 export interface SortDataProps {
-  sorts: SortDataItemProps[]
+  conds: SortDataItemProps[]
 }
 
 export interface SortDataItemProps {
@@ -61,12 +65,12 @@ export interface SortDataItemProps {
 }
 
 export interface GanttLayoutProps {
-  showKind: GanttShowKind
   timelineWidth: number
+  showKind: GanttShowKind
   planStartTimeColumnName: string
   planEndTimeColumnName: string
-  actualStartTimeColumnName: string
-  actualEndTimeColumnName: string
+  actualStartTimeColumnName?: string
+  actualEndTimeColumnName?: string
 }
 
 export interface EditDataProps {

@@ -66,7 +66,7 @@ function attachDict(data: { [key: string]: any }[]) {
 }
 
 const events: IwProps.TableEventProps = {
-  loadData: async (columns?: string[], quickSearchContent?: string, filters?: IwProps.FeatureFilterDataGroupProps[], sorts?: IwProps.FeatureSortDataItemProps[], group?: IwProps.FeatureGroupDataItemProps, aggs?: IwProps.FeatureAggDataItemProps[], hideSubData?: boolean, byGroupValue?: any, slices?: IwProps.DataQuerySliceReq, _returnOnlyAggs?: boolean): Promise<IwProps.DataResp | IwProps.FeatureGroupDataResp[]> => {
+  loadData: async (quickSearchContent?: string, filters?: IwProps.FilterDataProps, sorts?: IwProps.SortDataProps, group?: IwProps.GroupDataProps, agg?: IwProps.AggDataProps, hideSubData?: boolean, byGroupValue?: any, slices?: IwProps.DataQuerySliceReq, returnColumnNames?: string[], _returnOnlyAgg?: boolean): Promise<IwProps.DataResp | IwProps.DataGroupResp[]> => {
     let data: { [key: string]: any }[] = toRaw(DATA)
     if (quickSearchContent) {
       data = data.filter((d) => {
@@ -76,7 +76,7 @@ const events: IwProps.TableEventProps = {
 
     if (filters) {
       // TODO 支持多组
-      filters.forEach((filter) => {
+      filters.groups.forEach((filter) => {
         data = data.filter((d) => {
           return filter.items.every((item) => {
             switch (item.operator) {
@@ -122,7 +122,7 @@ const events: IwProps.TableEventProps = {
       })
     }
     if (sorts) {
-      sorts.forEach((sort) => {
+      sorts.conds.forEach((sort) => {
         data = data.sort((a, b) => {
           if (sort.orderDesc) {
             return a[sort.columnName] - b[sort.columnName]
@@ -140,11 +140,11 @@ const events: IwProps.TableEventProps = {
     }
     if (byGroupValue && group) {
       // 只获取当前分组的数据
-      data = data.filter(d => d[group.columnName] === byGroupValue)
+      data = data.filter(d => d[group.item!.columnName] === byGroupValue)
     }
     if (group && !byGroupValue) {
-      let dataGroup: { [key: string]: any[] } = IwUtils.groupBy(data, (d) => { return d[group.columnName] })
-      if (group.hideEmptyRecord) {
+      let dataGroup: { [key: string]: any[] } = IwUtils.groupBy(data, (d) => { return d[group.item!.columnName] })
+      if (group.item!.hideEmptyRecord) {
         dataGroup = Object.fromEntries(Object.entries(dataGroup).filter(([_, value]) => value.length > 0))
       }
       const groupTotalNumber = Object.fromEntries(Object.entries(dataGroup).map(([key, value]) => {
@@ -157,7 +157,7 @@ const events: IwProps.TableEventProps = {
         }),
         )
       }
-      if (group.groupOrderDesc) {
+      if (group.item!.orderDesc) {
         dataGroup = Object.fromEntries(
           Object.entries(dataGroup).sort((a, b) => b[0].localeCompare(a[0])),
         )
@@ -168,44 +168,44 @@ const events: IwProps.TableEventProps = {
         )
       }
       return Object.entries(dataGroup).map(([groupKey, data]) => {
-        const aggsResult = {}
-        if (aggs) {
-          aggs.forEach((agg) => {
+        const aggResult = {}
+        if (agg) {
+          agg.items.forEach((agg) => {
             switch (agg.aggKind) {
-              case IwProps.FeatureAggDataKind.COUNT:
-                return aggsResult[agg.columnName] = data.filter(d => d[agg.columnName] !== undefined).length
-              case IwProps.FeatureAggDataKind.SUM:
-                return aggsResult[agg.columnName] = data.reduce((acc, cur) => acc + cur[agg.columnName], 0)
-              case IwProps.FeatureAggDataKind.AVG:
-                return aggsResult[agg.columnName] = data.reduce((acc, cur) => acc + cur[agg.columnName], 0) / data.length
-              case IwProps.FeatureAggDataKind.MAX:
+              case IwProps.AggregateKind.COUNT:
+                return aggResult[agg.columnName] = data.filter(d => d[agg.columnName] !== undefined).length
+              case IwProps.AggregateKind.SUM:
+                return aggResult[agg.columnName] = data.reduce((acc, cur) => acc + cur[agg.columnName], 0)
+              case IwProps.AggregateKind.AVG:
+                return aggResult[agg.columnName] = data.reduce((acc, cur) => acc + cur[agg.columnName], 0) / data.length
+              case IwProps.AggregateKind.MAX:
                 if (data.length === 0) {
-                  return aggsResult[agg.columnName] = ''
+                  return aggResult[agg.columnName] = ''
                 }
                 else if (typeof data[0][agg.columnName] === 'string') {
-                  return aggsResult[agg.columnName] = data.reduce((acc, cur) => acc[agg.columnName] > cur[agg.columnName] ? acc : cur)[agg.columnName]
+                  return aggResult[agg.columnName] = data.reduce((acc, cur) => acc[agg.columnName] > cur[agg.columnName] ? acc : cur)[agg.columnName]
                 }
                 else {
-                  return aggsResult[agg.columnName] = Math.max(...data.map(d => d[agg.columnName]))
+                  return aggResult[agg.columnName] = Math.max(...data.map(d => d[agg.columnName]))
                 }
-              case IwProps.FeatureAggDataKind.MIN:
+              case IwProps.AggregateKind.MIN:
                 if (data.length === 0) {
-                  return aggsResult[agg.columnName] = ''
+                  return aggResult[agg.columnName] = ''
                 }
                 else if (typeof data[0][agg.columnName] === 'string') {
-                  return aggsResult[agg.columnName] = data.reduce((acc, cur) => acc[agg.columnName] < cur[agg.columnName] ? acc : cur)[agg.columnName]
+                  return aggResult[agg.columnName] = data.reduce((acc, cur) => acc[agg.columnName] < cur[agg.columnName] ? acc : cur)[agg.columnName]
                 }
                 else {
-                  return aggsResult[agg.columnName] = Math.min(...data.map(d => d[agg.columnName]))
+                  return aggResult[agg.columnName] = Math.min(...data.map(d => d[agg.columnName]))
                 }
               default:
-                return aggsResult[agg.columnName] = data.filter(d => d[agg.columnName] !== undefined).length
+                return aggResult[agg.columnName] = data.filter(d => d[agg.columnName] !== undefined).length
             }
           })
         }
-        if (columns) {
+        if (returnColumnNames) {
           data = data.map((d) => {
-            return columns.reduce((acc, cur) => {
+            return returnColumnNames.reduce((acc, cur) => {
               acc[cur] = d[cur]
               return acc
             }, {})
@@ -214,45 +214,45 @@ const events: IwProps.TableEventProps = {
         return {
           records: attachDict(data),
           totalNumber: groupTotalNumber[groupKey],
-          aggs: aggsResult,
+          aggs: aggResult,
           groupValue: groupKey,
-          groupShowTitle: getDictValue(group.columnName, groupKey),
+          groupShowTitle: getDictValue(group.item!.columnName, groupKey),
         }
       })
     }
     else {
-      const aggsResult = {}
-      if (aggs) {
-        aggs.forEach((agg) => {
+      const aggResult = {}
+      if (agg) {
+        agg.items.forEach((agg) => {
           switch (agg.aggKind) {
-            case IwProps.FeatureAggDataKind.COUNT:
-              return aggsResult[agg.columnName] = data.filter(d => d[agg.columnName] !== undefined).length
-            case IwProps.FeatureAggDataKind.SUM:
-              return aggsResult[agg.columnName] = data.reduce((acc, cur) => acc + cur[agg.columnName], 0)
-            case IwProps.FeatureAggDataKind.AVG:
-              return aggsResult[agg.columnName] = data.reduce((acc, cur) => acc + cur[agg.columnName], 0) / data.length
-            case IwProps.FeatureAggDataKind.MAX:
+            case IwProps.AggregateKind.COUNT:
+              return aggResult[agg.columnName] = data.filter(d => d[agg.columnName] !== undefined).length
+            case IwProps.AggregateKind.SUM:
+              return aggResult[agg.columnName] = data.reduce((acc, cur) => acc + cur[agg.columnName], 0)
+            case IwProps.AggregateKind.AVG:
+              return aggResult[agg.columnName] = data.reduce((acc, cur) => acc + cur[agg.columnName], 0) / data.length
+            case IwProps.AggregateKind.MAX:
               if (data.length === 0) {
-                return aggsResult[agg.columnName] = ''
+                return aggResult[agg.columnName] = ''
               }
               else if (typeof data[0][agg.columnName] === 'string') {
-                return aggsResult[agg.columnName] = data.reduce((acc, cur) => acc[agg.columnName] > cur[agg.columnName] ? acc : cur)[agg.columnName]
+                return aggResult[agg.columnName] = data.reduce((acc, cur) => acc[agg.columnName] > cur[agg.columnName] ? acc : cur)[agg.columnName]
               }
               else {
-                return aggsResult[agg.columnName] = Math.max(...data.map(d => d[agg.columnName]))
+                return aggResult[agg.columnName] = Math.max(...data.map(d => d[agg.columnName]))
               }
-            case IwProps.FeatureAggDataKind.MIN:
+            case IwProps.AggregateKind.MIN:
               if (data.length === 0) {
-                return aggsResult[agg.columnName] = ''
+                return aggResult[agg.columnName] = ''
               }
               else if (typeof data[0][agg.columnName] === 'string') {
-                return aggsResult[agg.columnName] = data.reduce((acc, cur) => acc[agg.columnName] < cur[agg.columnName] ? acc : cur)[agg.columnName]
+                return aggResult[agg.columnName] = data.reduce((acc, cur) => acc[agg.columnName] < cur[agg.columnName] ? acc : cur)[agg.columnName]
               }
               else {
-                return aggsResult[agg.columnName] = Math.min(...data.map(d => d[agg.columnName]))
+                return aggResult[agg.columnName] = Math.min(...data.map(d => d[agg.columnName]))
               }
             default:
-              return aggsResult[agg.columnName] = data.filter(d => d[agg.columnName] !== undefined).length
+              return aggResult[agg.columnName] = data.filter(d => d[agg.columnName] !== undefined).length
           }
         })
       }
@@ -263,9 +263,9 @@ const events: IwProps.TableEventProps = {
       else {
         records = data
       }
-      if (columns) {
+      if (returnColumnNames) {
         records = records.map((d) => {
-          return columns.reduce((acc, cur) => {
+          return returnColumnNames.reduce((acc, cur) => {
             acc[cur] = d[cur]
             return acc
           }, {})
@@ -274,7 +274,7 @@ const events: IwProps.TableEventProps = {
       return {
         records: attachDict(records),
         totalNumber: data.length,
-        aggs: aggsResult,
+        aggs: aggResult,
       }
     }
   },
@@ -329,9 +329,13 @@ const events: IwProps.TableEventProps = {
     return true
   },
 
-  modifyStyles: async (changedStyleProps: IwProps.TableStyleProps): Promise<boolean> => {
+  modifyStyles: async (changedStyleProps: IwProps.TableStyleModifyProps): Promise<boolean> => {
     // eslint-disable-next-line ts/no-use-before-define
-    tableProps.value.styles = changedStyleProps
+    tableProps.value.styles = {
+      // eslint-disable-next-line ts/no-use-before-define
+      ...tableProps.value.styles,
+      ...changedStyleProps,
+    }
     return true
   },
 
@@ -339,8 +343,8 @@ const events: IwProps.TableEventProps = {
     const id = Date.now().toString()
     // eslint-disable-next-line ts/no-use-before-define
     tableProps.value.layouts.push({
-      id,
       ...newLayoutProps,
+      id,
     })
     return id
   },
@@ -357,11 +361,27 @@ const events: IwProps.TableEventProps = {
     if (changedLayoutProps.slice) {
       currLayout.slice = changedLayoutProps.slice
     }
-    if (changedLayoutProps.groupSlices) {
-      currLayout.groupSlices = changedLayoutProps.groupSlices
-    }
     if (changedLayoutProps.subDataShowKind) {
       currLayout.subDataShowKind = changedLayoutProps.subDataShowKind
+    }
+    if (changedLayoutProps.actionColumn) {
+      currLayout.actionColumn = changedLayoutProps.actionColumn
+    }
+    if (changedLayoutProps.gantt) {
+      currLayout.gantt = changedLayoutProps.gantt
+    }
+
+    if (changedLayoutProps.filter) {
+      currLayout.filter = changedLayoutProps.filter
+    }
+    if (changedLayoutProps.sort) {
+      currLayout.sort = changedLayoutProps.sort
+    }
+    if (changedLayoutProps.group) {
+      currLayout.group = changedLayoutProps.group
+    }
+    if (changedLayoutProps.agg) {
+      currLayout.agg = changedLayoutProps.agg
     }
     if (changedLayoutProps.newColumn) {
       currLayout.columns.push(changedLayoutProps.newColumn)
@@ -372,37 +392,6 @@ const events: IwProps.TableEventProps = {
     }
     if (changedLayoutProps.deletedColumnName) {
       currLayout.columns.splice(currLayout.columns.findIndex((col) => { return col.name === changedLayoutProps.deletedColumnName }), 1)
-    }
-
-    if (changedLayoutProps.features.filterData?.filters) {
-      currLayout.features.filterData!.filters = changedLayoutProps.features.filterData.filters
-    }
-    if (changedLayoutProps.features.sortData?.sorts) {
-      currLayout.features.sortData!.sorts = changedLayoutProps.features.sortData.sorts
-    }
-    if (changedLayoutProps.features.groupData?.modify) {
-      currLayout.features.groupData!.group = changedLayoutProps.features.groupData.modify
-    }
-    if (changedLayoutProps.features.groupData?.remove) {
-      currLayout.features.groupData!.group = undefined
-    }
-    if (changedLayoutProps.features.aggData?.aggs) {
-      currLayout.features.aggData!.aggs = changedLayoutProps.features.aggData?.aggs
-    }
-    if (changedLayoutProps.features.editData?.columnNames) {
-      currLayout.features.editData!.columnNames = changedLayoutProps.features.editData?.columnNames
-    }
-    if (changedLayoutProps.features.selectData?.selectedDataPks) {
-      currLayout.features.selectData!.selectedDataPks = changedLayoutProps.features.selectData?.selectedDataPks
-    }
-    if (changedLayoutProps.features.actionColumn?.width) {
-      currLayout.features.actionColumn!.width = changedLayoutProps.features.actionColumn?.width
-    }
-    if (changedLayoutProps.features.ganttLayout?.showKind) {
-      currLayout.features.ganttLayout!.showKind = changedLayoutProps.features.ganttLayout?.showKind
-    }
-    if (changedLayoutProps.features.ganttLayout?.timelineWidth) {
-      currLayout.features.ganttLayout!.timelineWidth = changedLayoutProps.features.ganttLayout?.timelineWidth
     }
     return true
   },
@@ -449,9 +438,9 @@ const events: IwProps.TableEventProps = {
     ]
   },
 
-  loadCellDictItems: async (columnName: string, filterValue?: any, slice?: IwProps.DataQuerySliceReq): Promise<IwProps.FeatureUseDictItemsResp> => {
+  loadCellDictItems: async (columnName: string, filterValue?: any, slice?: IwProps.DataQuerySliceReq): Promise<IwProps.DictItemsResp> => {
     if (columnName === 'name') {
-      let nameDict: IwProps.FeatureUseDictItemProps[] = JSON.parse(JSON.stringify(NAME_DICT))
+      let nameDict: IwProps.DictItemProps[] = JSON.parse(JSON.stringify(NAME_DICT))
       if (filterValue) {
         nameDict = nameDict.filter((dict) => { return dict.title.includes(filterValue) || dict.value.includes(filterValue) })
       }
@@ -465,7 +454,7 @@ const events: IwProps.TableEventProps = {
       }
     }
     else {
-      let statsDict: IwProps.FeatureUseDictItemProps[] = JSON.parse(JSON.stringify(STATS_DICT))
+      let statsDict: IwProps.DictItemProps[] = JSON.parse(JSON.stringify(STATS_DICT))
       if (filterValue) {
         statsDict = statsDict.filter((dict) => { return dict.title.includes(filterValue) || dict.value.includes(filterValue) })
       }
@@ -480,11 +469,11 @@ const events: IwProps.TableEventProps = {
     }
   },
 
-  loadCellDictItemsWithMultiConds: async (conds: { [columnName: string]: any[] }, slice?: IwProps.DataQuerySliceReq): Promise<{ [columnName: string]: IwProps.FeatureUseDictItemsResp }> => {
+  loadCellDictItemsWithMultiConds: async (conds: { [columnName: string]: any[] }, slice?: IwProps.DataQuerySliceReq): Promise<{ [columnName: string]: IwProps.DictItemsResp }> => {
     const resp = {}
     Object.entries(conds).forEach(([columnName, values]) => {
       if (columnName === 'name') {
-        let nameDict: IwProps.FeatureUseDictItemProps[] = JSON.parse(JSON.stringify(NAME_DICT))
+        let nameDict: IwProps.DictItemProps[] = JSON.parse(JSON.stringify(NAME_DICT))
         nameDict = nameDict.filter((dict) => { return values.find(val => dict.title.includes(val) || dict.value.includes(val)) })
         const totalNumber = nameDict.length
         if (slice) {
@@ -496,7 +485,7 @@ const events: IwProps.TableEventProps = {
         }
       }
       else {
-        let statsDict: IwProps.FeatureUseDictItemProps[] = JSON.parse(JSON.stringify(STATS_DICT))
+        let statsDict: IwProps.DictItemProps[] = JSON.parse(JSON.stringify(STATS_DICT))
         statsDict = statsDict.filter((dict) => { return values.find(val => dict.title.includes(val) || dict.value.includes(val)) })
         const totalNumber = statsDict.length
         if (slice) {
@@ -512,91 +501,135 @@ const events: IwProps.TableEventProps = {
   },
 }
 
-const tableColumns = [
-  IwProps.TableColumnPropsBuilder.create('no').title('ID').dataKind(IwProps.DataKind.NUMBER).width(80).styles({ cursor: 'pointer' }).features({ sortData: true }).build(),
-  IwProps.TableColumnPropsBuilder.create('pno').title('父ID').dataKind(IwProps.DataKind.NUMBER).hide(true).build(),
-  IwProps.TableColumnPropsBuilder.create('name').title('名称').dataKind(IwProps.DataKind.NUMBER).width(300).render((record: { [key: string]: any }, layoutKind: IwProps.LayoutKind) => {
+const columns: IwProps.SimpleTableColumnProps[] = [
+  { name: 'no', title: 'ID', dataKind: IwProps.DataKind.NUMBER, sortable: true, width: 80, styles: { cursor: 'pointer' } },
+  { name: 'pno', title: '父ID', dataKind: IwProps.DataKind.NUMBER, hide: true },
+  { name: 'name', title: '名称', sortable: true, width: 300, render: (record: { [key: string]: any }, layoutKind: IwProps.LayoutKind) => {
     if (layoutKind === IwProps.LayoutKind.LIST) {
       return record.stats.includes('risk') ? `<span style='color:red'>${record.name}</span>` : record.name
     }
     else {
       return record.name
     }
-  }).features({ sortData: true }).build(),
-  IwProps.TableColumnPropsBuilder.create('creator').title('创建人').features({ useDict: true, dictEditable: true, sortData: true, groupData: true }).build(),
-  IwProps.TableColumnPropsBuilder.create('stats').title('状态').multiValue(true).features({ useDict: true, dictEditable: true, sortData: true, groupData: true }).build(),
-  IwProps.TableColumnPropsBuilder.create('planStartTime').title('计划开始时间').dataKind(IwProps.DataKind.DATETIME).features({ sortData: true }).build(),
-  IwProps.TableColumnPropsBuilder.create('planEndTime').title('计划结束时间').dataKind(IwProps.DataKind.DATETIME).features({ sortData: true }).build(),
-  IwProps.TableColumnPropsBuilder.create('actualStartTime').title('实际开始时间').dataKind(IwProps.DataKind.DATETIME).features({ sortData: true }).build(),
-  IwProps.TableColumnPropsBuilder.create('actualEndTime').title('实际结束时间').dataKind(IwProps.DataKind.DATETIME).features({ sortData: true }).build(),
+  } },
+  { name: 'creator', title: '创建人', useDict: true, dictEditable: true, sortable: true, groupable: true },
+  { name: 'stats', title: '状态', useDict: true, dictEditable: true, multiValue: true, sortable: true, groupable: true },
+  { name: 'planStartTime', title: '计划开始时间', dataKind: IwProps.DataKind.DATETIME, sortable: true },
+  { name: 'planEndTime', title: '计划结束时间', dataKind: IwProps.DataKind.DATETIME, sortable: true },
+  { name: 'actualStartTime', title: '实际开始时间', dataKind: IwProps.DataKind.DATETIME, sortable: true },
+  { name: 'actualEndTime', title: '实际结束时间', dataKind: IwProps.DataKind.DATETIME, sortable: true },
 ]
 
-const slice = IwProps.DataSlicePropsBuilder.create().fetchNumbers([5, 10, 20, 30, 50]).build()
+const layouts: IwProps.SimpleLayoutProps[] = [{
+  id: 'hi1',
+  title: 'gantt demo',
+  layoutKind: IwProps.LayoutKind.GANTT,
+  columns: [{
+    name: 'name',
+  }, {
+    name: 'creator',
+  }, {
+    name: 'no',
+  }, {
+    name: 'planStartTime',
+  }, {
+    name: 'planEndTime',
+  }, {
+    name: 'actualStartTime',
+  }, {
+    name: 'actualEndTime',
+  }],
+}, {
+  id: 'hi2',
+  title: 'list demo',
+  layoutKind: IwProps.LayoutKind.LIST,
+  columns: [{
+    name: 'name',
+  }, {
+    name: 'stats',
+  }, {
+    name: 'creator',
+  }, {
+    name: 'no',
+  }, {
+    name: 'planStartTime',
+  }, {
+    name: 'planEndTime',
+  }, {
+    name: 'actualStartTime',
+  }, {
+    name: 'actualEndTime',
+  }],
+  agg: {
+    items: [
+      { columnName: 'name', aggKind: IwProps.AggregateKind.MIN },
+    ],
+  },
+}, {
+  id: 'hi3',
+  title: 'multiple header demo',
+  layoutKind: IwProps.LayoutKind.LIST,
+  columns: [{
+    name: 'name',
+  }, {
+    name: 'creator',
+  }, {
+    name: 'stats',
+  }, {
+    name: 'no',
+  }, {
+    name: 'planStartTime',
+    categoryTitle: 'Time',
+  }, {
+    name: 'planEndTime',
+    categoryTitle: 'Time',
+  }, {
+    name: 'actualStartTime',
+  }, {
+    name: 'actualEndTime',
+  }],
+  agg: {
+    items: [
+      { columnName: 'name', aggKind: IwProps.AggregateKind.MIN },
+    ],
+  },
+}]
 
-const tableFeatures = {
-  multiLayouts: IwProps.FeatureMultiLayoutsInitPropsBuilder.create().build(),
-  quickSearch: IwProps.FeatureQuickSearchInitPropsBuilder.create('请输入姓名').build(),
-  settingTable: IwProps.FeatureSettingTableInitPropsBuilder.create().build(),
-  useDict: IwProps.FeatureUseDictInitPropsBuilder.create().build(),
-  ganttLayout: IwProps.FeatureGanttLayoutInitPropsBuilder.create('planStartTime', 'planEndTime').actualStartTimeColumnName('actualStartTime').actualEndTimeColumnName('actualEndTime').timelineWidth(500).build(),
-  actionColumn: IwProps.FeatureActionColumnInitPropsBuilder.create((record: { [key: string]: any }, _layoutKind: IwProps.LayoutKind) => {
-    return `<button class="btn-row-delete" style="margin-right:2px" data-id='${record.no}'>删除</button> <button class="btn-row-copy" data-id='${record.no}'>复制</button>`
-  }).width(100).build(),
-  selectData: IwProps.FeatureSelectDataInitPropsBuilder.create().build(),
-  aggData: IwProps.FeatureAggDataInitPropsBuilder.create().build(),
-  filterData: IwProps.FeatureFilterDataInitPropsBuilder.create().build(),
-  sortData: IwProps.FeatureSortDataInitPropsBuilder.create().build(),
-  groupData: IwProps.FeatureGroupDataInitPropsBuilder.create().build(),
-  editData: IwProps.FeatureEditDataInitPropsBuilder.create().build(),
+const _tableProps: IwProps.SimpleTableProps = {
+  pkColumnName: 'no',
+  parentPkColumnName: 'pno',
+  columns,
+  layouts,
+  events,
+  quickSearch: {
+    placeholder: '请输入姓名',
+  },
+  slice: {
+    offsetNumber: 0,
+    fetchNumber: 10,
+    fetchNumbers: [5, 10, 20, 30, 50],
+  },
+  showSelectColumn: true,
+  actionColumn: {
+    render: (record: { [key: string]: any }, _layoutKind: IwProps.LayoutKind) => {
+      return `<button class="btn-row-delete" style="margin-right:2px" data-id='${record.no}'>删除</button> <button class="btn-row-copy" data-id='${record.no}'>复制</button>`
+    },
+    width: 100,
+  },
+  agg: {
+    items: [],
+  },
+  gantt: {
+    timelineWidth: 500,
+    planStartTimeColumnName: 'planStartTime',
+    planEndTimeColumnName: 'planEndTime',
+    actualStartTimeColumnName: 'actualStartTime',
+    actualEndTimeColumnName: 'actualEndTime',
+  },
+
 }
 
-const layouts = [
-  IwProps.LayoutPropsBuilder.extend('gantt demo', IwProps.LayoutKind.GANTT, 'no', tableColumns, slice, tableFeatures).columns([
-    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'name')!).build(),
-    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'creator')!).build(),
-    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'no')!).build(),
-    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'planStartTime')!).build(),
-    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'planEndTime')!).build(),
-    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'actualStartTime')!).build(),
-    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'actualEndTime')!).build(),
-  ]).build(),
-  IwProps.LayoutPropsBuilder.extend('list demo', IwProps.LayoutKind.LIST, 'no', tableColumns, slice, tableFeatures).columns([
-    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'name')!).build(),
-    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'stats')!).build(),
-    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'creator')!).build(),
-    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'no')!).build(),
-    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'planStartTime')!).build(),
-    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'planEndTime')!).build(),
-    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'actualStartTime')!).build(),
-    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'actualEndTime')!).build(),
-  ]).features({
-    aggData: IwProps.FeatureAggDataInitPropsBuilder.create().aggs([
-      {
-        columnName: 'name',
-        aggKind: IwProps.FeatureAggDataKind.MIN,
-      },
-    ]).build(),
-  }).build(),
-  IwProps.LayoutPropsBuilder.extend('multiple header demo', IwProps.LayoutKind.LIST, 'no', tableColumns, slice, tableFeatures).columns([
-    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'name')!).build(),
-    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'creator')!).build(),
-    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'stats')!).build(),
-    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'no')!).build(),
-    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'planStartTime')!).categoryTitle('Time').build(),
-    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'planEndTime')!).categoryTitle('Time').build(),
-    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'actualStartTime')!).build(),
-    IwProps.LayoutColumnPropsBuilder.extend(tableColumns.find(col => col.name === 'actualEndTime')!).build(),
-  ]).features({
-    aggData: IwProps.FeatureAggDataInitPropsBuilder.create().aggs([
-      {
-        columnName: 'name',
-        aggKind: IwProps.FeatureAggDataKind.MIN,
-      },
-    ]).build(),
-  }).build(),
-]
-
-const tableProps: Ref<IwProps.TableProps> = ref(IwProps.TablePropsBuilder.create('no', tableColumns, layouts, events).parentPkColumnName('pno').features(tableFeatures).slice(slice).build())
+const tableProps: Ref<IwProps.SimpleTableProps> = ref(_tableProps)
 
 onMounted(() => {
   IwUtils.delegateEvent('.iw-tt', 'click', '.btn-row-delete', (e) => {

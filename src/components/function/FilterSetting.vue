@@ -1,25 +1,25 @@
 <script setup lang="ts">
 import { onMounted, ref, toRaw } from 'vue'
 import * as iconSvg from '../../assets/icon'
-import type { CellDictItemProps, CellDictItemsResp, DataFilterItemProps, DataFilterProps, DataKind, TableLayoutModifyProps } from '../../props'
+import type { DataKind, DictItemProps, DictItemsResp, FilterDataGroupProps, FilterDataItemProps, FilterDataProps, LayoutModifyProps } from '../../props'
 import { OperatorKind, translateOperatorKind } from '../../props'
+import { getInputTypeByDataKind, getOperatorKindsByDataKind } from '../../props/enumProps'
 import { IwUtils } from '../../utils'
 import MenuComp, { MenuOffsetKind, MenuSizeKind } from '../common/Menu.vue'
-import type { TableColumnConf } from '../initializer'
-import { getInputTypeByDataKind, getOperatorKindsByDataKind } from '../initializer'
+import type { ColumnConf } from '../conf'
 import * as eb from '../eventbus'
 
 const props = defineProps<{
   layoutId: string
-  filters?: DataFilterProps[]
-  columnsConf: TableColumnConf[]
+  filter: FilterDataProps
+  layoutColumnsConf: ColumnConf[]
 }>()
 
 const filterGroupContainerCompRef = ref<InstanceType<typeof MenuComp>>()
 const filterColumnCompRef = ref<InstanceType<typeof MenuComp>>()
 const filterOpCompRef = ref<InstanceType<typeof MenuComp>>()
 const dictContainerCompRef = ref<InstanceType<typeof MenuComp>>()
-const queryDictItemsResp = ref<CellDictItemsResp>()
+const queryDictItemsResp = ref<DictItemsResp>()
 
 let filterGroupContainerEle: HTMLElement
 
@@ -37,16 +37,16 @@ const selectedFilterGroup = ref<FilterItemProps[] | undefined>()
 const selectedFilterGroupIdx = ref<number | undefined>()
 const selectedFilterItemIdx = ref<number | undefined>()
 // column name + '-' + column value -> dict item
-const mappingColumValueAndDictTitle = ref<{ [key: string | number]: CellDictItemProps }>({})
+const mappingColumValueAndDictTitle = ref<{ [key: string | number]: DictItemProps }>({})
 
 async function showFilterGroupContainer(e: Event, filterGroupIdx?: number) {
   selectedFilterGroupIdx.value = filterGroupIdx
   selectedFilterItemIdx.value = undefined
   const targetEle = e.target as HTMLElement
   if (filterGroupIdx !== undefined) {
-    const filterItems = toRaw(props.filters![filterGroupIdx].items)
-    selectedFilterGroup.value = filterItems.map((item: DataFilterItemProps) => {
-      const columnConf = props.columnsConf.find(col => col.name === item.columnName)!
+    const filterItems = toRaw(props.filter.groups[filterGroupIdx].items)
+    selectedFilterGroup.value = filterItems.map((item: FilterDataItemProps) => {
+      const columnConf = props.layoutColumnsConf.find(col => col.name === item.columnName)!
       return {
         columnName: item.columnName,
         operator: item.operator,
@@ -59,11 +59,11 @@ async function showFilterGroupContainer(e: Event, filterGroupIdx?: number) {
       }
     })
     // init mapping dict
-    let groupedFilterItems: { [key: string]: DataFilterItemProps[] } = IwUtils.groupBy(
-      filterItems.filter((item: DataFilterItemProps) => item.value !== undefined),
-      (item: DataFilterItemProps) => { return item.columnName },
+    let groupedFilterItems: { [key: string]: FilterDataItemProps[] } = IwUtils.groupBy(
+      filterItems.filter((item: FilterDataItemProps) => item.value !== undefined),
+      (item: FilterDataItemProps) => { return item.columnName },
     )
-    const queryConds: { [key: string]: any[] } = groupedFilterItems = Object.fromEntries(Object.entries(groupedFilterItems).map(([columnName, values]) => [columnName, values.map((item: DataFilterItemProps) => item.value!)]))
+    const queryConds: { [key: string]: any[] } = groupedFilterItems = Object.fromEntries(Object.entries(groupedFilterItems).map(([columnName, values]) => [columnName, values.map((item: FilterDataItemProps) => item.value!)]))
     const dictItemResp = await eb.loadCellDictItemsWithMultiConds(queryConds, {
       offsetNumber: 0,
       fetchNumber: Math.max(...Object.entries(queryConds).map(([_, values]) => values.length)),
@@ -81,14 +81,14 @@ async function showFilterGroupContainer(e: Event, filterGroupIdx?: number) {
 }
 
 async function deleteFilterGroup(filterGroupIdx: number) {
-  const filters = toRaw(props.filters!)
-  filters.splice(filterGroupIdx, 1)
+  const filter = toRaw(props.filter!)
+  filter.groups.splice(filterGroupIdx, 1)
   await eb.modifyLayout({
-    filters,
+    filter,
   })
 }
 
-function parseDict(columnName: string, value?: any): any | CellDictItemProps[] {
+function parseDict(columnName: string, value?: any): any | DictItemProps[] {
   if (value === undefined) {
     return ''
   }
@@ -119,7 +119,7 @@ function showFilterOps(e: Event, filterItemIdx: number) {
 function setFilterColumn(e: Event) {
   const targetEle = e.target as HTMLElement
   const currColumnName = targetEle.dataset.columnName!
-  const columnConf = props.columnsConf.find(col => col.name === currColumnName)!
+  const columnConf = props.layoutColumnsConf.find(col => col.name === currColumnName)!
   if (selectedFilterItemIdx.value !== undefined) {
     const currFilterItem = selectedFilterGroup.value?.[selectedFilterItemIdx.value]
     currFilterItem!.columnName = currColumnName
@@ -218,7 +218,7 @@ async function saveFilterGroup() {
   if (selectedFilterGroup.value?.length === 0) {
     return
   }
-  const currFilterGroup: DataFilterProps = {
+  const currFilterGroup: FilterDataGroupProps = {
     items: selectedFilterGroup.value?.filter(item =>
       item.operator === OperatorKind.IS_EMPTY || item.operator === OperatorKind.NOT_EMPTY || item.values.length > 0,
     ).map((item) => {
@@ -237,15 +237,17 @@ async function saveFilterGroup() {
   if (currFilterGroup.items.length === 0) {
     return
   }
-  const filters = props.filters ? toRaw(props.filters) : []
+  const filterGroups = toRaw(props.filter.groups)
   if (selectedFilterGroupIdx.value === undefined) {
-    filters.push(currFilterGroup)
+    filterGroups.push(currFilterGroup)
   }
   else {
-    filters[selectedFilterGroupIdx.value] = currFilterGroup
+    filterGroups[selectedFilterGroupIdx.value] = currFilterGroup
   }
-  const layout: TableLayoutModifyProps = {
-    filters,
+  const layout: LayoutModifyProps = {
+    filter: {
+      groups: filterGroups,
+    },
   }
   await eb.modifyLayout(layout)
 }
@@ -262,10 +264,10 @@ onMounted(() => {
 
 <template>
   <div class="flex items-center text-nowrap">
-    <button v-for="(filterGroup, filterGroupIdx) in props.filters" :key="`${props.layoutId}-${filterGroupIdx}`" class="iw-btn iw-btn-outline iw-btn-xs flex-none mr-1">
+    <button v-for="(filterGroup, filterGroupIdx) in props.filter.groups" :key="`${props.layoutId}-${filterGroupIdx}`" class="iw-btn iw-btn-outline iw-btn-xs flex-none mr-1">
       <span class="flex items-center" @click="e => showFilterGroupContainer(e, filterGroupIdx)">
         <template v-if="filterGroup.items.length === 1">
-          <span class="mr-0.5">{{ props.columnsConf.find(col => col.name === filterGroup.items[0].columnName)?.title }}</span>
+          <span class="mr-0.5">{{ props.layoutColumnsConf.find(col => col.name === filterGroup.items[0].columnName)?.title }}</span>
           <span class="mr-0.5">{{ translateOperatorKind(filterGroup.items[0].operator) }}</span>
           <span class="mr-0.5 max-w-[100px] whitespace-nowrap overflow-hidden text-ellipsis">
             <span
@@ -353,7 +355,7 @@ onMounted(() => {
 
   <MenuComp ref="filterColumnCompRef" @click="setFilterColumn">
     <div
-      v-for="column in props.columnsConf" :key="column.name" class="iw-contextmenu__item flex w-full cursor-pointer"
+      v-for="column in props.layoutColumnsConf.filter(col => col.filterable)" :key="column.name" class="iw-contextmenu__item flex w-full cursor-pointer"
       :data-column-name="column.name"
     >
       <i :class="`${column.icon} mr-0.5`" />

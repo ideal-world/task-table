@@ -1,21 +1,21 @@
 import type { DataGroupResp, DataResp, DictItemsResp } from './basicProps'
 import type { LayoutKind } from './enumProps'
 import type { AggDataProps, DataQuerySliceReq, FilterDataProps, GroupDataProps, SortDataProps } from './functionProps'
-import type { LayoutModifyProps, LayoutProps, TableStyleProps } from '.'
+import type { LayoutModifyProps, LayoutProps, TableStyleModifyProps } from './kernelProps'
 
 export interface TableEventProps {
   loadData: (
-    columns?: string[],
     quickSearchContent?: string,
     filters?: FilterDataProps,
     sorts?: SortDataProps,
     group?: GroupDataProps,
-    aggs?: AggDataProps,
+    agg?: AggDataProps,
     hideSubData?: boolean,
   // Load only the data of the corresponding group
     byGroupValue?: any,
     slices?: DataQuerySliceReq,
-    returnOnlyAggs?: boolean) => Promise<DataResp | DataGroupResp[]>
+    returnColumnNames?: string[],
+    returnOnlyAgg?: boolean) => Promise<DataResp | DataGroupResp[]>
   newData?: (newRecords: { [key: string]: any }[]) => Promise<{ [key: string]: any }[]>
   copyData?: (targetRecordPks: any[]) => Promise<{ [key: string]: any }[]>
   modifyData?: (changedRecords: { [key: string]: any }[]) => Promise<{ [key: string]: any }[]>
@@ -27,7 +27,7 @@ export interface TableEventProps {
   loadCellDictItems?: (columnName: string, filterValue?: any, slice?: DataQuerySliceReq) => Promise<DictItemsResp>
   loadCellDictItemsWithMultiConds?: (conds: { [columnName: string]: any[] }, slice?: DataQuerySliceReq) => Promise<{ [columnName: string]: DictItemsResp }>
 
-  modifyStyles?: (changedStyleProps: TableStyleProps) => Promise<boolean>
+  modifyStyles?: (changedStyleProps: TableStyleModifyProps) => Promise<boolean>
 
   newLayout?: (newLayoutProps: LayoutProps) => Promise<string>
   modifyLayout?: (changedLayoutId: string, changedLayoutProps: LayoutModifyProps) => Promise<boolean>

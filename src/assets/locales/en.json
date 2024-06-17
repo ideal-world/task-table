@@ -54,20 +54,6 @@
     },
     "table": {
       "moreSettingTitle": "More settings"
-    },
-    "feature": {
-      "notEnabled": "Feature[{name}]not enabled",
-      "actionColumnTitle": "Action column",
-      "aggDataTitle": "Aggregate data",
-      "filterDataTitle": "Filter data",
-      "groupDataTitle": "Group data",
-      "sortDataTitle": "Sort data",
-      "editDataTitle": "Edit data",
-      "selectDataTitle": "Select data",
-      "ganttLayoutTitle": "Gantt layout",
-      "multiLayoutsTitle": "Multiple layouts",
-      "quickSearchTitle": "Quick search",
-      "useDictTitle": "Dictionary"
     }
   },
   "layout": {

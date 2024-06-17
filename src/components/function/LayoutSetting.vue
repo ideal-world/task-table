@@ -1,18 +1,17 @@
 <script setup lang="ts">
-import { ref, toRaw } from 'vue'
+import { ref } from 'vue'
 import * as iconSvg from '../../assets/icon'
-import { type LayoutKernelProps, LayoutKind, SubDataShowKind, type TableLayoutModifyProps } from '../../props'
-
-import MenuComp, { MenuOffsetKind, MenuSizeKind } from '../common/Menu.vue'
-import type { TableBasicConf, TableLayoutConf } from '../Initializer'
-import { convertLayoutColumnConfToLayoutColumnProps, getDefaultLayoutColumnProps } from '../Initializer'
-
 import locales from '../../locales'
+import { LayoutKind, type LayoutModifyProps, type SimpleLayoutProps, SubDataShowKind, defaultSlice } from '../../props'
+
+import { deepToRaw } from '../../utils/vueHelper'
+import MenuComp, { MenuOffsetKind, MenuSizeKind } from '../common/Menu.vue'
+import type { LayoutConf, TableConf } from '../conf'
 import * as eb from '../eventbus'
 
 const props = defineProps<{
-  basicConf: TableBasicConf
-  layoutConf: TableLayoutConf
+  tableConf: TableConf
+  layoutConf: LayoutConf
   layoutLength: number
 }>()
 
@@ -28,57 +27,33 @@ async function deleteLayout() {
 }
 
 async function resetLayout() {
-  const layout: TableLayoutModifyProps = {
-    filters: [],
-    sorts: [],
-    removeGroup: true,
-    aggs: {},
-    groupSlices: {},
+  const layout: LayoutModifyProps = {
+    slice: defaultSlice(),
     subDataShowKind: SubDataShowKind.FOLD_SUB_DATA,
-    defaultSlice: {
-      offsetNumber: 0,
-      fetchNumber: props.layoutConf.defaultSlice.fetchNumber,
-      fetchNumbers: props.layoutConf.defaultSlice.fetchNumbers,
-    },
   }
+  props.layoutConf.filter ?? (layout.filter = { groups: [] })
+  props.layoutConf.group ?? (layout.group = {})
+  props.layoutConf.sort ?? (layout.sort = { conds: [] })
+  props.layoutConf.agg ?? (layout.agg = { items: [] })
   await eb.modifyLayout(layout)
   confirmResetLayoutCompRef.value?.close()
 }
 
 async function copyLayout() {
-  await eb.newLayout({
-    title: `${props.layoutConf.title} - Copy`,
-    layoutKind: props.layoutConf.layoutKind,
-    icon: props.layoutConf.icon,
-    columns: props.layoutConf.columns.map((column) => {
-      return convertLayoutColumnConfToLayoutColumnProps(toRaw(column))
-    }),
-    filters: props.layoutConf.filters,
-    sorts: props.layoutConf.sorts,
-    group: props.layoutConf.group,
-    aggs: props.layoutConf.aggs,
-    groupSlices: props.layoutConf.groupSlices,
-    defaultSlice: props.layoutConf.defaultSlice,
-    subDataShowKind: props.layoutConf.subDataShowKind,
-    showSelectColumn: props.layoutConf.showSelectColumn,
-    actionColumnRender: props.layoutConf.actionColumnRender,
-    actionColumnWidth: props.layoutConf.actionColumnWidth,
-  })
+  const newLayout = deepToRaw(props.layoutConf)
+  delete newLayout.data
+  newLayout.selectedDataPks = []
+  newLayout.title = `${props.layoutConf.title} - Copy`
+  await eb.newLayout(newLayout)
 }
 
 async function createNewLayout(layoutKind: LayoutKind) {
-  const newLayout: LayoutKernelProps = {
+  const newLayout: SimpleLayoutProps = {
     title: t('layout.title.default'),
     layoutKind,
-    icon: iconSvg.TEXT,
-    columns: props.basicConf.columns.filter(column => !column.hide).map((column) => {
-      return getDefaultLayoutColumnProps(toRaw(column))
+    columns: props.tableConf.columns.filter(column => !column.hide).map((column) => {
+      return column
     }),
-    defaultSlice: props.basicConf.defaultSlice,
-    subDataShowKind: SubDataShowKind.FOLD_SUB_DATA,
-    showSelectColumn: props.basicConf.defaultShowSelectColumn,
-    actionColumnRender: props.basicConf.defaultActionColumnRender,
-    actionColumnWidth: props.basicConf.defaultActionColumnWidth,
   }
   await eb.newLayout(newLayout)
 }

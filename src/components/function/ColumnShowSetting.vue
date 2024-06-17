@@ -1,18 +1,19 @@
 <script setup lang="ts">
-import type { TableLayoutModifyProps } from '../../props/basicProps'
-import { type TableBasicConf, type TableLayoutColumnConf, convertLayoutColumnConfToLayoutColumnProps } from '../Initializer'
+import type { LayoutColumnProps, LayoutModifyProps } from '../../props'
+import type { TableConf } from '../conf'
 import * as eb from '../eventbus'
 
 const props = defineProps<{
-  layoutColumnConf: TableLayoutColumnConf[]
-  basicConf: TableBasicConf
+  layoutId: string
+  layoutColumns: LayoutColumnProps[]
+  tableConf: TableConf
 }>()
 
-async function setShowToggleColumn(columnConf: TableLayoutColumnConf) {
-  const changedLayoutReq: TableLayoutModifyProps = {
+async function setShowToggleColumn(column: LayoutColumnProps) {
+  const changedLayoutReq: LayoutModifyProps = {
     changedColumn: {
-      ...convertLayoutColumnConfToLayoutColumnProps(columnConf),
-      hide: !columnConf.hide,
+      ...column,
+      hide: !column.hide,
     },
   }
   await eb.modifyLayout(changedLayoutReq)
@@ -26,14 +27,14 @@ async function setShowToggleColumn(columnConf: TableLayoutColumnConf) {
     {{ $t('function.column.showTitle') }}
   </div>
   <div style="display: none;">
-    <div v-for="column in props.layoutColumnConf.filter(column => column.name !== props.basicConf.pkColumnName)" :key="column.name" class="iw-contextmenu__item flex items-center justify-between w-full">
+    <div v-for="column in props.layoutColumns.filter(col => col.name !== props.tableConf.pkColumnName)" :key="`${props.layoutId}-${column.name}`" class="iw-contextmenu__item flex items-center justify-between w-full">
       <span>
-        <i :class="props.basicConf.columns.find(col => col.name === column.name)?.icon" />
-        {{ props.basicConf.columns.find(col => col.name === column.name)?.title }}
+        <i :class="props.tableConf.columns.find(col => col.name === column.name)?.icon" />
+        {{ props.tableConf.columns.find(col => col.name === column.name)?.title }}
       </span>
       <input
         type="checkbox" class="iw-toggle iw-toggle-xs"
-        :checked="!props.layoutColumnConf.find(col => col.name === column.name)!.hide"
+        :checked="!props.layoutColumns.find(col => col.name === column.name)!.hide"
         @click="setShowToggleColumn(column)"
       >
     </div>
