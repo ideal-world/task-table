@@ -30,7 +30,7 @@ export interface CommonFunctionProps {
   agg?: AggDataProps
   edit?: EditDataProps
 }
-type SimpleCommonFunctionProps = ChangeAllOptional<CommonFunctionProps>
+type SimpleCommonFunctionProps = Partial<CommonFunctionProps>
 function generateCommonFunctionProps(simple: SimpleCommonFunctionProps): CommonFunctionProps {
   return {
     slice: defaultSlice(),
@@ -87,11 +87,16 @@ export interface TableProps extends CommonFunctionProps {
 
   quickSearch?: QuickSearchProps
 }
-export type SimpleTableProps = ChangeOptionalExceptWithTypes<TableProps, 'pkColumnName' | 'columns' | 'layouts' | 'events', {
+export interface SimpleTableProps extends SimpleCommonFunctionProps {
+  id?: string
+  pkColumnName: string
+  parentPkColumnName?: string
   columns: SimpleTableColumnProps[]
   layouts: SimpleLayoutProps[]
+  events: TableEventProps
   styles: SimpleTableStyleProps
-}>
+  quickSearch?: QuickSearchProps
+}
 export function generateTableProps(simple: SimpleTableProps): TableProps {
   const columns = simple.columns.map(col => generateTableColumnProps(col))
   const commonFunctions = generateCommonFunctionProps(simple)
