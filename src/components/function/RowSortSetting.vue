@@ -80,7 +80,7 @@ function addSortCond(columnName: string, orderDesc: boolean) {
     <div
       v-for="column in props.sort.conds"
       :key="`${props.layoutId}-${column.columnName}`"
-      class="iw-row-sort__item p-1 flex w-full justify-between cursor-pointer"
+      class="iw-row-sort__item p-1 flex w-full justify-between cursor-move"
     >
       <div>
         <i :class="`${iconSvg.GRABBER} cursor-pointer mr-0.5`" />

@@ -44,20 +44,20 @@ export async function loadData(moreForGroupedValue?: any, returnOnlyAgg?: boolea
 
   const resp = await events.loadData(
     tableConf.quickSearch?.searchContent,
-    layout.filter,
-    layout.sort,
-    layout.group,
-    layout.agg,
-    layout.subDataShowKind === SubDataShowKind.ONLY_PARENT_DATA,
+    rawLayout.filter,
+    rawLayout.sort,
+    rawLayout.group,
+    rawLayout.agg,
+    rawLayout.subDataShowKind === SubDataShowKind.ONLY_PARENT_DATA,
     moreForGroupedValue,
-    moreForGroupedValue && layout.group && layout.group.slices && layout.group.slices[moreForGroupedValue as string]
+    moreForGroupedValue && rawLayout.group && rawLayout.group.slices && rawLayout.group.slices[moreForGroupedValue as string]
       ? {
-          offsetNumber: layout.group.slices[moreForGroupedValue as string].offsetNumber,
-          fetchNumber: layout.group.slices[moreForGroupedValue as string].fetchNumber,
+          offsetNumber: rawLayout.group.slices[moreForGroupedValue as string].offsetNumber,
+          fetchNumber: rawLayout.group.slices[moreForGroupedValue as string].fetchNumber,
         }
       : {
-          offsetNumber: layout.slice.offsetNumber,
-          fetchNumber: layout.slice.fetchNumber,
+          offsetNumber: rawLayout.slice.offsetNumber,
+          fetchNumber: rawLayout.slice.fetchNumber,
         },
     showColumns,
     returnOnlyAgg,
@@ -273,7 +273,6 @@ export async function setQuickSearchContent(quickSearchContent: string): Promise
     tableConf.quickSearch.searchContent = quickSearchContent
   }
   else {
-    // TODO reactive
     tableConf.quickSearch = {
       placeholder: '',
       searchContent: quickSearchContent,

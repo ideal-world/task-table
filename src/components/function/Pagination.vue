@@ -83,7 +83,7 @@ async function setSlice(newPage?: number, newFetchNumber?: number) {
         fetchNumbers: props.slice.fetchNumbers,
       }
     }
-    const groupSlices = toRaw(props.groupProps?.slices)
+    const groupSlices = toRaw(props.groupProps?.slices) ?? {}
     groupSlices![props.groupValue!] = newSlice
     const changedLayoutReq: LayoutModifyProps = {
       group: {

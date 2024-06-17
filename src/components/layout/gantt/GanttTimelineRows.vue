@@ -146,7 +146,7 @@ function getTimelineBarTitle(row: { [key: string]: any }, plan: boolean) {
     return `${plan ? t('gantt.planTimeTitle') : t('gantt.actualTimeTitle')}: ${startTime ?? ''} / ${endTime ?? ''} ${t('gantt.totalWeekDays', { days: weekdays })}`
   }
   else {
-    return `${plan ? t('gantt.planTimeTitle') : t('gantt.actualTimeTitle')}: ${startTime ?? ''} / ${t('gantt.endTime')}: ${endTime ?? ''}`
+    return `${plan ? t('gantt.planTimeTitle') : t('gantt.actualTimeTitle')}: ${startTime ?? ''} / ${endTime ?? ''}`
   }
 }
 

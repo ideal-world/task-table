@@ -37,11 +37,13 @@ function showAggsContextMenu(event: MouseEvent, colIdx: number) {
 
 async function changeColumnAggs(aggKind: AggregateKind, columnName: string) {
   const agg = toRaw(props.agg)
-  agg.items.forEach((item) => {
-    if (item.columnName === columnName) {
-      item.aggKind = aggKind
-    }
-  })
+  const idx = agg.items.findIndex(item => item.columnName === columnName)
+  if (idx === -1) {
+    agg.items.push({ columnName, aggKind })
+  }
+  else {
+    agg.items[idx].aggKind = aggKind
+  }
   await eb.modifyLayout({
     agg,
   })

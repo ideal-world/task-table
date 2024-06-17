@@ -31,10 +31,10 @@ async function resetLayout() {
     slice: generateDataSliceProps(),
     subDataShowKind: SubDataShowKind.FOLD_SUB_DATA,
   }
-  props.layoutConf.filter ?? (layout.filter = { groups: [] })
-  props.layoutConf.group ?? (layout.group = {})
-  props.layoutConf.sort ?? (layout.sort = { conds: [] })
-  props.layoutConf.agg ?? (layout.agg = { items: [] })
+  props.layoutConf.filter && (layout.filter = { groups: [] })
+  props.layoutConf.group && (layout.group = {})
+  props.layoutConf.sort && (layout.sort = { conds: [] })
+  props.layoutConf.agg && (layout.agg = { items: [] })
   await eb.modifyLayout(layout)
   confirmResetLayoutCompRef.value?.close()
 }

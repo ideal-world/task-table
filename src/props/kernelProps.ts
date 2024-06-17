@@ -78,6 +78,9 @@ function generateCommonColumnProps(tableSimple: SimpleCommonColumnProps, layoutS
     width: layoutSimple?.width ?? tableSimple.width ?? 100,
     hide: layoutSimple?.hide ?? tableSimple.hide ?? false,
     styles: layoutSimple?.styles ?? tableSimple.styles ?? {},
+    categoryTitle: layoutSimple?.categoryTitle ?? tableSimple.categoryTitle,
+    render: layoutSimple?.render ?? tableSimple.render,
+    
     filterable: layoutSimple?.filterable ?? tableSimple.filterable ?? false,
     groupable: layoutSimple?.groupable ?? tableSimple.groupable ?? false,
     sortable: layoutSimple?.sortable ?? tableSimple.sortable ?? false,
@@ -166,7 +169,7 @@ export interface TableColumnProps extends CommonColumnProps {
 export type SimpleTableColumnProps = ChangeOptionalExcept<TableColumnProps, 'name'>
 function generateTableColumnProps(simple: SimpleTableColumnProps): TableColumnProps {
   return {
-    title: simple.name,
+    title: simple.title ?? simple.name,
     icon: getDefaultIconByDataKind(simple.dataKind ?? DataKind.TEXT),
     dataKind: simple.dataKind ?? DataKind.TEXT,
     useDict: simple.useDict ?? false,

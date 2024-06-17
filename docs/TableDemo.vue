@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { Ref } from 'vue';
-import { onMounted, ref, toRaw } from 'vue';
-import { IwEvents, IwProps } from '../src';
-import { IwUtils } from '../src/utils';
+import type { Ref } from 'vue'
+import { onMounted, ref, toRaw } from 'vue'
+import { IwEvents, IwProps } from '../src'
+import { IwUtils } from '../src/utils'
 
 const selectedRecordPks: Ref<any[]> = ref([])
 
@@ -123,12 +123,12 @@ const events: IwProps.TableEventProps = {
     }
     if (sorts) {
       sorts.conds.forEach((sort) => {
-        data = data.sort((a, b) => {
+        data.sort((a, b) => {
           if (sort.orderDesc) {
-            return a[sort.columnName] - b[sort.columnName]
+            return typeof a[sort.columnName] === 'number' ? b[sort.columnName] - a[sort.columnName] : b[sort.columnName].localeCompare(a[sort.columnName])
           }
           else {
-            return b[sort.columnName] - a[sort.columnName]
+            return typeof a[sort.columnName] === 'number' ? a[sort.columnName] - b[sort.columnName] : a[sort.columnName].localeCompare(b[sort.columnName])
           }
         })
       })
@@ -140,7 +140,15 @@ const events: IwProps.TableEventProps = {
     }
     if (byGroupValue && group && group.item) {
       // 只获取当前分组的数据
-      data = data.filter(d => d[group.item!.columnName] === byGroupValue)
+      data = data.filter((d) => {
+        // eslint-disable-next-line ts/no-use-before-define
+        if (columns.find(col => col.name === group.item!.columnName)?.multiValue) {
+          return d[group.item!.columnName].includes(byGroupValue)
+        }
+        else {
+          return d[group.item!.columnName] === byGroupValue
+        }
+      })
     }
     if (group && group.item && !byGroupValue) {
       let dataGroup: { [key: string]: any[] } = IwUtils.groupBy(data, (d) => { return d[group.item!.columnName] })
@@ -433,7 +441,7 @@ const events: IwProps.TableEventProps = {
   },
 
   loadCellDictItems: async (columnName: string, filterValue?: any, slice?: IwProps.DataQuerySliceReq): Promise<IwProps.DictItemsResp> => {
-    if (columnName === 'name') {
+    if (columnName === 'creator') {
       let nameDict: IwProps.DictItemProps[] = JSON.parse(JSON.stringify(NAME_DICT))
       if (filterValue) {
         nameDict = nameDict.filter((dict) => { return dict.title.includes(filterValue) || dict.value.includes(filterValue) })
@@ -496,7 +504,7 @@ const events: IwProps.TableEventProps = {
 }
 
 const columns: IwProps.SimpleTableColumnProps[] = [
-  { name: 'no', title: 'ID', dataKind: IwProps.DataKind.NUMBER, sortable: true, width: 80, styles: { cursor: 'pointer' } },
+  { name: 'no', title: 'ID', dataKind: IwProps.DataKind.NUMBER, sortable: true, width: 80, styles: { cursor: 'pointer' }, filterable: true },
   { name: 'pno', title: '父ID', dataKind: IwProps.DataKind.NUMBER, hide: true },
   { name: 'name', title: '名称', sortable: true, width: 300, render: (record: { [key: string]: any }, layoutKind: IwProps.LayoutKind) => {
     if (layoutKind === IwProps.LayoutKind.LIST) {
@@ -505,36 +513,36 @@ const columns: IwProps.SimpleTableColumnProps[] = [
     else {
       return record.name
     }
-  } },
-  { name: 'creator', title: '创建人', useDict: true, dictEditable: true, sortable: true, groupable: true },
-  { name: 'stats', title: '状态', useDict: true, dictEditable: true, multiValue: true, sortable: true, groupable: true },
-  { name: 'planStartTime', title: '计划开始时间', dataKind: IwProps.DataKind.DATETIME, sortable: true },
-  { name: 'planEndTime', title: '计划结束时间', dataKind: IwProps.DataKind.DATETIME, sortable: true },
+  }, aggable: true, filterable: true },
+  { name: 'creator', title: '创建人', useDict: true, dictEditable: true, sortable: true, aggable: true, groupable: true, filterable: true },
+  { name: 'stats', title: '状态', useDict: true, dictEditable: true, multiValue: true, aggable: true, groupable: true, filterable: true },
+  { name: 'planStartTime', title: '计划开始时间', dataKind: IwProps.DataKind.DATETIME, aggable: true, sortable: true, filterable: true },
+  { name: 'planEndTime', title: '计划结束时间', dataKind: IwProps.DataKind.DATETIME, sortable: true, filterable: true },
   { name: 'actualStartTime', title: '实际开始时间', dataKind: IwProps.DataKind.DATETIME, sortable: true },
   { name: 'actualEndTime', title: '实际结束时间', dataKind: IwProps.DataKind.DATETIME, sortable: true },
 ]
 
 const layouts: IwProps.SimpleLayoutProps[] = [
-//   {
-//   id: 'hi1',
-//   title: 'gantt demo',
-//   layoutKind: IwProps.LayoutKind.GANTT,
-//   columns: [{
-//     name: 'name',
-//   }, {
-//     name: 'creator',
-//   }, {
-//     name: 'no',
-//   }, {
-//     name: 'planStartTime',
-//   }, {
-//     name: 'planEndTime',
-//   }, {
-//     name: 'actualStartTime',
-//   }, {
-//     name: 'actualEndTime',
-//   }],
-// },
+  {
+    id: 'hi1',
+    title: 'gantt demo',
+    layoutKind: IwProps.LayoutKind.GANTT,
+    columns: [{
+      name: 'name',
+    }, {
+      name: 'creator',
+    }, {
+      name: 'no',
+    }, {
+      name: 'planStartTime',
+    }, {
+      name: 'planEndTime',
+    }, {
+      name: 'actualStartTime',
+    }, {
+      name: 'actualEndTime',
+    }],
+  },
   {
     id: 'hi2',
     title: 'list demo',
@@ -614,7 +622,10 @@ const _tableProps: IwProps.SimpleTableProps = {
     width: 100,
   },
   agg: {
-    items: [],
+    items: [
+      { columnName: 'name', aggKind: IwProps.AggregateKind.MIN },
+      { columnName: 'stats', aggKind: IwProps.AggregateKind.MIN },
+    ],
   },
   gantt: {
     timelineWidth: 500,
