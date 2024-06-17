@@ -34,32 +34,33 @@ export function init(props: SimpleTableProps): {
   layoutsConf: LayoutConf[]
   currentLayoutId: Ref<string>
 } {
-  const tableProps = generateTableProps(props)
   // Blocking external references
-  const rawProps = deepToRaw(tableProps)
+  const rawProps = deepToRaw(props)
+  // Generate table configuration
+  const tableProps = generateTableProps(rawProps)
   // Create a new reactive object
   const tableConf = reactive({
-    id: rawProps.id,
-    pkColumnName: rawProps.pkColumnName,
-    parentPkColumnName: rawProps.parentPkColumnName,
-    columns: rawProps.columns,
-    styles: rawProps.styles,
-    quickSearch: rawProps.quickSearch,
+    id: tableProps.id,
+    pkColumnName: tableProps.pkColumnName,
+    parentPkColumnName: tableProps.parentPkColumnName,
+    columns: tableProps.columns,
+    styles: tableProps.styles,
+    quickSearch: tableProps.quickSearch,
 
-    slice: rawProps.slice,
-    showSelectColumn: rawProps.showSelectColumn,
-    subDataShowKind: rawProps.subDataShowKind,
+    slice: tableProps.slice,
+    showSelectColumn: tableProps.showSelectColumn,
+    subDataShowKind: tableProps.subDataShowKind,
 
-    actionColumn: rawProps.actionColumn,
-    gantt: rawProps.gantt,
+    actionColumn: tableProps.actionColumn,
+    gantt: tableProps.gantt,
 
-    filter: rawProps.filter,
-    group: rawProps.group,
-    sort: rawProps.sort,
-    agg: rawProps.agg,
-    edit: rawProps.edit,
+    filter: tableProps.filter,
+    group: tableProps.group,
+    sort: tableProps.sort,
+    agg: tableProps.agg,
+    edit: tableProps.edit,
   })
-  const layoutsConf = reactive(rawProps.layouts.map((layout) => {
+  const layoutsConf = reactive(tableProps.layouts.map((layout) => {
     return {
       ...layout,
       selectedDataPks: [],

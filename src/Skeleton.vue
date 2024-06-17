@@ -60,7 +60,7 @@ function setHeight() {
     const outHeight = ttEle.parentElement?.clientHeight
     const headerHeight = ttEle.getElementsByClassName('iw-tt-header')[0].offsetHeight
     Array.prototype.forEach.call(ttEle.getElementsByClassName('iw-tt-layout'), (layoutEle) => {
-      const toolbarHeight = layoutEle.getElementsByClassName('iw-tt-toolbar')[0].offsetHeight
+      const toolbarHeight = layoutEle.getElementsByClassName('iw-tt-toolbar').length > 0 ? layoutEle.getElementsByClassName('iw-tt-toolbar')[0].offsetHeight : 0
       const footerHeight = layoutEle.getElementsByClassName('iw-tt-footer')[0].offsetHeight
       layoutEle.getElementsByClassName('iw-tt-table')[0].style.height = `${outHeight - headerHeight - toolbarHeight - footerHeight}px`
     })
@@ -155,7 +155,10 @@ onMounted(async () => {
     </div>
     <template v-for="layout in layoutsConf" :key="layout.id">
       <div v-show="currentLayoutId === layout.id" :id="`iw-tt-layout-${layout.id}`" class="iw-tt-layout">
-        <div class="iw-tt-toolbar flex items-center h-8 p-0.5">
+        <div
+          v-if="layout.sort || layout.filter"
+          class="iw-tt-toolbar flex items-center h-8 p-0.5"
+        >
           <RowSortSettingComp v-if="layout.sort" :layout-id="layout.id" :sort="layout.sort" :layout-columns-conf="currentLayoutColumnsConf" />
           <div class="iw-divider iw-divider-horizontal m-0.5" />
           <ScrollableComp v-if="layout.filter" ref="scrollableCompRefs" class="flex-1" :data-layout-id="layout.id">

@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import * as iconSvg from '../../assets/icon'
-import type { GroupDataProps } from '../../props'
-import type { ColumnConf } from '../conf'
-import * as eb from '../eventbus'
+import * as iconSvg from '../../assets/icon';
+import type { GroupDataProps } from '../../props';
+import type { ColumnConf } from '../conf';
+import * as eb from '../eventbus';
 
 const props = defineProps<{
   layoutId: string
@@ -19,6 +19,7 @@ async function setGroupColumn(columnName: string) {
           orderDesc: props.group.item.orderDesc,
           hideEmptyRecord: props.group.item.hideEmptyRecord,
         },
+        slices: props.group.slices,
       },
     })
   }
@@ -35,6 +36,7 @@ async function setGroupColumn(columnName: string) {
           orderDesc: false,
           hideEmptyRecord: false,
         },
+        slices: props.group.slices,
       },
     })
   }
@@ -49,6 +51,7 @@ async function setGroupDescSort() {
           orderDesc: !props.group.item!.orderDesc,
           hideEmptyRecord: props.group.item!.hideEmptyRecord,
         },
+        slices: props.group.slices,
       },
     })
   }
@@ -63,6 +66,7 @@ async function setGroupHideEmpty() {
           orderDesc: props.group.item!.orderDesc,
           hideEmptyRecord: !props.group.item!.hideEmptyRecord,
         },
+        slices: props.group.slices,
       },
     })
   }

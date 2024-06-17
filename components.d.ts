@@ -19,7 +19,6 @@ declare module 'vue' {
     LayoutSetting: typeof import('./src/components/function/LayoutSetting.vue')['default']
     List: typeof import('./src/components/layout/list/List.vue')['default']
     ListColumnAgg: typeof import('./src/components/layout/list/ListColumnAgg.vue')['default']
-    ListColumnAggs: typeof import('./src/components/layout/list/ListColumnAggs.vue')['default']
     ListColumnFixed: typeof import('./src/components/layout/list/ListColumnFixed.vue')['default']
     ListColumnWrap: typeof import('./src/components/layout/list/ListColumnWrap.vue')['default']
     ListHeader: typeof import('./src/components/layout/list/ListHeader.vue')['default']

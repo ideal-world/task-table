@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 import * as iconSvg from '../../assets/icon'
 import locales from '../../locales'
-import { LayoutKind, type LayoutModifyProps, type SimpleLayoutProps, SubDataShowKind, defaultSlice } from '../../props'
+import { LayoutKind, type LayoutModifyProps, type SimpleLayoutProps, SubDataShowKind, generateDataSliceProps } from '../../props'
 
 import { deepToRaw } from '../../utils/vueHelper'
 import MenuComp, { MenuOffsetKind, MenuSizeKind } from '../common/Menu.vue'
@@ -28,7 +28,7 @@ async function deleteLayout() {
 
 async function resetLayout() {
   const layout: LayoutModifyProps = {
-    slice: defaultSlice(),
+    slice: generateDataSliceProps(),
     subDataShowKind: SubDataShowKind.FOLD_SUB_DATA,
   }
   props.layoutConf.filter ?? (layout.filter = { groups: [] })

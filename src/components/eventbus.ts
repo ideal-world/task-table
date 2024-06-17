@@ -63,7 +63,7 @@ export async function loadData(moreForGroupedValue?: any, returnOnlyAgg?: boolea
     returnOnlyAgg,
   )
 
-  if (!moreForGroupedValue && !layout.group) {
+  if (!moreForGroupedValue && !(layout.group?.item)) {
     // Load data without grouping
     if (!Array.isArray(resp)) {
       if (!returnOnlyAgg) {
@@ -79,7 +79,7 @@ export async function loadData(moreForGroupedValue?: any, returnOnlyAgg?: boolea
       throw new Error('[events.loadData]  Invalid scene')
     }
   }
-  else if (!moreForGroupedValue && layout.group) {
+  else if (!moreForGroupedValue && layout.group && layout.group.item) {
     // Load all grouped data
     if (Array.isArray(resp)) {
       if (!returnOnlyAgg) {
@@ -333,8 +333,7 @@ export async function modifyLayout(changedLayoutProps: LayoutModifyProps, byGrou
   changedLayoutProps.actionColumn && (layout.actionColumn = changedLayoutProps.actionColumn)
   changedLayoutProps.gantt && (layout.gantt = changedLayoutProps.gantt)
   changedLayoutProps.filter && (layout.filter = changedLayoutProps.filter)
-  changedLayoutProps.group?.item && layout.group && (layout.group.item = changedLayoutProps.group.item)
-  changedLayoutProps.group?.slices && layout.group && (layout.group.slices = changedLayoutProps.group.slices)
+  changedLayoutProps.group && (layout.group = changedLayoutProps.group)
   changedLayoutProps.sort && (layout.sort = changedLayoutProps.sort)
   changedLayoutProps.agg && (layout.agg = changedLayoutProps.agg)
   changedLayoutProps.edit && (layout.edit = changedLayoutProps.edit)

@@ -138,13 +138,13 @@ const events: IwProps.TableEventProps = {
         return d.pno === null
       })
     }
-    if (byGroupValue && group) {
+    if (byGroupValue && group && group.item) {
       // 只获取当前分组的数据
       data = data.filter(d => d[group.item!.columnName] === byGroupValue)
     }
-    if (group && !byGroupValue) {
+    if (group && group.item && !byGroupValue) {
       let dataGroup: { [key: string]: any[] } = IwUtils.groupBy(data, (d) => { return d[group.item!.columnName] })
-      if (group.item!.hideEmptyRecord) {
+      if (group.item.hideEmptyRecord) {
         dataGroup = Object.fromEntries(Object.entries(dataGroup).filter(([_, value]) => value.length > 0))
       }
       const groupTotalNumber = Object.fromEntries(Object.entries(dataGroup).map(([key, value]) => {
@@ -157,7 +157,7 @@ const events: IwProps.TableEventProps = {
         }),
         )
       }
-      if (group.item!.orderDesc) {
+      if (group.item.orderDesc) {
         dataGroup = Object.fromEntries(
           Object.entries(dataGroup).sort((a, b) => b[0].localeCompare(a[0])),
         )
@@ -383,15 +383,9 @@ const events: IwProps.TableEventProps = {
     if (changedLayoutProps.agg) {
       currLayout.agg = changedLayoutProps.agg
     }
-    if (changedLayoutProps.newColumn) {
-      currLayout.columns.push(changedLayoutProps.newColumn)
-    }
     if (changedLayoutProps.changedColumn) {
       const col = currLayout.columns.find((col) => { return col.name === changedLayoutProps.changedColumn!.name })!
       Object.assign(col, changedLayoutProps.changedColumn)
-    }
-    if (changedLayoutProps.deletedColumnName) {
-      currLayout.columns.splice(currLayout.columns.findIndex((col) => { return col.name === changedLayoutProps.deletedColumnName }), 1)
     }
     return true
   },
@@ -520,80 +514,84 @@ const columns: IwProps.SimpleTableColumnProps[] = [
   { name: 'actualEndTime', title: '实际结束时间', dataKind: IwProps.DataKind.DATETIME, sortable: true },
 ]
 
-const layouts: IwProps.SimpleLayoutProps[] = [{
-  id: 'hi1',
-  title: 'gantt demo',
-  layoutKind: IwProps.LayoutKind.GANTT,
-  columns: [{
-    name: 'name',
-  }, {
-    name: 'creator',
-  }, {
-    name: 'no',
-  }, {
-    name: 'planStartTime',
-  }, {
-    name: 'planEndTime',
-  }, {
-    name: 'actualStartTime',
-  }, {
-    name: 'actualEndTime',
-  }],
-}, {
-  id: 'hi2',
-  title: 'list demo',
-  layoutKind: IwProps.LayoutKind.LIST,
-  columns: [{
-    name: 'name',
-  }, {
-    name: 'stats',
-  }, {
-    name: 'creator',
-  }, {
-    name: 'no',
-  }, {
-    name: 'planStartTime',
-  }, {
-    name: 'planEndTime',
-  }, {
-    name: 'actualStartTime',
-  }, {
-    name: 'actualEndTime',
-  }],
-  agg: {
-    items: [
-      { columnName: 'name', aggKind: IwProps.AggregateKind.MIN },
-    ],
+const layouts: IwProps.SimpleLayoutProps[] = [
+//   {
+//   id: 'hi1',
+//   title: 'gantt demo',
+//   layoutKind: IwProps.LayoutKind.GANTT,
+//   columns: [{
+//     name: 'name',
+//   }, {
+//     name: 'creator',
+//   }, {
+//     name: 'no',
+//   }, {
+//     name: 'planStartTime',
+//   }, {
+//     name: 'planEndTime',
+//   }, {
+//     name: 'actualStartTime',
+//   }, {
+//     name: 'actualEndTime',
+//   }],
+// },
+  {
+    id: 'hi2',
+    title: 'list demo',
+    layoutKind: IwProps.LayoutKind.LIST,
+    columns: [{
+      name: 'name',
+    }, {
+      name: 'stats',
+    }, {
+      name: 'creator',
+    }, {
+      name: 'no',
+    }, {
+      name: 'planStartTime',
+    }, {
+      name: 'planEndTime',
+    }, {
+      name: 'actualStartTime',
+    }, {
+      name: 'actualEndTime',
+    }],
+    agg: {
+      items: [
+        { columnName: 'name', aggKind: IwProps.AggregateKind.MIN },
+      ],
+    },
   },
-}, {
-  id: 'hi3',
-  title: 'multiple header demo',
-  layoutKind: IwProps.LayoutKind.LIST,
-  columns: [{
-    name: 'name',
-  }, {
-    name: 'creator',
-  }, {
-    name: 'stats',
-  }, {
-    name: 'no',
-  }, {
-    name: 'planStartTime',
-    categoryTitle: 'Time',
-  }, {
-    name: 'planEndTime',
-    categoryTitle: 'Time',
-  }, {
-    name: 'actualStartTime',
-  }, {
-    name: 'actualEndTime',
-  }],
-  agg: {
-    items: [
-      { columnName: 'name', aggKind: IwProps.AggregateKind.MIN },
-    ],
-  },
-}]
+//  {
+//   id: 'hi3',
+//   title: 'multiple header demo',
+//   layoutKind: IwProps.LayoutKind.LIST,
+//   columns: [{
+//     name: 'name',
+//   }, {
+//     name: 'creator',
+//   }, {
+//     name: 'stats',
+//   }, {
+//     name: 'no',
+//   }, {
+//     name: 'planStartTime',
+//     categoryTitle: 'Time',
+//   }, {
+//     name: 'planEndTime',
+//     categoryTitle: 'Time',
+//   }, {
+//     name: 'actualStartTime',
+//   }, {
+//     name: 'actualEndTime',
+//   }],
+//   agg: {
+//     items: [
+//       { columnName: 'name', aggKind: IwProps.AggregateKind.MIN },
+//     ],
+//   },
+// }
+]
 
 const _tableProps: IwProps.SimpleTableProps = {
   pkColumnName: 'no',
@@ -605,7 +603,6 @@ const _tableProps: IwProps.SimpleTableProps = {
     placeholder: '请输入姓名',
   },
   slice: {
-    offsetNumber: 0,
     fetchNumber: 10,
     fetchNumbers: [5, 10, 20, 30, 50],
   },
@@ -626,7 +623,10 @@ const _tableProps: IwProps.SimpleTableProps = {
     actualStartTimeColumnName: 'actualStartTime',
     actualEndTimeColumnName: 'actualEndTime',
   },
-
+  filter: {},
+  group: {},
+  sort: {},
+  edit: {},
 }
 
 const tableProps: Ref<IwProps.SimpleTableProps> = ref(_tableProps)

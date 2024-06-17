@@ -4,17 +4,10 @@ import type { LayoutKind } from './enumProps'
 import { DataKind, SizeKind, SubDataShowKind, getDefaultIconByDataKind, getDefaultIconByLayoutKind } from './enumProps'
 
 import type { TableEventProps } from './eventProps'
-import type { ActionColumnProps, AggDataProps, DataSliceProps, EditDataProps, FilterDataProps, GanttLayoutProps, GroupDataProps, QuickSearchProps, SortDataProps } from './functionProps'
+import type { ActionColumnProps, AggDataProps, DataSliceProps, EditDataProps, FilterDataProps, GanttLayoutProps, GroupDataProps, QuickSearchProps, SimpleAggDataProps, SimpleDataSliceProps, SimpleEditDataProps, SimpleFilterDataProps, SimpleGanttLayoutProps, SimpleGroupDataProps, SimpleSortDataProps, SortDataProps } from './functionProps'
+import { generateAggDataProps, generateDataSliceProps, generateEditDataProps, generateFilterDataProps, generateGanttLayoutProps, generateGroupDataProps, generateSortDataProps } from './functionProps'
 
 // --------------------------------------------------------- Common ---------------------------------------------------------
-
-export function defaultSlice(): DataSliceProps {
-  return {
-    offsetNumber: 0,
-    fetchNumber: 10,
-    fetchNumbers: [5, 10, 20, 30, 50, 100],
-  }
-}
 
 export interface CommonFunctionProps {
   slice: DataSliceProps
@@ -30,13 +23,32 @@ export interface CommonFunctionProps {
   agg?: AggDataProps
   edit?: EditDataProps
 }
-type SimpleCommonFunctionProps = Partial<CommonFunctionProps>
-function generateCommonFunctionProps(simple: SimpleCommonFunctionProps): CommonFunctionProps {
+interface SimpleCommonFunctionProps {
+  slice?: SimpleDataSliceProps
+  showSelectColumn?: boolean
+  subDataShowKind?: SubDataShowKind
+
+  actionColumn?: ActionColumnProps
+  gantt?: SimpleGanttLayoutProps
+
+  filter?: SimpleFilterDataProps
+  group?: SimpleGroupDataProps
+  sort?: SimpleSortDataProps
+  agg?: SimpleAggDataProps
+  edit?: SimpleEditDataProps
+}
+function generateCommonFunctionProps(tableSimple: SimpleCommonFunctionProps, layoutSimple?: SimpleCommonFunctionProps): CommonFunctionProps {
   return {
-    slice: defaultSlice(),
-    showSelectColumn: false,
-    subDataShowKind: SubDataShowKind.FOLD_SUB_DATA,
-    ...simple,
+    showSelectColumn: layoutSimple?.showSelectColumn ?? tableSimple.showSelectColumn ?? false,
+    subDataShowKind: layoutSimple?.subDataShowKind ?? tableSimple.subDataShowKind ?? SubDataShowKind.FOLD_SUB_DATA,
+    actionColumn: layoutSimple?.actionColumn ?? tableSimple.actionColumn,
+    slice: generateDataSliceProps(layoutSimple?.slice ?? tableSimple.slice),
+    gantt: (layoutSimple?.gantt ?? tableSimple.gantt) && generateGanttLayoutProps((layoutSimple?.gantt ?? tableSimple.gantt)!),
+    filter: (layoutSimple?.filter ?? tableSimple.filter) && generateFilterDataProps((layoutSimple?.filter ?? tableSimple.filter)!),
+    group: (layoutSimple?.group ?? tableSimple.group) && generateGroupDataProps((layoutSimple?.group ?? tableSimple.group)!),
+    sort: (layoutSimple?.sort ?? tableSimple.sort) && generateSortDataProps((layoutSimple?.sort ?? tableSimple.sort)!),
+    agg: (layoutSimple?.agg ?? tableSimple.agg) && generateAggDataProps((layoutSimple?.agg ?? tableSimple.agg)!),
+    edit: (layoutSimple?.edit ?? tableSimple.edit) && generateEditDataProps((layoutSimple?.edit ?? tableSimple.edit)!),
   }
 }
 
@@ -58,19 +70,19 @@ export interface CommonColumnProps {
   editable: boolean
 }
 export type SimpleCommonColumnProps = ChangeOptionalExcept<CommonColumnProps, 'name'>
-function generateCommonColumnProps(simple: SimpleCommonColumnProps): CommonColumnProps {
+function generateCommonColumnProps(tableSimple: SimpleCommonColumnProps, layoutSimple?: SimpleCommonColumnProps): CommonColumnProps {
   return {
-    wrap: false,
-    fixed: false,
-    width: 100,
-    hide: false,
-    styles: {},
-    filterable: false,
-    groupable: false,
-    sortable: false,
-    aggable: false,
-    editable: false,
-    ...simple,
+    name: layoutSimple?.name ?? tableSimple.name,
+    wrap: layoutSimple?.wrap ?? tableSimple.wrap ?? false,
+    fixed: layoutSimple?.fixed ?? tableSimple.fixed ?? false,
+    width: layoutSimple?.width ?? tableSimple.width ?? 100,
+    hide: layoutSimple?.hide ?? tableSimple.hide ?? false,
+    styles: layoutSimple?.styles ?? tableSimple.styles ?? {},
+    filterable: layoutSimple?.filterable ?? tableSimple.filterable ?? false,
+    groupable: layoutSimple?.groupable ?? tableSimple.groupable ?? false,
+    sortable: layoutSimple?.sortable ?? tableSimple.sortable ?? false,
+    aggable: layoutSimple?.aggable ?? tableSimple.aggable ?? false,
+    editable: layoutSimple?.editable ?? tableSimple.editable ?? false,
   }
 }
 
@@ -94,7 +106,7 @@ export interface SimpleTableProps extends SimpleCommonFunctionProps {
   columns: SimpleTableColumnProps[]
   layouts: SimpleLayoutProps[]
   events: TableEventProps
-  styles: SimpleTableStyleProps
+  styles?: SimpleTableStyleProps
   quickSearch?: QuickSearchProps
 }
 export function generateTableProps(simple: SimpleTableProps): TableProps {
@@ -130,15 +142,14 @@ export interface TableStyleProps {
 export type SimpleTableStyleProps = ChangeAllOptional<TableStyleProps>
 function generateTableStyleProps(simple: SimpleTableStyleProps): TableStyleProps {
   return {
-    size: SizeKind.MEDIUM,
-    theme: '',
-    tableClass: '',
-    headerClass: '',
-    footerClass: '',
-    rowClass: '',
-    cellClass: '',
-    aggClass: '',
-    ...simple,
+    size: simple.size ?? SizeKind.MEDIUM,
+    theme: simple.theme ?? '',
+    tableClass: simple.tableClass ?? '',
+    headerClass: simple.headerClass ?? '',
+    footerClass: simple.footerClass ?? '',
+    rowClass: simple.rowClass ?? '',
+    cellClass: simple.cellClass ?? '',
+    aggClass: simple.aggClass ?? '',
   }
 }
 export type TableStyleModifyProps = SimpleTableStyleProps
@@ -157,12 +168,11 @@ function generateTableColumnProps(simple: SimpleTableColumnProps): TableColumnPr
   return {
     title: simple.name,
     icon: getDefaultIconByDataKind(simple.dataKind ?? DataKind.TEXT),
-    dataKind: DataKind.TEXT,
-    useDict: false,
-    dictEditable: false,
-    multiValue: false,
+    dataKind: simple.dataKind ?? DataKind.TEXT,
+    useDict: simple.useDict ?? false,
+    dictEditable: simple.dictEditable ?? false,
+    multiValue: simple.multiValue ?? false,
     ...generateCommonColumnProps(simple),
-    ...simple,
   }
 }
 
@@ -195,10 +205,7 @@ export function generateLayoutProps(layoutSimple: SimpleLayoutProps, tableSimple
     layoutKind: layoutSimple.layoutKind,
     icon: layoutSimple.icon ?? getDefaultIconByLayoutKind(layoutSimple.layoutKind),
     columns,
-    ...generateCommonFunctionProps({
-      ...tableSimple,
-      ...layoutSimple,
-    }),
+    ...generateCommonFunctionProps(tableSimple, layoutSimple),
   }
 }
 
@@ -207,14 +214,11 @@ export interface LayoutColumnProps extends CommonColumnProps {
 export type SimpleLayoutColumnProps = ChangeOptionalExcept<LayoutColumnProps, 'name'>
 function generateLayoutColumnProps(layoutSimple: SimpleLayoutColumnProps, tableSimple: CommonColumnProps): LayoutColumnProps {
   return {
-    ...generateCommonColumnProps({
-      ...tableSimple,
-      ...layoutSimple,
-    }),
+    ...generateCommonColumnProps(tableSimple, layoutSimple),
   }
 }
 
-export interface LayoutModifyProps extends SimpleCommonFunctionProps {
+export interface LayoutModifyProps extends Partial<CommonFunctionProps> {
   title?: string
   icon?: string
 

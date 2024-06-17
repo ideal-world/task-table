@@ -123,7 +123,7 @@ onMounted(() => {
         <div
           class="flex justify-end p-2 min-h-0"
         >
-          <PaginationComp :slice="layoutConf.slice" :group-slices="layoutConf.group?.slices" :group-value="groupData.groupValue" :total-number="groupData.totalNumber" />
+          <PaginationComp :slice="layoutConf.slice" :group-props="layoutConf.group" :group-value="groupData.groupValue" :total-number="groupData.totalNumber" />
         </div>
       </template>
     </template>
