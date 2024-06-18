@@ -15,7 +15,7 @@ async function changeTheme(e: Event) {
 </script>
 
 <template>
-  <div class="iw-contextmenu__item w-full pl-1 pr-1  bg-base-200  rounded-md">
+  <div class="iw-contextmenu__item w-full px-1  bg-base-200  rounded-md">
     <div class="flex justify-between items-center" @click="changeTheme">
       <input
         type="radio" name="theme-buttons" class="iw-btn iw-btn-xs iw-btn-circle theme-controller" value="default"

@@ -31,6 +31,6 @@ function handleQuickShow() {
       style="transition: all 0.2s ease-in-out"
       @change="setQuickSearchContent"
     >
-    <i :class="iconSvg.SEARCH" class="text-sm" @click="handleQuickShow" />
+    <i :class="iconSvg.SEARCH" class="text-base" @click="handleQuickShow" />
   </label>
 </template>
