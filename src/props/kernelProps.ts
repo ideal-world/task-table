@@ -162,7 +162,6 @@ export interface TableColumnProps extends CommonColumnProps {
   icon: string
   dataKind: DataKind
   useDict: boolean
-  dictEditable: boolean
   multiValue: boolean
   kindDateTimeFormat?: string
 }
@@ -173,7 +172,6 @@ function generateTableColumnProps(simple: SimpleTableColumnProps): TableColumnPr
     icon: getDefaultIconByDataKind(simple.dataKind ?? DataKind.TEXT),
     dataKind: simple.dataKind ?? DataKind.TEXT,
     useDict: simple.useDict ?? false,
-    dictEditable: simple.dictEditable ?? false,
     multiValue: simple.multiValue ?? false,
     ...generateCommonColumnProps(simple),
   }

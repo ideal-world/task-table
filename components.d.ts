@@ -8,8 +8,12 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     BasicSetting: typeof import('./src/components/function/BasicSetting.vue')['default']
+    CellEdit: typeof import('./src/components/function/CellEdit.vue')['default']
     ColumnResize: typeof import('./src/components/function/ColumnResize.vue')['default']
     ColumnShowSetting: typeof import('./src/components/function/ColumnShowSetting.vue')['default']
+    copy: typeof import('./src/components/function/FilterSetting copy.vue')['default']
+    DictSelect: typeof import('./src/components/function/DictSelect.vue')['default']
+    DictSlect: typeof import('./src/components/function/DictSlect.vue')['default']
     FilterSetting: typeof import('./src/components/function/FilterSetting.vue')['default']
     Gantt: typeof import('./src/components/layout/gantt/Gantt.vue')['default']
     GanttTimelineHeader: typeof import('./src/components/layout/gantt/GanttTimelineHeader.vue')['default']

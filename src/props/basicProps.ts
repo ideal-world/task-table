@@ -2,6 +2,9 @@ export interface DataResp {
   records: { [key: string]: any }[]
   aggs: { [key: string]: any }
   totalNumber: number
+  // 优先
+  nonEditablePks?: any[]
+  editablePks?: any[]
 }
 
 export interface DataGroupResp extends DataResp {

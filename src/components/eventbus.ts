@@ -138,7 +138,9 @@ export async function newData(newRecords: { [key: string]: any }[]): Promise<boo
   }
 
   await events.newData(newRecords)
-  await loadData()
+  layoutsConf.forEach(async (layout) => {
+    await loadData(undefined, undefined, layout.id)
+  })
   return true
 }
 
@@ -152,7 +154,9 @@ export async function copyData(targetRecordPks: any[]): Promise<boolean> {
   }
 
   await events.copyData(targetRecordPks)
-  await loadData()
+  layoutsConf.forEach(async (layout) => {
+    await loadData(undefined, undefined, layout.id)
+  })
   return true
 }
 
@@ -167,7 +171,9 @@ export async function modifyData(changedRecords: { [key: string]: any }[]): Prom
   }
 
   await events.modifyData(changedRecords)
-  await loadData()
+  layoutsConf.forEach(async (layout) => {
+    await loadData(undefined, undefined, layout.id)
+  })
   return true
 }
 
@@ -184,7 +190,9 @@ export async function deleteData(deletedRecordPks: any[]): Promise<boolean> {
   if (!await events.deleteData(deletedRecordPks))
     return false
 
-  await loadData()
+  layoutsConf.forEach(async (layout) => {
+    await loadData(undefined, undefined, layout.id)
+  })
   return true
 }
 

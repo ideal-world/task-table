@@ -120,11 +120,11 @@ export function generateGanttLayoutProps(simple: SimpleGanttLayoutProps): GanttL
 }
 
 export interface EditDataProps {
-  columnNames: string[]
+  markEditable: boolean
 }
 export type SimpleEditDataProps = ChangeAllOptional<EditDataProps>
 export function generateEditDataProps(simple: SimpleEditDataProps): EditDataProps {
   return {
-    columnNames: simple.columnNames ?? [],
+    markEditable: simple.markEditable ?? false,
   }
 }

@@ -7,6 +7,7 @@ import type { ColumnConf, LayoutConf, TableConf } from '../../conf'
 import { registerCellClickListener } from '../../function/CellClick'
 import PaginationComp from '../../function/Pagination.vue'
 import RowSelectComp from '../../function/RowSelect.vue'
+import CellEditComp from '../../function/CellEdit.vue'
 import { registerTreeRowToggleListener } from '../../function/RowTree'
 import ColumnAggComp from './ListColumnAgg.vue'
 import { setFixedColumnStyles } from './ListColumnFixed.vue'
@@ -129,8 +130,21 @@ onMounted(() => {
     </template>
     <RowSelectComp
       v-if="props.layoutConf.showSelectColumn"
-      :selected-pks="props.layoutConf.selectedDataPks" :pk-column-name="props.tableConf.pkColumnName"
+      :selected-pks="props.layoutConf.selectedDataPks"
+      :pk-column-name="props.tableConf.pkColumnName"
       :pk-kind-is-number="pkKindIsNumber"
+    />
+    <CellEditComp
+      v-if="props.layoutConf.edit && props.layoutConf.data"
+      :pk-column-name="props.tableConf.pkColumnName"
+      :pk-kind-is-number="pkKindIsNumber"
+      :columns-conf="props.layoutColumnsConf"
+      :data="props.layoutConf.data"
+      container-class="iw-list"
+      edit-cell-class="iw-data-cell"
+      edit-cell-column-name-prop="columnName"
+      edit-row-class="iw-data-row"
+      edit-row-pk-value-prop="pk"
     />
   </div>
 </template>
