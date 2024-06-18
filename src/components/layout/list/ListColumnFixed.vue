@@ -49,7 +49,7 @@ export function setFixedColumnStyles(styles: any, colIdx: number, columnsConf: C
   const fixedColumnIdx = columnsConf.findIndex(col => col.fixed)
   if (colIdx === -1 && fixedColumnIdx === -1) {
     // non-fixed column
-    styles.position = 'static'
+    styles.position = 'relative'
     styles.zIndex = 1000
   }
   else if (colIdx === -1) {
@@ -77,7 +77,7 @@ export function setFixedColumnStyles(styles: any, colIdx: number, columnsConf: C
     }
   }
   else {
-    styles.position = 'static'
+    styles.position = 'relative'
   }
 }
 </script>

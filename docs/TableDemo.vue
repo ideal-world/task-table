@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { Ref } from 'vue'
-import { onMounted, ref, toRaw } from 'vue'
-import { IwEvents, IwProps } from '../src'
-import { IwUtils } from '../src/utils'
+import type { Ref } from 'vue';
+import { onMounted, ref, toRaw } from 'vue';
+import { IwEvents, IwProps } from '../src';
+import { IwUtils } from '../src/utils';
 
 const selectedRecordPks: Ref<any[]> = ref([])
 
@@ -642,7 +642,9 @@ const _tableProps: IwProps.SimpleTableProps = {
   filter: {},
   group: {},
   sort: {},
-  edit: {},
+  edit: {
+    markEditable: true,
+  },
 }
 
 const tableProps: Ref<IwProps.SimpleTableProps> = ref(_tableProps)

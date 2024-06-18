@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
+import type { EditDataProps } from '../../props'
 import type { DataGroupResp, DataResp } from '../../props/basicProps'
 import { DataKind, getInputTypeByDataKind } from '../../props/enumProps'
 import { IwUtils } from '../../utils'
@@ -11,6 +12,7 @@ const props = defineProps<{
   containerClass: string
   pkColumnName: string
   pkKindIsNumber: boolean
+  editProps: EditDataProps
   columnsConf: ColumnConf[]
   data: DataResp | DataGroupResp[]
   editCellClass: string
@@ -64,7 +66,6 @@ async function setValue(value: any) {
 }
 
 function checkEditable(data: DataResp, pkValue: any, columnConf: ColumnConf) {
-  // 可编辑性判断
   if (data.nonEditablePks?.includes(pkValue)) {
     return false
   }
@@ -73,6 +74,46 @@ function checkEditable(data: DataResp, pkValue: any, columnConf: ColumnConf) {
   }
   return columnConf.editable ?? false
 }
+
+function markEditable(containerEle: HTMLElement) {
+  const editableMarkEles = document.createElement('div')
+  editableMarkEles.classList.add('iw-editable-mark')
+  editableMarkEles.style.position = 'absolute'
+  editableMarkEles.style.right = '0.1rem'
+  editableMarkEles.style.bottom = '0.1rem'
+  // 生成一个红色的圆点
+  editableMarkEles.style.borderRadius = '50%'
+  editableMarkEles.style.width = '0.2rem'
+  editableMarkEles.style.height = '0.2rem'
+  editableMarkEles.classList.add('bg-info')
+
+  containerEle.querySelectorAll(`.${props.editRowClass}`).forEach((ele) => {
+    const editRowEle = ele as HTMLElement
+    const pkValue = props.pkKindIsNumber ? Number.parseInt(editRowEle.dataset[props.editRowPkValueProp]!) : editRowEle.dataset[props.editRowPkValueProp]!
+    const data: DataResp = Array.isArray(props.data) ? props.data.find(groupData => groupData.records.some(record => record[props.pkColumnName] === pkValue))! : props.data
+
+    editRowEle.querySelectorAll(`.${props.editCellClass}`).forEach((ele) => {
+      const editCellEle = ele as HTMLElement
+      const columnName = editCellEle.dataset[props.editCellColumnNameProp] as string
+      const columnConf = props.columnsConf.find(column => column.name === columnName)!
+      if (checkEditable(data, pkValue, columnConf)) {
+        editCellEle.appendChild(editableMarkEles.cloneNode(true))
+      }
+    })
+  })
+}
+
+watch(() => props.columnsConf, () => {
+  if (props.editProps.markEditable) {
+    markEditable(cellEditContainerRef.value!.closest(`.${props.containerClass}`) as HTMLElement)
+  }
+})
+
+watch(() => props.data, () => {
+  if (props.editProps.markEditable) {
+    markEditable(cellEditContainerRef.value!.closest(`.${props.containerClass}`) as HTMLElement)
+  }
+})
 
 onMounted(() => {
   const containerEle = cellEditContainerRef.value!.closest(`.${props.containerClass}`) as HTMLElement
@@ -100,6 +141,9 @@ onMounted(() => {
     }
     leaveEditMode()
   })
+  if (props.editProps.markEditable) {
+    markEditable(containerEle)
+  }
 })
 </script>
 

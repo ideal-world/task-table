@@ -5,9 +5,9 @@ import type { DataResp } from '../../../props'
 import { DataKind, SubDataShowKind } from '../../../props'
 import type { ColumnConf, LayoutConf, TableConf } from '../../conf'
 import { registerCellClickListener } from '../../function/CellClick'
+import CellEditComp from '../../function/CellEdit.vue'
 import PaginationComp from '../../function/Pagination.vue'
 import RowSelectComp from '../../function/RowSelect.vue'
-import CellEditComp from '../../function/CellEdit.vue'
 import { registerTreeRowToggleListener } from '../../function/RowTree'
 import ColumnAggComp from './ListColumnAgg.vue'
 import { setFixedColumnStyles } from './ListColumnFixed.vue'
@@ -138,6 +138,7 @@ onMounted(() => {
       v-if="props.layoutConf.edit && props.layoutConf.data"
       :pk-column-name="props.tableConf.pkColumnName"
       :pk-kind-is-number="pkKindIsNumber"
+      :edit-props="props.layoutConf.edit"
       :columns-conf="props.layoutColumnsConf"
       :data="props.layoutConf.data"
       container-class="iw-list"
