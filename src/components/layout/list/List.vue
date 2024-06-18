@@ -1,39 +1,32 @@
 <script setup lang="ts">
 import type { Ref } from 'vue'
 import { computed, onMounted, ref } from 'vue'
-import type { TableDataResp } from '../../../props'
+import type { DataResp } from '../../../props'
 import { DataKind, SubDataShowKind } from '../../../props'
-import type { CachedColumnConf, TableBasicConf, TableLayoutConf } from '../../conf'
+import type { ColumnConf, LayoutConf, TableConf } from '../../conf'
 import { registerCellClickListener } from '../../function/CellClick'
+import CellEditComp from '../../function/CellEdit.vue'
 import PaginationComp from '../../function/Pagination.vue'
 import RowSelectComp from '../../function/RowSelect.vue'
 import { registerTreeRowToggleListener } from '../../function/RowTree'
-import ColumnAggsComp from './ListColumnAggs.vue'
+import ColumnAggComp from './ListColumnAgg.vue'
 import { setFixedColumnStyles } from './ListColumnFixed.vue'
 import HeaderComp from './ListHeader.vue'
 import RowsComp from './ListRows.vue'
 
 const props = defineProps<
   {
-    layout: TableLayoutConf
-    basic: TableBasicConf
+    layoutConf: LayoutConf
+    tableConf: TableConf
+    layoutColumnsConf: ColumnConf[]
   }
 >()
 const listRef: Ref<HTMLDivElement | null> = ref(null)
 
-const selectColumnWidth = computed(() => props.layout.showSelectColumn ? 25 : 0)
-const actionColumnWidth = computed(() => props.layout.actionColumnRender ? props.layout.actionColumnWidth : 0)
+const selectColumnWidth = computed(() => props.layoutConf.showSelectColumn ? 25 : 0)
+const actionColumnWidth = computed(() => props.layoutConf.actionColumn ? props.layoutConf.actionColumn.width : 0)
 
-const pkKindIsNumber = props.basic.columns.some(col => col.name === props.basic.pkColumnName && [DataKind.NUMBER, DataKind.SERIAL].includes(col.dataKind))
-
-const columnsWithoutHideConf = computed<CachedColumnConf[]>(() => {
-  return props.layout.columns.filter(column => !column.hide).map((column) => {
-    return {
-      ...props.basic.columns.find(col => col.name === column.name)!,
-      ...column,
-    }
-  })
-})
+const pkKindIsNumber = props.tableConf.columns.some(col => col.name === props.tableConf.pkColumnName && [DataKind.NUMBER, DataKind.SERIAL].includes(col.dataKind))
 
 function setColumnStyles(colIdx: number) {
 // ColIdx of select column = -1
@@ -46,21 +39,21 @@ function setColumnStyles(colIdx: number) {
     styles.width = `${actionColumnWidth.value}px`
   }
   else {
-    styles.width = `${columnsWithoutHideConf.value[colIdx].width}px`
+    styles.width = `${props.layoutColumnsConf[colIdx].width}px`
   }
-  setFixedColumnStyles(styles, colIdx, columnsWithoutHideConf.value, selectColumnWidth.value)
+  setFixedColumnStyles(styles, colIdx, props.layoutColumnsConf, selectColumnWidth.value)
   return styles
 }
 
 function setTableWidth() {
   const styles: any = {}
   // 2px for border
-  styles.width = `${props.layout.columns.filter(column => !column.hide).reduce((count, col) => count + col.width, selectColumnWidth.value + actionColumnWidth.value + 2)}px`
+  styles.width = `${props.layoutConf.columns.filter(column => !column.hide).reduce((count, col) => count + col.width, selectColumnWidth.value + actionColumnWidth.value + 2)}px`
   return styles
 }
 
 onMounted(() => {
-  props.layout.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA && registerTreeRowToggleListener(listRef.value!)
+  props.layoutConf.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA && registerTreeRowToggleListener(listRef.value!)
   registerCellClickListener(listRef.value!)
 })
 </script>
@@ -68,75 +61,91 @@ onMounted(() => {
 <template>
   <div
     ref="listRef"
-    :class="`iw-list iw-row-select-container relative iw-list--size${props.basic.styles.size}`"
+    :class="`iw-list iw-row-select-container relative iw-list--size${props.tableConf.styles.size}`"
     :style="setTableWidth()"
   >
-    <HeaderComp :columns-conf="columnsWithoutHideConf" :layout="props.layout" :basic="props.basic" :set-column-styles="setColumnStyles" />
-    <template v-if="props.layout.data && !Array.isArray(props.layout.data)">
+    <HeaderComp :columns-conf="props.layoutColumnsConf" :layout-conf="props.layoutConf" :table-conf="props.tableConf" :set-column-styles="setColumnStyles" />
+    <template v-if="props.layoutConf.data && !Array.isArray(props.layoutConf.data)">
       <RowsComp
-        :records="props.layout.data.records"
-        :pk-column-name="props.basic.pkColumnName"
-        :parent-pk-column-name="props.basic.parentPkColumnName"
-        :sub-data-show-kind="props.layout.subDataShowKind"
+        :records="props.layoutConf.data.records"
+        :pk-column-name="props.tableConf.pkColumnName"
+        :parent-pk-column-name="props.tableConf.parentPkColumnName"
+        :sub-data-show-kind="props.layoutConf.subDataShowKind"
         :pk-kind-is-number="pkKindIsNumber"
-        :columns-conf="columnsWithoutHideConf"
-        :layout-id="props.layout.id"
-        :layout-kind="props.layout.layoutKind"
-        :style-conf="props.basic.styles"
-        :show-select-column="props.layout.showSelectColumn"
-        :action-column-render="props.layout.actionColumnRender"
+        :columns-conf="props.layoutColumnsConf"
+        :layout-id="props.layoutConf.id"
+        :layout-kind="props.layoutConf.layoutKind"
+        :style-props="props.tableConf.styles"
+        :show-select-column="props.layoutConf.showSelectColumn"
+        :action-column-render="props.layoutConf.actionColumn?.render"
         :set-column-styles="setColumnStyles"
       />
-      <ColumnAggsComp
-        v-if="layout.aggs"
-        :layout-id="props.layout.id"
-        :layout-aggs="layout.aggs"
-        :data-basic="layout.data as TableDataResp"
-        :show-select-column="layout.showSelectColumn"
-        :show-action-column="layout.actionColumnRender !== undefined"
-        :columns-conf="columnsWithoutHideConf" :style-conf="props.basic.styles"
+      <ColumnAggComp
+        v-if="layoutConf.agg"
+        :layout-id="props.layoutConf.id"
+        :agg="layoutConf.agg"
+        :data-basic="layoutConf.data as DataResp"
+        :show-select-column="layoutConf.showSelectColumn"
+        :show-action-column="layoutConf.actionColumn !== undefined"
+        :columns-conf="props.layoutColumnsConf"
+        :style-props="props.tableConf.styles"
         :set-column-styles="setColumnStyles"
       />
     </template>
-    <template v-else-if="props.layout.data && Array.isArray(props.layout.data)">
-      <template v-for="groupData in props.layout.data" :key="`${props.layout.id}-${groupData.groupValue}`">
-        <ColumnAggsComp
-          v-if="layout.aggs"
-          :layout-id="props.layout.id"
-          :layout-aggs="layout.aggs"
+    <template v-else-if="props.layoutConf.data && Array.isArray(props.layoutConf.data)">
+      <template v-for="groupData in props.layoutConf.data" :key="`${props.layoutConf.id}-${groupData.groupValue}`">
+        <ColumnAggComp
+          v-if="layoutConf.agg"
+          :layout-id="props.layoutConf.id"
+          :agg="layoutConf.agg"
           :data-basic="groupData"
-          :show-select-column="layout.showSelectColumn"
-          :show-action-column="layout.actionColumnRender !== undefined"
-          :columns-conf="columnsWithoutHideConf" :style-conf="props.basic.styles"
-          :group-column-name="props.layout.group?.columnName"
+          :show-select-column="layoutConf.showSelectColumn"
+          :show-action-column="layoutConf.actionColumn !== undefined"
+          :columns-conf="props.layoutColumnsConf"
+          :group-column-name="props.layoutConf.group?.item?.columnName"
           :group-value="groupData.groupShowTitle ?? groupData.groupValue"
+          :style-props="props.tableConf.styles"
           :set-column-styles="setColumnStyles"
         />
         <RowsComp
           :records="groupData.records"
-          :pk-column-name="props.basic.pkColumnName"
-          :parent-pk-column-name="props.basic.parentPkColumnName"
-          :sub-data-show-kind="props.layout.subDataShowKind"
+          :pk-column-name="props.tableConf.pkColumnName"
+          :parent-pk-column-name="props.tableConf.parentPkColumnName"
+          :sub-data-show-kind="props.layoutConf.subDataShowKind"
           :pk-kind-is-number="pkKindIsNumber"
-          :columns-conf="columnsWithoutHideConf"
-          :layout-id="props.layout.id"
-          :layout-kind="props.layout.layoutKind"
-          :style-conf="props.basic.styles"
-          :show-select-column="props.layout.showSelectColumn"
-          :action-column-render="props.layout.actionColumnRender"
+          :columns-conf="props.layoutColumnsConf"
+          :layout-id="props.layoutConf.id"
+          :layout-kind="props.layoutConf.layoutKind"
+          :style-props="props.tableConf.styles"
+          :show-select-column="props.layoutConf.showSelectColumn"
+          :action-column-render="props.layoutConf.actionColumn?.render"
           :set-column-styles="setColumnStyles"
         />
         <div
           class="flex justify-end p-2 min-h-0"
         >
-          <PaginationComp :default-slice="layout.defaultSlice" :group-slices="layout.groupSlices" :group-value="groupData.groupValue" :total-number="groupData.totalNumber" />
+          <PaginationComp :slice="layoutConf.slice" :group-props="layoutConf.group" :group-value="groupData.groupValue" :total-number="groupData.totalNumber" />
         </div>
       </template>
     </template>
     <RowSelectComp
-      v-if="props.layout.showSelectColumn"
-      :selected-pks="props.layout.selectedDataPks" :pk-column-name="props.basic.pkColumnName"
+      v-if="props.layoutConf.showSelectColumn"
+      :selected-pks="props.layoutConf.selectedDataPks"
+      :pk-column-name="props.tableConf.pkColumnName"
       :pk-kind-is-number="pkKindIsNumber"
+    />
+    <CellEditComp
+      v-if="props.layoutConf.edit && props.layoutConf.data"
+      :pk-column-name="props.tableConf.pkColumnName"
+      :pk-kind-is-number="pkKindIsNumber"
+      :edit-props="props.layoutConf.edit"
+      :columns-conf="props.layoutColumnsConf"
+      :data="props.layoutConf.data"
+      container-class="iw-list"
+      edit-cell-class="iw-data-cell"
+      edit-cell-column-name-prop="columnName"
+      edit-row-class="iw-data-row"
+      edit-row-pk-value-prop="pk"
     />
   </div>
 </template>

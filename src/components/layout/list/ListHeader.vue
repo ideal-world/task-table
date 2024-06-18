@@ -1,21 +1,21 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import type { TableLayoutModifyProps } from '../../../props'
+import type { LayoutModifyProps } from '../../../props'
 import MenuComp from '../../common/Menu.vue'
-import { type CachedColumnConf, type TableBasicConf, type TableLayoutConf, convertLayoutColumnConfToLayoutColumnProps } from '../../conf'
+import type { ColumnConf, LayoutConf, TableConf } from '../../conf'
 import * as eb from '../../eventbus'
 import ColumnResizeComp from '../../function/ColumnResize.vue'
 import ColumnFixedComp from './ListColumnFixed.vue'
 import ColumnWrapComp from './ListColumnWrap.vue'
 
 const props = defineProps<{
-  columnsConf: CachedColumnConf[]
-  layout: TableLayoutConf
-  basic: TableBasicConf
+  columnsConf: ColumnConf[]
+  layoutConf: LayoutConf
+  tableConf: TableConf
   setColumnStyles: (colIdx: number) => any
 }>()
 
-const selectedColumnConf = ref<CachedColumnConf | undefined>()
+const selectedColumnConf = ref<ColumnConf | undefined>()
 const headerRef = ref<InstanceType<typeof HTMLElement>>()
 const headerMenuCompRef = ref<InstanceType<typeof MenuComp>>()
 
@@ -54,9 +54,9 @@ const cateColumns = computed(() => {
 async function setNewWidth(newWidth: number, columnName?: string) {
   const columnConf = props.columnsConf.find(col => col.name === columnName)
   if (columnConf) {
-    const changedLayoutReq: TableLayoutModifyProps = {
+    const changedLayoutReq: LayoutModifyProps = {
       changedColumn: {
-        ...convertLayoutColumnConfToLayoutColumnProps(columnConf),
+        ...columnConf,
         width: newWidth,
       },
     }
@@ -68,28 +68,28 @@ async function setNewWidth(newWidth: number, columnName?: string) {
 <template>
   <div
     ref="headerRef"
-    :class="`${props.basic.styles.headerClass} flex flex-col sticky top-0 z-[1500] bg-base-200 border-b border-b-base-300`"
+    :class="`${props.tableConf.styles.headerClass} flex flex-col sticky top-0 z-[1500] bg-base-200 border-b border-b-base-300`"
   >
     <div v-if="hasCateColumn" class="flex items-center">
       <div
-        v-if="props.layout.showSelectColumn"
-        :class="`${props.basic.styles.cellClass} iw-list-cell flex justify-center items-center bg-base-200`"
+        v-if="props.layoutConf.showSelectColumn"
+        :class="`${props.tableConf.styles.cellClass} iw-list-cell flex justify-center items-center bg-base-200`"
         :style="props.setColumnStyles(-1)"
       >
         &nbsp;
       </div>
       <div
         v-for="(cateColumn, colIdx) in cateColumns"
-        :key="`${props.layout.id}-${colIdx}`"
+        :key="`${props.layoutConf.id}-${colIdx}`"
         :style="`width:${cateColumn.width}px`"
         :title="cateColumn.title"
-        :class="`${props.basic.styles.cellClass} iw-list-cell flex justify-center items-center bg-base-200 ${cateColumn.title && 'border-b border-b-base-300'} ${(colIdx !== 0 || props.layout.showSelectColumn) && 'border-l border-l-base-300'} whitespace-nowrap overflow-hidden text-ellipsis flex-nowrap`"
+        :class="`${props.tableConf.styles.cellClass} iw-list-cell flex justify-center items-center bg-base-200 ${cateColumn.title && 'border-b border-b-base-300'} ${(colIdx !== 0 || props.layoutConf.showSelectColumn) && 'border-l border-l-base-300'} whitespace-nowrap overflow-hidden text-ellipsis flex-nowrap`"
       >
         {{ cateColumn.title ? cateColumn.title : '&nbsp;' }}
       </div>
       <div
-        v-if="props.layout.actionColumnRender"
-        :class="`${props.basic.styles.cellClass} iw-list-cell flex justify-center items-center bg-base-200 border-l border-l-base-300`"
+        v-if="props.layoutConf.actionColumn"
+        :class="`${props.tableConf.styles.cellClass} iw-list-cell flex justify-center items-center bg-base-200 border-l border-l-base-300`"
         :style="props.setColumnStyles(-2)"
       >
         &nbsp;
@@ -97,15 +97,15 @@ async function setNewWidth(newWidth: number, columnName?: string) {
     </div>
     <div class="iw-column-header flex items-center">
       <div
-        v-if="props.layout.showSelectColumn"
-        :class="`${props.basic.styles.cellClass} iw-list-cell flex justify-center items-center bg-base-200`"
+        v-if="props.layoutConf.showSelectColumn"
+        :class="`${props.tableConf.styles.cellClass} iw-list-cell flex justify-center items-center bg-base-200`"
         :style="props.setColumnStyles(-1)"
       >
         <input type="checkbox" class="iw-row-select-all-cell__chk iw-checkbox iw-checkbox-xs">
       </div>
       <div
-        v-for="(column, colIdx) in columnsConf" :key="`${props.layout.id}-${column.name}`"
-        :class="`${props.basic.styles.cellClass} iw-list-cell iw-resize-item ${column.name !== props.basic.pkColumnName ? 'iw-list-header-normal-cell' : ''} flex items-center bg-base-200 ${(colIdx !== 0 || props.layout.showSelectColumn) && 'border-l border-l-base-300'} whitespace-nowrap overflow-hidden text-ellipsis flex-nowrap hover:cursor-pointer`"
+        v-for="(column, colIdx) in columnsConf" :key="`${props.layoutConf.id}-${column.name}`"
+        :class="`${props.tableConf.styles.cellClass} iw-list-cell iw-resize-item ${column.name !== props.tableConf.pkColumnName ? 'iw-list-header-normal-cell' : ''} flex items-center bg-base-200 ${(colIdx !== 0 || props.layoutConf.showSelectColumn) && 'border-l border-l-base-300'} whitespace-nowrap overflow-hidden text-ellipsis flex-nowrap hover:cursor-pointer`"
         :data-column-name="column.name"
         :style="props.setColumnStyles(colIdx)"
         :title="column.title"
@@ -114,8 +114,8 @@ async function setNewWidth(newWidth: number, columnName?: string) {
         <i :class="`${column.icon} mr-1`" /> {{ column.title }}
       </div>
       <div
-        v-if="props.layout.actionColumnRender"
-        :class="`${props.basic.styles.cellClass} iw-list-cell flex justify-center items-center bg-base-200 border-l border-l-base-300`"
+        v-if="props.layoutConf.actionColumn"
+        :class="`${props.tableConf.styles.cellClass} iw-list-cell flex justify-center items-center bg-base-200 border-l border-l-base-300`"
         :style="props.setColumnStyles(-2)"
       >
         {{ $t('layout.action.title') }}
@@ -128,12 +128,12 @@ async function setNewWidth(newWidth: number, columnName?: string) {
       <div
         class="iw-contextmenu__item flex justify-between w-full p-1"
       >
-        <ColumnFixedComp :cur-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
+        <ColumnFixedComp :current-column-conf="selectedColumnConf" :columns-conf="columnsConf" />
       </div>
       <div
         class="iw-contextmenu__item flex justify-between w-full p-1"
       >
-        <ColumnWrapComp :cur-column-conf="selectedColumnConf!" :pk-column-name="props.basic.pkColumnName" :columns-conf="columnsConf" />
+        <ColumnWrapComp :current-column-conf="selectedColumnConf!" :pk-column-name="props.tableConf.pkColumnName" />
       </div>
     </template>
   </MenuComp>

@@ -1,27 +1,27 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import * as iconSvg from '../../assets/icon'
-import type { TableLayoutModifyProps } from '../../props'
+import type { LayoutModifyProps } from '../../props'
 import IconPickerComp from '../common/IconPicker.vue'
 import type MenuComp from '../common/Menu.vue'
 import { MenuOffsetKind } from '../common/Menu.vue'
-import type { TableLayoutConf } from '../conf'
+import type { LayoutConf } from '../conf'
 import * as eb from '../eventbus'
 
 const props = defineProps<{
-  layoutConf: TableLayoutConf
+  layoutConf: LayoutConf
 }>()
 const iconPickerCompRef = ref<InstanceType<typeof MenuComp>>()
 
 async function renameLayoutTitle() {
-  const layout: TableLayoutModifyProps = {
+  const layout: LayoutModifyProps = {
     title: props.layoutConf.title,
   }
   await eb.modifyLayout(layout)
 }
 
 async function setLayoutIcon(icon: string) {
-  const layout: TableLayoutModifyProps = {
+  const layout: LayoutModifyProps = {
     icon,
   }
   await eb.modifyLayout(layout)

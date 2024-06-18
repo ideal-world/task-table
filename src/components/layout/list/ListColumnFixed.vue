@@ -1,42 +1,42 @@
 <script setup lang="ts">
 import { inject, onMounted, ref, watch } from 'vue'
 import * as iconSvg from '../../../assets/icon'
-import type { TableLayoutModifyProps } from '../../../props'
+import type { LayoutModifyProps } from '../../../props'
 import { FUN_CLOSE_CONTEXT_MENU_TYPE } from '../../common/Menu.vue'
-import { type CachedColumnConf, convertLayoutColumnConfToLayoutColumnProps } from '../../conf'
+import type { ColumnConf } from '../../conf'
 import * as eb from '../../eventbus'
 
 const props = defineProps<{
-  curColumnConf: CachedColumnConf
-  columnsConf: CachedColumnConf[]
+  currentColumnConf: ColumnConf
+  columnsConf: ColumnConf[]
 }>()
 const closeContextMenuFun = inject(FUN_CLOSE_CONTEXT_MENU_TYPE)!
 
 const fixedInputRef = ref<HTMLInputElement>()
 
 onMounted(() => {
-  fixedInputRef.value!.checked = props.curColumnConf.fixed
+  fixedInputRef.value!.checked = props.currentColumnConf.fixed
 })
 
 watch(props, () => {
-  fixedInputRef.value!.checked = props.curColumnConf.fixed
+  fixedInputRef.value!.checked = props.currentColumnConf.fixed
 })
 
 async function setFixedColumn() {
   const oldFixedColumnConf = props.columnsConf.find(col => col.fixed)
-  if (oldFixedColumnConf && oldFixedColumnConf.name !== props.curColumnConf.name) {
-    const changedLayoutReq: TableLayoutModifyProps = {
+  if (oldFixedColumnConf && oldFixedColumnConf.name !== props.currentColumnConf.name) {
+    const changedLayoutReq: LayoutModifyProps = {
       changedColumn: {
-        ...convertLayoutColumnConfToLayoutColumnProps(oldFixedColumnConf),
+        ...oldFixedColumnConf,
         fixed: false,
       },
     }
     await eb.modifyLayout(changedLayoutReq)
   }
-  const changedLayoutReq: TableLayoutModifyProps = {
+  const changedLayoutReq: LayoutModifyProps = {
     changedColumn: {
-      ...convertLayoutColumnConfToLayoutColumnProps(props.curColumnConf),
-      fixed: !props.curColumnConf.fixed,
+      ...props.currentColumnConf,
+      fixed: !props.currentColumnConf.fixed,
     },
   }
   await eb.modifyLayout(changedLayoutReq)
@@ -45,11 +45,11 @@ async function setFixedColumn() {
 </script>
 
 <script lang="ts">
-export function setFixedColumnStyles(styles: any, colIdx: number, columnsConf: CachedColumnConf[], selectColumnWidth: number) {
+export function setFixedColumnStyles(styles: any, colIdx: number, columnsConf: ColumnConf[], selectColumnWidth: number) {
   const fixedColumnIdx = columnsConf.findIndex(col => col.fixed)
   if (colIdx === -1 && fixedColumnIdx === -1) {
     // non-fixed column
-    styles.position = 'static'
+    styles.position = 'relative'
     styles.zIndex = 1000
   }
   else if (colIdx === -1) {
@@ -77,7 +77,7 @@ export function setFixedColumnStyles(styles: any, colIdx: number, columnsConf: C
     }
   }
   else {
-    styles.position = 'static'
+    styles.position = 'relative'
   }
 }
 </script>

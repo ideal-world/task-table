@@ -1,17 +1,12 @@
 <script setup lang="ts">
-import type { TableStyleConf } from '../conf'
-import * as eb from '../eventbus'
-
-const props = defineProps<{
-  styles: TableStyleConf
-}>()
+import type { TableStyleModifyProps } from '../../props';
+import * as eb from '../eventbus';
 
 async function changeTheme(e: Event) {
   const targetEle = e.target as HTMLInputElement
   const theme = targetEle.value
   if (theme !== undefined) {
-    const tableStyleConf: TableStyleConf = {
-      ...props.styles,
+    const tableStyleConf: TableStyleModifyProps = {
       theme,
     }
     await eb.modifyStyles(tableStyleConf)
