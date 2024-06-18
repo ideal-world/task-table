@@ -11,6 +11,7 @@ import LayoutSettingComp from './LayoutSetting.vue'
 import SubDataShowSettingComp from './SubDataShowSetting.vue'
 import TableResizeSettingComp from './TableResizeSetting.vue'
 import TableThemeSettingComp from './TableThemeSetting.vue'
+import TableLocalesSettingComp from './TableLocalesSetting.vue'
 
 const props = defineProps<{
   tableConf: TableConf
@@ -33,7 +34,8 @@ onMounted(() => {
 <template>
   <a class="cursor-pointer">
     <i
-      :class="iconSvg.MORE"
+      :class="iconSvg.SETTING"
+      class="text-base"
       @click="(e) => { tableSettingCompRef?.show(e, MenuOffsetKind.RIGHT_TOP, { width: 220 }, false, (e.target as HTMLElement).closest('.iw-tt') as HTMLElement) }"
     /></a>
   <MenuComp ref="tableSettingCompRef">
@@ -50,6 +52,7 @@ onMounted(() => {
     <div style="display: none;">
       <TableResizeSettingComp :size="props.tableConf.styles.size" :styles="props.tableConf.styles" />
       <TableThemeSettingComp />
+      <TableLocalesSettingComp />
     </div>
   </MenuComp>
 </template>

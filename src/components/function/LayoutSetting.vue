@@ -66,7 +66,7 @@ async function createNewLayout(layoutKind: LayoutKind) {
   <div>
     <div class="flex justify-between">
       <button
-        class="iw-btn m-1 flex-1"
+        class="iw-btn m-0.5 px-3 flex-1"
         :title="$t('layout.reset.note')"
         @click="e => { confirmResetLayoutCompRef?.show(e, MenuOffsetKind.RIGHT_TOP, MenuSizeKind.MINI, true) }"
       >
@@ -95,7 +95,7 @@ async function createNewLayout(layoutKind: LayoutKind) {
         </div>
       </MenuComp>
       <button
-        class="iw-btn m-1 flex-1"
+        class="iw-btn m-0.5 px-3 flex-1"
         :title="$t('layout.copy.note')"
         @click="copyLayout"
       >
@@ -106,7 +106,7 @@ async function createNewLayout(layoutKind: LayoutKind) {
       </button>
       <button
         v-if="props.layoutLength > 1"
-        class="iw-btn m-1 flex-1"
+        class="iw-btn m-0.5 px-3 flex-1"
         :title="$t('layout.delete.note')"
         @click="e => { confirmDeleteLayoutCompRef?.show(e, MenuOffsetKind.RIGHT_TOP, MenuSizeKind.MINI, true) }"
       >
@@ -135,7 +135,7 @@ async function createNewLayout(layoutKind: LayoutKind) {
         </div>
       </MenuComp>
       <button
-        class="iw-btn m-1 flex-1"
+        class="iw-btn m-0.5 px-3 flex-1"
         :class="showNewLayoutContainer && 'iw-btn-active'"
         :title="$t('layout.new.note')"
         @click="_ => { showNewLayoutContainer = !showNewLayoutContainer }"
