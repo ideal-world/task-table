@@ -69,7 +69,7 @@ async function changeColumnAggs(aggKind: AggregateKind, columnName: string) {
         <span class="iw-list-agg-cell__value text-info self-center">{{ props.dataBasic.totalNumber }}</span>
       </div>
       <div
-        v-else-if="!column.aggable"
+        v-else-if="!props.agg.enabledColumnNames.includes(column.name)"
         :class="`${props.styleProps.cellClass} iw-list-cell iw-list-agg-cell cursor-pointer flex items-center justify-end pr-1 bg-base-100 border-solid border-b border-b-base-300 border-l border-l-base-300 hover:bg-base-200 whitespace-nowrap flex-nowrap`" :data-column-name="column.name"
         :style="props.setColumnStyles(colIdx)"
       >

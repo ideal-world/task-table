@@ -62,12 +62,6 @@ export interface CommonColumnProps {
   styles: { [key: string]: string }
   categoryTitle?: string
   render?: (record: { [key: string]: any }, layoutKind: LayoutKind) => any
-
-  filterable: boolean
-  groupable: boolean
-  sortable: boolean
-  aggable: boolean
-  editable: boolean
 }
 export type SimpleCommonColumnProps = ChangeOptionalExcept<CommonColumnProps, 'name'>
 function generateCommonColumnProps(tableSimple: SimpleCommonColumnProps, layoutSimple?: SimpleCommonColumnProps): CommonColumnProps {
@@ -80,12 +74,6 @@ function generateCommonColumnProps(tableSimple: SimpleCommonColumnProps, layoutS
     styles: layoutSimple?.styles ?? tableSimple.styles ?? {},
     categoryTitle: layoutSimple?.categoryTitle ?? tableSimple.categoryTitle,
     render: layoutSimple?.render ?? tableSimple.render,
-    
-    filterable: layoutSimple?.filterable ?? tableSimple.filterable ?? false,
-    groupable: layoutSimple?.groupable ?? tableSimple.groupable ?? false,
-    sortable: layoutSimple?.sortable ?? tableSimple.sortable ?? false,
-    aggable: layoutSimple?.aggable ?? tableSimple.aggable ?? false,
-    editable: layoutSimple?.editable ?? tableSimple.editable ?? false,
   }
 }
 

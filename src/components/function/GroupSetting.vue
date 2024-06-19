@@ -14,6 +14,7 @@ async function setGroupColumn(columnName: string) {
   if (props.group.item && props.group.item.columnName !== columnName) {
     await eb.modifyLayout({
       group: {
+        enabledColumnNames: props.group.enabledColumnNames,
         item: {
           columnName,
           orderDesc: props.group.item.orderDesc,
@@ -25,12 +26,15 @@ async function setGroupColumn(columnName: string) {
   }
   else if (props.group.item) {
     await eb.modifyLayout({
-      group: {},
+      group: {
+        enabledColumnNames: props.group.enabledColumnNames,
+      },
     })
   }
   else {
     await eb.modifyLayout({
       group: {
+        enabledColumnNames: props.group.enabledColumnNames,
         item: {
           columnName,
           orderDesc: false,
@@ -46,6 +50,7 @@ async function setGroupDescSort() {
   if (props.group) {
     await eb.modifyLayout({
       group: {
+        enabledColumnNames: props.group.enabledColumnNames,
         item: {
           columnName: props.group.item!.columnName,
           orderDesc: !props.group.item!.orderDesc,
@@ -61,6 +66,7 @@ async function setGroupHideEmpty() {
   if (props.group) {
     await eb.modifyLayout({
       group: {
+        enabledColumnNames: props.group.enabledColumnNames,
         item: {
           columnName: props.group.item!.columnName,
           orderDesc: props.group.item!.orderDesc,
@@ -86,7 +92,7 @@ async function setGroupHideEmpty() {
       {{ $t('function.group.columnsTitle') }}
     </div>
     <div
-      v-for="column in props.layoutColumnsConf.filter(col => col.groupable)"
+      v-for="column in props.layoutColumnsConf.filter(col => props.group.enabledColumnNames.includes(col.name))"
       :key="`${props.layoutId}=${column.name}`" class="iw-contextmenu__item flex items-center justify-between w-full"
     >
       <span>

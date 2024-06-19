@@ -77,7 +77,10 @@ async function showFilterGroupContainer(e: Event, filterGroupIdx?: number) {
   else {
     selectedFilterGroup.value = []
   }
-  filterGroupContainerCompRef.value?.show(targetEle, undefined, MenuSizeKind.LARGE, false, targetEle.closest('.iw-tt') as HTMLElement)
+  filterGroupContainerCompRef.value?.show(targetEle, undefined, {
+    width: 350,
+    height: 150,
+  }, false, targetEle.closest('.iw-tt') as HTMLElement)
 }
 
 async function deleteFilterGroup(filterGroupIdx: number) {
@@ -246,6 +249,7 @@ async function saveFilterGroup() {
   }
   const layout: LayoutModifyProps = {
     filter: {
+      enabledColumnNames: props.filter.enabledColumnNames,
       groups: filterGroups,
     },
   }
@@ -355,7 +359,7 @@ onMounted(() => {
 
   <MenuComp ref="filterColumnCompRef" @click="setFilterColumn">
     <div
-      v-for="column in props.layoutColumnsConf.filter(col => col.filterable)" :key="column.name" class="iw-contextmenu__item flex w-full cursor-pointer"
+      v-for="column in props.layoutColumnsConf.filter(col => props.filter.enabledColumnNames.includes(col.name))" :key="column.name" class="iw-contextmenu__item flex w-full cursor-pointer"
       :data-column-name="column.name"
     >
       <i :class="`${column.icon} mr-0.5`" />

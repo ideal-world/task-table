@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { Ref } from 'vue';
-import { onMounted, ref, toRaw } from 'vue';
-import { IwEvents, IwProps } from '../src';
-import { IwUtils } from '../src/utils';
+import type { Ref } from 'vue'
+import { onMounted, ref, toRaw } from 'vue'
+import { IwEvents, IwProps } from '../src'
+import { IwUtils } from '../src/utils'
 
 const selectedRecordPks: Ref<any[]> = ref([])
 
@@ -505,23 +505,23 @@ const events: IwProps.TableEventProps = {
 }
 
 const columns: IwProps.SimpleTableColumnProps[] = [
-  { name: 'no', title: 'ID', dataKind: IwProps.DataKind.NUMBER, sortable: true, width: 80, styles: { cursor: 'pointer' }, filterable: true },
+  { name: 'no', title: 'ID', dataKind: IwProps.DataKind.NUMBER, width: 80, styles: { cursor: 'pointer' } },
   { name: 'pno', title: '父ID', dataKind: IwProps.DataKind.NUMBER, hide: true },
-  { name: 'name', title: '名称', sortable: true, width: 300, render: (record: { [key: string]: any }, layoutKind: IwProps.LayoutKind) => {
+  { name: 'name', title: '名称', width: 300, render: (record: { [key: string]: any }, layoutKind: IwProps.LayoutKind) => {
     if (layoutKind === IwProps.LayoutKind.LIST) {
       return record.stats.includes('risk') ? `<span style='color:red'>${record.name}</span>` : record.name
     }
     else {
       return record.name
     }
-  }, editable: true, filterable: true },
-  { name: 'creator', title: '创建人', useDict: true, sortable: true, aggable: true, groupable: true, filterable: true, editable: true },
-  { name: 'stats', title: '状态', useDict: true, multiValue: true, aggable: true, groupable: true, filterable: true, editable: true },
-  { name: 'planStartTime', title: '计划开始时间', dataKind: IwProps.DataKind.DATETIME, aggable: true, sortable: true, filterable: true, editable: true },
-  { name: 'planEndTime', title: '计划结束时间', dataKind: IwProps.DataKind.DATETIME, sortable: true, filterable: true },
-  { name: 'actualStartTime', title: '实际开始时间', dataKind: IwProps.DataKind.DATETIME, sortable: true },
-  { name: 'actualEndTime', title: '实际结束时间', dataKind: IwProps.DataKind.DATETIME, sortable: true },
-  { name: 'disabled', title: '是否禁用', dataKind: IwProps.DataKind.BOOLEAN, sortable: true, editable: true },
+  } },
+  { name: 'creator', title: '创建人', useDict: true },
+  { name: 'stats', title: '状态', useDict: true, multiValue: true },
+  { name: 'planStartTime', title: '计划开始时间', dataKind: IwProps.DataKind.DATETIME },
+  { name: 'planEndTime', title: '计划结束时间', dataKind: IwProps.DataKind.DATETIME },
+  { name: 'actualStartTime', title: '实际开始时间', dataKind: IwProps.DataKind.DATETIME },
+  { name: 'actualEndTime', title: '实际结束时间', dataKind: IwProps.DataKind.DATETIME },
+  { name: 'disabled', title: '是否禁用', dataKind: IwProps.DataKind.BOOLEAN },
 ]
 
 const layouts: IwProps.SimpleLayoutProps[] = [
@@ -560,9 +560,6 @@ const layouts: IwProps.SimpleLayoutProps[] = [
     }, {
       name: 'planStartTime',
     }, {
-      name: 'planEndTime',
-      editable: true,
-    }, {
       name: 'actualStartTime',
     }, {
       name: 'actualEndTime',
@@ -570,9 +567,14 @@ const layouts: IwProps.SimpleLayoutProps[] = [
       name: 'disabled',
     }],
     agg: {
+      enabledColumnNames: ['name', 'creator', 'stats', 'planStartTime', 'planEndTime'],
       items: [
         { columnName: 'name', aggKind: IwProps.AggregateKind.MIN },
       ],
+    },
+    edit: {
+      enabledColumnNames: ['name', 'creator', 'stats', 'planStartTime', 'planEndTime', 'disabled'],
+      markEditable: true,
     },
   },
   {
@@ -599,8 +601,9 @@ const layouts: IwProps.SimpleLayoutProps[] = [
       name: 'actualEndTime',
     }],
     agg: {
+      enabledColumnNames: ['name', 'creator', 'stats', 'planStartTime', 'planEndTime'],
       items: [
-        { columnName: 'name', aggKind: IwProps.AggregateKind.MIN },
+        { columnName: 'name', aggKind: IwProps.AggregateKind.MAX },
       ],
     },
   },
@@ -626,12 +629,6 @@ const _tableProps: IwProps.SimpleTableProps = {
     },
     width: 100,
   },
-  agg: {
-    items: [
-      { columnName: 'name', aggKind: IwProps.AggregateKind.MIN },
-      { columnName: 'stats', aggKind: IwProps.AggregateKind.MIN },
-    ],
-  },
   gantt: {
     timelineWidth: 500,
     planStartTimeColumnName: 'planStartTime',
@@ -639,10 +636,24 @@ const _tableProps: IwProps.SimpleTableProps = {
     actualStartTimeColumnName: 'actualStartTime',
     actualEndTimeColumnName: 'actualEndTime',
   },
-  filter: {},
-  group: {},
-  sort: {},
+  filter: {
+    enabledColumnNames: ['no', 'name', 'creator', 'stats', 'planStartTime', 'planEndTime', 'actualStartTime', 'actualEndTime', 'disabled'],
+  },
+  sort: {
+    enabledColumnNames: ['no', 'name', 'creator', 'stats', 'planStartTime', 'planEndTime', 'actualStartTime', 'actualEndTime', 'disabled'],
+  },
+  group: {
+    enabledColumnNames: ['creator', 'stats', 'disabled'],
+  },
+  agg: {
+    enabledColumnNames: ['name', 'creator', 'stats', 'planStartTime', 'planEndTime'],
+    items: [
+      { columnName: 'name', aggKind: IwProps.AggregateKind.MIN },
+      { columnName: 'stats', aggKind: IwProps.AggregateKind.MIN },
+    ],
+  },
   edit: {
+    enabledColumnNames: ['name', 'creator', 'stats', 'planStartTime', 'disabled'],
     markEditable: true,
   },
 }

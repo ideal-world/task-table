@@ -30,11 +30,13 @@ export interface ActionColumnProps {
 }
 
 export interface AggDataProps {
+  enabledColumnNames: string[]
   items: AggDataItemProps[]
 }
-export type SimpleAggDataProps = ChangeAllOptional<AggDataProps>
+export type SimpleAggDataProps = ChangeOptionalExcept<AggDataProps, 'enabledColumnNames'>
 export function generateAggDataProps(simple: SimpleAggDataProps): AggDataProps {
   return {
+    enabledColumnNames: simple.enabledColumnNames,
     items: simple.items ?? [],
   }
 }
@@ -45,12 +47,14 @@ export interface AggDataItemProps {
 }
 
 export interface FilterDataProps {
+  enabledColumnNames: string[]
   // OR relationship between groups
   groups: FilterDataGroupProps[]
 }
-export type SimpleFilterDataProps = ChangeAllOptional<FilterDataProps>
+export type SimpleFilterDataProps = ChangeOptionalExcept<FilterDataProps, 'enabledColumnNames'>
 export function generateFilterDataProps(simple: SimpleFilterDataProps): FilterDataProps {
   return {
+    enabledColumnNames: simple.enabledColumnNames,
     groups: simple.groups ?? [],
   }
 }
@@ -67,12 +71,14 @@ export interface FilterDataItemProps {
 }
 
 export interface GroupDataProps {
+  enabledColumnNames: string[]
   item?: GroupDataItemProps
   slices?: { [key: string]: DataSliceProps }
 }
-export type SimpleGroupDataProps = ChangeAllOptional<GroupDataProps>
+export type SimpleGroupDataProps = ChangeOptionalExcept<GroupDataProps, 'enabledColumnNames'>
 export function generateGroupDataProps(simple: SimpleGroupDataProps): GroupDataProps {
   return {
+    enabledColumnNames: simple.enabledColumnNames,
     item: simple.item,
     slices: simple.slices,
   }
@@ -85,11 +91,13 @@ export interface GroupDataItemProps {
 }
 
 export interface SortDataProps {
+  enabledColumnNames: string[]
   conds: SortDataItemProps[]
 }
-export type SimpleSortDataProps = ChangeAllOptional<SortDataProps>
+export type SimpleSortDataProps = ChangeOptionalExcept<SortDataProps, 'enabledColumnNames'>
 export function generateSortDataProps(simple: SimpleSortDataProps): SortDataProps {
   return {
+    enabledColumnNames: simple.enabledColumnNames,
     conds: simple.conds ?? [],
   }
 }
@@ -120,11 +128,13 @@ export function generateGanttLayoutProps(simple: SimpleGanttLayoutProps): GanttL
 }
 
 export interface EditDataProps {
+  enabledColumnNames: string[]
   markEditable: boolean
 }
-export type SimpleEditDataProps = ChangeAllOptional<EditDataProps>
+export type SimpleEditDataProps = ChangeOptionalExcept<EditDataProps, 'enabledColumnNames'>
 export function generateEditDataProps(simple: SimpleEditDataProps): EditDataProps {
   return {
+    enabledColumnNames: simple.enabledColumnNames,
     markEditable: simple.markEditable ?? false,
   }
 }
