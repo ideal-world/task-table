@@ -47,10 +47,9 @@ watch(
     else {
       currentLayoutId.value = layoutsConf[0].id
     }
-    setHeight()
-  },
-  {
-    immediate: true,
+    setTimeout(() => {
+      setHeight()
+    })
   },
 )
 
@@ -61,9 +60,16 @@ function setHeight() {
     const headerEle = ttEle.getElementsByClassName('iw-tt-header')
     const headerHeight = headerEle.length > 0 ? headerEle[0].offsetHeight : 0
     Array.prototype.forEach.call(ttEle.getElementsByClassName('iw-tt-layout'), (layoutEle) => {
+      if (layoutEle.id !== `iw-tt-layout-${currentLayoutId.value}`)
+        return
+
       const toolbarEle = layoutEle.getElementsByClassName('iw-tt-toolbar')
       const toolbarHeight = toolbarEle.length > 0 ? toolbarEle[0].offsetHeight : 0
-      const footerHeight = layoutEle.getElementsByClassName('iw-tt-footer')[0].offsetHeight
+      const layoutStyleHeight = layoutEle.getElementsByClassName('iw-tt-footer')[0].style.height
+      const footerHeight = layoutStyleHeight || layoutEle.getElementsByClassName('iw-tt-footer')[0].offsetHeight
+      if (!layoutStyleHeight) {
+        layoutEle.getElementsByClassName('iw-tt-footer')[0].style.height = `${footerHeight}px`
+      }
       layoutEle.getElementsByClassName('iw-tt-table')[0].style.height = `${outHeight - headerHeight - toolbarHeight - footerHeight}px`
     })
   })
@@ -75,11 +81,11 @@ function reSetScrollableWidth(layoutId: string) {
     if (curScrollComp.$el.children[1].style.width && curScrollComp.$el.children[1].style.width === '0px') {
       curScrollComp.reSetMainWidth(true)
     }
+    setHeight()
   })
 }
 
 onMounted(async () => {
-  setHeight()
   delegateEvent(`#iw-tt-${tableConf.id}`, 'click', '.iw-tt-header__item', (e: Event) => {
     const target = e.target as HTMLElement
     const layoutId = target.dataset.layoutId
@@ -89,6 +95,9 @@ onMounted(async () => {
     }
   })
   await eb.watch()
+  setTimeout(() => {
+    setHeight()
+  })
 })
 </script>
 

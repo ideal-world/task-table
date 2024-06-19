@@ -256,6 +256,37 @@ async function saveFilterGroup() {
   await eb.modifyLayout(layout)
 }
 
+async function resetFilterGroupStyle(filterGroup: FilterDataItemProps[]) {
+  const filterItems = toRaw(filterGroup)
+  selectedFilterGroup.value = filterItems.map((item: FilterDataItemProps) => {
+    const columnConf = props.layoutColumnsConf.find(col => col.name === item.columnName)!
+    return {
+      columnName: item.columnName,
+      operator: item.operator,
+      values: item.value ? Array.isArray(item.value) ? item.value : [item.value] : [],
+      icon: columnConf.icon,
+      title: columnConf.title,
+      dataKind: columnConf.dataKind,
+      useDict: columnConf.useDict,
+      multiValue: columnConf.multiValue,
+    }
+  })
+  let groupedFilterItems: { [key: string]: FilterDataItemProps[] } = groupBy(
+    filterItems.filter((item: FilterDataItemProps) => item.value !== undefined),
+    (item: FilterDataItemProps) => { return item.columnName },
+  )
+  const queryConds: { [key: string]: any[] } = groupedFilterItems = Object.fromEntries(Object.entries(groupedFilterItems).map(([columnName, values]) => [columnName, values.map((item: FilterDataItemProps) => item.value!)]))
+  const dictItemResp = await eb.loadCellDictItemsWithMultiConds(queryConds, {
+    offsetNumber: 0,
+    fetchNumber: Math.max(...Object.entries(queryConds).map(([_, values]) => values.length)),
+  })
+  Object.entries(dictItemResp).forEach(([columnName, resp]) => {
+    resp.records.forEach((dictItem) => {
+      mappingColumValueAndDictTitle.value[`${columnName}-${dictItem.value}`] = dictItem
+    })
+  })
+}
+
 onMounted(() => {
   filterGroupContainerCompRef.value?.onInit(async (menuEle: HTMLElement) => {
     filterGroupContainerEle = menuEle
@@ -263,6 +294,13 @@ onMounted(() => {
   filterGroupContainerCompRef.value?.onClose(async (_) => {
     await saveFilterGroup()
   })
+  if (props.filter.groups?.length !== 0) {
+    props.filter.groups.forEach((filterGroup) => {
+      if (filterGroup.items.length !== 0) {
+        resetFilterGroupStyle(filterGroup.items)
+      }
+    })
+  }
 })
 </script>
 
