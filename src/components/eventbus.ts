@@ -50,7 +50,7 @@ export async function loadData(moreForGroupedValue?: any, returnOnlyAgg?: boolea
     rawLayout.agg,
     rawLayout.subDataShowKind === SubDataShowKind.ONLY_PARENT_DATA,
     moreForGroupedValue,
-    moreForGroupedValue && rawLayout.group && rawLayout.group.slices && rawLayout.group.slices[moreForGroupedValue as string]
+    moreForGroupedValue !== undefined && rawLayout.group && rawLayout.group.slices && rawLayout.group.slices[moreForGroupedValue as string]
       ? {
           offsetNumber: rawLayout.group.slices[moreForGroupedValue as string].offsetNumber,
           fetchNumber: rawLayout.group.slices[moreForGroupedValue as string].fetchNumber,
@@ -63,7 +63,7 @@ export async function loadData(moreForGroupedValue?: any, returnOnlyAgg?: boolea
     returnOnlyAgg,
   )
 
-  if (!moreForGroupedValue && !(layout.group?.item)) {
+  if (moreForGroupedValue === undefined && !(layout.group?.item)) {
     // Load data without grouping
     if (!Array.isArray(resp)) {
       if (!returnOnlyAgg) {
@@ -79,7 +79,7 @@ export async function loadData(moreForGroupedValue?: any, returnOnlyAgg?: boolea
       throw new Error('[events.loadData]  Invalid scene')
     }
   }
-  else if (!moreForGroupedValue && layout.group && layout.group.item) {
+  else if (moreForGroupedValue === undefined && layout.group && layout.group.item) {
     // Load all grouped data
     if (Array.isArray(resp)) {
       if (!returnOnlyAgg) {
@@ -264,14 +264,14 @@ export async function modifyStyles(changedStyles: TableStyleModifyProps): Promis
     return false
   }
 
-  changedStyles.size && (tableConf.styles.size = changedStyles.size)
-  changedStyles.theme && (tableConf.styles.theme = changedStyles.theme)
-  changedStyles.tableClass && (tableConf.styles.tableClass = changedStyles.tableClass)
-  changedStyles.headerClass && (tableConf.styles.headerClass = changedStyles.headerClass)
-  changedStyles.footerClass && (tableConf.styles.footerClass = changedStyles.footerClass)
-  changedStyles.rowClass && (tableConf.styles.rowClass = changedStyles.rowClass)
-  changedStyles.cellClass && (tableConf.styles.cellClass = changedStyles.cellClass)
-  changedStyles.aggClass && (tableConf.styles.aggClass = changedStyles.aggClass)
+  changedStyles.size !== undefined && (tableConf.styles.size = changedStyles.size)
+  changedStyles.theme !== undefined && (tableConf.styles.theme = changedStyles.theme)
+  changedStyles.tableClass !== undefined && (tableConf.styles.tableClass = changedStyles.tableClass)
+  changedStyles.headerClass !== undefined && (tableConf.styles.headerClass = changedStyles.headerClass)
+  changedStyles.footerClass !== undefined && (tableConf.styles.footerClass = changedStyles.footerClass)
+  changedStyles.rowClass !== undefined && (tableConf.styles.rowClass = changedStyles.rowClass)
+  changedStyles.cellClass !== undefined && (tableConf.styles.cellClass = changedStyles.cellClass)
+  changedStyles.aggClass !== undefined && (tableConf.styles.aggClass = changedStyles.aggClass)
 
   return true
 }
@@ -330,20 +330,20 @@ export async function modifyLayout(changedLayoutProps: LayoutModifyProps, byGrou
     return false
 
   // Process basic
-  changedLayoutProps.title && (layout.title = changedLayoutProps.title)
-  changedLayoutProps.icon && (layout.icon = changedLayoutProps.icon)
+  changedLayoutProps.title !== undefined && (layout.title = changedLayoutProps.title)
+  changedLayoutProps.icon !== undefined && (layout.icon = changedLayoutProps.icon)
 
-  changedLayoutProps.slice && (layout.slice = changedLayoutProps.slice)
-  changedLayoutProps.showSelectColumn && (layout.showSelectColumn = changedLayoutProps.showSelectColumn)
-  changedLayoutProps.subDataShowKind && (layout.subDataShowKind = changedLayoutProps.subDataShowKind)
+  changedLayoutProps.slice !== undefined && (layout.slice = changedLayoutProps.slice)
+  changedLayoutProps.showSelectColumn !== undefined && (layout.showSelectColumn = changedLayoutProps.showSelectColumn)
+  changedLayoutProps.subDataShowKind !== undefined && (layout.subDataShowKind = changedLayoutProps.subDataShowKind)
 
-  changedLayoutProps.actionColumn && (layout.actionColumn = changedLayoutProps.actionColumn)
-  changedLayoutProps.gantt && (layout.gantt = changedLayoutProps.gantt)
-  changedLayoutProps.filter && (layout.filter = changedLayoutProps.filter)
-  changedLayoutProps.group && (layout.group = changedLayoutProps.group)
-  changedLayoutProps.sort && (layout.sort = changedLayoutProps.sort)
-  changedLayoutProps.agg && (layout.agg = changedLayoutProps.agg)
-  changedLayoutProps.edit && (layout.edit = changedLayoutProps.edit)
+  changedLayoutProps.actionColumn !== undefined && (layout.actionColumn = changedLayoutProps.actionColumn)
+  changedLayoutProps.gantt !== undefined && (layout.gantt = changedLayoutProps.gantt)
+  changedLayoutProps.filter !== undefined && (layout.filter = changedLayoutProps.filter)
+  changedLayoutProps.group !== undefined && (layout.group = changedLayoutProps.group)
+  changedLayoutProps.sort !== undefined && (layout.sort = changedLayoutProps.sort)
+  changedLayoutProps.agg !== undefined && (layout.agg = changedLayoutProps.agg)
+  changedLayoutProps.edit !== undefined && (layout.edit = changedLayoutProps.edit)
 
   if (changedLayoutProps.changedColumn) {
     const oldLayoutColumnIdx = layout.columns.findIndex(column => column.name === changedLayoutProps.changedColumn?.name)

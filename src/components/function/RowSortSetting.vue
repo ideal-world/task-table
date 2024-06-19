@@ -47,6 +47,7 @@ async function deleteSortCond(columnName: string) {
   const conds = props.sort.conds.filter(cond => cond.columnName !== columnName)
   await eb.modifyLayout({
     sort: {
+      enabledColumnNames: props.sort.enabledColumnNames,
       conds,
     },
   })
@@ -60,6 +61,7 @@ function addSortCond(columnName: string, orderDesc: boolean) {
   })
   eb.modifyLayout({
     sort: {
+      enabledColumnNames: props.sort.enabledColumnNames,
       conds,
     },
   })
@@ -108,7 +110,7 @@ function addSortCond(columnName: string, orderDesc: boolean) {
       {{ $t('function.rowSort.sortableColumns') }}
     </div>
     <div
-      v-for="column in props.layoutColumnsConf.filter(col => col.sortable && !props.sort.conds?.find(cond => cond.columnName === col.name))"
+      v-for="column in props.layoutColumnsConf.filter(col => props.sort.enabledColumnNames.includes(col.name) && !props.sort.conds?.find(cond => cond.columnName === col.name))"
       :key="`${props.layoutId}-${column.name}`"
       class="p-1 flex w-full justify-between cursor-pointer" :data-column-name="column.name"
     >

@@ -12,7 +12,7 @@ const props = defineProps<{
   containerClass: string
   pkColumnName: string
   pkKindIsNumber: boolean
-  editProps: EditDataProps
+  edit: EditDataProps
   columnsConf: ColumnConf[]
   data: DataResp | DataGroupResp[]
   editCellClass: string
@@ -72,7 +72,7 @@ function checkEditable(data: DataResp, pkValue: any, columnConf: ColumnConf) {
   if (data.editablePks && !data.editablePks.includes(pkValue)) {
     return false
   }
-  return columnConf.editable ?? false
+  return props.edit.enabledColumnNames.includes(columnConf.name) ?? false
 }
 
 function markEditable(containerEle: HTMLElement) {
@@ -104,13 +104,13 @@ function markEditable(containerEle: HTMLElement) {
 }
 
 watch(() => props.columnsConf, () => {
-  if (props.editProps.markEditable) {
+  if (props.edit.markEditable) {
     markEditable(cellEditContainerRef.value!.closest(`.${props.containerClass}`) as HTMLElement)
   }
 })
 
 watch(() => props.data, () => {
-  if (props.editProps.markEditable) {
+  if (props.edit.markEditable) {
     markEditable(cellEditContainerRef.value!.closest(`.${props.containerClass}`) as HTMLElement)
   }
 })
@@ -141,7 +141,7 @@ onMounted(() => {
     }
     leaveEditMode()
   })
-  if (props.editProps.markEditable) {
+  if (props.edit.markEditable) {
     markEditable(containerEle)
   }
 })

@@ -14,6 +14,7 @@ export interface TableConf extends CommonFunctionProps {
   columns: TableColumnProps[]
   styles: TableStyleProps
   quickSearch?: QuickSearchProps
+  mini: boolean
 }
 
 export interface LayoutConf extends LayoutProps {
@@ -46,6 +47,7 @@ export function init(props: SimpleTableProps): {
     columns: tableProps.columns,
     styles: tableProps.styles,
     quickSearch: tableProps.quickSearch,
+    mini: tableProps.mini,
 
     slice: tableProps.slice,
     showSelectColumn: tableProps.showSelectColumn,

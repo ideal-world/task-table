@@ -12,4 +12,11 @@ const locales = createI18n({
   },
 })
 
+export function changeLocale(locale: 'en' | 'zh') {
+  locales.global.locale.value = locale
+  if (typeof localStorage !== 'undefined') {
+    localStorage.setItem('locale', locale)
+  }
+}
+
 export default locales

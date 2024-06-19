@@ -112,7 +112,7 @@
       "new": "New Filter",
       "items": "Items",
       "selectColumnPlaceholder": "New column",
-      "note": "Multiple conditions within a group are AND, between groups are OR"
+      "note": "Between Groups And, Within Groups OR"
     },
     "group": {
       "groupTitle": "Group",

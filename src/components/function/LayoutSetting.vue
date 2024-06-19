@@ -31,10 +31,10 @@ async function resetLayout() {
     slice: generateDataSliceProps(),
     subDataShowKind: SubDataShowKind.FOLD_SUB_DATA,
   }
-  props.layoutConf.filter && (layout.filter = { groups: [] })
-  props.layoutConf.group && (layout.group = {})
-  props.layoutConf.sort && (layout.sort = { conds: [] })
-  props.layoutConf.agg && (layout.agg = { items: [] })
+  props.layoutConf.filter && (layout.filter = { enabledColumnNames: props.layoutConf.filter.enabledColumnNames, groups: [] })
+  props.layoutConf.group && (layout.group = { enabledColumnNames: props.layoutConf.group.enabledColumnNames })
+  props.layoutConf.sort && (layout.sort = { enabledColumnNames: props.layoutConf.sort.enabledColumnNames, conds: [] })
+  props.layoutConf.agg && (layout.agg = { enabledColumnNames: props.layoutConf.agg.enabledColumnNames, items: [] })
   await eb.modifyLayout(layout)
   confirmResetLayoutCompRef.value?.close()
 }
@@ -66,7 +66,7 @@ async function createNewLayout(layoutKind: LayoutKind) {
   <div>
     <div class="flex justify-between">
       <button
-        class="iw-btn m-1 flex-1"
+        class="iw-btn m-0.5 px-3 flex-1"
         :title="$t('layout.reset.note')"
         @click="e => { confirmResetLayoutCompRef?.show(e, MenuOffsetKind.RIGHT_TOP, MenuSizeKind.MINI, true) }"
       >
@@ -95,7 +95,7 @@ async function createNewLayout(layoutKind: LayoutKind) {
         </div>
       </MenuComp>
       <button
-        class="iw-btn m-1 flex-1"
+        class="iw-btn m-0.5 px-3 flex-1"
         :title="$t('layout.copy.note')"
         @click="copyLayout"
       >
@@ -106,7 +106,7 @@ async function createNewLayout(layoutKind: LayoutKind) {
       </button>
       <button
         v-if="props.layoutLength > 1"
-        class="iw-btn m-1 flex-1"
+        class="iw-btn m-0.5 px-3 flex-1"
         :title="$t('layout.delete.note')"
         @click="e => { confirmDeleteLayoutCompRef?.show(e, MenuOffsetKind.RIGHT_TOP, MenuSizeKind.MINI, true) }"
       >
@@ -135,7 +135,7 @@ async function createNewLayout(layoutKind: LayoutKind) {
         </div>
       </MenuComp>
       <button
-        class="iw-btn m-1 flex-1"
+        class="iw-btn m-0.5 px-3 flex-1"
         :class="showNewLayoutContainer && 'iw-btn-active'"
         :title="$t('layout.new.note')"
         @click="_ => { showNewLayoutContainer = !showNewLayoutContainer }"

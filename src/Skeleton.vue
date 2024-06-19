@@ -57,16 +57,12 @@ function setHeight() {
   // Set table height
   Array.prototype.forEach.call(document.getElementsByClassName('iw-tt'), (ttEle) => {
     const outHeight = ttEle.parentElement?.clientHeight
-    const headerHeight = ttEle.getElementsByClassName('iw-tt-header')[0].offsetHeight
+    const headerEle = ttEle.getElementsByClassName('iw-tt-header')
+    const headerHeight = headerEle.length > 0 ? headerEle[0].offsetHeight : 0
     Array.prototype.forEach.call(ttEle.getElementsByClassName('iw-tt-layout'), (layoutEle) => {
-      if (layoutEle.id !== `iw-tt-layout-${currentLayoutId.value}`)
-        return
-      const toolbarHeight = layoutEle.getElementsByClassName('iw-tt-toolbar').length > 0 ? layoutEle.getElementsByClassName('iw-tt-toolbar')[0].offsetHeight : 0
-      const layoutStyleHeight = layoutEle.getElementsByClassName('iw-tt-footer')[0].style.height
-      const footerHeight = layoutStyleHeight || layoutEle.getElementsByClassName('iw-tt-footer')[0].offsetHeight
-      if (!layoutStyleHeight) {
-        layoutEle.getElementsByClassName('iw-tt-footer')[0].style.height = `${footerHeight}px`
-      }
+      const toolbarEle = layoutEle.getElementsByClassName('iw-tt-toolbar')
+      const toolbarHeight = toolbarEle.length > 0 ? toolbarEle[0].offsetHeight : 0
+      const footerHeight = layoutEle.getElementsByClassName('iw-tt-footer')[0].offsetHeight
       layoutEle.getElementsByClassName('iw-tt-table')[0].style.height = `${outHeight - headerHeight - toolbarHeight - footerHeight}px`
     })
   })
@@ -129,9 +125,11 @@ onMounted(async () => {
     :class="`${tableConf.styles.tableClass} iw-tt w-full text-sm text-base-content bg-base-100 relative`"
   >
     <div
+      v-if="!tableConf.mini || tableConf.quickSearch"
       :class="`${tableConf.styles.headerClass} iw-tt-header flex justify-between p-0 min-h-0`"
     >
       <ScrollableComp
+        v-if="!tableConf.mini"
         class="flex-1"
       >
         <div class="tablist iw-tabs iw-tabs-sm iw-tabs-boxed">
@@ -147,6 +145,9 @@ onMounted(async () => {
           </a>
         </div>
       </ScrollableComp>
+      <div v-else class="flex-1">
+        &nbsp;
+      </div>
       <div class="flex items-center">
         <QuickSearchComp
           v-if="tableConf.quickSearch"
@@ -154,6 +155,7 @@ onMounted(async () => {
           :quick-search="tableConf.quickSearch"
         />
         <TableSettingComp
+          v-if="!tableConf.mini"
           :table-conf="tableConf"
           :layout-conf="currentLayoutConf"
           :layout-columns-conf="currentLayoutColumnsConf"
@@ -164,7 +166,7 @@ onMounted(async () => {
     <template v-for="layout in layoutsConf" :key="layout.id">
       <div v-show="currentLayoutId === layout.id" :id="`iw-tt-layout-${layout.id}`" class="iw-tt-layout">
         <div
-          v-if="layout.sort || layout.filter"
+          v-if="!tableConf.mini && (layout.sort || layout.filter)"
           class="iw-tt-toolbar flex items-center h-8 p-0.5"
         >
           <RowSortSettingComp v-if="layout.sort" :layout-id="layout.id" :sort="layout.sort" :layout-columns-conf="currentLayoutColumnsConf" />
