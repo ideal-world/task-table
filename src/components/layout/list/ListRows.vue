@@ -54,18 +54,20 @@ const props = defineProps<{
     </div>
     <div
       v-for="(column, colIdx) in props.columnsConf.slice(1)" :key="`${props.layoutId}-${column.name}`"
-      :class="`${props.styleProps.cellClass} iw-list-cell iw-data-cell flex items-center bg-base-100 border-l border-l-base-300 ${column.wrap ? 'break-words flex-wrap' : 'whitespace-nowrap overflow-hidden text-ellipsis flex-nowrap'}`"
+      :class="`${props.styleProps.cellClass} iw-list-cell iw-data-cell flex items-center bg-base-100 border-l border-l-base-300 ${column.wrap ? 'break-words flex-wrap' : 'whitespace-nowrap text-ellipsis flex-nowrap'}`"
       :data-column-name="column.name" :style="{ ...column.styles, ...props.setColumnStyles(colIdx + 1) }"
     >
       <div v-if="column.render" v-html="column.render(row, props.layoutKind)" />
-      <div v-else-if="column.dataKind === DataKind.DATE || column.dataKind === DataKind.TIME || column.dataKind === DataKind.DATETIME">
+      <template v-else-if="column.dataKind === DataKind.DATE || column.dataKind === DataKind.TIME || column.dataKind === DataKind.DATETIME">
         {{ column.kindDateTimeFormat ? dayjs(row[column.name]).format(column.kindDateTimeFormat) : row[column.name] }}
-      </div>
-      <div v-else-if="!column.useDict">
+      </template>
+      <img v-else-if="column.dataKind === DataKind.IMAGE" :src="row[column.name]" class="w-4 h-4 transition duration-300 transform hover:scale-[8] hover:rounded-sm hover:z-[3000]">
+      <a v-else-if="column.dataKind === DataKind.FILE" :href="row[column.name]" target="_blank" class="underline">{{ row[column.name] && row[column.name].substring(row[column.name].lastIndexOf('/') + 1) }}</a>
+      <template v-else-if="!column.useDict">
         {{ row[column.name] }}
-      </div>
+      </template>
       <div
-        v-for="dictItem in row[column.name + DATA_DICT_POSTFIX]" v-else :key="`${column.name}-${dictItem.value}`"
+        v-for="dictItem in row[column.name + DATA_DICT_POSTFIX]" :key="`${column.name}-${dictItem.value}`"
         :data-value="dictItem.value"
         class="iw-badge iw-badge-outline pl-0.5 mb-0.5 mr-0.5"
         :style="`background-color: ${dictItem.color}`"
