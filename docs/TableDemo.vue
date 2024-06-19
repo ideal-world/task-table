@@ -610,6 +610,7 @@ const layouts: IwProps.SimpleLayoutProps[] = [
 ]
 
 const _tableProps: IwProps.SimpleTableProps = {
+  // mini: true,
   pkColumnName: 'no',
   parentPkColumnName: 'pno',
   columns,
