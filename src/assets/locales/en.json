@@ -19,9 +19,6 @@
       "file": "File",
       "image": "Image",
       "amount": "Amount",
-      "select": "Dropdown single selection",
-      "multiselect": "Dropdown multiple selection",
-      "checkbox": "Multiple selection",
       "date": "Date",
       "datetime": "Date time",
       "time": "Time",
@@ -50,6 +47,7 @@
     },
     "event": {
       "notConfigured": "Event[{name}]not configured",
+      "invokeError": "Event invoke error: {msg}",
       "loadDataInvalidScene": "Unable to load data: Invalid scene"
     },
     "table": {

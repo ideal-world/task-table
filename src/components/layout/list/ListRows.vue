@@ -8,7 +8,7 @@ import type { ColumnConf } from '../../conf'
 import { NODE_DEPTH_FLAG, renderTreeToggleHandler } from '../../function/RowTree'
 
 const props = defineProps<{
-  records: { [key: string]: any }[]
+  records: { [columnName: string]: any }[]
   pkColumnName: string
   parentPkColumnName?: string
   subDataShowKind: SubDataShowKind
@@ -18,7 +18,7 @@ const props = defineProps<{
   layoutKind: LayoutKind
   styleProps: TableStyleProps
   showSelectColumn: boolean
-  actionColumnRender?: (record: { [key: string]: any }, layoutKind: LayoutKind) => any
+  actionColumnRender?: (record: { [columnName: string]: any }, layoutKind: LayoutKind) => any
   setColumnStyles: (colIdx: number) => any
 }>()
 </script>

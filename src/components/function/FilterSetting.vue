@@ -4,7 +4,7 @@ import * as iconSvg from '../../assets/icon'
 import type { DataKind, DictItemProps, DictItemsResp, FilterDataGroupProps, FilterDataItemProps, FilterDataProps, LayoutModifyProps } from '../../props'
 import { OperatorKind, translateOperatorKind } from '../../props'
 import { getInputTypeByDataKind, getOperatorKindsByDataKind } from '../../props/enumProps'
-import { IwUtils } from '../../utils'
+import { groupBy } from '../../utils/basic'
 import MenuComp, { MenuOffsetKind, MenuSizeKind } from '../common/Menu.vue'
 import type { ColumnConf } from '../conf'
 import * as eb from '../eventbus'
@@ -59,7 +59,7 @@ async function showFilterGroupContainer(e: Event, filterGroupIdx?: number) {
       }
     })
     // init mapping dict
-    let groupedFilterItems: { [key: string]: FilterDataItemProps[] } = IwUtils.groupBy(
+    let groupedFilterItems: { [key: string]: FilterDataItemProps[] } = groupBy(
       filterItems.filter((item: FilterDataItemProps) => item.value !== undefined),
       (item: FilterDataItemProps) => { return item.columnName },
     )
@@ -369,7 +369,7 @@ onMounted(() => {
   <MenuComp ref="filterOpCompRef" @click="setFilterOp">
     <template v-if="selectedFilterItemIdx !== undefined">
       <div
-        v-for="op in getOperatorKindsByDataKind(selectedFilterGroup?.[selectedFilterItemIdx!].dataKind, selectedFilterGroup?.[selectedFilterItemIdx!].multiValue)"
+        v-for="op in getOperatorKindsByDataKind(selectedFilterGroup?.[selectedFilterItemIdx!].dataKind)"
         :key="op"
         class="iw-contextmenu__item flex w-full cursor-pointer" :data-op="op"
       >

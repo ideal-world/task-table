@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { IwUtils } from '../../utils';
-import { getParentWithClass } from '../../utils/basic';
+import { delegateEvent, getParentWithClass } from '../../utils/basic';
 import * as eb from '../eventbus';
 
 const props = defineProps<{
@@ -15,8 +14,8 @@ let listEle: HTMLElement
 
 onMounted(() => {
   listEle = currentRef.value!.closest('.iw-row-select-container')! as HTMLElement
-  IwUtils.delegateEvent(listEle, 'click', '.iw-row-select-cell__chk', onSelectToggle)
-  IwUtils.delegateEvent(listEle, 'click', '.iw-row-select-all-cell__chk', onSelectAllToggle)
+  delegateEvent(listEle, 'click', '.iw-row-select-cell__chk', onSelectToggle)
+  delegateEvent(listEle, 'click', '.iw-row-select-all-cell__chk', onSelectAllToggle)
 })
 
 function onSelectToggle(event: Event) {

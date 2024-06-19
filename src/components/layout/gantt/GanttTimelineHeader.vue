@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { TableStyleProps } from '../../../props'
-import { GanttShowKind } from '../../../props/enumProps'
-import { IwUtils } from '../../../utils'
+import type { TableStyleProps } from '../../../props';
+import { GanttShowKind } from '../../../props/enumProps';
+import { groupBy } from '../../../utils/basic';
 
-import { type GanttInfo, type TimelineInfo, getTimelineColumnWidth } from './gantt'
+import { type GanttInfo, type TimelineInfo, getTimelineColumnWidth } from './gantt';
 
 const props = defineProps<{
   layoutId: string
@@ -12,7 +12,7 @@ const props = defineProps<{
 }>()
 
 function getCateColumTimeline() {
-  const cateColumTimeline: { [key: string]: TimelineInfo[] } = IwUtils.groupBy(props.ganttInfo.timeline, timeline => timeline.categoryTitle!)
+  const cateColumTimeline: { [key: string]: TimelineInfo[] } = groupBy(props.ganttInfo.timeline, timeline => timeline.categoryTitle!)
   return Object.entries(cateColumTimeline)
     .map(([cateTitle, items]) => {
       return {

@@ -12,7 +12,7 @@ import { type GanttInfo, getTimelineColumnWidth, getWeekdays } from './gantt'
 const props = defineProps<{
   layoutId: string
   ganttProps: GanttLayoutProps
-  records: { [key: string]: any }[]
+  records: { [columnName: string]: any }[]
   pkColumnName: string
   parentPkColumnName?: string
   subDataShowKind: SubDataShowKind
@@ -138,7 +138,7 @@ function generateDataRelLine() {
   }
 }
 
-function getTimelineBarTitle(row: { [key: string]: any }, plan: boolean) {
+function getTimelineBarTitle(row: { [columnName: string]: any }, plan: boolean) {
   const startTime = row[plan ? props.ganttProps.planStartTimeColumnName! : props.ganttProps.actualStartTimeColumnName!]
   const endTime = row[plan ? props.ganttProps.planEndTimeColumnName! : props.ganttProps.actualEndTimeColumnName!]
   if (startTime && endTime) {

@@ -32,7 +32,16 @@ export async function watch() {
   })
 }
 
-export async function loadData(moreForGroupedValue?: any, returnOnlyAgg?: boolean, layoutId?: string) {
+/**
+ * 加载数据
+ *
+ * Load data
+ *
+ * @param byGroupValue 分组值，当分组及分组值存在时仅加载对应分组值的数据 / Group value, when group and group value exist, only load the data of the corresponding group value
+ * @param returnOnlyAgg 仅返回聚合数据 / Only return aggregated data
+ * @param layoutId 布局ID / Layout ID
+ */
+export async function loadData(byGroupValue?: any, returnOnlyAgg?: boolean, layoutId?: string) {
   const layout = layoutId ? layoutsConf.find(layout => layout.id === layoutId)! : layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   const rawLayout = toRaw(layout)
@@ -42,28 +51,35 @@ export async function loadData(moreForGroupedValue?: any, returnOnlyAgg?: boolea
     showColumns.push(tableConf.parentPkColumnName)
   }
 
-  const resp = await events.loadData(
-    tableConf.quickSearch?.searchContent,
-    rawLayout.filter,
-    rawLayout.sort,
-    rawLayout.group,
-    rawLayout.agg,
-    rawLayout.subDataShowKind === SubDataShowKind.ONLY_PARENT_DATA,
-    moreForGroupedValue,
-    moreForGroupedValue !== undefined && rawLayout.group && rawLayout.group.slices && rawLayout.group.slices[moreForGroupedValue as string]
-      ? {
-          offsetNumber: rawLayout.group.slices[moreForGroupedValue as string].offsetNumber,
-          fetchNumber: rawLayout.group.slices[moreForGroupedValue as string].fetchNumber,
-        }
-      : {
-          offsetNumber: rawLayout.slice.offsetNumber,
-          fetchNumber: rawLayout.slice.fetchNumber,
-        },
-    showColumns,
-    returnOnlyAgg,
-  )
+  let resp = null
+  try {
+    resp = await events.loadData(
+      tableConf.quickSearch?.searchContent,
+      rawLayout.filter,
+      rawLayout.sort,
+      rawLayout.group,
+      rawLayout.agg,
+      rawLayout.subDataShowKind === SubDataShowKind.ONLY_PARENT_DATA,
+      byGroupValue,
+      byGroupValue !== undefined && rawLayout.group && rawLayout.group.slices && rawLayout.group.slices[byGroupValue as string]
+        ? {
+            offsetNumber: rawLayout.group.slices[byGroupValue as string].offsetNumber,
+            fetchNumber: rawLayout.group.slices[byGroupValue as string].fetchNumber,
+          }
+        : {
+            offsetNumber: rawLayout.slice.offsetNumber,
+            fetchNumber: rawLayout.slice.fetchNumber,
+          },
+      showColumns,
+      returnOnlyAgg,
+    )
+  }
+  catch (e: any) {
+    showAlert(t('_.event.invokeError', { msg: e.message }), 6, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    throw new Error(`[events.loadData] Invoke Error:${e.message}`)
+  }
 
-  if (moreForGroupedValue === undefined && !(layout.group?.item)) {
+  if (byGroupValue === undefined && !(layout.group?.item)) {
     // Load data without grouping
     if (!Array.isArray(resp)) {
       if (!returnOnlyAgg) {
@@ -76,10 +92,10 @@ export async function loadData(moreForGroupedValue?: any, returnOnlyAgg?: boolea
     }
     else {
       showAlert(t('_.event.loadDataInvalidScene'), 2, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
-      throw new Error('[events.loadData]  Invalid scene')
+      throw new Error('[events.loadData] Invalid scene')
     }
   }
-  else if (moreForGroupedValue === undefined && layout.group && layout.group.item) {
+  else if (byGroupValue === undefined && layout.group && layout.group.item) {
     // Load all grouped data
     if (Array.isArray(resp)) {
       if (!returnOnlyAgg) {
@@ -96,14 +112,14 @@ export async function loadData(moreForGroupedValue?: any, returnOnlyAgg?: boolea
     }
     else {
       showAlert(t('_.event.loadDataInvalidScene'), 2, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
-      throw new Error('[events.loadData]  Invalid scene')
+      throw new Error('[events.loadData] Invalid scene')
     }
   }
-  else if (moreForGroupedValue) {
+  else if (byGroupValue) {
     // Load a grouped data
     if (!Array.isArray(resp) && Array.isArray(layout.data)) {
       if (!returnOnlyAgg) {
-        const groupData = layout.data.find(d => d.groupValue === moreForGroupedValue)
+        const groupData = layout.data.find(d => d.groupValue === byGroupValue)
         if (groupData) {
           groupData.records = layout.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA ? sortByTree(resp.records, tableConf.pkColumnName, tableConf.parentPkColumnName) : resp.records
           groupData.aggs = resp.aggs
@@ -111,7 +127,7 @@ export async function loadData(moreForGroupedValue?: any, returnOnlyAgg?: boolea
         }
       }
       else {
-        const groupData = (layout.data as DataGroupResp[]).find(d => d.groupValue === moreForGroupedValue)
+        const groupData = (layout.data as DataGroupResp[]).find(d => d.groupValue === byGroupValue)
         if (groupData) {
           groupData.aggs = resp.aggs
         }
@@ -119,16 +135,23 @@ export async function loadData(moreForGroupedValue?: any, returnOnlyAgg?: boolea
     }
     else {
       showAlert(t('_.event.loadDataInvalidScene'), 2, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
-      throw new Error('[events.loadData]  Invalid scene')
+      throw new Error('[events.loadData] Invalid scene')
     }
   }
   else {
     showAlert(t('_.event.loadDataInvalidScene'), 2, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
-    throw new Error('[events.loadData]  Invalid scene')
+    throw new Error('[events.loadData] Invalid scene')
   }
 }
 
-export async function newData(newRecords: { [key: string]: any }[]): Promise<boolean> {
+/**
+ * 新建数据
+ *
+ * Create new data
+ *
+ * @param newRecords 要新建的数据 / Records to be created
+ */
+export async function newData(newRecords: { [columnName: string]: any }[]) {
   newRecords = toRaw(newRecords)
   const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
@@ -137,14 +160,27 @@ export async function newData(newRecords: { [key: string]: any }[]): Promise<boo
     throw new Error('[events.newData] Event not Configured')
   }
 
-  await events.newData(newRecords)
+  try {
+    await events.newData(newRecords)
+  }
+  catch (e: any) {
+    showAlert(t('_.event.invokeError', { msg: e.message }), 6, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    throw new Error(`[events.newData] Invoke Error:${e.message}`)
+  }
+
   layoutsConf.forEach(async (layout) => {
     await loadData(undefined, undefined, layout.id)
   })
-  return true
 }
 
-export async function copyData(targetRecordPks: any[]): Promise<boolean> {
+/**
+ * 复制数据
+ *
+ * Copy data
+ *
+ * @param targetRecordPks 要复制的数据主键 / Data primary keys to be copied
+ */
+export async function copyData(targetRecordPks: any[]) {
   targetRecordPks = toRaw(targetRecordPks)
   const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
@@ -153,14 +189,27 @@ export async function copyData(targetRecordPks: any[]): Promise<boolean> {
     throw new Error('[events.copyData] Event not Configured')
   }
 
-  await events.copyData(targetRecordPks)
+  try {
+    await events.copyData(targetRecordPks)
+  }
+  catch (e: any) {
+    showAlert(t('_.event.invokeError', { msg: e.message }), 6, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    throw new Error(`[events.copyData] Invoke Error:${e.message}`)
+  }
+
   layoutsConf.forEach(async (layout) => {
     await loadData(undefined, undefined, layout.id)
   })
-  return true
 }
 
-export async function modifyData(changedRecords: { [key: string]: any }[]): Promise<boolean> {
+/**
+ * 修改数据
+ *
+ * Modify data
+ *
+ * @param changedRecords 要修改的数据 / Data to be modified
+ */
+export async function modifyData(changedRecords: { [columnName: string]: any }[]) {
   changedRecords = toRaw(changedRecords)
 
   const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
@@ -170,14 +219,29 @@ export async function modifyData(changedRecords: { [key: string]: any }[]): Prom
     throw new Error('[events.modifyData] Event not Configured')
   }
 
-  await events.modifyData(changedRecords)
+  try {
+    await events.modifyData(changedRecords)
+  }
+  catch (e: any) {
+    showAlert(t('_.event.invokeError', { msg: e.message }), 6, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    throw new Error(`[events.modifyData] Invoke Error:${e.message}`)
+  }
+
   layoutsConf.forEach(async (layout) => {
     await loadData(undefined, undefined, layout.id)
   })
-  return true
 }
 
-export async function deleteData(deletedRecordPks: any[]): Promise<boolean> {
+/**
+ * 删除数据
+ *
+ * Delete data
+ *
+ * NOTE: 删除数据时，需要同时删除子数据 / When deleting data, you need to delete sub-data at the same time
+ *
+ * @param deletedRecordPks 要删除的数据主键 / Data primary keys to be deleted
+ */
+export async function deleteData(deletedRecordPks: any[]) {
   deletedRecordPks = toRaw(deletedRecordPks)
 
   const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
@@ -187,16 +251,27 @@ export async function deleteData(deletedRecordPks: any[]): Promise<boolean> {
     throw new Error('[events.deleteData] Event not Configured')
   }
 
-  if (!await events.deleteData(deletedRecordPks))
-    return false
+  try {
+    await events.deleteData(deletedRecordPks)
+  }
+  catch (e: any) {
+    showAlert(t('_.event.invokeError', { msg: e.message }), 6, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    throw new Error(`[events.deleteData] Invoke Error:${e.message}`)
+  }
 
   layoutsConf.forEach(async (layout) => {
     await loadData(undefined, undefined, layout.id)
   })
-  return true
 }
 
-export async function selectData(selectedRecordPks: any[]): Promise<boolean> {
+/**
+ * 选择数据
+ *
+ * Select data
+ *
+ * @param selectedRecordPks 选择的数据主键 / Selected data primary keys
+ */
+export async function selectData(selectedRecordPks: any[]) {
   selectedRecordPks = toRaw(selectedRecordPks)
 
   const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
@@ -206,52 +281,106 @@ export async function selectData(selectedRecordPks: any[]): Promise<boolean> {
     throw new Error('[events.selectData] Event not Configured')
   }
 
-  if (!await events.selectData(selectedRecordPks)) {
-    return false
+  try {
+    await events.selectData(selectedRecordPks)
   }
+  catch (e: any) {
+    showAlert(t('_.event.invokeError', { msg: e.message }), 6, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    throw new Error(`[events.selectData] Invoke Error:${e.message}`)
+  }
+
   layout.selectedDataPks = selectedRecordPks
-  return true
 }
 
-export async function clickCell(clickedRecordPk: any, clickedColumnName: string): Promise<boolean> {
+/**
+ * 点击单元格
+ *
+ * Click cell
+ *
+ * @param clickedRecordPk 点击的数据主键 / Clicked data primary key
+ * @param clickedColumnName 点击的列名 / Clicked column name
+ */
+export async function clickCell(clickedRecordPk: any, clickedColumnName: string) {
   const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.clickCell) {
     showAlert(t('_.event.notConfigured', { name: 'clickCell' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
     throw new Error('[events.clickCell] Event not Configured')
   }
-  return await events.clickCell(clickedRecordPk, clickedColumnName, layout.id, layout.layoutKind)
+  try {
+    await events.clickCell(clickedRecordPk, clickedColumnName, layout.id, layout.layoutKind)
+  }
+  catch (e: any) {
+    showAlert(t('_.event.invokeError', { msg: e.message }), 6, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    throw new Error(`[events.clickCell] Invoke Error:${e.message}`)
+  }
 }
 
-export async function loadCellDictItems(columnName: string, filterValue?: any, slice?: DataQuerySliceReq): Promise<DictItemsResp> {
+/**
+ * 加载字典项列表
+ *
+ * Load dictionary item list
+ *
+ * @param dictName 字典名 / Dictionary name
+ * @param filterValue 过滤值 / Filter value
+ * @param slice 分片 / Slice
+ * @returns 字典项列表 / Dictionary item list
+ */
+export async function loadCellDictItems(dictName: string, filterValue?: any, slice?: DataQuerySliceReq): Promise<DictItemsResp> {
   slice = toRaw(slice)
 
   const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
-  if (!events.loadCellDictItems) {
+  if (!events.loadDictItems) {
     showAlert(t('_.event.notConfigured', { name: 'loadCellDictItems' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
     throw new Error('[events.loadCellDictItems] Event not Configured')
   }
-
-  return await events.loadCellDictItems(columnName, filterValue, slice)
+  try {
+    return await events.loadDictItems(dictName, filterValue, slice)
+  }
+  catch (e: any) {
+    showAlert(t('_.event.invokeError', { msg: e.message }), 6, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    throw new Error(`[events.loadCellDictItems] Invoke Error:${e.message}`)
+  }
 }
 
+/**
+ * 加载多条件字典项列表
+ *
+ * Load multi-condition dictionary item list
+ *
+ * @param conds 条件 / Conditions
+ * @param slice 分片 / Slice
+ * @returns 字典项列表 / Dictionary item list
+ */
 export async function loadCellDictItemsWithMultiConds(conds: { [columnName: string]: any[] }, slice?: DataQuerySliceReq): Promise<{ [columnName: string]: DictItemsResp }> {
   conds = toRaw(conds)
   slice = toRaw(slice)
 
   const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
-  if (!events.loadCellDictItemsWithMultiConds) {
+  if (!events.loadDictItemsWithMultiConds) {
     showAlert(t('_.event.notConfigured', { name: 'loadCellDictItemsWithMultiConds' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
     throw new Error('[events.loadCellDictItemsWithMultiConds] Event not Configured')
   }
-
-  return await events.loadCellDictItemsWithMultiConds(conds, slice)
+  try {
+    return await events.loadDictItemsWithMultiConds(conds, slice)
+  }
+  catch (e: any) {
+    showAlert(t('_.event.invokeError', { msg: e.message }), 6, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    throw new Error(`[events.loadCellDictItemsWithMultiConds] Invoke Error:${e.message}`)
+  }
 }
 
-export async function modifyStyles(changedStyles: TableStyleModifyProps): Promise<boolean> {
-  changedStyles = toRaw(changedStyles)
+/**
+ * 修改样式
+ *
+ * Modify style
+ *
+ * @param changedStyleProps 修改的样式属性 / Modified style properties
+ */
+export async function modifyStyles(changedStyleProps: TableStyleModifyProps) {
+  changedStyleProps = toRaw(changedStyleProps)
 
   const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
@@ -260,23 +389,32 @@ export async function modifyStyles(changedStyles: TableStyleModifyProps): Promis
     throw new Error('[events.modifyStyles] Event not Configured')
   }
 
-  if (!await events.modifyStyles(changedStyles)) {
-    return false
+  try {
+    await events.modifyStyles(changedStyleProps)
+  }
+  catch (e: any) {
+    showAlert(t('_.event.invokeError', { msg: e.message }), 6, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    throw new Error(`[events.modifyStyles] Invoke Error:${e.message}`)
   }
 
-  changedStyles.size !== undefined && (tableConf.styles.size = changedStyles.size)
-  changedStyles.theme !== undefined && (tableConf.styles.theme = changedStyles.theme)
-  changedStyles.tableClass !== undefined && (tableConf.styles.tableClass = changedStyles.tableClass)
-  changedStyles.headerClass !== undefined && (tableConf.styles.headerClass = changedStyles.headerClass)
-  changedStyles.footerClass !== undefined && (tableConf.styles.footerClass = changedStyles.footerClass)
-  changedStyles.rowClass !== undefined && (tableConf.styles.rowClass = changedStyles.rowClass)
-  changedStyles.cellClass !== undefined && (tableConf.styles.cellClass = changedStyles.cellClass)
-  changedStyles.aggClass !== undefined && (tableConf.styles.aggClass = changedStyles.aggClass)
-
-  return true
+  changedStyleProps.size !== undefined && (tableConf.styles.size = changedStyleProps.size)
+  changedStyleProps.theme !== undefined && (tableConf.styles.theme = changedStyleProps.theme)
+  changedStyleProps.tableClass !== undefined && (tableConf.styles.tableClass = changedStyleProps.tableClass)
+  changedStyleProps.headerClass !== undefined && (tableConf.styles.headerClass = changedStyleProps.headerClass)
+  changedStyleProps.footerClass !== undefined && (tableConf.styles.footerClass = changedStyleProps.footerClass)
+  changedStyleProps.rowClass !== undefined && (tableConf.styles.rowClass = changedStyleProps.rowClass)
+  changedStyleProps.cellClass !== undefined && (tableConf.styles.cellClass = changedStyleProps.cellClass)
+  changedStyleProps.aggClass !== undefined && (tableConf.styles.aggClass = changedStyleProps.aggClass)
 }
 
-export async function setQuickSearchContent(quickSearchContent: string): Promise<boolean> {
+/**
+ * 设置快速搜索内容
+ *
+ * Set quick search content
+ *
+ * @param quickSearchContent 快速搜索内容 / Quick search content
+ */
+export async function setQuickSearchContent(quickSearchContent: string) {
   if (tableConf.quickSearch) {
     tableConf.quickSearch.searchContent = quickSearchContent
   }
@@ -290,10 +428,16 @@ export async function setQuickSearchContent(quickSearchContent: string): Promise
   layoutsConf.forEach((layout) => {
     loadData(undefined, undefined, layout.id)
   })
-  return true
 }
 
-export async function newLayout(newLayoutProps: SimpleLayoutProps): Promise<boolean> {
+/**
+ * 新建布局
+ *
+ * Create new layout
+ *
+ * @param newLayoutProps 新建布局属性 / New layout properties
+ */
+export async function newLayout(newLayoutProps: SimpleLayoutProps) {
   const layoutProps = generateLayoutProps(deepToRaw(newLayoutProps), {
     ...deepToRaw(tableConf),
   })
@@ -305,18 +449,32 @@ export async function newLayout(newLayoutProps: SimpleLayoutProps): Promise<bool
     throw new Error('[events.newLayout] Event not Configured')
   }
 
-  const layoutId = await events.newLayout(layoutProps)
-  layoutsConf.push({
-    ...layoutProps,
-    selectedDataPks: [],
-    id: layoutId,
-  })
+  let layoutId
+  try {
+    layoutId = await events.newLayout(layoutProps)
+    layoutsConf.push({
+      ...layoutProps,
+      selectedDataPks: [],
+      id: layoutId,
+    })
+  }
+  catch (e: any) {
+    showAlert(t('_.event.invokeError', { msg: e.message }), 6, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    throw new Error(`[events.newLayout] Invoke Error:${e.message}`)
+  }
 
   await loadData(undefined, undefined, layoutId)
-  return true
 }
 
-export async function modifyLayout(changedLayoutProps: LayoutModifyProps, byGroupValue?: any): Promise<boolean> {
+/**
+ * 修改当前布局
+ *
+ * Modify current layout
+ *
+ * @param changedLayoutProps 修改的布局属性 / Changed layout properties
+ * @param byGroupValue 分组值，当分组及分组值存在时修改布局后仅加载对应分组值的数据 / Group value, when group and group value exist, only load the data of the corresponding group value after modifying the layout
+ */
+export async function modifyLayout(changedLayoutProps: LayoutModifyProps, byGroupValue?: any) {
   changedLayoutProps = deepToRaw(changedLayoutProps)
 
   const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
@@ -326,8 +484,13 @@ export async function modifyLayout(changedLayoutProps: LayoutModifyProps, byGrou
     throw new Error('[events.modifyLayout] Event not Configured')
   }
 
-  if (!await events.modifyLayout(currentLayoutId.value, changedLayoutProps))
-    return false
+  try {
+    await events.modifyLayout(currentLayoutId.value, changedLayoutProps)
+  }
+  catch (e: any) {
+    showAlert(t('_.event.invokeError', { msg: e.message }), 6, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    throw new Error(`[events.modifyLayout] Invoke Error:${e.message}`)
+  }
 
   // Process basic
   changedLayoutProps.title !== undefined && (layout.title = changedLayoutProps.title)
@@ -361,10 +524,16 @@ export async function modifyLayout(changedLayoutProps: LayoutModifyProps, byGrou
       await loadData(byGroupValue)
     }
   }
-  return true
 }
 
-export async function deleteLayout(deletedLayoutId: string): Promise<boolean> {
+/**
+ * 删除布局
+ *
+ * Delete layout
+ *
+ * @param deletedLayoutId 删除的布局ID / Deleted layout ID
+ */
+export async function deleteLayout(deletedLayoutId: string) {
   const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.deleteLayout) {
@@ -372,14 +541,27 @@ export async function deleteLayout(deletedLayoutId: string): Promise<boolean> {
     throw new Error('[events.deleteLayout] Event not Configured')
   }
 
-  if (!await events.deleteLayout(deletedLayoutId))
-    return false
+  try {
+    await events.deleteLayout(deletedLayoutId)
+  }
+  catch (e: any) {
+    showAlert(t('_.event.invokeError', { msg: e.message }), 6, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    throw new Error(`[events.deleteLayout] Invoke Error:${e.message}`)
+  }
 
   const oldColumnIdx = layoutsConf.findIndex(layout => layout.id === deletedLayoutId)!
   layoutsConf.splice(oldColumnIdx, 1)
-  return true
 }
 
+/**
+ * 加载假日列表
+ *
+ * Load holidays
+ *
+ * @param startTime 开始时间 / Start time
+ * @param endTime 结束时间 / End time
+ * @returns 假日列表 / Holidays
+ */
 export async function loadHolidays(startTime: Date, endTime: Date): Promise<Date[]> {
   const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
@@ -388,5 +570,11 @@ export async function loadHolidays(startTime: Date, endTime: Date): Promise<Date
     throw new Error('[events.loadHolidays] Event not Configured')
   }
 
-  return await events.loadHolidays(startTime, endTime)
+  try {
+    return await events.loadHolidays(startTime, endTime)
+  }
+  catch (e: any) {
+    showAlert(t('_.event.invokeError', { msg: e.message }), 6, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    throw new Error(`[events.loadHolidays] Invoke Error:${e.message}`)
+  }
 }

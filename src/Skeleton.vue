@@ -14,7 +14,7 @@ import GanttComp from './components/layout/gantt/Gantt.vue'
 import ListComp from './components/layout/list/List.vue'
 import type { SimpleTableProps } from './props'
 import { LayoutKind } from './props/enumProps'
-import { IwUtils } from './utils'
+import { delegateEvent } from './utils/basic'
 
 const _props = defineProps<SimpleTableProps>()
 const { tableConf, layoutsConf, currentLayoutId }: {
@@ -80,7 +80,7 @@ function reSetScrollableWidth(layoutId: string) {
 
 onMounted(async () => {
   setHeight()
-  IwUtils.delegateEvent(`#iw-tt-${tableConf.id}`, 'click', '.iw-tt-header__item', (e: Event) => {
+  delegateEvent(`#iw-tt-${tableConf.id}`, 'click', '.iw-tt-header__item', (e: Event) => {
     const target = e.target as HTMLElement
     const layoutId = target.dataset.layoutId
     if (layoutId) {

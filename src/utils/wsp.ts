@@ -1,3 +1,8 @@
+/**
+ * 异步Websocket类
+ *
+ * Async Websocket class
+ */
 export class WebsocketP {
   protected ws!: WebSocket
   protected injectReqIdFun!: ((data: any, reqId: string) => any)
@@ -114,7 +119,7 @@ export class DefaultWebSocketP extends WebsocketP {
       from_avatar,
       to_avatars: [
         from_avatar,
-      ], 
+      ],
       ignore_self: false,
     }, timeout)
     if (resp.msg.code.startsWith('200'))

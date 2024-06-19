@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import * as iconSvg from '../../assets/icon'
-import { IwUtils } from '../../utils'
+import { delegateEvent } from '../../utils/basic'
 import MenuComp, { MenuOffsetKind } from '../common/Menu.vue'
 import type { ColumnConf, LayoutConf, TableConf } from '../conf'
 import BasicSettingComp from './BasicSetting.vue'
@@ -9,9 +9,9 @@ import ColumnShowSettingComp from './ColumnShowSetting.vue'
 import GroupSettingComp from './GroupSetting.vue'
 import LayoutSettingComp from './LayoutSetting.vue'
 import SubDataShowSettingComp from './SubDataShowSetting.vue'
+import TableLocalesSettingComp from './TableLocalesSetting.vue'
 import TableResizeSettingComp from './TableResizeSetting.vue'
 import TableThemeSettingComp from './TableThemeSetting.vue'
-import TableLocalesSettingComp from './TableLocalesSetting.vue'
 
 const props = defineProps<{
   tableConf: TableConf
@@ -23,7 +23,7 @@ const tableSettingCompRef = ref<InstanceType<typeof MenuComp>>()
 
 onMounted(() => {
   tableSettingCompRef.value?.onInit(async (menuEle: HTMLElement) => {
-    IwUtils.delegateEvent(menuEle, 'click', '.iw-table-setting-title', (e: Event) => {
+    delegateEvent(menuEle, 'click', '.iw-table-setting-title', (e: Event) => {
       const toggleEle = (e.target as HTMLElement).nextSibling as HTMLElement
       toggleEle.style.display = toggleEle.style.display === 'none' ? 'block' : 'none'
     })

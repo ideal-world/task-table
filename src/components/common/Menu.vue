@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { InjectionKey } from 'vue'
 import { computed, nextTick, onMounted, provide, ref } from 'vue'
-import { IwUtils } from '../../utils'
+import { getParentWithClass, getRandomString } from '../../utils/basic'
 
 const contextmenuRef = ref<HTMLElement | null>(null)
 const is_init = ref<boolean>(false)
@@ -9,7 +9,7 @@ const is_init = ref<boolean>(false)
 const DIFF_OFFSET = 10
 
 const contextmenuMathRandom = computed(() =>
-  IwUtils.getRandomString(12),
+  getRandomString(12),
 )
 
 async function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: MenuOffsetKind = MenuOffsetKind.MEDIUM_TOP, size: MenuSizeKind | MenuCustomSize = MenuSizeKind.MEDIUM, force: boolean = false, boundaryEle?: HTMLElement,
@@ -155,7 +155,7 @@ async function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: Menu
     })
     contextMenuEle.style.display = `block`
     if (attachObj instanceof HTMLElement || attachObj.target instanceof HTMLElement) {
-      const parentMenuEle = IwUtils.getParentWithClass(attachObj instanceof HTMLElement ? attachObj as HTMLElement : attachObj.target as HTMLElement, 'iw-contextmenu')
+      const parentMenuEle = getParentWithClass(attachObj instanceof HTMLElement ? attachObj as HTMLElement : attachObj.target as HTMLElement, 'iw-contextmenu')
       if (parentMenuEle)
         contextMenuEle.dataset.level = `${Number.parseInt(parentMenuEle.dataset.level!) + 1}`
       else

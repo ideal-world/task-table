@@ -44,7 +44,7 @@ export interface TimelineInfo {
   today?: boolean
 }
 
-export function getStartAndEndDay(records: { [key: string]: any }[], planStartTimeColumnName: string, planEndTimeColumnName: string, actualStartTimeColumnName?: string, actualEndTimeColumnName?: string): { startDate: Date, endDate: Date } {
+export function getStartAndEndDay(records: { [columnName: string]: any }[], planStartTimeColumnName: string, planEndTimeColumnName: string, actualStartTimeColumnName?: string, actualEndTimeColumnName?: string): { startDate: Date, endDate: Date } {
   let timelineStartDate: Date | null = null
   let timelineEndDate: Date | null = null
   records.forEach((d) => {

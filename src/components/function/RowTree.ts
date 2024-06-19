@@ -1,6 +1,5 @@
 import * as iconSvg from '../../assets/icon'
-import { IwUtils } from '../../utils'
-import { getParentWithClass } from '../../utils/basic'
+import { delegateEvent, getParentWithClass, getRandomString } from '../../utils/basic'
 
 export const NODE_DEPTH_FLAG = '__node_depth'
 
@@ -10,7 +9,7 @@ const EVENT_EXECUTE_HANDLER: {
 }[] = []
 
 export function registerRowTreeTriggerEvent(event: (dataPk: any, hide: boolean) => Promise<void>): string {
-  const id = `iw-row-tree-event-${IwUtils.getRandomString(12)}`
+  const id = `iw-row-tree-event-${getRandomString(12)}`
   EVENT_EXECUTE_HANDLER.push({
     id,
     event,
@@ -44,7 +43,7 @@ function getTreeData(data: any[], parentPk: any, pkColumnName: string, parentPkC
   return treeData
 }
 
-export function filterTreeDataPks(filterPks: any[], records: { [key: string]: any }[], pkColumnName: string, parentPkColumnName?: string): any[] {
+export function filterTreeDataPks(filterPks: any[], records: { [columnName: string]: any }[], pkColumnName: string, parentPkColumnName?: string): any[] {
   if (parentPkColumnName === undefined)
     return filterPks
 
@@ -65,7 +64,7 @@ export function renderTreeToggleHandler(hasSubData: boolean): string {
 }
 
 export function registerTreeRowToggleListener(rowsEle: HTMLElement) {
-  IwUtils.delegateEvent(rowsEle, 'click', `.${iconSvg.EXPAND}`, (e) => {
+  delegateEvent(rowsEle, 'click', `.${iconSvg.EXPAND}`, (e) => {
     const ele = e.target as HTMLElement
     const currPk = getParentWithClass(ele, 'iw-data-row')!.dataset.pk!
     rowsEle.querySelectorAll(`.iw-data-row[data-parent-pk="${currPk}"]`).forEach((node) => {
@@ -76,7 +75,7 @@ export function registerTreeRowToggleListener(rowsEle: HTMLElement) {
     ele.classList.add(iconSvg.SHRINK)
     e.stopImmediatePropagation()
   })
-  IwUtils.delegateEvent(rowsEle, 'click', `.${iconSvg.SHRINK}`, (e) => {
+  delegateEvent(rowsEle, 'click', `.${iconSvg.SHRINK}`, (e) => {
     const ele = e.target as HTMLElement
     const currPk = getParentWithClass(ele, 'iw-data-row')!.dataset.pk!
     recursionShrinkRows(rowsEle, currPk)

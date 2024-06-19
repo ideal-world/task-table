@@ -19,9 +19,6 @@
       "file": "文件",
       "image": "图像",
       "amount": "金额",
-      "select": "下拉单选",
-      "multiselect": "下拉多选",
-      "checkbox": "多选",
       "date": "日期",
       "datetime": "日期时间",
       "time": "时间",
@@ -50,6 +47,7 @@
     },
     "event": {
       "notConfigured": "事件[{name}]未配置",
+      "invokeError": "事件执行失败：{msg}",
       "loadDataInvalidScene": "数据加载失败：场景不合法"
     },
     "table": {

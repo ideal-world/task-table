@@ -3,7 +3,7 @@ import { onMounted, ref, watch } from 'vue'
 import type { EditDataProps } from '../../props'
 import type { DataGroupResp, DataResp } from '../../props/basicProps'
 import { DataKind, getInputTypeByDataKind } from '../../props/enumProps'
-import { IwUtils } from '../../utils'
+import { delegateEvent } from '../../utils/basic'
 import type { ColumnConf } from '../conf'
 import * as eb from '../eventbus'
 import DictSelectComp from './DictSelect.vue'
@@ -117,7 +117,7 @@ watch(() => props.data, () => {
 
 onMounted(() => {
   const containerEle = cellEditContainerRef.value!.closest(`.${props.containerClass}`) as HTMLElement
-  IwUtils.delegateEvent(containerEle, 'dblclick', `.${props.editCellClass}`, (e) => {
+  delegateEvent(containerEle, 'dblclick', `.${props.editCellClass}`, (e) => {
     if (!e.target || !(e.target instanceof HTMLElement)) {
       return
     }

@@ -1,15 +1,14 @@
 <script setup lang="ts">
-import type { Ref } from 'vue'
-import { onMounted, ref, toRaw } from 'vue'
-import { IwEvents, IwProps } from '../src'
-import { IwUtils } from '../src/utils'
+import type { Ref } from 'vue';
+import { onMounted, ref, toRaw } from 'vue';
+import { IwEvents, IwProps,IwUtils } from '../src';
 
 const selectedRecordPks: Ref<any[]> = ref([])
 
 const NAME_DICT = [{ title: '星航', value: 'xh', avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg' }, { title: '星杨', value: 'xy', avatar: 'https://pic1.zhimg.com/v2-770e9580d5febfb49cbb23c409cea85d_r.jpg' }, { title: '星辰', value: 'xc' }]
 const STATS_DICT = [{ title: '初始化', value: 'init', color: '#43ad7f7f' }, { title: '进行中', value: 'progress' }, { title: '有风险', value: 'risk', color: '#be14807f' }, { title: '已完成', value: 'finish' }, { title: '已关闭', value: 'close' }]
 
-const DATA: { [key: string]: any }[] = [
+const DATA: { [columnName: string]: any }[] = [
   { no: 1, pno: null, name: 'v1.0优化任务集合', creator: 'xh', stats: ['init'], planStartTime: '2023-10-22', planEndTime: '2023-12-01', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: 'https://idealworld.group/img/home-bg.jpg' },
   { no: 2, pno: null, name: '测试报告导出', creator: 'xh', stats: ['init'], planStartTime: '2023-10-14', planEndTime: '2024-01-01', actualStartTime: '2023-10-15', actualEndTime: '2023-11-24', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: 'https://idealworld.group/img/home-bg.jpg' },
   { no: 3, pno: 1, name: '平台支持修改工程下默认分支', creator: 'xh', stats: ['progress', 'risk'], planStartTime: '2023-10-25', planEndTime: '2023-11-29', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
@@ -53,7 +52,7 @@ function getDictValue(columnName: string, dataValue: any) {
   }
 }
 
-function attachDict(data: { [key: string]: any }[]) {
+function attachDict(data: { [columnName: string]: any }[]) {
   return data.map((d) => {
     if (d.creator) {
       d[`creator${IwProps.DATA_DICT_POSTFIX}`] = [NAME_DICT.find(dict => dict.value === d.creator)!]
@@ -66,17 +65,17 @@ function attachDict(data: { [key: string]: any }[]) {
 }
 
 const events: IwProps.TableEventProps = {
-  loadData: async (quickSearchContent?: string, filters?: IwProps.FilterDataProps, sorts?: IwProps.SortDataProps, group?: IwProps.GroupDataProps, agg?: IwProps.AggDataProps, hideSubData?: boolean, byGroupValue?: any, slices?: IwProps.DataQuerySliceReq, returnColumnNames?: string[], _returnOnlyAgg?: boolean): Promise<IwProps.DataResp | IwProps.DataGroupResp[]> => {
-    let data: { [key: string]: any }[] = toRaw(DATA)
+  loadData: async (quickSearchContent?: string, filter?: IwProps.FilterDataProps, sort?: IwProps.SortDataProps, group?: IwProps.GroupDataProps, agg?: IwProps.AggDataProps, hideSubData?: boolean, byGroupValue?: any, slice?: IwProps.DataQuerySliceReq, returnColumnNames?: string[], _returnOnlyAgg?: boolean): Promise<IwProps.DataResp | IwProps.DataGroupResp[]> => {
+    let data: { [columnName: string]: any }[] = toRaw(DATA)
     if (quickSearchContent) {
       data = data.filter((d) => {
         return d.name.includes(quickSearchContent)
       })
     }
 
-    if (filters) {
+    if (filter) {
       // TODO 支持多组
-      filters.groups.forEach((filter) => {
+      filter.groups.forEach((filter) => {
         data = data.filter((d) => {
           return filter.items.every((item) => {
             switch (item.operator) {
@@ -94,10 +93,24 @@ const events: IwProps.TableEventProps = {
                 return d[item.columnName] > item.value
               case IwProps.OperatorKind.GE:
                 return d[item.columnName] >= item.value
-              case IwProps.OperatorKind.IN:
-                return d[item.columnName].includes(item.value)
-              case IwProps.OperatorKind.NOT_IN:
-                return !d[item.columnName].includes(item.value)
+              case IwProps.OperatorKind.IN:{
+                // eslint-disable-next-line ts/no-use-before-define
+                if (columns.find(col => col.name === item.columnName)!.multiValue) {
+                  return d[item.columnName].some((v: any) => item.value.includes(v))
+                }
+                else {
+                  return d[item.columnName].includes(item.value)
+                }
+              }
+              case IwProps.OperatorKind.NOT_IN:{
+                // eslint-disable-next-line ts/no-use-before-define
+                if (columns.find(col => col.name === item.columnName)!.multiValue) {
+                  return !d[item.columnName].some((v: any) => item.value.includes(v))
+                }
+                else {
+                  return !d[item.columnName].includes(item.value)
+                }
+              }
               case IwProps.OperatorKind.CONTAINS:
                 return d[item.columnName].includes(item.value)
               case IwProps.OperatorKind.NOT_CONTAINS:
@@ -121,8 +134,8 @@ const events: IwProps.TableEventProps = {
         })
       })
     }
-    if (sorts) {
-      sorts.conds.forEach((sort) => {
+    if (sort) {
+      sort.items.forEach((sort) => {
         data.sort((a, b) => {
           if (sort.orderDesc) {
             return typeof a[sort.columnName] === 'number' ? b[sort.columnName] - a[sort.columnName] : b[sort.columnName].localeCompare(a[sort.columnName])
@@ -151,7 +164,7 @@ const events: IwProps.TableEventProps = {
       })
     }
     if (group && group.item && !byGroupValue) {
-      let dataGroup: { [key: string]: any[] } = IwUtils.groupBy(data, (d) => { return d[group.item!.columnName] })
+      let dataGroup: { [key: string]: any[] } = IwUtils.basic.groupBy(data, (d) => { return d[group.item!.columnName] })
       if (group.item.hideEmptyRecord) {
         dataGroup = Object.fromEntries(Object.entries(dataGroup).filter(([_, value]) => value.length > 0))
       }
@@ -159,9 +172,9 @@ const events: IwProps.TableEventProps = {
         return [key, value.length]
       }),
       )
-      if (slices) {
+      if (slice) {
         dataGroup = Object.fromEntries(Object.entries(dataGroup).map(([key, value]) => {
-          return [key, value.slice(slices.offsetNumber, slices.offsetNumber + slices.fetchNumber)]
+          return [key, value.slice(slice.offsetNumber, slice.offsetNumber + slice.fetchNumber)]
         }),
         )
       }
@@ -265,8 +278,8 @@ const events: IwProps.TableEventProps = {
         })
       }
       let records
-      if (slices) {
-        records = data.slice(slices.offsetNumber, slices.offsetNumber + slices.fetchNumber)
+      if (slice) {
+        records = data.slice(slice.offsetNumber, slice.offsetNumber + slice.fetchNumber)
       }
       else {
         records = data
@@ -288,13 +301,12 @@ const events: IwProps.TableEventProps = {
     }
   },
 
-  newData: async (newRecords: { [key: string]: any }[]): Promise<{ [key: string]: any }[]> => {
+  newData: async (newRecords: { [columnName: string]: any }[]): Promise<void> => {
     // TODO targetSortValue
     DATA.push(...newRecords)
-    return JSON.parse(JSON.stringify(DATA))
   },
 
-  copyData: async (targetRecordPks: any[]): Promise<{ [key: string]: any }[]> => {
+  copyData: async (targetRecordPks: any[]): Promise<void> => {
     const newRecords = targetRecordPks.map((pk) => {
       // 不区别类型
     // eslint-disable-next-line eqeqeq
@@ -305,47 +317,41 @@ const events: IwProps.TableEventProps = {
       record.no = Date.now().toString()
     })
     DATA.push(...newRecords)
-    return JSON.parse(JSON.stringify(DATA))
   },
 
-  modifyData: async (changedRecords: { [key: string]: any }[]): Promise<{ [key: string]: any }[]> => {
+  modifyData: async (changedRecords: { [columnName: string]: any }[]): Promise<void> => {
     changedRecords.forEach((changedRecord) => {
       // 不区别类型
     // eslint-disable-next-line eqeqeq
       const record = DATA.find(d => d.no == changedRecord.no)!
       Object.assign(record, changedRecord)
     })
-    return JSON.parse(JSON.stringify(DATA))
   },
 
-  deleteData: async (deletedRecordPks: any[]): Promise<boolean> => {
+  deleteData: async (deletedRecordPks: any[]): Promise<void> => {
     // 不区别类型
     // eslint-disable-next-line eqeqeq
     DATA.splice(DATA.findIndex(d => d.no == deletedRecordPks[0]), 1)
-    return true
   },
 
-  selectData: async (_selectedRecordPks: any[]): Promise<boolean> => {
+  selectData: async (_selectedRecordPks: any[]): Promise<void> => {
     selectedRecordPks.value = _selectedRecordPks
-    return true
   },
 
-  clickCell: async (clickedRecordPk: any, clickedColumnName: string, _byLayoutId: string, _byLayoutKind: IwProps.LayoutKind): Promise<boolean> => {
+  clickCell: async (clickedRecordPk: any, clickedColumnName: string, _byLayoutId: string, _byLayoutKind: IwProps.LayoutKind): Promise<void> => {
     if (clickedColumnName === 'no') {
       // eslint-disable-next-line no-alert
       alert(`点击了序号${clickedRecordPk}`)
     }
-    return true
   },
 
-  modifyStyles: async (changedStyleProps: IwProps.TableStyleModifyProps): Promise<boolean> => {
+  modifyStyles: async (changedStyleProps: IwProps.TableStyleModifyProps): Promise<void> => {
     // eslint-disable-next-line ts/no-use-before-define
     tableProps.value.styles = {
       // eslint-disable-next-line ts/no-use-before-define
       ...tableProps.value.styles,
       ...changedStyleProps,
     }
-    return true
   },
 
   newLayout: async (newLayoutProps: IwProps.LayoutProps): Promise<string> => {
@@ -358,7 +364,7 @@ const events: IwProps.TableEventProps = {
     return id
   },
 
-  modifyLayout: async (changedLayoutId: string, changedLayoutProps: IwProps.LayoutModifyProps): Promise<boolean> => {
+  modifyLayout: async (changedLayoutId: string, changedLayoutProps: IwProps.LayoutModifyProps): Promise<void> => {
     // eslint-disable-next-line ts/no-use-before-define
     const currLayout = tableProps.value.layouts.find((layout) => { return layout.id === changedLayoutId })!
     if (changedLayoutProps.title) {
@@ -393,16 +399,14 @@ const events: IwProps.TableEventProps = {
       currLayout.agg = changedLayoutProps.agg
     }
     if (changedLayoutProps.changedColumn) {
-      const col = currLayout.columns.find((col) => { return col.name === changedLayoutProps.changedColumn!.name })!
+      const col = currLayout.columns!.find((col) => { return col.name === changedLayoutProps.changedColumn!.name })!
       Object.assign(col, changedLayoutProps.changedColumn)
     }
-    return true
   },
 
-  deleteLayout: async (deletedLayoutId: string): Promise<boolean> => {
+  deleteLayout: async (deletedLayoutId: string): Promise<void> => {
     // eslint-disable-next-line ts/no-use-before-define
     tableProps.value.layouts.splice(tableProps.value.layouts.findIndex((layout) => { return layout.id === deletedLayoutId }), 1)
-    return true
   },
 
   loadHolidays: async (_startTime: Date, _endTime: Date): Promise<Date[]> => {
@@ -441,8 +445,8 @@ const events: IwProps.TableEventProps = {
     ]
   },
 
-  loadCellDictItems: async (columnName: string, filterValue?: any, slice?: IwProps.DataQuerySliceReq): Promise<IwProps.DictItemsResp> => {
-    if (columnName === 'creator') {
+  loadDictItems: async (dictName: string, filterValue?: any, slice?: IwProps.DataQuerySliceReq): Promise<IwProps.DictItemsResp> => {
+    if (dictName === 'creator') {
       let nameDict: IwProps.DictItemProps[] = JSON.parse(JSON.stringify(NAME_DICT))
       if (filterValue) {
         nameDict = nameDict.filter((dict) => { return dict.title.includes(filterValue) || dict.value.includes(filterValue) })
@@ -472,7 +476,7 @@ const events: IwProps.TableEventProps = {
     }
   },
 
-  loadCellDictItemsWithMultiConds: async (conds: { [columnName: string]: any[] }, slice?: IwProps.DataQuerySliceReq): Promise<{ [columnName: string]: IwProps.DictItemsResp }> => {
+  loadDictItemsWithMultiConds: async (conds: { [dictName: string]: any[] }, slice?: IwProps.DataQuerySliceReq): Promise<{ [dictName: string]: IwProps.DictItemsResp }> => {
     const resp = {}
     Object.entries(conds).forEach(([columnName, values]) => {
       if (columnName === 'name') {
@@ -507,7 +511,7 @@ const events: IwProps.TableEventProps = {
 const columns: IwProps.SimpleTableColumnProps[] = [
   { name: 'no', title: 'ID', dataKind: IwProps.DataKind.NUMBER, width: 80, styles: { cursor: 'pointer' } },
   { name: 'pno', title: '父ID', dataKind: IwProps.DataKind.NUMBER, hide: true },
-  { name: 'name', title: '名称', width: 300, render: (record: { [key: string]: any }, layoutKind: IwProps.LayoutKind) => {
+  { name: 'name', title: '名称', width: 300, render: (record: { [columnName: string]: any }, layoutKind: IwProps.LayoutKind) => {
     if (layoutKind === IwProps.LayoutKind.LIST) {
       return record.stats.includes('risk') ? `<span style='color:red'>${record.name}</span>` : record.name
     }
@@ -631,7 +635,7 @@ const _tableProps: IwProps.SimpleTableProps = {
   },
   showSelectColumn: true,
   actionColumn: {
-    render: (record: { [key: string]: any }, _layoutKind: IwProps.LayoutKind) => {
+    render: (record: { [columnName: string]: any }, _layoutKind: IwProps.LayoutKind) => {
       return `<button class="btn-row-delete" style="margin-right:2px" data-id='${record.no}'>删除</button> <button class="btn-row-copy" data-id='${record.no}'>复制</button>`
     },
     width: 100,
@@ -668,10 +672,10 @@ const _tableProps: IwProps.SimpleTableProps = {
 const tableProps: Ref<IwProps.SimpleTableProps> = ref(_tableProps)
 
 onMounted(() => {
-  IwUtils.delegateEvent('.iw-tt', 'click', '.btn-row-delete', (e) => {
+  IwUtils.basic.delegateEvent('.iw-tt', 'click', '.btn-row-delete', (e) => {
     IwEvents.deleteData([(e.target as HTMLElement).dataset.id])
   })
-  IwUtils.delegateEvent('.iw-tt', 'click', '.btn-row-copy', (e) => {
+  IwUtils.basic.delegateEvent('.iw-tt', 'click', '.btn-row-copy', (e) => {
     IwEvents.copyData([(e.target as HTMLElement).dataset.id])
   })
 })

@@ -1,50 +1,148 @@
+/**
+ * @module IwEvents
+ * @description 所有外部可主动调用的事件 / All events that can be called externally
+ */
+
 import * as eb from './components/eventbus'
 import type { DataQuerySliceReq, DictItemsResp, LayoutModifyProps, SimpleLayoutProps, TableStyleModifyProps } from './props'
 
-export async function loadData(moreForGroupedValue?: any, returnOnlyAgg?: boolean, layoutId?: string) {
-  await eb.loadData(moreForGroupedValue, returnOnlyAgg, layoutId)
+/**
+ * 加载数据
+ *
+ * Load data
+ *
+ * @param byGroupValue 分组值，当分组及分组值存在时仅加载对应分组值的数据 / Group value, when group and group value exist, only load the data of the corresponding group value
+ * @param returnOnlyAgg 仅返回聚合数据 / Only return aggregated data
+ * @param layoutId 布局ID / Layout ID
+ */
+export async function loadData(byGroupValue?: any, returnOnlyAgg?: boolean, layoutId?: string) {
+  await eb.loadData(byGroupValue, returnOnlyAgg, layoutId)
 }
 
-export async function newData(newRecords: { [key: string]: any }[]): Promise<boolean> {
-  return await eb.newData(newRecords)
+/**
+ * 新建数据
+ *
+ * Create new data
+ *
+ * @param newRecords 要新建的数据 / Records to be created
+ */
+export async function newData(newRecords: { [columnName: string]: any }[]) {
+  await eb.newData(newRecords)
 }
 
-export async function copyData(targetRecordPks: any[]): Promise<boolean> {
-  return await eb.copyData(targetRecordPks)
+/**
+ * 复制数据
+ *
+ * Copy data
+ *
+ * @param targetRecordPks 要复制的数据主键 / Data primary keys to be copied
+ */
+export async function copyData(targetRecordPks: any[]) {
+  await eb.copyData(targetRecordPks)
 }
 
-export async function modifyData(changedRecords: { [key: string]: any }[]): Promise<boolean> {
-  return await eb.modifyData(changedRecords)
+/**
+ * 修改数据
+ *
+ * Modify data
+ *
+ * @param changedRecords 要修改的数据 / Data to be modified
+ */
+export async function modifyData(changedRecords: { [columnName: string]: any }[]) {
+  await eb.modifyData(changedRecords)
 }
 
-export async function deleteData(deletedRecordPks: any[]): Promise<boolean> {
-  return await eb.deleteData(deletedRecordPks)
+/**
+ * 删除数据
+ *
+ * Delete data
+ *
+ * NOTE: 删除数据时，需要同时删除子数据 / When deleting data, you need to delete sub-data at the same time
+ *
+ * @param deletedRecordPks 要删除的数据主键 / Data primary keys to be deleted
+ */
+export async function deleteData(deletedRecordPks: any[]) {
+  await eb.deleteData(deletedRecordPks)
 }
 
-export async function selectData(selectedRecordPks: any[]): Promise<boolean> {
-  return await eb.selectData(selectedRecordPks)
+/**
+ * 选择数据
+ *
+ * Select data
+ *
+ * @param selectedRecordPks 选择的数据主键 / Selected data primary keys
+ */
+export async function selectData(selectedRecordPks: any[]) {
+  await eb.selectData(selectedRecordPks)
 }
 
-export async function loadCellDictItems(columnName: string, filterValue?: any, slice?: DataQuerySliceReq): Promise<DictItemsResp> {
-  return await eb.loadCellDictItems(columnName, filterValue, slice)
+/**
+ * 加载字典项列表
+ *
+ * Load dictionary item list
+ *
+ * @param dictName 字典名 / Dictionary name
+ * @param filterValue 过滤值 / Filter value
+ * @param slice 分片 / Slice
+ * @returns 字典项列表 / Dictionary item list
+ */
+export async function loadCellDictItems(dictName: string, filterValue?: any, slice?: DataQuerySliceReq): Promise<DictItemsResp> {
+  return await eb.loadCellDictItems(dictName, filterValue, slice)
 }
 
-export async function loadCellDictItemsWithMultiConds(conds: { [columnName: string]: any[] }, slice?: DataQuerySliceReq): Promise<{ [columnName: string]: DictItemsResp }> {
+/**
+ * 加载多条件字典项列表
+ *
+ * Load multi-condition dictionary item list
+ *
+ * @param conds 条件 / Conditions
+ * @param slice 分片 / Slice
+ * @returns 字典项列表 / Dictionary item list
+ */
+export async function loadCellDictItemsWithMultiConds(conds: { [dictName: string]: any[] }, slice?: DataQuerySliceReq): Promise<{ [dictName: string]: DictItemsResp }> {
   return await eb.loadCellDictItemsWithMultiConds(conds, slice)
 }
 
-export async function modifyStyles(changedStyles: TableStyleModifyProps): Promise<boolean> {
-  return await eb.modifyStyles(changedStyles)
+/**
+ * 修改样式
+ *
+ * Modify style
+ *
+ * @param changedStyleProps 修改的样式属性 / Modified style properties
+ */
+export async function modifyStyles(changedStyleProps: TableStyleModifyProps) {
+  await eb.modifyStyles(changedStyleProps)
 }
 
-export async function newLayout(newLayoutProps: SimpleLayoutProps): Promise<boolean> {
-  return await eb.newLayout(newLayoutProps)
+/**
+ * 新建布局
+ *
+ * Create new layout
+ *
+ * @param newLayoutProps 新建布局属性 / New layout properties
+ */
+export async function newLayout(newLayoutProps: SimpleLayoutProps) {
+  await eb.newLayout(newLayoutProps)
 }
 
-export async function modifyLayout(changedLayoutProps: LayoutModifyProps): Promise<boolean> {
-  return await eb.modifyLayout(changedLayoutProps)
+/**
+ * 修改当前布局
+ *
+ * Modify current layout
+ *
+ * @param changedLayoutProps 修改的布局属性 / Changed layout properties
+ */
+export async function modifyLayout(changedLayoutProps: LayoutModifyProps) {
+  await eb.modifyLayout(changedLayoutProps)
 }
 
-export async function deleteLayout(deletedLayoutId: string): Promise<boolean> {
-  return await eb.deleteLayout(deletedLayoutId)
+/**
+ * 删除布局
+ *
+ * Delete layout
+ *
+ * @param deletedLayoutId 删除的布局ID / Deleted layout ID
+ */
+export async function deleteLayout(deletedLayoutId: string) {
+  await eb.deleteLayout(deletedLayoutId)
 }

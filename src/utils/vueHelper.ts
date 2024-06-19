@@ -5,14 +5,15 @@ import {
   toRaw,
 } from 'vue'
 
-/// deepToRaw
-///
 /**
- * DeepToRaw
+ * 深度转换Vue引用对象到原始对象
+ *
+ * Deeply convert Vue reference objects to original objects
  *
  * https://github.com/vuejs/core/issues/5303
- * @param sourceObj Objects that may contain reactive
- * @returns Objects that do not contain reactive
+ *
+ * @param sourceObj Vue的引用对象 / Vue reference object
+ * @returns 原始对象 / Original object
  */
 export function deepToRaw<T extends Record<string, any>>(sourceObj: T): T {
   const objectIterator = (input: any): any => {
@@ -28,6 +29,5 @@ export function deepToRaw<T extends Record<string, any>>(sourceObj: T): T {
     }
     return input
   }
-
   return objectIterator(sourceObj)
 }

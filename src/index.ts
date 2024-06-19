@@ -4,6 +4,7 @@ import './assets/main.css'
 import * as IwEvents from './events'
 import locales from './locales'
 import * as IwProps from './props/index'
+import * as IwUtils from './utils'
 import IwTaskTable from './Skeleton.vue'
 
 export default (app: App): void => {
@@ -19,8 +20,9 @@ declare module 'vue' {
 }
 
 export {
-  IwEvents,
   IwProps,
+  IwEvents,
+  IwUtils,
   IwTaskTable
 }
 
