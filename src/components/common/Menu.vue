@@ -1,144 +1,65 @@
 <script setup lang="ts">
 import type { InjectionKey } from 'vue'
 import { computed, nextTick, onMounted, provide, ref } from 'vue'
-import { getParentWithClass, getRandomString } from '../../utils/basic'
+import { getRandomString } from '../../utils/basic'
+import type { MenuCustomSize } from './Menu'
+import { EVENTS, MenuOffsetKind, MenuSizeKind, doCloseContextMenu, getInitOffset, getInitSize, setContextmenuLevel } from './Menu'
 
 const contextmenuRef = ref<HTMLElement | null>(null)
-const is_init = ref<boolean>(false)
-
-const DIFF_OFFSET = 10
+const isInit = ref<boolean>(false)
 
 const contextmenuMathRandom = computed(() =>
   getRandomString(12),
 )
 
+/**
+ * 显示上下文菜单
+ *
+ * Show context menu
+ *
+ * NOTE: 当参数 ``force`` 为 ``false`` 或未定义 时，如果菜单附着对象是菜单本身或菜单的子元素，则不会显示菜单，即不支持在菜单中再次显示菜单。
+ *
+ * NOTE: When the parameter ``force`` is ``false`` or undefined,
+ * if the menu attachment object is the menu itself or a child element of the menu, the menu will not be displayed, that is,
+ * it does not support displaying the menu again in the menu.
+ *
+ * @param attachObj 菜单附着对象，可以是 MouseEvent 或 HTMLElement / Menu attachment object, can be MouseEvent or HTMLElement
+ * @param offset 菜单显示位置 / Menu display position
+ * @param size 菜单大小 / Menu size
+ * @param force 是否强制显示 / Whether to force display
+ * @param boundaryEle 边界元素，菜单不会超出边界元素 / Boundary element, the menu will not exceed the boundary element
+ */
 async function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: MenuOffsetKind = MenuOffsetKind.MEDIUM_TOP, size: MenuSizeKind | MenuCustomSize = MenuSizeKind.MEDIUM, force: boolean = false, boundaryEle?: HTMLElement,
 ) {
   const contextmenuEle = contextmenuRef.value!
-  if (!is_init.value && EVENTS.init[contextmenuEle.id]) {
+  if (!isInit.value && EVENTS.init[contextmenuEle.id]) {
     EVENTS.init[contextmenuEle.id].callback(contextmenuEle)
   }
 
-  is_init.value = true
+  // 菜单已初始化
+  isInit.value = true
 
   if (!force
     && (attachObj instanceof HTMLElement && contextmenuRef.value!.contains(attachObj)
     || attachObj instanceof MouseEvent && attachObj.target instanceof HTMLElement && contextmenuRef.value!.contains(attachObj.target))) {
-    // Prevent accidental triggering from items
     return
   }
 
-  let minHeight
-  let minWidth
-  let padding = 0
-  switch (size) {
-    case MenuSizeKind.MINI: {
-      minHeight = 20
-      minWidth = 40
-      padding = 1
-      break
-    }
-    case MenuSizeKind.SMALL: {
-      minHeight = 40
-      minWidth = 80
-      padding = 2
-      break
-    }
-    case MenuSizeKind.MEDIUM: {
-      minHeight = 80
-      minWidth = 160
-      padding = 3
-      break
-    }
-    case MenuSizeKind.LARGE: {
-      minHeight = 100
-      minWidth = 220
-      padding = 4
-      break
-    }
-    default: {
-      minHeight = size.height ?? 80
-      minWidth = size.width ?? 160
-      padding = 3
-      break
-    }
-  }
+  // 设置菜单初始大小
+  // Set the initial size of the menu
+  const { minHeight, minWidth, padding } = getInitSize(size)
 
   const contextMenuEle = contextmenuRef.value as HTMLElement
   contextMenuEle.style.minHeight = `${minHeight}px`
   contextMenuEle.style.minWidth = `${minWidth}px`
+  // 隐藏菜单但保持占位，可用于计算菜单的实际大小
+  // Hide the menu but keep the placeholder, which can be used to calculate the actual size of the menu
   contextMenuEle.style.visibility = 'hidden'
   contextMenuEle.style.display = `block`
 
   nextTick().then(() => {
     const observer = new ResizeObserver((_) => {
-      let left
-      let top
-      let attachObjHeight
-      let attachObjWidth
-      if (attachObj instanceof HTMLElement) {
-        const targetOffset = attachObj.getBoundingClientRect()
-        left = targetOffset.left
-        top = targetOffset.top
-        attachObjHeight = targetOffset.height
-        attachObjWidth = targetOffset.width
-      }
-      else {
-        left = attachObj.x
-        top = attachObj.y
-        attachObjHeight = 0
-        attachObjWidth = 0
-      }
-      const menuHeight = contextMenuEle.offsetHeight
-      const menuWidth = contextMenuEle.offsetWidth
-
-      switch (offset) {
-        case MenuOffsetKind.LEFT_TOP: {
-          top = top + attachObjHeight + DIFF_OFFSET
-          break
-        }
-        case MenuOffsetKind.MEDIUM_TOP: {
-          left = left + attachObjWidth / 2 - menuWidth / 2
-          top = top + attachObjHeight + DIFF_OFFSET
-          break
-        }
-        case MenuOffsetKind.RIGHT_TOP: {
-          left = left + attachObjWidth - menuWidth
-          top = top + attachObjHeight + DIFF_OFFSET
-          break
-        }
-        case MenuOffsetKind.LEFT_BOTTOM: {
-          top = top - menuHeight - DIFF_OFFSET
-          break
-        }
-        case MenuOffsetKind.MEDIUM_BOTTOM: {
-          left = left + attachObjWidth / 2 - menuWidth / 2
-          top = top - menuHeight - DIFF_OFFSET
-          break
-        }
-        case MenuOffsetKind.RIGHT_BOTTOM: {
-          left = left + attachObjWidth - menuWidth
-          top = top - menuHeight - DIFF_OFFSET
-          break
-        }
-      }
-
-      if (boundaryEle) {
-        const boundaryEleRect = boundaryEle.getBoundingClientRect()
-        if (left < boundaryEleRect.left) {
-          left = boundaryEleRect.left
-        }
-        if (top < boundaryEleRect.top) {
-          top = boundaryEleRect.top
-        }
-        if ((left + contextMenuEle.offsetWidth) > boundaryEleRect.right) {
-          left = boundaryEleRect.right - contextMenuEle.offsetWidth
-        }
-
-        if ((top + contextMenuEle.offsetHeight) > boundaryEleRect.bottom) {
-          top = boundaryEleRect.bottom - contextMenuEle.offsetHeight
-        }
-      }
+      const { left, top } = getInitOffset(attachObj, offset, contextMenuEle, boundaryEle)
 
       contextMenuEle.style.left = `${left}px`
       contextMenuEle.dataset.left = `${left + window.scrollX}`
@@ -146,79 +67,44 @@ async function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: Menu
       contextMenuEle.dataset.top = `${top + window.scrollY}`
     })
     observer.observe(contextMenuEle)
-
+    // 计算完成，显示菜单
+    // Calculation completed, display the menu
     contextMenuEle.style.visibility = 'visible'
 
+    // 设置菜单项的 padding
+    // Set the padding of the menu item
     contextMenuEle.querySelectorAll('.iw-contextmenu__item').forEach((node) => {
       const nodeEle = node as HTMLElement
       nodeEle.style.padding = `${padding}px`
     })
-    contextMenuEle.style.display = `block`
-    if (attachObj instanceof HTMLElement || attachObj.target instanceof HTMLElement) {
-      const parentMenuEle = getParentWithClass(attachObj instanceof HTMLElement ? attachObj as HTMLElement : attachObj.target as HTMLElement, 'iw-contextmenu')
-      if (parentMenuEle)
-        contextMenuEle.dataset.level = `${Number.parseInt(parentMenuEle.dataset.level!) + 1}`
-      else
-        contextMenuEle.dataset.level = '0'
-    }
-    else {
-      contextMenuEle.dataset.level = '0'
-    }
+
+    // 设置菜单的显示级别，用于控制有多个菜单时隐藏方式
+    // Set the display level of the menu, used to control the hiding method when there are multiple menus
+    setContextmenuLevel(attachObj, contextMenuEle)
   })
 }
 
-function hideUnActiveContextMenus(event: MouseEvent) {
-  const contextmenuEles = Array.from(document.querySelectorAll('.iw-contextmenu'))
-    .filter(ele => ele instanceof HTMLElement && (ele as HTMLElement).style.display !== 'none')
-    .sort((a, b) => Number.parseInt((b as HTMLElement).dataset.level!) - Number.parseInt((a as HTMLElement).dataset.level!))
-  for (const i in contextmenuEles) {
-    const contextMenuEle = contextmenuEles[i] as HTMLElement
-    const contextMenuRect = contextMenuEle.getBoundingClientRect()
-    if (
-      event.x < contextMenuRect.left
-      || event.y < contextMenuRect.top
-      || event.x > contextMenuRect.left + contextMenuRect.width
-      || event.y > contextMenuRect.top + contextMenuRect.height
-    ) {
-      if (i === '0' || (contextmenuEles[Number(i) - 1] as HTMLElement).style.display === 'none')
-        doCloseContextMenu(contextMenuEle)
-    }
-  }
-}
-
+/**
+ * 关闭当前上下文菜单
+ *
+ * Close the current context menu
+ */
 function closeCurrentContextMenu() {
   const contextMenuEle = contextmenuRef.value as HTMLElement
   doCloseContextMenu(contextMenuEle)
 }
 
-function doCloseContextMenu(contextMenuEle: HTMLElement) {
-  contextMenuEle.style.display = `none`
-  const id = contextMenuEle.id
-  if (id && EVENTS.close[id]) {
-    EVENTS.close[id]?.callback(contextMenuEle)
-    EVENTS.close[id]?.once && delete EVENTS.close[id]
-  }
-}
-
 onMounted(() => {
-  document.addEventListener('pointerdown', (event: MouseEvent) => {
-    if (event.target == null)
-      return
-    hideUnActiveContextMenus(event)
-  })
-  window.addEventListener('scroll', () => {
-    const contextmenuEles = document.querySelectorAll('.iw-contextmenu')
-    for (const i in contextmenuEles) {
-      if (!(contextmenuEles[i] instanceof HTMLElement) || (contextmenuEles[i] as HTMLElement).style.display === 'none') {
-        continue
-      }
-      const contextMenuEle = contextmenuEles[i] as HTMLElement
-      contextMenuEle.style.top = `${Number.parseInt(contextMenuEle.dataset.top!) - window.scrollY}px`
-      contextMenuEle.style.left = `${Number.parseInt(contextMenuEle.dataset.left!) - window.scrollX}px`
-    }
-  })
+
 })
 
+/**
+ * 注册菜单初始化时的监听器
+ *
+ * Register a listener when the menu is initialized
+ *
+ * @param callback 回调函数 / Callback function
+ */
 function registerOnInitListener(callback: (menuEle: HTMLElement) => Promise<void>) {
   const contextMenuEle = contextmenuRef.value as HTMLElement
   EVENTS.init[contextMenuEle.id] = {
@@ -226,6 +112,14 @@ function registerOnInitListener(callback: (menuEle: HTMLElement) => Promise<void
   }
 }
 
+/**
+ * 注册菜单关闭时的监听器
+ *
+ * Register a listener when the menu is closed
+ *
+ * @param callback 回调函数 / Callback function
+ * @param once 是否只执行一次 / Whether to execute only once
+ */
 function registerOnCloseListener(callback: (menuEle: HTMLElement) => Promise<void>, once?: boolean) {
   const contextMenuEle = contextmenuRef.value as HTMLElement
   EVENTS.close[contextMenuEle.id] = {
@@ -235,11 +129,27 @@ function registerOnCloseListener(callback: (menuEle: HTMLElement) => Promise<voi
 }
 
 defineExpose({
+  /**
+   * 显示上下文菜单
+   *
+   * Show context menu
+   */
   show: showContextMenu,
+  /**
+   * 关闭当前上下文菜单
+   *
+   * Close the current context menu
+   */
   close: closeCurrentContextMenu,
-  // 初始化时注册监听器，必须在显示前注册
-  // The listener is registered during initialization and must be registered before `show`
+  /**
+   * 注册菜单初始化时的监听器，必须在显示前注册
+   *
+   * Register a listener when the menu is initialized, must be registered before `show`
+   */
   onInit: registerOnInitListener,
+  /**
+   * 注册菜单关闭时的监听器
+   */
   onClose: registerOnCloseListener,
 })
 
@@ -248,51 +158,19 @@ provide(FUN_CLOSE_CONTEXT_MENU_TYPE, closeCurrentContextMenu)
 </script>
 
 <script lang="ts">
-export enum MenuOffsetKind {
-  LEFT_TOP,
-  MEDIUM_TOP,
-  RIGHT_TOP,
-  LEFT_BOTTOM,
-  MEDIUM_BOTTOM,
-  RIGHT_BOTTOM,
-}
-
-export enum MenuSizeKind {
-  MINI,
-  SMALL,
-  MEDIUM,
-  LARGE,
-}
-
-export interface MenuCustomSize {
-  width?: number
-  height?: number
-}
-
 export const FUN_CLOSE_CONTEXT_MENU_TYPE = Symbol('FUN_CLOSE_CONTEXT_MENU_TYPE') as InjectionKey<() => void>
-
-const EVENTS: {
-  init: { [id: string]: {
-    callback: (menuEle: HTMLElement) => Promise<void>
-  } }
-  close: { [id: string]: {
-    callback: (menuEle: HTMLElement) => Promise<void>
-    once: boolean
-  } }
-} = {
-  init: {},
-  close: {},
-}
 </script>
 
 <template>
   <div
-    v-show="is_init"
+    v-show="isInit"
     :id="'iw-contextmenu-' + `${contextmenuMathRandom}`"
     ref="contextmenuRef"
     class="iw-contextmenu flex flex-col items-start fixed z-[3100] bg-base-100 p-1 rounded-md border border-base-300"
   >
-    <slot v-if="is_init" />
+    <!-- 仅在初始化后渲染插槽信息 -->
+    <!-- Only render slot information after initialization -->
+    <slot v-if="isInit" />
   </div>
 </template>
 

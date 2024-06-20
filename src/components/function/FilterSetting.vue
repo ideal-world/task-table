@@ -5,7 +5,8 @@ import type { DataKind, DictItemProps, DictItemsResp, FilterDataGroupProps, Filt
 import { OperatorKind, translateOperatorKind } from '../../props'
 import { getInputTypeByDataKind, getOperatorKindsByDataKind } from '../../props/enumProps'
 import { groupBy } from '../../utils/basic'
-import MenuComp, { MenuOffsetKind, MenuSizeKind } from '../common/Menu.vue'
+import { MenuOffsetKind, MenuSizeKind } from '../common/Menu'
+import MenuComp from '../common/Menu.vue'
 import type { ColumnConf } from '../conf'
 import * as eb from '../eventbus'
 

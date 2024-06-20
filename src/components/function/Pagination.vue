@@ -2,7 +2,8 @@
 import { ref, toRaw } from 'vue'
 import * as iconSvg from '../../assets/icon'
 import type { DataSliceProps, GroupDataProps, LayoutModifyProps } from '../../props'
-import MenuComp, { MenuOffsetKind, MenuSizeKind } from '../common/Menu.vue'
+import { MenuOffsetKind, MenuSizeKind } from '../common/Menu'
+import MenuComp from '../common/Menu.vue'
 import * as eb from '../eventbus'
 
 const props = defineProps<{
@@ -87,7 +88,8 @@ async function setSlice(newPage?: number, newFetchNumber?: number) {
     groupSlices![props.groupValue!] = newSlice
     const changedLayoutReq: LayoutModifyProps = {
       group: {
-        item: props.groupProps?.item,
+        enabledColumnNames: props.groupProps!.enabledColumnNames,
+        item: props.groupProps!.item,
         slices: groupSlices,
       },
     }

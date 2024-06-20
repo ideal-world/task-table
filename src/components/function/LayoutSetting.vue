@@ -5,7 +5,8 @@ import locales from '../../locales'
 import { LayoutKind, type LayoutModifyProps, type SimpleLayoutProps, SubDataShowKind, generateDataSliceProps } from '../../props'
 
 import { deepToRaw } from '../../utils/vueHelper'
-import MenuComp, { MenuOffsetKind, MenuSizeKind } from '../common/Menu.vue'
+import { MenuOffsetKind, MenuSizeKind } from '../common/Menu'
+import MenuComp from '../common/Menu.vue'
 import type { LayoutConf, TableConf } from '../conf'
 import * as eb from '../eventbus'
 

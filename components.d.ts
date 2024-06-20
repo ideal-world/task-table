@@ -11,7 +11,6 @@ declare module 'vue' {
     CellEdit: typeof import('./src/components/function/CellEdit.vue')['default']
     ColumnResize: typeof import('./src/components/function/ColumnResize.vue')['default']
     ColumnShowSetting: typeof import('./src/components/function/ColumnShowSetting.vue')['default']
-    copy: typeof import('./src/components/function/TableThemeSetting copy.vue')['default']
     DictSelect: typeof import('./src/components/function/DictSelect.vue')['default']
     FilterSetting: typeof import('./src/components/function/FilterSetting.vue')['default']
     Gantt: typeof import('./src/components/layout/gantt/Gantt.vue')['default']

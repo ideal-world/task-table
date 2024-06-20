@@ -2,7 +2,8 @@
 import { h, ref, toRaw } from 'vue'
 import type { AggDataProps, AggregateKind, DataResp, TableStyleProps } from '../../../props'
 import { showAggMappingByDataKind, translateAggregateKind } from '../../../props'
-import MenuComp, { MenuOffsetKind, MenuSizeKind } from '../../common/Menu.vue'
+import { MenuOffsetKind, MenuSizeKind } from '../../common/Menu'
+import MenuComp from '../../common/Menu.vue'
 import type { ColumnConf } from '../../conf'
 import * as eb from '../../eventbus'
 

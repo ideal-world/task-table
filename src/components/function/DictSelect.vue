@@ -2,7 +2,8 @@
 import { onMounted, ref } from 'vue'
 import * as iconSvg from '../../assets/icon'
 import type { DictItemProps } from '../../props'
-import MenuComp, { MenuOffsetKind } from '../common/Menu.vue'
+import { MenuOffsetKind } from '../common/Menu'
+import MenuComp from '../common/Menu.vue'
 import * as eb from '../eventbus'
 
 const props = defineProps<{
