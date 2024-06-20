@@ -75,12 +75,8 @@ function setHeight() {
   })
 }
 
-function reSetScrollableWidth(layoutId: string) {
-  const curScrollComp = scrollableCompRefs.value.find((ele: { $el: { dataset: { layoutId: string } } }) => ele.$el.dataset.layoutId === layoutId)
+function reSetScrollableWidth() {
   setTimeout(() => {
-    if (curScrollComp.$el.children[1].style.width && curScrollComp.$el.children[1].style.width === '0px') {
-      curScrollComp.reSetMainWidth(true)
-    }
     setHeight()
   })
 }
@@ -91,7 +87,7 @@ onMounted(async () => {
     const layoutId = target.dataset.layoutId
     if (layoutId) {
       currentLayoutId.value = layoutId
-      reSetScrollableWidth(layoutId)
+      reSetScrollableWidth()
     }
   })
   await eb.watch()

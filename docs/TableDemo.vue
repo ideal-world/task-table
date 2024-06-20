@@ -2,6 +2,7 @@
 import type { Ref } from 'vue';
 import { onMounted, ref, toRaw } from 'vue';
 import { IwEvents, IwProps,IwUtils } from '../src';
+import { OperatorKind } from '../src/props';
 
 const selectedRecordPks: Ref<any[]> = ref([])
 
@@ -649,6 +650,42 @@ const _tableProps: IwProps.SimpleTableProps = {
   },
   filter: {
     enabledColumnNames: ['no', 'name', 'creator', 'stats', 'planStartTime', 'planEndTime', 'actualStartTime', 'actualEndTime', 'disabled'],
+    groups:[
+      {
+        items: [
+          {
+            columnName: 'no',
+            operator:OperatorKind.EQ,
+            value: 111111
+          },
+        ]
+      },
+      {
+        items: [
+          {
+            columnName: 'no',
+            operator:OperatorKind.EQ,
+            value: 111111
+          },
+        ]
+      },{
+        items: [
+          {
+            columnName: 'no',
+            operator:OperatorKind.EQ,
+            value: 111111
+          },
+        ]
+      },{
+        items: [
+          {
+            columnName: 'no',
+            operator:OperatorKind.EQ,
+            value: 111111
+          },
+        ]
+      }
+    ]
   },
   sort: {
     enabledColumnNames: ['no', 'name', 'creator', 'stats', 'planStartTime', 'planEndTime', 'actualStartTime', 'actualEndTime', 'disabled'],

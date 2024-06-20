@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
-import * as iconSvg from '../../assets/icon'
+import { onMounted, ref } from 'vue';
+import * as iconSvg from '../../assets/icon';
 
 const scrollableRef = ref<HTMLElement | null>(null)
 const scrollableMainRef = ref<HTMLElement | null>(null)
@@ -15,6 +15,16 @@ onMounted(() => {
   mainEle.style.width = `${scrollableEle.offsetWidth - controllerButtonRef.value!.offsetWidth * 2}px`
   const contentEle = scrollableContentRef.value!
   const observer = new ResizeObserver((_) => {
+    if (scrollableEle.offsetWidth === 0) {
+      // 当前元素不可见，直接返回
+      // Current element is not visible, return directly
+      return
+    }
+    if (mainEle.offsetWidth === 0) {
+      // 从不可见变为可见时，重新设置宽度
+      // When it changes from invisible to visible, reset the width
+      mainEle.style.width = `${scrollableEle.offsetWidth - controllerButtonRef.value!.offsetWidth * 2}px`
+    }
     if (mainEle.offsetWidth <= contentEle.offsetWidth) {
       showLeftButton.value = true
       showRightButton.value = true
@@ -27,26 +37,6 @@ onMounted(() => {
   observer.observe(contentEle)
 })
 
-function reSetMainWidth(reset?: boolean) {
-  if (!reset)
-    return
-
-  const scrollableEle = scrollableRef.value!
-  const mainEle = scrollableMainRef.value!
-
-  mainEle.style.width = `${scrollableEle.offsetWidth - controllerButtonRef.value!.offsetWidth * 2}px`
-
-  const contentEle = scrollableContentRef.value!
-  if (mainEle.offsetWidth <= contentEle.offsetWidth) {
-    showLeftButton.value = true
-    showRightButton.value = true
-  }
-  else {
-    showLeftButton.value = false
-    showRightButton.value = false
-  }
-}
-
 function offsetLeft() {
   const mainEle = scrollableMainRef.value!
   mainEle.scrollLeft = Math.max(mainEle.scrollLeft - 200, 0)
@@ -56,10 +46,6 @@ function offsetRight() {
   const mainEle = scrollableMainRef.value!
   mainEle.scrollLeft = Math.min(mainEle.scrollLeft + 200, mainEle.offsetWidth)
 }
-
-defineExpose({
-  reSetMainWidth,
-})
 </script>
 
 <template>
