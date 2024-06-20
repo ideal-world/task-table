@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import MenuComp, { MenuOffsetKind } from './Menu.vue'
+import { ref } from 'vue';
+import { MenuOffsetKind } from './Menu';
+import MenuComp from './Menu.vue';
 
 const emit = defineEmits(['selectIcon'])
 const iconCompRef = ref<InstanceType<typeof MenuComp>>()
@@ -11,10 +12,23 @@ async function selectIcon(event: Event) {
   iconCompRef.value?.close()
 }
 
-function showContainer(event: MouseEvent, offsetKind: MenuOffsetKind = MenuOffsetKind.MEDIUM_BOTTOM) {
+/**
+ * 显示图标选择器
+ *
+ * Show the icon picker
+ *
+ * @param event 触发事件 / Trigger event
+ * @param offsetKind 菜单偏移位置 / Menu offset position
+ */
+function showContainer(event: PointerEvent, offsetKind: MenuOffsetKind = MenuOffsetKind.MEDIUM_BOTTOM) {
   iconCompRef.value?.show(event, offsetKind)
 }
 
+/**
+ * 隐藏图标选择器
+ *
+ * Hide the icon picker
+ */
 function hideContainer() {
   iconCompRef.value?.close()
 }
