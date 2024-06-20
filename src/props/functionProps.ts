@@ -48,14 +48,15 @@ export type SimpleDataSliceProps = ChangeAllOptional<DataSliceProps>
  *
  * Generate data slice props
  *
- * @param simple 简单数据分片属性 / Simple data slice props
+ * @param tableSimple 表格级简单数据分片属性 / Table level simple data slice props
+ * @param layoutSimple 布局级简单数据分片属性 / Layout level simple data slice props
  * @returns 数据分片属性 / Data slice props
  */
-export function generateDataSliceProps(simple?: SimpleDataSliceProps): DataSliceProps {
+export function generateDataSliceProps(tableSimple?: SimpleDataSliceProps, layoutSimple?: SimpleDataSliceProps): DataSliceProps {
   return {
-    offsetNumber: simple?.offsetNumber ?? 0,
-    fetchNumber: simple?.fetchNumber ?? 10,
-    fetchNumbers: simple?.fetchNumbers ?? [5, 10, 20, 30, 50, 100],
+    offsetNumber: layoutSimple?.offsetNumber ?? tableSimple?.offsetNumber ?? 0,
+    fetchNumber: layoutSimple?.fetchNumber ?? tableSimple?.fetchNumber ?? 10,
+    fetchNumbers: layoutSimple?.fetchNumbers ?? tableSimple?.fetchNumbers ?? [5, 10, 20, 30, 50, 100],
   }
 }
 
@@ -144,13 +145,14 @@ export type SimpleAggDataProps = ChangeOptionalExcept<AggDataProps, 'enabledColu
  *
  * Generate aggregate data props
  *
- * @param simple 简单聚合数据属性 / Simple aggregate data props
+ * @param tableSimple 表格级简单聚合数据属性 / Table level simple aggregate data props
+ * @param layoutSimple 布局级简单聚合数据属性 / Layout level simple aggregate data props
  * @returns 聚合数据属性 / Aggregate data props
  */
-export function generateAggDataProps(simple: SimpleAggDataProps): AggDataProps {
+export function generateAggDataProps(tableSimple?: SimpleAggDataProps, layoutSimple?: SimpleAggDataProps): AggDataProps {
   return {
-    enabledColumnNames: simple.enabledColumnNames,
-    items: simple.items ?? [],
+    enabledColumnNames: (layoutSimple?.enabledColumnNames ?? tableSimple?.enabledColumnNames)!,
+    items: layoutSimple?.items ?? tableSimple?.items ?? [],
   }
 }
 
@@ -206,13 +208,14 @@ export type SimpleFilterDataProps = ChangeOptionalExcept<FilterDataProps, 'enabl
  *
  * Generate filter data props
  *
- * @param simple 简单过滤数据属性 / Simple filter data props
+ * @param tableSimple 表格级简单过滤数据属性 / Table level simple filter data props
+ * @param layoutSimple 布局级简单过滤数据属性 / Layout level simple filter data props
  * @returns 过滤数据属性 / Filter data props
  */
-export function generateFilterDataProps(simple: SimpleFilterDataProps): FilterDataProps {
+export function generateFilterDataProps(tableSimple?: SimpleFilterDataProps, layoutSimple?: SimpleFilterDataProps): FilterDataProps {
   return {
-    enabledColumnNames: simple.enabledColumnNames,
-    groups: simple.groups ?? [],
+    enabledColumnNames: (layoutSimple?.enabledColumnNames ?? tableSimple?.enabledColumnNames)!,
+    groups: layoutSimple?.groups ?? tableSimple?.groups ?? [],
   }
 }
 
@@ -294,14 +297,15 @@ export type SimpleGroupDataProps = ChangeOptionalExcept<GroupDataProps, 'enabled
  *
  * Generate group data props
  *
- * @param simple 简单分组数据属性 / Simple group data props
+ * @param tableSimple 表格级简单分组数据属性 / Table level simple group data props
+ * @param layoutSimple 布局级简单分组数据属性 / Layout level simple group data props
  * @returns 分组数据属性 / Group data props
  */
-export function generateGroupDataProps(simple: SimpleGroupDataProps): GroupDataProps {
+export function generateGroupDataProps(tableSimple?: SimpleGroupDataProps, layoutSimple?: SimpleGroupDataProps): GroupDataProps {
   return {
-    enabledColumnNames: simple.enabledColumnNames,
-    item: simple.item,
-    slices: simple.slices,
+    enabledColumnNames: (layoutSimple?.enabledColumnNames ?? tableSimple?.enabledColumnNames)!,
+    item: layoutSimple?.item ?? tableSimple?.item,
+    slices: layoutSimple?.slices ?? tableSimple?.slices,
   }
 }
 
@@ -359,13 +363,14 @@ export type SimpleSortDataProps = ChangeOptionalExcept<SortDataProps, 'enabledCo
  *
  * Generate sort data props
  *
- * @param simple 简单排序数据属性 / Simple sort data props
+ * @param tableSimple 表格级简单排序数据属性 / Table level simple sort data props
+ * @param layoutSimple 布局级简单排序数据属性 / Layout level simple sort data props
  * @returns 排序数据属性 / Sort data props
  */
-export function generateSortDataProps(simple: SimpleSortDataProps): SortDataProps {
+export function generateSortDataProps(tableSimple?: SimpleSortDataProps, layoutSimple?: SimpleSortDataProps): SortDataProps {
   return {
-    enabledColumnNames: simple.enabledColumnNames,
-    items: simple.items ?? [],
+    enabledColumnNames: (layoutSimple?.enabledColumnNames ?? tableSimple?.enabledColumnNames)!,
+    items: layoutSimple?.items ?? tableSimple?.items ?? [],
   }
 }
 
@@ -441,17 +446,18 @@ export type SimpleGanttLayoutProps = ChangeOptionalExcept<GanttLayoutProps, 'pla
  *
  * Generate Gantt layout props
  *
- * @param simple 简单甘特布局属性 / Simple Gantt layout props
+ * @param tableSimple 表格级简单甘特布局属性 / Table level simple Gantt layout props
+ * @param layoutSimple 布局级简单甘特布局属性 / Table level simple Gantt layout props
  * @returns 甘特布局属性 / Gantt layout props
  */
-export function generateGanttLayoutProps(simple: SimpleGanttLayoutProps): GanttLayoutProps {
+export function generateGanttLayoutProps(tableSimple?: SimpleGanttLayoutProps, layoutSimple?: SimpleGanttLayoutProps): GanttLayoutProps {
   return {
-    timelineWidth: simple.timelineWidth ?? 300,
-    showKind: simple.showKind ?? GanttShowKind.DAY,
-    planStartTimeColumnName: simple.planStartTimeColumnName,
-    planEndTimeColumnName: simple.planEndTimeColumnName,
-    actualStartTimeColumnName: simple.actualStartTimeColumnName,
-    actualEndTimeColumnName: simple.actualEndTimeColumnName,
+    timelineWidth: layoutSimple?.timelineWidth ?? tableSimple?.timelineWidth ?? 300,
+    showKind: layoutSimple?.showKind ?? tableSimple?.showKind ?? GanttShowKind.DAY,
+    planStartTimeColumnName: (layoutSimple?.planStartTimeColumnName ?? tableSimple?.planStartTimeColumnName)!,
+    planEndTimeColumnName: (layoutSimple?.planEndTimeColumnName ?? tableSimple?.planEndTimeColumnName)!,
+    actualStartTimeColumnName: layoutSimple?.actualStartTimeColumnName ?? tableSimple?.actualStartTimeColumnName,
+    actualEndTimeColumnName: layoutSimple?.actualEndTimeColumnName ?? tableSimple?.actualEndTimeColumnName,
   }
 }
 
@@ -487,12 +493,13 @@ export type SimpleEditDataProps = ChangeOptionalExcept<EditDataProps, 'enabledCo
  *
  * Generate edit data props
  *
- * @param simple 简单编辑数据属性 / Simple edit data props
+ * @param tableSimple 表格级简单编辑数据属性 / Table level simple edit data props
+ * @param layoutSimple 布局级简单编辑数据属性 / Layout level simple edit data props
  * @returns 编辑数据属性 / Edit data props
  */
-export function generateEditDataProps(simple: SimpleEditDataProps): EditDataProps {
+export function generateEditDataProps(tableSimple?: SimpleEditDataProps, layoutSimple?: SimpleEditDataProps): EditDataProps {
   return {
-    enabledColumnNames: simple.enabledColumnNames,
-    markEditable: simple.markEditable ?? false,
+    enabledColumnNames: (layoutSimple?.enabledColumnNames ?? tableSimple?.enabledColumnNames)!,
+    markEditable: layoutSimple?.markEditable ?? tableSimple?.markEditable ?? false,
   }
 }

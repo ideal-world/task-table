@@ -33,5 +33,9 @@ export default defineConfig({
     },
     emptyOutDir: false,
     sourcemap: false,
-  }
+  },
+  test: {
+    globals: true,
+    environment: 'happy-dom',
+  },
 })

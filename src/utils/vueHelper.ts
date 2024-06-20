@@ -19,7 +19,9 @@ export function deepToRaw<T extends Record<string, any>>(sourceObj: T): T {
   const objectIterator = (input: any): any => {
     if (Array.isArray(input)) {
       return input.map(item => objectIterator(item))
-    } if (isRef(input) || isReactive(input) || isProxy(input)) {
+    } if (isRef(input)) {
+      return objectIterator(toRaw(input.value))
+    } if (isReactive(input) || isProxy(input)) {
       return objectIterator(toRaw(input))
     } if (input && typeof input === 'object') {
       return Object.keys(input).reduce((acc, key) => {

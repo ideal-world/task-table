@@ -3,7 +3,7 @@
  */
 
 import { getRandomString } from '../utils/basic'
-import type { ChangeAllOptional, ChangeOptionalExcept, ChangeOptionalExceptWithTypes } from '../utils/tsHelper'
+import type { ChangeAllOptional, ChangeOptionalExcept } from '../utils/tsHelper'
 import { DataKind, LayoutKind, SizeKind, SubDataShowKind, getDefaultIconByDataKind, getDefaultIconByLayoutKind } from './enumProps'
 
 import type { TableEventProps } from './eventProps'
@@ -164,13 +164,13 @@ function generateCommonFunctionProps(tableSimple: SimpleCommonFunctionProps, lay
     showSelectColumn: layoutSimple?.showSelectColumn ?? tableSimple.showSelectColumn ?? false,
     subDataShowKind: layoutSimple?.subDataShowKind ?? tableSimple.subDataShowKind ?? SubDataShowKind.FOLD_SUB_DATA,
     actionColumn: layoutSimple?.actionColumn ?? tableSimple.actionColumn,
-    slice: generateDataSliceProps(layoutSimple?.slice ?? tableSimple.slice),
-    gantt: (layoutSimple?.gantt ?? tableSimple.gantt) && generateGanttLayoutProps((layoutSimple?.gantt ?? tableSimple.gantt)!),
-    filter: (layoutSimple?.filter ?? tableSimple.filter) && generateFilterDataProps((layoutSimple?.filter ?? tableSimple.filter)!),
-    group: (layoutSimple?.group ?? tableSimple.group) && generateGroupDataProps((layoutSimple?.group ?? tableSimple.group)!),
-    sort: (layoutSimple?.sort ?? tableSimple.sort) && generateSortDataProps((layoutSimple?.sort ?? tableSimple.sort)!),
-    agg: (layoutSimple?.agg ?? tableSimple.agg) && generateAggDataProps((layoutSimple?.agg ?? tableSimple.agg)!),
-    edit: (layoutSimple?.edit ?? tableSimple.edit) && generateEditDataProps((layoutSimple?.edit ?? tableSimple.edit)!),
+    slice: generateDataSliceProps(tableSimple.slice, layoutSimple?.slice),
+    gantt: (layoutSimple?.gantt ?? tableSimple.gantt) && generateGanttLayoutProps(tableSimple.gantt, layoutSimple?.gantt),
+    filter: (layoutSimple?.filter ?? tableSimple.filter) && generateFilterDataProps(tableSimple.filter, layoutSimple?.filter),
+    group: (layoutSimple?.group ?? tableSimple.group) && generateGroupDataProps(tableSimple.group, layoutSimple?.group),
+    sort: (layoutSimple?.sort ?? tableSimple.sort) && generateSortDataProps(tableSimple.sort, layoutSimple?.sort),
+    agg: (layoutSimple?.agg ?? tableSimple.agg) && generateAggDataProps(tableSimple.agg, layoutSimple?.agg),
+    edit: (layoutSimple?.edit ?? tableSimple.edit) && generateEditDataProps(tableSimple.edit, layoutSimple?.edit),
   }
 }
 
@@ -761,14 +761,38 @@ export interface LayoutProps extends CommonFunctionProps {
  *
  * Simple layout props
  */
-export type SimpleLayoutProps = ChangeOptionalExceptWithTypes<LayoutProps, 'title', {
+export interface SimpleLayoutProps extends SimpleCommonFunctionProps {
+  /**
+   * ID
+   *
+   * ID
+   */
+  id?: string
+  /**
+   * 标题
+   *
+   * Title
+   */
+  title: string
+  /**
+   * 布局类型
+   *
+   * Layout kind
+   */
+  layoutKind?: LayoutKind
+  /**
+   * 图标（来自内部图标库）
+   *
+   * Icon (from internal icon library)
+   */
+  icon?: string
   /**
    * 列
    *
    * Columns
    */
   columns?: SimpleLayoutColumnProps[]
-}>
+}
 /**
  * 生成布局属性
  *

@@ -21,7 +21,7 @@ export function groupBy<T>(array: T[], predicate: (value: T, index: number, arra
  *
  * @param element 当前元素 / Current element
  * @param parentClassName 父元素的类名 / Parent element class name
- * @returns
+ * @returns 父元素 / Parent element
  */
 export function getParentWithClass(element: HTMLElement | null, parentClassName: string): HTMLElement | null {
   while (element) {
