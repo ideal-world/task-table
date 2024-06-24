@@ -95,7 +95,7 @@ async function setNewWidth(newWidth: number, columnName?: string) {
         &nbsp;
       </div>
     </div>
-    <div class="iw-column-header flex items-center">
+    <div class="iw-column-header flex items-center relative">
       <div
         v-if="props.layoutConf.showSelectColumn"
         :class="`${props.tableConf.styles.cellClass} iw-list-cell flex justify-center items-center bg-base-200`"
@@ -120,7 +120,7 @@ async function setNewWidth(newWidth: number, columnName?: string) {
       >
         {{ $t('layout.action.title') }}
       </div>
-      <ColumnResizeComp resize-item-class="iw-resize-item" resize-item-id="columnName" resize-container-class="iw-column-header" :set-size="setNewWidth" />
+      <ColumnResizeComp resize-item-class="iw-resize-item" resize-item-id-prop="columnName" resize-container-class="iw-column-header" :set-size="setNewWidth" />
     </div>
   </div>
   <MenuComp ref="headerMenuCompRef" class="text-sm">
