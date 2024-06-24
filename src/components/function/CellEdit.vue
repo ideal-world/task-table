@@ -250,7 +250,7 @@ onMounted(() => {
     </template>
     <template v-else>
       <DictSelectComp
-        :dict-name="curColumnConf.name" :dict-values="curValue" :multi-value="curColumnConf.multiValue"
+        :dict-name="curColumnConf.name" :selected-dict-values="curValue" :multi-value="curColumnConf.multiValue"
         :set-values="setValue"
       />
     </template>

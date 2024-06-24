@@ -7,18 +7,18 @@ import type { ColumnConf, LayoutConf, TableConf } from '../../conf'
 import { registerCellClickListener } from '../../function/CellClick'
 import CellEditComp from '../../function/CellEdit.vue'
 import PaginationComp from '../../function/Pagination.vue'
-import RowSelectComp from '../../function/RowSelect.vue'
 import { registerTreeRowToggleListener } from '../../function/RowTree'
 import ColumnAggComp from './ListColumnAgg.vue'
 import { setFixedColumnStyles } from './ListColumnFixed.vue'
 import HeaderComp from './ListHeader.vue'
 import RowsComp from './ListRows.vue'
+import ListRowSelectComp from './ListRowSelect.vue'
 
 const props = defineProps<
   {
     layoutConf: LayoutConf
     tableConf: TableConf
-    layoutColumnsConf: ColumnConf[]
+    columnsConf: ColumnConf[]
   }
 >()
 const listRef: Ref<HTMLDivElement | null> = ref(null)
@@ -39,9 +39,9 @@ function setColumnStyles(colIdx: number) {
     styles.width = `${actionColumnWidth.value}px`
   }
   else {
-    styles.width = `${props.layoutColumnsConf[colIdx].width}px`
+    styles.width = `${props.columnsConf[colIdx].width}px`
   }
-  setFixedColumnStyles(styles, colIdx, props.layoutColumnsConf, selectColumnWidth.value)
+  setFixedColumnStyles(styles, colIdx, props.columnsConf, selectColumnWidth.value)
   return styles
 }
 
@@ -64,7 +64,7 @@ onMounted(() => {
     :class="`iw-list iw-row-select-container relative iw-list--size${props.tableConf.styles.size}`"
     :style="setTableWidth()"
   >
-    <HeaderComp :columns-conf="props.layoutColumnsConf" :layout-conf="props.layoutConf" :table-conf="props.tableConf" :set-column-styles="setColumnStyles" />
+    <HeaderComp :columns-conf="props.columnsConf" :layout-conf="props.layoutConf" :table-conf="props.tableConf" :set-column-styles="setColumnStyles" />
     <template v-if="props.layoutConf.data && !Array.isArray(props.layoutConf.data)">
       <RowsComp
         :records="props.layoutConf.data.records"
@@ -72,7 +72,7 @@ onMounted(() => {
         :parent-pk-column-name="props.tableConf.parentPkColumnName"
         :sub-data-show-kind="props.layoutConf.subDataShowKind"
         :pk-kind-is-number="pkKindIsNumber"
-        :columns-conf="props.layoutColumnsConf"
+        :columns-conf="props.columnsConf"
         :layout-id="props.layoutConf.id"
         :layout-kind="props.layoutConf.layoutKind"
         :style-props="props.tableConf.styles"
@@ -87,7 +87,7 @@ onMounted(() => {
         :data-basic="layoutConf.data as DataResp"
         :show-select-column="layoutConf.showSelectColumn"
         :show-action-column="layoutConf.actionColumn !== undefined"
-        :columns-conf="props.layoutColumnsConf"
+        :columns-conf="props.columnsConf"
         :style-props="props.tableConf.styles"
         :set-column-styles="setColumnStyles"
       />
@@ -101,7 +101,7 @@ onMounted(() => {
           :data-basic="groupData"
           :show-select-column="layoutConf.showSelectColumn"
           :show-action-column="layoutConf.actionColumn !== undefined"
-          :columns-conf="props.layoutColumnsConf"
+          :columns-conf="props.columnsConf"
           :group-column-name="props.layoutConf.group?.item?.columnName"
           :group-value="groupData.groupShowTitle ?? groupData.groupValue"
           :style-props="props.tableConf.styles"
@@ -113,7 +113,7 @@ onMounted(() => {
           :parent-pk-column-name="props.tableConf.parentPkColumnName"
           :sub-data-show-kind="props.layoutConf.subDataShowKind"
           :pk-kind-is-number="pkKindIsNumber"
-          :columns-conf="props.layoutColumnsConf"
+          :columns-conf="props.columnsConf"
           :layout-id="props.layoutConf.id"
           :layout-kind="props.layoutConf.layoutKind"
           :style-props="props.tableConf.styles"
@@ -128,7 +128,7 @@ onMounted(() => {
         </div>
       </template>
     </template>
-    <RowSelectComp
+    <ListRowSelectComp
       v-if="props.layoutConf.showSelectColumn"
       :selected-pks="props.layoutConf.selectedDataPks"
       :pk-column-name="props.tableConf.pkColumnName"
@@ -139,7 +139,7 @@ onMounted(() => {
       :pk-column-name="props.tableConf.pkColumnName"
       :pk-kind-is-number="pkKindIsNumber"
       :edit="props.layoutConf.edit"
-      :columns-conf="props.layoutColumnsConf"
+      :columns-conf="props.columnsConf"
       :data="props.layoutConf.data"
       container-class="iw-list"
       edit-cell-class="iw-data-cell"

@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import type { Ref } from 'vue';
 import { onMounted, ref, toRaw } from 'vue';
-import { IwEvents, IwProps,IwUtils } from '../src';
-import { OperatorKind } from '../src/props';
+import { IwEvents, IwProps, IwUtils } from '../src';
 
 const selectedRecordPks: Ref<any[]> = ref([])
 
@@ -480,7 +479,7 @@ const events: IwProps.TableEventProps = {
   loadDictItemsWithMultiConds: async (conds: { [dictName: string]: any[] }, slice?: IwProps.DataQuerySliceReq): Promise<{ [dictName: string]: IwProps.DictItemsResp }> => {
     const resp = {}
     Object.entries(conds).forEach(([columnName, values]) => {
-      if (columnName === 'name') {
+      if (columnName === 'creator') {
         let nameDict: IwProps.DictItemProps[] = JSON.parse(JSON.stringify(NAME_DICT))
         nameDict = nameDict.filter((dict) => { return values.find(val => dict.title.includes(val) || dict.value.includes(val)) })
         const totalNumber = nameDict.length
@@ -650,6 +649,15 @@ const _tableProps: IwProps.SimpleTableProps = {
   },
   filter: {
     enabledColumnNames: ['no', 'name', 'creator', 'stats', 'planStartTime', 'planEndTime', 'actualStartTime', 'actualEndTime', 'disabled'],
+    groups: [
+      {
+        items: [{
+          columnName: 'creator',
+          operator: IwProps.OperatorKind.EQ,
+          value: 'xh',
+        }],
+      },
+    ],
   },
   sort: {
     enabledColumnNames: ['no', 'name', 'creator', 'stats', 'planStartTime', 'planEndTime', 'actualStartTime', 'actualEndTime', 'disabled'],

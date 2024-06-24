@@ -11,8 +11,14 @@ import type { LayoutConf, TableConf } from '../conf'
 import * as eb from '../eventbus'
 
 const props = defineProps<{
+  // 表格配置
+  // Table configuration
   tableConf: TableConf
+  // 布局配置
+  // Layout configuration
   layoutConf: LayoutConf
+  // 布局数量
+  // Layout quantity
   layoutLength: number
 }>()
 
@@ -105,6 +111,8 @@ async function createNewLayout(layoutKind: LayoutKind) {
           <span class="text-xs font-normal">{{ $t('layout.copy.title') }}</span>
         </div>
       </button>
+      <!-- 仅当布局大于1时可以删除 -->
+      <!-- Only delete when the layout is greater than 1 -->
       <button
         v-if="props.layoutLength > 1"
         class="iw-btn m-0.5 px-3 flex-1"

@@ -7,7 +7,11 @@ import type { ColumnConf } from '../../conf'
 import * as eb from '../../eventbus'
 
 const props = defineProps<{
+  // 当前列配置
+  // Current column configuration
   currentColumnConf: ColumnConf
+  // 可能涉及的列配置
+  // Possible column configuration
   columnsConf: ColumnConf[]
 }>()
 const closeContextMenuFun = inject(FUN_CLOSE_CONTEXT_MENU_TYPE)!
@@ -45,20 +49,41 @@ async function setFixedColumn() {
 </script>
 
 <script lang="ts">
-export function setFixedColumnStyles(styles: any, colIdx: number, columnsConf: ColumnConf[], selectColumnWidth: number) {
+/**
+ * 设置固定列样式
+ *
+ * Set fixed column styles
+ *
+ * @param styles 已存在的样式 / Existing styles
+ * @param currColIdx 当前列索引 / Current column index
+ * @param columnsConf 列配置 / Column configuration
+ * @param selectColumnWidth 选择列宽度 / Select column width
+ */
+export function setFixedColumnStyles(styles: any, currColIdx: number, columnsConf: ColumnConf[], selectColumnWidth: number) {
+  // 获取固定列索引
+  // Get the fixed column index
   const fixedColumnIdx = columnsConf.findIndex(col => col.fixed)
-  if (colIdx === -1 && fixedColumnIdx === -1) {
+  if (currColIdx === -1 && fixedColumnIdx === -1) {
+    // 当前是选择列且无固定列
+    // Current is the select column and there is no fixed column
+
     // non-fixed column
     styles.position = 'relative'
     styles.zIndex = 1000
   }
-  else if (colIdx === -1) {
+  else if (currColIdx === -1) {
+    // 当前是选择列，存在固定列
+    // Current is the select column, and there is a fixed column
+
     // fixed select column
     styles.position = 'sticky'
     styles.zIndex = 1099
     styles.left = `0px`
   }
-  else if (colIdx === -2) {
+  else if (currColIdx === -2) {
+    // 当前是操作列
+    // Current is the action column
+
     // fixed action column
     styles.position = 'sticky'
     styles.zIndex = 1099
@@ -66,17 +91,23 @@ export function setFixedColumnStyles(styles: any, colIdx: number, columnsConf: C
     // class: base-300
     styles.borderLeft = '3px solid oklch(var(--b3))'
   }
-  else if (fixedColumnIdx >= colIdx) {
+  else if (fixedColumnIdx >= currColIdx) {
+    // 存在固定列，且当前列在固定列之前
+    // There is a fixed column, and the current column is before the fixed column
+
     // fixed columns
     styles.position = 'sticky'
     styles.zIndex = 1099
-    styles.left = `${columnsConf.slice(0, colIdx).reduce((count, col) => count + col.width, selectColumnWidth)}px`
-    if (fixedColumnIdx === colIdx) {
+    styles.left = `${columnsConf.slice(0, currColIdx).reduce((count, col) => count + col.width, selectColumnWidth)}px`
+    if (fixedColumnIdx === currColIdx) {
       // class: base-300
       styles.borderRight = '3px solid oklch(var(--b3))'
     }
   }
   else {
+    // 其它情况
+    // Other cases
+
     styles.position = 'relative'
   }
 }

@@ -9,9 +9,15 @@ import type { ColumnConf } from '../conf'
 import * as eb from '../eventbus'
 
 const props = defineProps<{
+  // 布局Id
+  // Layout ID
   layoutId: string
+  // 排序配置
+  // Sort configuration
   sort: SortDataProps
-  layoutColumnsConf: ColumnConf[]
+  // 可能涉及的列配置
+  // Possible column configuration
+  columnsConf: ColumnConf[]
 }>()
 
 const sortCompRef = ref<InstanceType<typeof MenuComp>>()
@@ -87,8 +93,8 @@ function addSortCond(columnName: string, orderDesc: boolean) {
     >
       <div>
         <i :class="`${iconSvg.GRABBER} cursor-pointer mr-0.5`" />
-        <i :class="`${props.layoutColumnsConf.find(col => col.name === column.columnName)?.icon} mr-0.5`" />
-        {{ props.layoutColumnsConf.find(col => col.name === column.columnName)?.title }}
+        <i :class="`${props.columnsConf.find(col => col.name === column.columnName)?.icon} mr-0.5`" />
+        {{ props.columnsConf.find(col => col.name === column.columnName)?.title }}
       </div>
       <div class="iw-join ml-1">
         <button
@@ -111,7 +117,7 @@ function addSortCond(columnName: string, orderDesc: boolean) {
       {{ $t('function.rowSort.sortableColumns') }}
     </div>
     <div
-      v-for="column in props.layoutColumnsConf.filter(col => props.sort.enabledColumnNames.includes(col.name) && !props.sort.items?.find(cond => cond.columnName === col.name))"
+      v-for="column in props.columnsConf.filter(col => props.sort.enabledColumnNames.includes(col.name) && !props.sort.items?.find(cond => cond.columnName === col.name))"
       :key="`${props.layoutId}-${column.name}`"
       class="p-1 flex w-full justify-between cursor-pointer" :data-column-name="column.name"
     >

@@ -5,7 +5,11 @@ import { SizeKind } from '../../props';
 import * as eb from '../eventbus';
 
 const props = defineProps<{
+  // 表格样式
+  // Table style
   styles: TableStyleProps
+  // 表格大小
+  // Table size
   size: SizeKind
 }>()
 

@@ -4,8 +4,14 @@ import type { TableConf } from '../conf'
 import * as eb from '../eventbus'
 
 const props = defineProps<{
+  // 布局Id
+  // Layout ID
   layoutId: string
+  // 布局列
+  // Layout columns
   layoutColumns: LayoutColumnProps[]
+  // 表格配置
+  // Table configuration
   tableConf: TableConf
 }>()
 

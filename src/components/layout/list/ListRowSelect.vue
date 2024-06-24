@@ -1,11 +1,17 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
-import { delegateEvent, getParentWithClass } from '../../utils/basic';
-import * as eb from '../eventbus';
+import { onMounted, ref } from 'vue'
+import { delegateEvent, getParentWithClass } from '../../../utils/basic'
+import * as eb from '../../eventbus'
 
 const props = defineProps<{
+  // 已选中的主键
+  // Selected primary key
   selectedPks: any[]
+  // 主键列名
+  // Primary key column name
   pkColumnName: string
+  // 主键类型是否为数字
+  // Whether the primary key type is a number
   pkKindIsNumber: boolean
 }>()
 

@@ -7,27 +7,53 @@ import MenuComp from '../common/Menu.vue'
 import * as eb from '../eventbus'
 
 const props = defineProps<{
+  // 数据分片配置
+  // Data slice configuration
   slice: DataSliceProps
+  // 总数
+  // Total number
   totalNumber: number
+  // 分组配置
   groupProps?: GroupDataProps
+  // 分组值
   groupValue?: string
 }>()
 const fetchNumberSelectCompRef = ref<InstanceType<typeof MenuComp>>()
 
+/**
+ * 获取实际分片，如果存在分组则获取分组的分片，否则获取默认分片
+ *
+ * Get the actual slice, if there is a group, get the group's slice, otherwise get the default slice
+ */
 function getActualSlice(): DataSliceProps {
   return props.groupValue && props.groupProps?.slices && props.groupProps?.slices[props.groupValue]
     ? props.groupProps?.slices[props.groupValue]
     : props.slice
 }
 
+/**
+ * 获取总页数
+ *
+ * Get total number of pages
+ */
 function getTotalPage() {
   return Math.ceil(props.totalNumber / getActualSlice().fetchNumber)
 }
 
+/**
+ * 获取当前页
+ *
+ * Get current page
+ */
 function getCurrentPage() {
   return Math.ceil(getActualSlice().offsetNumber / getActualSlice().fetchNumber) + 1
 }
 
+/**
+ * 获取显示候选页码
+ *
+ * Get the displayed candidate page number
+ */
 function getShowPages(): number[] {
   const totalPages = getTotalPage()
   const currentPage = getCurrentPage()
@@ -40,15 +66,37 @@ function getShowPages(): number[] {
   return pages
 }
 
+/**
+ * 设置当前页
+ *
+ * Set current page
+ *
+ * @param newPage 新页码 / New page number
+ */
 async function setCurrentPage(newPage: number) {
   await setSlice(newPage, undefined)
 }
 
+/**
+ * 设置每页数量
+ *
+ * Set the number of items per page
+ *
+ * @param fetchNumber 每页数量 / Number of items per page
+ */
 async function setFetchNumber(fetchNumber: number) {
   await setSlice(undefined, fetchNumber)
   fetchNumberSelectCompRef.value?.close()
 }
 
+/**
+ * 设置分片
+ *
+ * Set slice
+ *
+ * @param newPage 新页码 / New page number
+ * @param newFetchNumber 新每页数量 / New number of items per page
+ */
 async function setSlice(newPage?: number, newFetchNumber?: number) {
   if (!props.groupValue) {
     const newSlice = {

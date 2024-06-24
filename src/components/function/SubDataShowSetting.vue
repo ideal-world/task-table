@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import * as iconSvg from '../../assets/icon';
-import type { LayoutModifyProps } from '../../props';
-import { SubDataShowKind } from '../../props';
-import * as eb from '../eventbus';
+import * as iconSvg from '../../assets/icon'
+import type { LayoutModifyProps } from '../../props'
+import { SubDataShowKind } from '../../props'
+import * as eb from '../eventbus'
 
 const props = defineProps<{
+  // 子数据展示方式
+  // Sub-data display method
   subDataShowKind: SubDataShowKind
 }>()
 

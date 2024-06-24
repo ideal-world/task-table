@@ -9,9 +9,17 @@ import ColumnFixedComp from './ListColumnFixed.vue'
 import ColumnWrapComp from './ListColumnWrap.vue'
 
 const props = defineProps<{
+  // 列配置
+  // Column configuration
   columnsConf: ColumnConf[]
+  // 布局配置
+  // Layout configuration
   layoutConf: LayoutConf
+  // 表格配置
+  // Table configuration
   tableConf: TableConf
+  // 设置列样式
+  // Set column style
   setColumnStyles: (colIdx: number) => any
 }>()
 

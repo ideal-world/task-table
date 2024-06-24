@@ -22,7 +22,7 @@ const props = defineProps<
     layoutConf: LayoutConf
     ganttProps: GanttLayoutProps
     tableConf: TableConf
-    layoutColumnsConf: ColumnConf[]
+    columnsConf: ColumnConf[]
   }
 >()
 
@@ -159,7 +159,7 @@ async function changeShowKind(showKind: GanttShowKind) {
     class="iw-gantt flex h-full relative"
   >
     <div ref="ganttListRef" class="overflow-y-hidden overflow-x-auto" :style="`width: ${ganttWith - props.ganttProps.timelineWidth}px`">
-      <ListComp :layout-conf="props.layoutConf" :table-conf="props.tableConf" :layout-columns-conf="props.layoutColumnsConf" />
+      <ListComp :layout-conf="props.layoutConf" :table-conf="props.tableConf" :columns-conf="props.columnsConf" />
     </div>
     <div
       ref="ganttTimelineRef"
