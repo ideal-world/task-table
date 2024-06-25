@@ -9,6 +9,8 @@ import type { LayoutConf } from '../conf'
 import * as eb from '../eventbus'
 
 const props = defineProps<{
+  // 布局配置
+  // Layout configuration
   layoutConf: LayoutConf
 }>()
 const iconPickerCompRef = ref<InstanceType<typeof MenuComp>>()

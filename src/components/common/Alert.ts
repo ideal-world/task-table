@@ -1,3 +1,8 @@
+/**
+ * 消息提示类型
+ *
+ * Message prompt type
+ */
 export enum AlertKind {
   ERROR,
   WARNING,

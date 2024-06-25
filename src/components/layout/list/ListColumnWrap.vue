@@ -7,7 +7,11 @@ import type { ColumnConf } from '../../conf'
 import * as eb from '../../eventbus'
 
 const props = defineProps<{
+  // 当前列配置
+  // Current column configuration
   currentColumnConf: ColumnConf
+  // 主键列名
+  // Primary key column name
   pkColumnName: string
 }>()
 

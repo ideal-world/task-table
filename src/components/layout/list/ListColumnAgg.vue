@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { h, ref, toRaw } from 'vue'
-import type { AggDataProps, AggregateKind, DataResp, TableStyleProps } from '../../../props'
+import type { AggDataProps, AggregateKind, TableStyleProps } from '../../../props'
 import { showAggMappingByDataKind, translateAggregateKind } from '../../../props'
 import { MenuOffsetKind, MenuSizeKind } from '../../common/Menu'
 import MenuComp from '../../common/Menu.vue'
@@ -8,22 +8,57 @@ import type { ColumnConf } from '../../conf'
 import * as eb from '../../eventbus'
 
 const props = defineProps<{
+  // 布局Id
+  // Layout ID
   layoutId: string
+  // 聚合配置
+  // Aggregation configuration
   agg: AggDataProps
-  dataBasic: DataResp
+  // 基础数据
+  // Basic data
+  dataBasic: {
+    // 总数
+    // Total number
+    totalNumber: number
+    // 聚合数据
+    // Aggregated data
+    aggs: { [columName: string]: any }
+  }
+  // 是否显示选择列
+  // Whether to display the selection column
   showSelectColumn: boolean
+  // 是否显示操作列
+  // Whether to display the action column
   showActionColumn: boolean
+  // 列配置
+  // Column configuration
   columnsConf: ColumnConf[]
+  // 分组列名
+  // Group column name
   groupColumnName?: string
+  // 分组值
+  // Group value
   groupValue?: string
+  // 样式配置
+  // Style configuration
   styleProps: TableStyleProps
+  // 设置列样式
+  // Set column style
   setColumnStyles: (colIdx: number) => any
 }>()
 
 const aggsMenuCompRef = ref<InstanceType<typeof MenuComp>>()
 const dynamicAggMenuContent = ref()
 
-function showAggsContextMenu(event: MouseEvent, colIdx: number) {
+/**
+ * 点击时动态显示聚合类型可选项菜单
+ *
+ * Display the menu of selectable aggregation types dynamically when clicked
+ *
+ * @param e 点击事件 / Click event
+ * @param colIdx 列索引 / Column index
+ */
+function showAggsContextMenu(e: MouseEvent, colIdx: number) {
   const column = props.columnsConf[colIdx]
   dynamicAggMenuContent.value = () => showAggMappingByDataKind(column.dataKind).map(aggItem =>
     h('div', {
@@ -33,7 +68,7 @@ function showAggsContextMenu(event: MouseEvent, colIdx: number) {
       onClick: () => changeColumnAggs(aggItem.kind, column.name),
     }, aggItem.title),
   )
-  aggsMenuCompRef.value?.show(event, MenuOffsetKind.RIGHT_BOTTOM, MenuSizeKind.MINI)
+  aggsMenuCompRef.value?.show(e, MenuOffsetKind.RIGHT_BOTTOM, MenuSizeKind.MINI)
 }
 
 async function changeColumnAggs(aggKind: AggregateKind, columnName: string) {

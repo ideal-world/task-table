@@ -15,9 +15,16 @@ import TableResizeSettingComp from './TableResizeSetting.vue'
 import TableThemeSettingComp from './TableThemeSetting.vue'
 
 const props = defineProps<{
+  // 表格配置
+  // Table configuration
   tableConf: TableConf
+  // 布局配置
   layoutConf: LayoutConf
-  layoutColumnsConf: ColumnConf[]
+  // 可能涉及的列配置
+  // Possible column configuration
+  columnsConf: ColumnConf[]
+  // 布局数量
+  // Layout quantity
   layoutLength: number
 }>()
 const tableSettingCompRef = ref<InstanceType<typeof MenuComp>>()
@@ -45,7 +52,7 @@ onMounted(() => {
     <template v-if="props.tableConf.parentPkColumnName">
       <SubDataShowSettingComp :sub-data-show-kind="props.layoutConf.subDataShowKind" />
     </template>
-    <GroupSettingComp v-if="props.layoutConf.group" :layout-id="props.layoutConf.id" :group="props.layoutConf.group" :layout-columns-conf="props.layoutColumnsConf" />
+    <GroupSettingComp v-if="props.layoutConf.group" :layout-id="props.layoutConf.id" :group="props.layoutConf.group" :columns-conf="props.columnsConf" />
     <ColumnShowSettingComp :layout-id="props.layoutConf.id" :layout-columns="props.layoutConf.columns" :table-conf="props.tableConf" />
     <div class="iw-divider cursor-pointer iw-table-setting-title">
       {{ $t('_.table.moreSettingTitle') }}

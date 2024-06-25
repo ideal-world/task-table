@@ -161,7 +161,7 @@ onMounted(async () => {
           v-if="!tableConf.mini"
           :table-conf="tableConf"
           :layout-conf="currentLayoutConf"
-          :layout-columns-conf="currentLayoutColumnsConf"
+          :columns-conf="currentLayoutColumnsConf"
           :layout-length="layoutsConf.length"
         />
       </div>
@@ -172,15 +172,15 @@ onMounted(async () => {
           v-if="!tableConf.mini && (layout.sort || layout.filter)"
           class="iw-tt-toolbar flex items-center h-8 p-0.5"
         >
-          <RowSortSettingComp v-if="layout.sort" :layout-id="layout.id" :sort="layout.sort" :layout-columns-conf="currentLayoutColumnsConf" />
+          <RowSortSettingComp v-if="layout.sort" :layout-id="layout.id" :sort="layout.sort" :columns-conf="currentLayoutColumnsConf" />
           <div class="iw-divider iw-divider-horizontal m-0.5" />
           <ScrollableComp v-if="layout.filter" ref="scrollableCompRefs" class="flex-1" :data-layout-id="layout.id">
-            <FilterSettingComp :layout-id="layout.id" :filter="layout.filter" :layout-columns-conf="currentLayoutColumnsConf" />
+            <FilterSettingComp :layout-id="layout.id" :filter="layout.filter" :columns-conf="currentLayoutColumnsConf" />
           </ScrollableComp>
         </div>
         <div class="iw-tt-table overflow-auto w-full border border-base-300">
-          <ListComp v-if="layout.layoutKind === LayoutKind.LIST" :layout-conf="layout" :table-conf="tableConf" :layout-columns-conf="currentLayoutColumnsConf" />
-          <GanttComp v-else-if="layout.layoutKind === LayoutKind.GANTT && layout.gantt" :gantt-props="layout.gantt" :layout-conf="layout" :table-conf="tableConf" :layout-columns-conf="currentLayoutColumnsConf" />
+          <ListComp v-if="layout.layoutKind === LayoutKind.LIST" :layout-conf="layout" :table-conf="tableConf" :columns-conf="currentLayoutColumnsConf" />
+          <GanttComp v-else-if="layout.layoutKind === LayoutKind.GANTT && layout.gantt" :gantt-props="layout.gantt" :layout-conf="layout" :table-conf="tableConf" :columns-conf="currentLayoutColumnsConf" />
         </div>
         <div
           :class="`${tableConf.styles.footerClass} iw-tt-footer flex justify-between p-1 min-h-0`"

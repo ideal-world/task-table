@@ -5,6 +5,8 @@ import type { QuickSearchProps } from '../../props'
 import * as eb from '../eventbus'
 
 const props = defineProps<{
+  // 快速搜索配置
+  // Quick search configuration
   quickSearch: QuickSearchProps
 }>()
 

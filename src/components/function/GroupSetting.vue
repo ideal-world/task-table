@@ -5,11 +5,24 @@ import type { ColumnConf } from '../conf';
 import * as eb from '../eventbus';
 
 const props = defineProps<{
+  // 布局Id
+  // Layout ID
   layoutId: string
+  // 分组配置
+  // Group configuration
   group: GroupDataProps
-  layoutColumnsConf: ColumnConf[]
+  // 可能涉及的列配置
+  // Possible column configuration
+  columnsConf: ColumnConf[]
 }>()
 
+/**
+ * 设置分组
+ *
+ * Set group
+ *
+ * @param columnName 列名 / Column name
+ */
 async function setGroupColumn(columnName: string) {
   if (props.group.item && props.group.item.columnName !== columnName) {
     await eb.modifyLayout({
@@ -46,6 +59,11 @@ async function setGroupColumn(columnName: string) {
   }
 }
 
+/**
+ * 设置分组排序
+ *
+ * Set group sort
+ */
 async function setGroupDescSort() {
   if (props.group) {
     await eb.modifyLayout({
@@ -62,6 +80,11 @@ async function setGroupDescSort() {
   }
 }
 
+/**
+ * 设置分组隐藏空记录
+ *
+ * Set group hide empty records
+ */
 async function setGroupHideEmpty() {
   if (props.group) {
     await eb.modifyLayout({
@@ -92,7 +115,7 @@ async function setGroupHideEmpty() {
       {{ $t('function.group.columnsTitle') }}
     </div>
     <div
-      v-for="column in props.layoutColumnsConf.filter(col => props.group.enabledColumnNames.includes(col.name))"
+      v-for="column in props.columnsConf.filter(col => props.group.enabledColumnNames.includes(col.name))"
       :key="`${props.layoutId}=${column.name}`" class="iw-contextmenu__item flex items-center justify-between w-full"
     >
       <span>
