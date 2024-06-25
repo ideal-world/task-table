@@ -85,7 +85,7 @@ async function setGroupHideEmpty() {
   >
     {{ $t('function.group.groupTitle') }}
   </div>
-  <div style="display: none;">
+  <div class="w-full" style="display: none;">
     <div
       class="iw-divider iw-divider-end mt-1 mb-1 ml-2 mr-2"
     >

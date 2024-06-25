@@ -26,7 +26,7 @@ async function setShowToggleColumn(column: LayoutColumnProps) {
   >
     {{ $t('function.column.showTitle') }}
   </div>
-  <div style="display: none;">
+  <div class="w-full" style="display: none;">
     <div v-for="column in props.layoutColumns.filter(col => col.name !== props.tableConf.pkColumnName)" :key="`${props.layoutId}-${column.name}`" class="iw-contextmenu__item flex items-center justify-between w-full">
       <span>
         <i :class="props.tableConf.columns.find(col => col.name === column.name)?.icon" />

@@ -20,7 +20,7 @@ async function setSubDataShow(subDataShowKind: SubDataShowKind) {
   <div class="iw-divider cursor-pointer iw-table-setting-title">
     {{ $t('function.subData.title') }}
   </div>
-  <div style="display: none;">
+  <div class="w-full" style="display: none;">
     <div class="flex justify-between">
       <button
         class="iw-btn m-1 flex-1"

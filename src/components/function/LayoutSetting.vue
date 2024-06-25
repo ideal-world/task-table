@@ -64,7 +64,7 @@ async function createNewLayout(layoutKind: LayoutKind) {
   <div class="iw-divider cursor-pointer iw-table-setting-title">
     {{ $t('layout.settingTitle') }}
   </div>
-  <div>
+  <div class="w-full">
     <div class="flex justify-between">
       <button
         class="iw-btn m-0.5 px-3 flex-1"

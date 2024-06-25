@@ -50,7 +50,7 @@ onMounted(() => {
     <div class="iw-divider cursor-pointer iw-table-setting-title">
       {{ $t('_.table.moreSettingTitle') }}
     </div>
-    <div style="display: none;">
+    <div class="w-full" style="display: none;">
       <TableResizeSettingComp :size="props.tableConf.styles.size" :styles="props.tableConf.styles" />
       <TableThemeSettingComp />
       <TableLocalesSettingComp />
