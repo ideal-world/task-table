@@ -28,7 +28,7 @@ const actionColumnWidth = computed(() => props.layoutConf.actionColumn ? props.l
 
 const pkKindIsNumber = props.tableConf.columns.some(col => col.name === props.tableConf.pkColumnName && [DataKind.NUMBER, DataKind.SERIAL].includes(col.dataKind))
 
-function setColumnStyles(colIdx: number) {
+function setColumnStyles(colIdx: number, width?: number) {
 // ColIdx of select column = -1
 // ColIdx of action column = -2
   const styles: any = {}
@@ -39,7 +39,7 @@ function setColumnStyles(colIdx: number) {
     styles.width = `${actionColumnWidth.value}px`
   }
   else {
-    styles.width = `${props.columnsConf[colIdx].width}px`
+    styles.width = `${width || props.columnsConf[colIdx].width}px`
   }
   setFixedColumnStyles(styles, colIdx, props.columnsConf, selectColumnWidth.value)
   return styles
