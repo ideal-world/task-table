@@ -11,7 +11,7 @@ import type { ColumnConf } from '../conf'
 import * as eb from '../eventbus'
 
 const props = defineProps<{
-  // 布局Id
+  // 布局ID
   // Layout ID
   layoutId: string
   // 过滤配置
@@ -56,14 +56,14 @@ interface FilterItemProps {
   useDict: boolean
   multiValue: boolean
 }
-// 已选中的过滤组Id，在显示过滤组容器时设置
-// Selected filter group Id, set when showing the filter group container
+// 已选中的过滤组ID，在显示过滤组容器时设置
+// Selected filter group ID, set when showing the filter group container
 const selectedFilterGroupIdx = ref<number | undefined>()
 // 已选中的过滤项
 // Selected filter items
 const selectedFilterItems = ref<FilterItemProps[] | undefined>()
-// 已选中的过滤项Id，在选择过滤项时设置
-// Selected filter item Id, set when selecting filter item
+// 已选中的过滤项ID，在选择过滤项时设置
+// Selected filter item ID, set when selecting filter item
 const selectedFilterItemIdx = ref<number | undefined>()
 // 所有过滤组中已选中的字典项，格式：列名 + '-' + 列值 -> 字典项
 // Dictionary items selected in all filter groups, format: column name + '-' + column value -> dictionary item
@@ -139,11 +139,11 @@ async function addDictItemsByFilterItems(filterItems: FilterItemProps[]) {
  * Show filter group container
  *
  * @param e 事件 / Event
- * @param filterGroupIdx 过滤组Id / Filter group Id
+ * @param filterGroupIdx 过滤组ID / Filter group ID
  */
 async function showFilterGroupContainer(e: Event, filterGroupIdx?: number) {
-  // 初始化，设置已选中的过滤组Id，清空已选中的过滤项Id
-  // Initialize, set the selected filter group Id, and clear the selected filter item Id
+  // 初始化，设置已选中的过滤组ID，清空已选中的过滤项ID
+  // Initialize, set the selected filter group ID, and clear the selected filter item ID
   selectedFilterGroupIdx.value = filterGroupIdx
   selectedFilterItemIdx.value = undefined
   const targetEle = e.target as HTMLElement
@@ -179,7 +179,7 @@ async function showFilterGroupContainer(e: Event, filterGroupIdx?: number) {
  *
  * Delete filter group
  *
- * @param filterGroupIdx 过滤组Id / Filter group Id
+ * @param filterGroupIdx 过滤组ID / Filter group ID
  */
 async function deleteFilterGroup(filterGroupIdx: number) {
   const filter = toRaw(props.filter!)
@@ -220,11 +220,11 @@ function tryParseDictItems(columnName: string, value?: any): any | DictItemProps
  * Show filter column container
  *
  * @param e 事件 / Event
- * @param filterItemIdx 过滤项Id / Filter item Id
+ * @param filterItemIdx 过滤项ID / Filter item ID
  */
 function showFilterColumns(e: Event, filterItemIdx?: number) {
-  // 设置已选中的过滤项Id
-  // Set the selected filter item Id
+  // 设置已选中的过滤项ID
+  // Set the selected filter item ID
   selectedFilterItemIdx.value = filterItemIdx
   filterColumnCompRef.value?.show(e.target as HTMLElement, undefined, undefined, true)
 }
@@ -235,11 +235,11 @@ function showFilterColumns(e: Event, filterItemIdx?: number) {
  * Show filter operation container
  *
  * @param e 事件 / Event
- * @param filterItemIdx 过滤项Id / Filter item Id
+ * @param filterItemIdx 过滤项ID / Filter item ID
  */
 function showFilterOps(e: Event, filterItemIdx: number) {
-  // 设置已选中的过滤项Id
-  // Set the selected filter item Id
+  // 设置已选中的过滤项ID
+  // Set the selected filter item ID
   selectedFilterItemIdx.value = filterItemIdx
   filterOpCompRef.value?.show(e.target as HTMLElement, undefined, MenuSizeKind.MINI, true)
 }
@@ -249,7 +249,7 @@ function showFilterOps(e: Event, filterItemIdx: number) {
  *
  * Delete filter item
  *
- * @param filterItemIdx 过滤项Id / Filter item Id
+ * @param filterItemIdx 过滤项ID / Filter item ID
  */
 async function deleteFilterItem(filterItemIdx: number) {
   selectedFilterItems.value?.splice(filterItemIdx, 1)
@@ -320,7 +320,7 @@ function setFilterOp(e: Event) {
  * Set a single filter value
  *
  * @param value 值 / Value
- * @param filterItemIdx 过滤项Id / Filter item Id
+ * @param filterItemIdx 过滤项ID / Filter item ID
  */
 function setFilterAValue(value: any, filterItemIdx: number) {
   const currFilterItem = selectedFilterItems.value?.[filterItemIdx]
@@ -354,8 +354,8 @@ function setFilterAValue(value: any, filterItemIdx: number) {
  *
  * Delete a single value
  *
- * @param filterItemIdx 过滤项Id / Filter item Id
- * @param valueIdx 值索引Id / Value index Id
+ * @param filterItemIdx 过滤项ID / Filter item ID
+ * @param valueIdx 值索引ID / Value index ID
  */
 function deleteAValue(filterItemIdx: number, valueIdx: number) {
   selectedFilterItems.value?.[filterItemIdx] && selectedFilterItems.value[filterItemIdx].values.splice(valueIdx, 1)
@@ -367,7 +367,7 @@ function deleteAValue(filterItemIdx: number, valueIdx: number) {
  * Show dictionary item selection container
  *
  * @param value 字典值 / Dictionary value
- * @param filterItemIdx 过滤项Id / Filter item Id
+ * @param filterItemIdx 过滤项ID / Filter item ID
  * @param e 事件 / Event
  */
 async function showDictItems(value: any, filterItemIdx: number, e: Event) {
