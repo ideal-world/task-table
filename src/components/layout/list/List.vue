@@ -16,18 +16,41 @@ import ListRowSelectComp from './ListRowSelect.vue'
 
 const props = defineProps<
   {
+  // 布局配置
+  // Layout configuration
     layoutConf: LayoutConf
+    // 表格配置
+    // Table configuration
     tableConf: TableConf
+    // 列配置
+    // Column configuration
     columnsConf: ColumnConf[]
   }
 >()
+
+// 列表元素引用
+// List element reference
 const listRef: Ref<HTMLDivElement | null> = ref(null)
 
+// 选择列宽度
+// Select column width
 const selectColumnWidth = computed(() => props.layoutConf.showSelectColumn ? 25 : 0)
+// 操作列宽度
+// Action column width
 const actionColumnWidth = computed(() => props.layoutConf.actionColumn ? props.layoutConf.actionColumn.width : 0)
 
+// 主键列是否为数字类型
+// Whether the primary key column is of numeric type
 const pkKindIsNumber = props.tableConf.columns.some(col => col.name === props.tableConf.pkColumnName && [DataKind.NUMBER, DataKind.SERIAL].includes(col.dataKind))
 
+/**
+ * 设置列样式
+ *
+ * Set column style
+ *
+ * @param colIdx 列索引 / Column index
+ * @param width 强制指定列的宽度 / Force the width of the column
+ */
 function setColumnStyles(colIdx: number, width?: number) {
 // ColIdx of select column = -1
 // ColIdx of action column = -2
@@ -41,10 +64,17 @@ function setColumnStyles(colIdx: number, width?: number) {
   else {
     styles.width = `${width || props.columnsConf[colIdx].width}px`
   }
+  // 设置固定列样式
+  // Set fixed column styles
   setFixedColumnStyles(styles, colIdx, props.columnsConf, selectColumnWidth.value)
   return styles
 }
 
+/**
+ * 设置表格宽度
+ *
+ * Set table width
+ */
 function setTableWidth() {
   const styles: any = {}
   // 2px for border
@@ -53,7 +83,11 @@ function setTableWidth() {
 }
 
 onMounted(() => {
+  // 注册树形行展开/折叠监听
+  // Register tree row expansion/collapse listener
   props.layoutConf.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA && registerTreeRowToggleListener(listRef.value!)
+  // 注册单元格点击监听
+  // Register cell click listener
   registerCellClickListener(listRef.value!)
 })
 </script>
@@ -65,6 +99,8 @@ onMounted(() => {
     :style="setTableWidth()"
   >
     <HeaderComp :columns-conf="props.columnsConf" :layout-conf="props.layoutConf" :table-conf="props.tableConf" :set-column-styles="setColumnStyles" />
+    <!-- 不分组模式 -->
+    <!-- Non-grouping mode -->
     <template v-if="props.layoutConf.data && !Array.isArray(props.layoutConf.data)">
       <RowsComp
         :records="props.layoutConf.data.records"
@@ -92,6 +128,8 @@ onMounted(() => {
         :set-column-styles="setColumnStyles"
       />
     </template>
+    <!-- 分组模式 -->
+    <!-- Grouping mode -->
     <template v-else-if="props.layoutConf.data && Array.isArray(props.layoutConf.data)">
       <template v-for="groupData in props.layoutConf.data" :key="`${props.layoutConf.id}-${groupData.groupValue}`">
         <ColumnAggComp

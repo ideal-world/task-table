@@ -10,60 +10,37 @@ import { registerRowTreeTriggerEvent, unregisterRowTreeTriggerEvent } from '../.
 import { type GanttInfo, getTimelineColumnWidth, getWeekdays } from './gantt'
 
 const props = defineProps<{
+  // 布局ID
+  // Layout ID
   layoutId: string
+  // 甘特图配置
+  // Gantt chart configuration
   ganttProps: GanttLayoutProps
+  // 数据
+  // Data
   records: { [columnName: string]: any }[]
+  // 主键列名
+  // Primary key column name
   pkColumnName: string
+  // 父主键列名
+  // Parent primary key column name
   parentPkColumnName?: string
+  // 子数据显示类型
+  // Sub-data display type
   subDataShowKind: SubDataShowKind
+  // 表格样式配置
+  // Table style configuration
   styleProps: TableStyleProps
+  // 甘特图信息
+  // Gantt chart information
   ganttInfo: GanttInfo
 }>()
 
 const { t } = locales.global
 
+// 甘特图时间线元素引用
+// Gantt chart timeline element reference
 const ganttTimelineRef = ref<HTMLElement | null>(null)
-
-function setTimelineBar(barEle: HTMLElement, timelineRowEle: HTMLElement, plan: boolean, startTime?: Dayjs, endTime?: Dayjs) {
-  const searchTime = startTime || (endTime!)
-  const hasStartAndEndTime = startTime && endTime
-  let cellEle: HTMLElement
-  let left: number
-  let width: number
-
-  const timelineColumnWidth = getTimelineColumnWidth(props.ganttInfo.ganttShowKind)
-  switch (props.ganttInfo.ganttShowKind) {
-    case GanttShowKind.DAY:
-      cellEle = timelineRowEle.querySelector(`.iw-gantt-timeline-value-cell[data-value="${searchTime.date()}"][data-group-value="${searchTime.format('YYYY-MM')}"]`) as HTMLElement
-      // Center a cell
-      left = cellEle.offsetLeft + (hasStartAndEndTime ? timelineColumnWidth / 2 : timelineColumnWidth / 4)
-      width = hasStartAndEndTime ? endTime.diff(startTime, 'day') * timelineColumnWidth : 0
-      break
-    case GanttShowKind.WEEK:
-      cellEle = timelineRowEle.querySelector(`.iw-gantt-timeline-value-cell[data-value="${searchTime.week()}"][data-group-value="${searchTime.year()}"]`) as HTMLElement
-      // Add a deviation of the week day,
-      // if a small rectangle is displayed at the start or end time,
-      // the width of this rectangle needs to be compensated for 1/2, otherwise it will overflow.
-      left = cellEle.offsetLeft + timelineColumnWidth * (startTime ?? endTime!).weekday() / 6 + (hasStartAndEndTime ? 0 : -6)
-      width = hasStartAndEndTime ? endTime.diff(startTime, 'week', true) * timelineColumnWidth : 0
-      break
-    case GanttShowKind.MONTH:
-      cellEle = timelineRowEle.querySelector(`.iw-gantt-timeline-value-cell[data-value="${searchTime.month() + 1}"][data-group-value="${searchTime.year()}"]`) as HTMLElement
-      left = cellEle.offsetLeft + timelineColumnWidth * (startTime ?? endTime!).date() / (startTime ?? endTime!).daysInMonth() + (hasStartAndEndTime ? 0 : -6)
-      width = hasStartAndEndTime ? endTime.diff(startTime, 'month', true) * timelineColumnWidth : 0
-      break
-    case GanttShowKind.YEAR:
-      cellEle = timelineRowEle.querySelector(`.iw-gantt-timeline-value-cell[data-value="${searchTime.year()}"]`) as HTMLElement
-      left = cellEle.offsetLeft + timelineColumnWidth * (startTime ?? endTime!).month() / 11 + (hasStartAndEndTime ? 0 : -6)
-      width = hasStartAndEndTime ? endTime.diff(startTime, 'year', true) * timelineColumnWidth : 0
-      break
-  }
-  const top = cellEle.offsetTop + cellEle.offsetHeight / 2 - 6 + (plan ? 0 : 2)
-  barEle.style.left = `${left}px`
-  barEle.style.top = `${top}px`
-  barEle.style.width = `${width}px`
-  barEle.style.display = `block`
-}
 
 function drawDataRelLine(globalOffsetTop: number, currTimelineEle: HTMLElement, parentTimelineEle: HTMLElement) {
   function doDrawDataRelLine(x1: number, y1: number, x2: number, y2: number) {
@@ -103,23 +80,6 @@ function drawDataRelLine(globalOffsetTop: number, currTimelineEle: HTMLElement, 
   }
 }
 
-function generateTimelineBar() {
-  ganttTimelineRef.value?.querySelectorAll('.iw-gantt-timeline-plan-bar').forEach((ele) => {
-    const barEle = ele as HTMLElement
-    const startTime = barEle.dataset.startTime ? dayjs(barEle.dataset.startTime) : undefined
-    const endTime = barEle.dataset.endTime ? dayjs(barEle.dataset.endTime) : undefined
-    const timelineRowEle = barEle.parentElement as HTMLElement
-    setTimelineBar(barEle, timelineRowEle, true, startTime, endTime)
-  })
-  ganttTimelineRef.value?.querySelectorAll('.iw-gantt-timeline-actual-bar').forEach((ele) => {
-    const barEle = ele as HTMLElement
-    const startTime = barEle.dataset.startTime ? dayjs(barEle.dataset.startTime) : undefined
-    const endTime = barEle.dataset.endTime ? dayjs(barEle.dataset.endTime) : undefined
-    const timelineRowEle = barEle.parentElement as HTMLElement
-    setTimelineBar(barEle, timelineRowEle, false, startTime, endTime)
-  })
-}
-
 function generateDataRelLine() {
   ganttTimelineRef.value!.querySelectorAll('svg').forEach((ele) => {
     ele.remove()
@@ -150,28 +110,129 @@ function getTimelineBarTitle(row: { [columnName: string]: any }, plan: boolean) 
   }
 }
 
+/**
+ * 生成所有时间线栏
+ *
+ * Generate all timeline bars
+ */
+function generateAllTimelineBar() {
+  ganttTimelineRef.value?.querySelectorAll('.iw-gantt-timeline-plan-bar').forEach((ele) => {
+    const barEle = ele as HTMLElement
+    const startTime = barEle.dataset.startTime ? dayjs(barEle.dataset.startTime) : undefined
+    const endTime = barEle.dataset.endTime ? dayjs(barEle.dataset.endTime) : undefined
+    const timelineRowEle = barEle.parentElement as HTMLElement
+    generateOneTimelineBar(barEle, timelineRowEle, true, startTime, endTime)
+  })
+  ganttTimelineRef.value?.querySelectorAll('.iw-gantt-timeline-actual-bar').forEach((ele) => {
+    const barEle = ele as HTMLElement
+    const startTime = barEle.dataset.startTime ? dayjs(barEle.dataset.startTime) : undefined
+    const endTime = barEle.dataset.endTime ? dayjs(barEle.dataset.endTime) : undefined
+    const timelineRowEle = barEle.parentElement as HTMLElement
+    generateOneTimelineBar(barEle, timelineRowEle, false, startTime, endTime)
+  })
+}
+
+/**
+ * 生成一个时间线栏
+ *
+ * Generate a timeline bar
+ *
+ * @param barEle 时间线栏元素 / Timeline bar element
+ * @param timelineRowEle 时间线行元素 / Timeline row element
+ * @param plan 是否是计划时间线栏 / Whether it is a planned timeline bar
+ * @param startTime 开始时间 / Start time
+ * @param endTime 结束时间 / End time
+ */
+function generateOneTimelineBar(barEle: HTMLElement, timelineRowEle: HTMLElement, plan: boolean, startTime?: Dayjs, endTime?: Dayjs) {
+  // 搜索时间，优先使用开始时间，否则使用结束时间
+  // Search time, use start time first, otherwise use end time
+  const searchTime = startTime || (endTime!)
+  // 是否有开始、结束时间，存在开始及结束时间显示为线，否则显示为点
+  // Whether there is a start and end time，
+  // if there is a start and end time, it is displayed as a line, otherwise it is displayed as a point
+  const hasStartAndEndTime = startTime !== undefined && endTime !== undefined
+
+  // 时间线栏依附的最左侧单元格元素
+  // Leftmost cell element attached to the timeline bar
+  let leftCellEle: HTMLElement
+  // 时间线栏位置
+  // Timeline bar position
+  let left: number
+  // 时间线栏宽度
+  // Timeline bar width
+  let width: number
+  // 获取时间线栏宽度
+  // Get the width of the timeline bar
+  const timelineColumnWidth = getTimelineColumnWidth(props.ganttInfo.ganttShowKind)
+  // 根据甘特图显示类型及开始、结束时间计算时间线栏位置及宽度
+  // Calculate the position and width of the timeline bar based on the Gantt chart display type and start and end times
+  switch (props.ganttInfo.ganttShowKind) {
+    case GanttShowKind.DAY:
+      leftCellEle = timelineRowEle.querySelector(`.iw-gantt-timeline-value-cell[data-value="${searchTime.date()}"][data-group-value="${searchTime.format('YYYY-MM')}"]`) as HTMLElement
+      left = leftCellEle.offsetLeft + timelineColumnWidth / 4
+      width = hasStartAndEndTime && endTime.diff(startTime, 'day') !== 0 ? endTime.diff(startTime, 'day') * timelineColumnWidth + timelineColumnWidth / 4 * 2 : 14
+      break
+    case GanttShowKind.WEEK:
+      leftCellEle = timelineRowEle.querySelector(`.iw-gantt-timeline-value-cell[data-value="${searchTime.week()}"][data-group-value="${searchTime.year()}"]`) as HTMLElement
+      left = leftCellEle.offsetLeft + timelineColumnWidth * searchTime.weekday() / 7
+      width = hasStartAndEndTime ? endTime.diff(startTime, 'week', true) * timelineColumnWidth + timelineColumnWidth / 7 : 8
+      break
+    case GanttShowKind.MONTH:
+      leftCellEle = timelineRowEle.querySelector(`.iw-gantt-timeline-value-cell[data-value="${searchTime.month() + 1}"][data-group-value="${searchTime.year()}"]`) as HTMLElement
+      left = leftCellEle.offsetLeft + Math.min(timelineColumnWidth - 6, timelineColumnWidth * (searchTime.date() - 1) / searchTime.daysInMonth())
+      width = hasStartAndEndTime ? Math.max(6, endTime.diff(startTime, 'month', true) * timelineColumnWidth + timelineColumnWidth / searchTime.daysInMonth()) : 6
+      break
+    case GanttShowKind.YEAR:
+      leftCellEle = timelineRowEle.querySelector(`.iw-gantt-timeline-value-cell[data-value="${searchTime.year()}"]`) as HTMLElement
+      left = leftCellEle.offsetLeft + Math.min(timelineColumnWidth - 6, timelineColumnWidth * searchTime.dayOfYear() / (searchTime.isLeapYear() ? 366 : 365))
+      width = hasStartAndEndTime ? Math.max(6, endTime.diff(startTime, 'days', true) * timelineColumnWidth / 365 + timelineColumnWidth / 365) : 6
+      break
+  }
+  const top = leftCellEle.offsetTop + leftCellEle.offsetHeight / 2 - 6 + (plan ? 0 : 2)
+  barEle.style.left = `${left}px`
+  barEle.style.top = `${top}px`
+  barEle.style.width = `${width}px`
+  barEle.style.display = `block`
+}
+
+// 监听甘特图信息变化
+// Listen for changes in Gantt chart information
 watch(() => props.ganttInfo, () => {
   nextTick(() => {
-    generateTimelineBar()
+    // 重新生成时间线栏
+    // Regenerate timeline bar
+    generateAllTimelineBar()
+    // 重新生成子父数据间的时间关联线
+    // Regenerate time-related lines between child and parent data
     generateDataRelLine()
   })
 })
 
 let rowTreeEventId: string | null = null
 onMounted(() => {
-  generateTimelineBar()
+  // 生成时间线栏
+  // Generate timeline bar
+  generateAllTimelineBar()
+  // 生成子父数据间的时间关联线
+  // Generate time-related lines between child and parent data
   generateDataRelLine()
 
+  // 注册行树触发事件
+  // Register row tree trigger event
   rowTreeEventId = registerRowTreeTriggerEvent(async (dataPk, hide) => {
     if (ganttTimelineRef.value) {
       const rowEle = ganttTimelineRef.value?.querySelector(`.iw-gantt-timeline-row[data-pk="${dataPk}"]`) as HTMLElement
       rowEle.style.display = hide ? 'none' : 'flex'
+      // 重新生成子父数据间的时间关联线
+      // Regenerate time-related lines between child and parent data
       generateDataRelLine()
     }
   })
 })
 
 onUnmounted(() => {
+  // 注销行树触发事件
+  // Unregister row tree trigger event
   unregisterRowTreeTriggerEvent(rowTreeEventId!)
 })
 </script>
@@ -196,21 +257,25 @@ onUnmounted(() => {
       ${timeline.holiday && 'bg-base-200'}
       ${idx !== 0 && 'border-l border-l-base-300'}`"
       >
+        <!-- 特殊标记当前天的列 -->
+        <!-- Special mark the current day column -->
         <div v-if="timeline.today" class="bg-accent pl-0.5 mr-0.5 h-3/4" />
         <template v-else>
             &nbsp;
         </template>
       </div>
+      <!-- 在每行行尾添加计划、实际的时间线栏 -->
+      <!-- Add plan and actual timeline bars at the end of each row -->
       <div
         v-if="row[props.ganttProps.planStartTimeColumnName] || row[props.ganttProps.planEndTimeColumnName]"
-        class="iw-gantt-timeline-plan-bar absolute hidden p-1 border-2 border-info rounded"
+        class="iw-gantt-timeline-plan-bar absolute hidden py-1 border-2 border-info rounded"
         :title="getTimelineBarTitle(row, true)"
         :data-start-time="row[props.ganttProps.planStartTimeColumnName]"
         :data-end-time="row[props.ganttProps.planEndTimeColumnName]"
       />
       <div
         v-if="props.ganttProps.actualStartTimeColumnName && props.ganttProps.actualEndTimeColumnName && (row[props.ganttProps.actualStartTimeColumnName] || row[props.ganttProps.actualEndTimeColumnName])"
-        class="iw-gantt-timeline-actual-bar absolute hidden p-1 bg-success rounded-sm"
+        class="iw-gantt-timeline-actual-bar absolute hidden py-1 bg-success rounded-sm"
         :title="getTimelineBarTitle(row, false)"
         :data-start-time="row[props.ganttProps.actualStartTimeColumnName]"
         :data-end-time="row[props.ganttProps.actualEndTimeColumnName]"
