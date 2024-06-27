@@ -42,6 +42,90 @@ const { t } = locales.global
 // Gantt chart timeline element reference
 const ganttTimelineRef = ref<HTMLElement | null>(null)
 
+/**
+ * 获取时间线栏标题
+ *
+ * Get timeline bar title
+ *
+ * @param row 行数据 / Row data
+ * @param plan 是否是计划时间线栏 / Whether it is a planned timeline bar
+ */
+function getTimelineBarTitle(row: { [columnName: string]: any }, plan: boolean) {
+  const startTime = row[plan ? props.ganttProps.planStartTimeColumnName! : props.ganttProps.actualStartTimeColumnName!]
+  const endTime = row[plan ? props.ganttProps.planEndTimeColumnName! : props.ganttProps.actualEndTimeColumnName!]
+  if (startTime && endTime) {
+    const weekdays = getWeekdays(startTime, endTime, props.ganttInfo.holidays)
+    return `${plan ? t('gantt.planTimeTitle') : t('gantt.actualTimeTitle')}: ${startTime ?? ''} / ${endTime ?? ''} ${t('gantt.totalWeekDays', { days: weekdays })}`
+  }
+  else {
+    return `${plan ? t('gantt.planTimeTitle') : t('gantt.actualTimeTitle')}: ${startTime ?? ''} / ${endTime ?? ''}`
+  }
+}
+
+/**
+ * 生成子父数据间的时间关联线
+ *
+ * Generate time-related lines between child and parent data
+ *
+ *
+ * 布局上，每列的left值是相对于行的偏移，每行的top值是相对于整个列表的偏移。
+ *
+ * In layout, the left value of each column is the offset relative to the row, and the top value of each row is the offset relative to the entire list.
+ *
+ * +--------------------------------------------------+
+ * |  relative                                        |
+ * |                                                  |
+ * |  +--------------------------------------------+  |
+ * |  |                                            |  |
+ * |  |              +---+ +---+ +---+ +---+ +---+ |  |
+ * |  |   relative   |   | |   | |   | |   | |   | |  |
+ * |  |              +---+ +---+ +---+ +---+ +---+ |  |
+ * |  |                                            |  |
+ * |  +--------------------------------------------+  |
+ * |                                                  |
+ * |  +--------------------------------------------+  |
+ * |  |                                            |  |
+ * |  |              +---+ +---+ +---+ +---+ +---+ |  |
+ * |  |   relative   |   | |   | |   | |   | |   | |  |
+ * |  |              +---+ +---+ +---+ +---+ +---+ |  |
+ * |  |                                            |  |
+ * |  +--------------------------------------------+  |
+ * |                                                  |
+ * +--------------------------------------------------+
+ */
+function generateDataRelLine() {
+  // 清除所有时间关联线
+  // Clear all time-related lines
+  ganttTimelineRef.value!.querySelectorAll('svg').forEach((ele) => {
+    ele.remove()
+  })
+  if (props.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA) {
+    // 遍历所有行，隐藏的行不生成关联线
+    // Traverse all rows, hidden rows do not generate related lines
+    ganttTimelineRef.value?.querySelectorAll('.iw-gantt-timeline-row[data-parent-pk]').forEach((ele) => {
+      const currRowEle = ele as HTMLElement
+      if (currRowEle.style.display === 'none') {
+        return
+      }
+      const parentRowEle = ganttTimelineRef.value?.querySelector(`.iw-gantt-timeline-row[data-pk="${currRowEle.dataset.parentPk!}"]`)
+      // 如果父行存在，生成关联线
+      // If the parent row exists, generate a related line
+      if (parentRowEle) {
+        drawDataRelLine(currRowEle.offsetTop, currRowEle.querySelector('.iw-gantt-timeline-plan-bar')!, parentRowEle.querySelector('.iw-gantt-timeline-plan-bar')!)
+      }
+    })
+  }
+}
+
+/**
+ * 绘制子父数据间的时间关联线
+ *
+ * Draw time-related lines between child and parent data
+ *
+ * @param globalOffsetTop 当前行在整个列表中的偏移顶部高度 / The offset top height of the current row in the entire list
+ * @param currTimelineEle 当前时间线元素 / Current timeline element
+ * @param parentTimelineEle 父时间线元素 / Parent timeline element
+ */
 function drawDataRelLine(globalOffsetTop: number, currTimelineEle: HTMLElement, parentTimelineEle: HTMLElement) {
   function doDrawDataRelLine(x1: number, y1: number, x2: number, y2: number) {
     const svgEle = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
@@ -77,36 +161,6 @@ function drawDataRelLine(globalOffsetTop: number, currTimelineEle: HTMLElement, 
     const x2 = parentTimelineEle.offsetLeft + parentTimelineEle.offsetWidth - 2
     const y2 = offsetHeight + currTimelineEle.offsetHeight / 2
     doDrawDataRelLine(x1, y1, x2, y2)
-  }
-}
-
-function generateDataRelLine() {
-  ganttTimelineRef.value!.querySelectorAll('svg').forEach((ele) => {
-    ele.remove()
-  })
-  if (props.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA) {
-    ganttTimelineRef.value?.querySelectorAll('.iw-gantt-timeline-row[data-parent-pk]').forEach((ele) => {
-      const currRowEle = ele as HTMLElement
-      if (currRowEle.style.display === 'none') {
-        return
-      }
-      const parentRowEle = ganttTimelineRef.value?.querySelector(`.iw-gantt-timeline-row[data-pk="${currRowEle.dataset.parentPk!}"]`)
-      if (parentRowEle) {
-        drawDataRelLine(currRowEle.offsetTop, currRowEle.querySelector('.iw-gantt-timeline-plan-bar')!, parentRowEle.querySelector('.iw-gantt-timeline-plan-bar')!)
-      }
-    })
-  }
-}
-
-function getTimelineBarTitle(row: { [columnName: string]: any }, plan: boolean) {
-  const startTime = row[plan ? props.ganttProps.planStartTimeColumnName! : props.ganttProps.actualStartTimeColumnName!]
-  const endTime = row[plan ? props.ganttProps.planEndTimeColumnName! : props.ganttProps.actualEndTimeColumnName!]
-  if (startTime && endTime) {
-    const weekdays = getWeekdays(startTime, endTime, props.ganttInfo.holidays)
-    return `${plan ? t('gantt.planTimeTitle') : t('gantt.actualTimeTitle')}: ${startTime ?? ''} / ${endTime ?? ''} ${t('gantt.totalWeekDays', { days: weekdays })}`
-  }
-  else {
-    return `${plan ? t('gantt.planTimeTitle') : t('gantt.actualTimeTitle')}: ${startTime ?? ''} / ${endTime ?? ''}`
   }
 }
 
@@ -169,22 +223,47 @@ function generateOneTimelineBar(barEle: HTMLElement, timelineRowEle: HTMLElement
   switch (props.ganttInfo.ganttShowKind) {
     case GanttShowKind.DAY:
       leftCellEle = timelineRowEle.querySelector(`.iw-gantt-timeline-value-cell[data-value="${searchTime.date()}"][data-group-value="${searchTime.format('YYYY-MM')}"]`) as HTMLElement
+      // 从1/4处开始
+      // Start from 1/4
       left = leftCellEle.offsetLeft + timelineColumnWidth / 4
-      width = hasStartAndEndTime && endTime.diff(startTime, 'day') !== 0 ? endTime.diff(startTime, 'day') * timelineColumnWidth + timelineColumnWidth / 4 * 2 : 14
+      // 如果有开始及结束时间且结束时间与开始时间相差天数大于0时，宽度为结束时间与开始时间相差天数乘以时间线栏宽度，再加上1/2列栏宽度（补偿偏差），否则直接设置宽度为14
+      // If there is a start and end time and the number of days between the end time and the start time is greater than 0,
+      // the width is the number of days between the end time and the start time multiplied by the timeline column width, plus 1/2 column width (compensating for deviation),
+      // otherwise the width is set directly to 14
+      width = hasStartAndEndTime && endTime.diff(startTime, 'day') !== 0 ? endTime.diff(startTime, 'day') * timelineColumnWidth + timelineColumnWidth / 2 : 14
       break
     case GanttShowKind.WEEK:
       leftCellEle = timelineRowEle.querySelector(`.iw-gantt-timeline-value-cell[data-value="${searchTime.week()}"][data-group-value="${searchTime.year()}"]`) as HTMLElement
+      // 一周7天，从0到6，设置当天在一周内的偏差
+      // One week has 7 days, from 0 to 6, set the deviation of the current day within a week
       left = leftCellEle.offsetLeft + timelineColumnWidth * searchTime.weekday() / 7
+      // 如果有开始及结束时间，宽度为结束时间与开始时间相差周数（包含小数点）乘以时间线栏宽度，再加上1/7列栏宽度（补偿偏差），否则直接设置宽度为8
+      // If there is a start and end time, the width is the number of weeks between the end time and the start time (including decimals) multiplied by the timeline column width, plus 1/7 column width (compensating for deviation),
+      // otherwise the width is set directly to 8
       width = hasStartAndEndTime ? endTime.diff(startTime, 'week', true) * timelineColumnWidth + timelineColumnWidth / 7 : 8
       break
     case GanttShowKind.MONTH:
       leftCellEle = timelineRowEle.querySelector(`.iw-gantt-timeline-value-cell[data-value="${searchTime.month() + 1}"][data-group-value="${searchTime.year()}"]`) as HTMLElement
+      // 设置当天在当月内的偏差。使用min函数防止侵占到下一列栏
+      // Set the deviation of the current day within the month
+      // Use the min function to prevent encroachment on the next column
       left = leftCellEle.offsetLeft + Math.min(timelineColumnWidth - 6, timelineColumnWidth * (searchTime.date() - 1) / searchTime.daysInMonth())
+      // 如果有开始及结束时间，宽度为结束时间与开始时间相差月数（包含小数点）乘以时间线栏宽度，再加上1/当月天数列栏宽度（补偿偏差），否则直接设置宽度为6。使用Math.max函数防止宽度小于6
+      // If there is a start and end time, the width is the number of months between the end time and the start time (including decimals) multiplied by the timeline column width, plus 1/number of days in the month column width (compensating for deviation),
+      // otherwise the width is set directly to 6.
+      // Use the Math.max function to prevent the width from being less than 6.
       width = hasStartAndEndTime ? Math.max(6, endTime.diff(startTime, 'month', true) * timelineColumnWidth + timelineColumnWidth / searchTime.daysInMonth()) : 6
       break
     case GanttShowKind.YEAR:
       leftCellEle = timelineRowEle.querySelector(`.iw-gantt-timeline-value-cell[data-value="${searchTime.year()}"]`) as HTMLElement
+      // 设置当天在当年内的偏差。使用min函数防止侵占到下一列栏
+      // Set the deviation of the current day within the year.
+      // Use the min function to prevent encroachment on the next column.
       left = leftCellEle.offsetLeft + Math.min(timelineColumnWidth - 6, timelineColumnWidth * searchTime.dayOfYear() / (searchTime.isLeapYear() ? 366 : 365))
+      // 如果有开始及结束时间，宽度为结束时间与开始时间相差年数（包含小数点）乘以时间线栏宽度，再加上1/365列栏宽度（补偿偏差），否则直接设置宽度为6。使用Math.max函数防止宽度小于6
+      // If there is a start and end time, the width is the number of years between the end time and the start time (including decimals) multiplied by the timeline column width, plus 1/365 column width (compensating for deviation),
+      // otherwise the width is set directly to 6.
+      // Use the Math.max function to prevent the width from being less than 6.
       width = hasStartAndEndTime ? Math.max(6, endTime.diff(startTime, 'days', true) * timelineColumnWidth / 365 + timelineColumnWidth / 365) : 6
       break
   }

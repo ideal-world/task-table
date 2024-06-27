@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { Ref } from 'vue'
-import { onMounted, ref, toRaw } from 'vue'
-import { IwEvents, IwProps, IwUtils } from '../src'
+import type { Ref } from 'vue';
+import { onMounted, ref, toRaw } from 'vue';
+import { IwEvents, IwProps, IwUtils } from '../src';
 
 const selectedRecordPks: Ref<any[]> = ref([])
 
@@ -9,35 +9,35 @@ const NAME_DICT = [{ title: '星航', value: 'xh', avatar: 'https://pic1.zhimg.c
 const STATS_DICT = [{ title: '初始化', value: 'init', color: '#43ad7f7f' }, { title: '进行中', value: 'progress' }, { title: '有风险', value: 'risk', color: '#be14807f' }, { title: '已完成', value: 'finish' }, { title: '已关闭', value: 'close' }]
 
 const DATA: { [columnName: string]: any }[] = [
-  // { no: 1, pno: null, name: 'v1.0优化任务集合', creator: 'xh', stats: ['init'], planStartTime: '2023-10-22', planEndTime: '2023-12-01', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: 'https://idealworld.group/img/home-bg.jpg' },
-  // { no: 2, pno: null, name: '测试报告导出', creator: 'xh', stats: ['init'], planStartTime: '2023-10-14', planEndTime: '2024-01-01', actualStartTime: '2023-10-15', actualEndTime: '2023-11-24', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: 'https://idealworld.group/img/home-bg.jpg' },
-  // { no: 3, pno: 1, name: '平台支持修改工程下默认分支', creator: 'xh', stats: ['progress', 'risk'], planStartTime: '2023-10-25', planEndTime: '2023-11-29', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
-  // { no: 4, pno: 1, name: '工作项优化', creator: 'xh', stats: ['init'], planStartTime: '2023-10-26', planEndTime: '2023-11-25', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: 'https://idealworld.group/img/home-bg.jpg' },
-  // { no: 5, pno: 1, name: '作业执行日志实时获取并增加搜索和支持定位', creator: 'xh', stats: ['init'], planStartTime: '2023-10-27', planEndTime: '2023-11-30', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
-  { no: 6, pno: null, name: '制品文件支持下载和删除', creator: 'xh', stats: ['init'], planStartTime: '2023-11-02', planEndTime: '2023-11-03', disabled: true, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
-  // { no: 7, pno: null, name: '测试报告模板增加模板内容', creator: 'xh', stats: ['init'], planStartTime: '2023-10-29', planEndTime: '2023-11-25', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
-  // { no: 8, pno: 4, name: '工作项报表导出', creator: 'xh', stats: ['init'], planStartTime: '2023-10-30', planEndTime: '2023-11-24', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
-  // { no: 9, pno: 4, name: '工作项列表中显示关联的工作项数量', creator: 'xh', stats: ['init'], planStartTime: '2023-10-31', planEndTime: '2023-11-24', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
-  // { no: 10, pno: 8, name: '报表导出组件支持动态字段', creator: 'xh', stats: ['close'], planStartTime: '2023-11-1', planEndTime: '2023-11-24', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
-  // { no: 11, pno: null, name: '项目新增字段项目类型', creator: 'xh', stats: ['close'], planStartTime: '2023-11-2', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
-  // { no: 12, pno: null, name: '账号新增用工性质字段', creator: 'xh', stats: ['close'], planStartTime: '2023-11-3', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
-  // { no: 13, pno: null, name: '报表的纬度支持相关属性', creator: 'xh', stats: ['close'], planStartTime: '2023-11-4', planEndTime: '2023-12-24', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
-  // { no: 14, pno: null, name: '人员提供接口筛选', creator: 'xh', stats: ['close'], planStartTime: '2023-11-5', planEndTime: '2023-12-24', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
-  // { no: 15, pno: null, name: '报表支持一个主题选多次', creator: 'xh', stats: ['close'], planStartTime: '2023-11-6', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
-  // { no: 16, pno: 8, name: '执行用例结果页面增加创缺陷按钮', creator: 'xh', stats: ['close'], planStartTime: '2023-11-7', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
-  // { no: 17, pno: null, name: '资源实例根据时间添加倒序排列', creator: 'xh', stats: ['finish'], planStartTime: '2023-11-8', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
-  // { no: 18, pno: null, name: '新建引用已经归档的版本', creator: 'xy', stats: ['finish'], planStartTime: '2023-11-9', planEndTime: '2023-12-24', disabled: false, avatar: 'https://pic1.zhimg.com/v2-770e9580d5febfb49cbb23c409cea85d_r.jpg', attachment: '' },
-  // { no: 19, pno: null, name: '归档镜像包依赖包合并查询', creator: 'xy', stats: ['finish'], planStartTime: '2023-11-10', planEndTime: '2023-12-24', disabled: false, avatar: 'https://pic1.zhimg.com/v2-770e9580d5febfb49cbb23c409cea85d_r.jpg', attachment: '' },
-  // { no: 20, pno: null, name: '制品文件支持下载和删除', creator: 'xh', stats: ['finish'], planStartTime: '2023-11-11', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
-  // { no: 21, pno: null, name: '作业支持定时执行', creator: 'xh', stats: ['finish'], planStartTime: '2023-11-12', planEndTime: '2023-11-24', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
-  // { no: 22, pno: 1, name: '执行过程中打印变量', creator: 'xh', stats: ['finish'], planStartTime: '2023-11-13', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
-  // { no: 23, pno: null, name: 'MinIO路径按项目隔离', creator: 'xh', stats: ['finish'], planStartTime: '2023-11-14', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
-  // { no: 24, pno: null, name: '附件支持预览', creator: 'xh', stats: ['progress', 'risk'], planStartTime: '2023-11-15', planEndTime: '2023-12-24', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
-  // { no: 25, pno: null, name: '模板及工作流逻辑优化', creator: 'xh', stats: ['close'], planStartTime: '2023-11-16', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
-  // { no: 26, pno: null, name: '工作流支持EDA异步消息', creator: 'xy', stats: ['close'], planStartTime: '2023-11-17', planEndTime: '2024-01-24', disabled: false, avatar: 'https://pic1.zhimg.com/v2-770e9580d5febfb49cbb23c409cea85d_r.jpg', attachment: '' },
-  // { no: 27, pno: null, name: '工程提交记录支持建立分支货标签', creator: 'xy', stats: ['close'], planStartTime: '2023-11-18', planEndTime: '2024-01-24', disabled: false, avatar: 'https://pic1.zhimg.com/v2-770e9580d5febfb49cbb23c409cea85d_r.jpg', attachment: '' },
-  // { no: 28, pno: null, name: '报表统计增加数据跳转功能', creator: 'xh', stats: ['close'], planStartTime: '2023-11-19', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
-  // { no: 29, pno: null, name: '代码评审与合并', creator: 'xh', stats: ['close'], planStartTime: '2023-11-20', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
+  { no: 1, pno: null, name: 'v1.0优化任务集合', creator: 'xh', stats: ['init'], planStartTime: '2023-10-22', planEndTime: '2023-12-01', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: 'https://idealworld.group/img/home-bg.jpg' },
+  { no: 2, pno: null, name: '测试报告导出', creator: 'xh', stats: ['init'], planStartTime: '2023-10-14', planEndTime: '2024-01-01', actualStartTime: '2023-10-15', actualEndTime: '2023-11-24', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: 'https://idealworld.group/img/home-bg.jpg' },
+  { no: 3, pno: 1, name: '平台支持修改工程下默认分支', creator: 'xh', stats: ['progress', 'risk'], planStartTime: '2023-10-25', planEndTime: '2023-11-29', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
+  { no: 4, pno: 1, name: '工作项优化', creator: 'xh', stats: ['init'], planStartTime: '2023-10-26', planEndTime: '2023-11-25', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: 'https://idealworld.group/img/home-bg.jpg' },
+  { no: 5, pno: 1, name: '作业执行日志实时获取并增加搜索和支持定位', creator: 'xh', stats: ['init'], planStartTime: '2023-10-27', planEndTime: '2023-11-30', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
+  { no: 6, pno: null, name: '制品文件支持下载和删除', creator: 'xh', stats: ['init'], planStartTime: '2023-10-28', planEndTime: '2023-11-28', disabled: true, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
+  { no: 7, pno: null, name: '测试报告模板增加模板内容', creator: 'xh', stats: ['init'], planStartTime: '2023-10-29', planEndTime: '2023-11-25', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
+  { no: 8, pno: 4, name: '工作项报表导出', creator: 'xh', stats: ['init'], planStartTime: '2023-10-30', planEndTime: '2023-11-24', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
+  { no: 9, pno: 4, name: '工作项列表中显示关联的工作项数量', creator: 'xh', stats: ['init'], planStartTime: '2023-10-31', planEndTime: '2023-11-24', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
+  { no: 10, pno: 8, name: '报表导出组件支持动态字段', creator: 'xh', stats: ['close'], planStartTime: '2023-11-1', planEndTime: '2023-11-24', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
+  { no: 11, pno: null, name: '项目新增字段项目类型', creator: 'xh', stats: ['close'], planStartTime: '2023-11-2', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
+  { no: 12, pno: null, name: '账号新增用工性质字段', creator: 'xh', stats: ['close'], planStartTime: '2023-11-3', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
+  { no: 13, pno: null, name: '报表的纬度支持相关属性', creator: 'xh', stats: ['close'], planStartTime: '2023-11-4', planEndTime: '2023-12-24', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
+  { no: 14, pno: null, name: '人员提供接口筛选', creator: 'xh', stats: ['close'], planStartTime: '2023-11-5', planEndTime: '2023-12-24', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
+  { no: 15, pno: null, name: '报表支持一个主题选多次', creator: 'xh', stats: ['close'], planStartTime: '2023-11-6', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
+  { no: 16, pno: 8, name: '执行用例结果页面增加创缺陷按钮', creator: 'xh', stats: ['close'], planStartTime: '2023-11-7', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
+  { no: 17, pno: null, name: '资源实例根据时间添加倒序排列', creator: 'xh', stats: ['finish'], planStartTime: '2023-11-8', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
+  { no: 18, pno: null, name: '新建引用已经归档的版本', creator: 'xy', stats: ['finish'], planStartTime: '2023-11-9', planEndTime: '2023-12-24', disabled: false, avatar: 'https://pic1.zhimg.com/v2-770e9580d5febfb49cbb23c409cea85d_r.jpg', attachment: '' },
+  { no: 19, pno: null, name: '归档镜像包依赖包合并查询', creator: 'xy', stats: ['finish'], planStartTime: '2023-11-10', planEndTime: '2023-12-24', disabled: false, avatar: 'https://pic1.zhimg.com/v2-770e9580d5febfb49cbb23c409cea85d_r.jpg', attachment: '' },
+  { no: 20, pno: null, name: '制品文件支持下载和删除', creator: 'xh', stats: ['finish'], planStartTime: '2023-11-11', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
+  { no: 21, pno: null, name: '作业支持定时执行', creator: 'xh', stats: ['finish'], planStartTime: '2023-11-12', planEndTime: '2023-11-24', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
+  { no: 22, pno: 1, name: '执行过程中打印变量', creator: 'xh', stats: ['finish'], planStartTime: '2023-11-13', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
+  { no: 23, pno: null, name: 'MinIO路径按项目隔离', creator: 'xh', stats: ['finish'], planStartTime: '2023-11-14', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
+  { no: 24, pno: null, name: '附件支持预览', creator: 'xh', stats: ['progress', 'risk'], planStartTime: '2023-11-15', planEndTime: '2023-12-24', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
+  { no: 25, pno: null, name: '模板及工作流逻辑优化', creator: 'xh', stats: ['close'], planStartTime: '2023-11-16', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
+  { no: 26, pno: null, name: '工作流支持EDA异步消息', creator: 'xy', stats: ['close'], planStartTime: '2023-11-17', planEndTime: '2024-01-24', disabled: false, avatar: 'https://pic1.zhimg.com/v2-770e9580d5febfb49cbb23c409cea85d_r.jpg', attachment: '' },
+  { no: 27, pno: null, name: '工程提交记录支持建立分支货标签', creator: 'xy', stats: ['close'], planStartTime: '2023-11-18', planEndTime: '2024-01-24', disabled: false, avatar: 'https://pic1.zhimg.com/v2-770e9580d5febfb49cbb23c409cea85d_r.jpg', attachment: '' },
+  { no: 28, pno: null, name: '报表统计增加数据跳转功能', creator: 'xh', stats: ['close'], planStartTime: '2023-11-19', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
+  { no: 29, pno: null, name: '代码评审与合并', creator: 'xh', stats: ['close'], planStartTime: '2023-11-20', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
 ]
 
 function getDictValue(columnName: string, dataValue: any) {
