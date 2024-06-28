@@ -29,7 +29,6 @@ declare module 'vue' {
     Menu: typeof import('./src/components/common/Menu.vue')['default']
     Pagination: typeof import('./src/components/function/Pagination.vue')['default']
     QuickSearch: typeof import('./src/components/function/QuickSearch.vue')['default']
-    RowSelect: typeof import('./src/components/layout/list/RowSelect.vue')['default']
     RowSortSetting: typeof import('./src/components/function/RowSortSetting.vue')['default']
     Scrollable: typeof import('./src/components/common/Scrollable.vue')['default']
     Skeleton: typeof import('./src/Skeleton.vue')['default']
