@@ -286,6 +286,9 @@ export function doCloseContextMenu(contextMenuEle: HTMLElement) {
 
 let isGlobalInit = false
 function globalInit() {
+  if (typeof document === 'undefined') {
+    return
+  }
   if (!isGlobalInit) {
     isGlobalInit = true
     /**
