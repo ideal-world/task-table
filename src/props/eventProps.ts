@@ -55,14 +55,14 @@ export interface TableEventProps {
    */
   newData?: (newRecords: { [columnName: string]: any }[]) => Promise<void>
 
-  /**
-   * 复制数据
-   *
-   * Copy data
-   *
-   * @param targetRecordPks 要复制的数据主键 / Data primary keys to be copied
-   */
-  copyData?: (targetRecordPks: any[]) => Promise<void>
+    /**
+     * 复制数据
+     *
+     * Copy data
+     *
+     * @param targetRecordPks 要复制的数据主键 / Data primary keys to be copied
+     */
+    copyData?: (targetRecordPks: any[]) => Promise<void>
 
   /**
    * 修改数据
