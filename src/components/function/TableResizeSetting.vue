@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import * as iconSvg from '../../assets/icon';
-import type { TableStyleModifyProps, TableStyleProps } from '../../props';
-import { SizeKind } from '../../props';
-import * as eb from '../eventbus';
+import * as iconSvg from '../../assets/icon'
+import type { TableStyleModifyProps, TableStyleProps } from '../../props'
+import { SizeKind } from '../../props'
+import * as eb from '../eventbus'
 
 const props = defineProps<{
   // 表格样式

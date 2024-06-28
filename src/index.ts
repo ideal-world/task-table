@@ -23,6 +23,5 @@ export {
   IwProps,
   IwEvents,
   IwUtils,
-  IwTaskTable
+  IwTaskTable,
 }
-

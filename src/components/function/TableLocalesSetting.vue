@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { changeLocale } from '../../locales';
+import { changeLocale } from '../../locales'
 
 function changeLocales(locale: 'zh' | 'en') {
   changeLocale(locale)

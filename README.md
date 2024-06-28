@@ -16,7 +16,6 @@ TODO
 
 TODO
 
-
 ## Documentation and examples
 
 [https://ideal-world.github.io/task-table/](https://ideal-world.github.io/task-table/)

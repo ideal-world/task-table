@@ -224,7 +224,8 @@ onMounted(() => {
   // 容器冒泡捕捉到单击事件后，尝试离开编辑模式
   // After the container captures the click event, try to leave edit mode
   containerEle.addEventListener('click', (e) => {
-    if (!curColumnConf.value || e.target && e.target instanceof HTMLElement && e.target.closest(`.iw-edit-container`)) {
+    if (!curColumnConf.value
+      || (e.target && e.target instanceof HTMLElement && e.target.closest(`.iw-edit-container`))) {
       return
     }
     // 在编辑模式下，且点击的不是编辑容器(cellEditContainerRef)，则尝试离开编辑模式

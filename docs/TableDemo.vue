@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { Ref } from 'vue';
-import { onMounted, ref, toRaw } from 'vue';
-import { IwEvents, IwProps, IwUtils } from '../src';
+import type { Ref } from 'vue'
+import { onMounted, ref, toRaw } from 'vue'
+import { IwEvents, IwProps, IwUtils } from '../src'
 
 const selectedRecordPks: Ref<any[]> = ref([])
 
@@ -58,7 +58,9 @@ function attachDict(data: { [columnName: string]: any }[]) {
       d[`creator${IwProps.DATA_DICT_POSTFIX}`] = [NAME_DICT.find(dict => dict.value === d.creator)!]
     }
     if (d.stats) {
-      d[`stats${IwProps.DATA_DICT_POSTFIX}`] = d.stats.map((s) => { return STATS_DICT.find(dict => dict.value === s)! })
+      d[`stats${IwProps.DATA_DICT_POSTFIX}`] = d.stats.map((s) => {
+        return STATS_DICT.find(dict => dict.value === s)!
+      })
     }
     return d
   })
@@ -164,7 +166,9 @@ const events: IwProps.TableEventProps = {
       })
     }
     if (group && group.item && !byGroupValue) {
-      let dataGroup: { [key: string]: any[] } = IwUtils.basic.groupBy(data, (d) => { return d[group.item!.columnName] })
+      let dataGroup: { [key: string]: any[] } = IwUtils.basic.groupBy(data, (d) => {
+        return d[group.item!.columnName]
+      })
       if (group.item.hideEmptyRecord) {
         dataGroup = Object.fromEntries(Object.entries(dataGroup).filter(([_, value]) => value.length > 0))
       }
@@ -366,7 +370,9 @@ const events: IwProps.TableEventProps = {
 
   modifyLayout: async (changedLayoutId: string, changedLayoutProps: IwProps.LayoutModifyProps): Promise<void> => {
     // eslint-disable-next-line ts/no-use-before-define
-    const currLayout = tableProps.value.layouts.find((layout) => { return layout.id === changedLayoutId })!
+    const currLayout = tableProps.value.layouts.find((layout) => {
+      return layout.id === changedLayoutId
+    })!
     if (changedLayoutProps.title) {
       currLayout.title = changedLayoutProps.title
     }
@@ -399,14 +405,18 @@ const events: IwProps.TableEventProps = {
       currLayout.agg = changedLayoutProps.agg
     }
     if (changedLayoutProps.changedColumn) {
-      const col = currLayout.columns!.find((col) => { return col.name === changedLayoutProps.changedColumn!.name })!
+      const col = currLayout.columns!.find((col) => {
+        return col.name === changedLayoutProps.changedColumn!.name
+      })!
       Object.assign(col, changedLayoutProps.changedColumn)
     }
   },
 
   deleteLayout: async (deletedLayoutId: string): Promise<void> => {
     // eslint-disable-next-line ts/no-use-before-define
-    tableProps.value.layouts.splice(tableProps.value.layouts.findIndex((layout) => { return layout.id === deletedLayoutId }), 1)
+    tableProps.value.layouts.splice(tableProps.value.layouts.findIndex((layout) => {
+      return layout.id === deletedLayoutId
+    }), 1)
   },
 
   loadHolidays: async (_startTime: Date, _endTime: Date): Promise<Date[]> => {
@@ -449,7 +459,9 @@ const events: IwProps.TableEventProps = {
     if (dictName === 'creator') {
       let nameDict: IwProps.DictItemProps[] = JSON.parse(JSON.stringify(NAME_DICT))
       if (filterValue) {
-        nameDict = nameDict.filter((dict) => { return dict.title.includes(filterValue) || dict.value.includes(filterValue) })
+        nameDict = nameDict.filter((dict) => {
+          return dict.title.includes(filterValue) || dict.value.includes(filterValue)
+        })
       }
       const totalNumber = nameDict.length
       if (slice) {
@@ -463,7 +475,9 @@ const events: IwProps.TableEventProps = {
     else {
       let statsDict: IwProps.DictItemProps[] = JSON.parse(JSON.stringify(STATS_DICT))
       if (filterValue) {
-        statsDict = statsDict.filter((dict) => { return dict.title.includes(filterValue) || dict.value.includes(filterValue) })
+        statsDict = statsDict.filter((dict) => {
+          return dict.title.includes(filterValue) || dict.value.includes(filterValue)
+        })
       }
       const totalNumber = statsDict.length
       if (slice) {
@@ -481,7 +495,9 @@ const events: IwProps.TableEventProps = {
     Object.entries(conds).forEach(([columnName, values]) => {
       if (columnName === 'creator') {
         let nameDict: IwProps.DictItemProps[] = JSON.parse(JSON.stringify(NAME_DICT))
-        nameDict = nameDict.filter((dict) => { return values.find(val => dict.title.includes(val) || dict.value.includes(val)) })
+        nameDict = nameDict.filter((dict) => {
+          return values.find(val => dict.title.includes(val) || dict.value.includes(val))
+        })
         const totalNumber = nameDict.length
         if (slice) {
           nameDict = nameDict.slice(slice.offsetNumber, slice.offsetNumber + slice.fetchNumber)
@@ -493,7 +509,9 @@ const events: IwProps.TableEventProps = {
       }
       else {
         let statsDict: IwProps.DictItemProps[] = JSON.parse(JSON.stringify(STATS_DICT))
-        statsDict = statsDict.filter((dict) => { return values.find(val => dict.title.includes(val) || dict.value.includes(val)) })
+        statsDict = statsDict.filter((dict) => {
+          return values.find(val => dict.title.includes(val) || dict.value.includes(val))
+        })
         const totalNumber = statsDict.length
         if (slice) {
           statsDict = statsDict.slice(slice.offsetNumber, slice.offsetNumber + slice.fetchNumber)

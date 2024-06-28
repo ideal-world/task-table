@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
-import * as iconSvg from '../../assets/icon';
+import { onMounted, ref } from 'vue'
+import * as iconSvg from '../../assets/icon'
 
 const scrollableRef = ref<HTMLElement | null>(null)
 const scrollableMainRef = ref<HTMLElement | null>(null)

@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { TableStyleModifyProps } from '../../props';
-import * as eb from '../eventbus';
+import type { TableStyleModifyProps } from '../../props'
+import * as eb from '../eventbus'
 
 async function changeTheme(e: Event) {
   const targetEle = e.target as HTMLInputElement

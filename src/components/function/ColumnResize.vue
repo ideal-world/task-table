@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref } from 'vue'
 
 const props = defineProps<{
   // 可调整大小的元素类名。必须是 ``relative`` 定位
@@ -137,8 +137,8 @@ onMounted(() => {
     const targetEleRect = targetEle.getBoundingClientRect()
     // 边界计算
     // Boundary calculation
-    if (!props.handleLeft && targetEleRect.right - e.clientX < 5
-      || props.handleLeft && e.clientX - targetEleRect.left < 5
+    if ((!props.handleLeft && targetEleRect.right - e.clientX < 5)
+      || (props.handleLeft && e.clientX - targetEleRect.left < 5)
     ) {
       prepareResize(dragEle, targetEle, e)
     }

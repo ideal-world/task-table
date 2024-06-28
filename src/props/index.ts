@@ -23,4 +23,3 @@ export * from './enumProps'
 export * from './eventProps'
 export * from './functionProps'
 export * from './kernelProps'
-

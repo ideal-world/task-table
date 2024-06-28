@@ -170,7 +170,7 @@ export interface TableEventProps {
    * 加载假日列表
    *
    * Load holidays
-   * 
+   *
    * @param startTime 开始时间 / Start time
    * @param endTime 结束时间 / End time
    * @returns 假日列表 / Holidays

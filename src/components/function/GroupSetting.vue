@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import * as iconSvg from '../../assets/icon';
-import type { GroupDataProps } from '../../props';
-import type { ColumnConf } from '../conf';
-import * as eb from '../eventbus';
+import * as iconSvg from '../../assets/icon'
+import type { GroupDataProps } from '../../props'
+import type { ColumnConf } from '../conf'
+import * as eb from '../eventbus'
 
 const props = defineProps<{
   // 布局ID

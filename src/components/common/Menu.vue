@@ -39,9 +39,12 @@ async function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: Menu
   // 菜单已初始化
   isInit.value = true
 
-  if (!force
-    && (attachObj instanceof HTMLElement && contextmenuRef.value!.contains(attachObj)
-    || attachObj instanceof MouseEvent && attachObj.target instanceof HTMLElement && contextmenuRef.value!.contains(attachObj.target))) {
+  if (
+    !force
+    && (
+      (attachObj instanceof HTMLElement && contextmenuRef.value!.contains(attachObj)) || (attachObj instanceof MouseEvent && attachObj.target instanceof HTMLElement && contextmenuRef.value!.contains(attachObj.target))
+    )
+  ) {
     return
   }
 
