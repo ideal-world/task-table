@@ -19,21 +19,48 @@ import GanttTimelineRowComp from './GanttTimelineRows.vue'
 
 const props = defineProps<
   {
+    // 布局配置
+    // Layout configuration
     layoutConf: LayoutConf
+    // 甘特图配置
+    // Gantt chart configuration
     ganttProps: GanttLayoutProps
+    // 表格配置
+    // Table configuration
     tableConf: TableConf
+    // 列配置
+    // Column configuration
     columnsConf: ColumnConf[]
   }
 >()
 
+// 甘特图整体容器的引用
+// Reference to the overall container of the Gantt chart
 const ganttRef: Ref<HTMLElement | null> = ref(null)
+// 甘特图列表引用
+// Gantt chart list reference
 const ganttListRef: Ref<HTMLElement | null> = ref(null)
+// 甘特图时间线引用
+// Gantt chart timeline reference
 const ganttTimelineRef: Ref<HTMLElement | null> = ref(null)
+// 甘特图宽度
+// Gantt chart width
 const ganttWith: Ref<number> = ref(0)
+// 甘特图信息
+// Gantt chart information
 const ganttInfo: Ref<GanttInfo | null> = ref(null)
 
+// 显示类型菜单引用
+// Show type menu reference
 const showKindCompRef = ref<InstanceType<typeof MenuComp>>()
 
+/**
+ * 生成甘特图信息
+ *
+ * Generate Gantt information
+ *
+ * @param data 数据 / Data
+ */
 async function generateGanttInfo(data: DataResp | DataGroupResp[]) {
   let timelineStartDate: Date | null = null
   let timelineEndDate: Date | null = null
@@ -81,6 +108,11 @@ async function generateGanttInfo(data: DataResp | DataGroupResp[]) {
   }
 }
 
+/**
+ * 获取时间线实际宽度
+ *
+ * Get the actual width of the timeline
+ */
 function getTimelineActualWidth() {
   const styles: any = {}
   styles.width = `${ganttInfo.value!.timeline.length * getTimelineColumnWidth(ganttInfo.value!.ganttShowKind)}px`
@@ -97,17 +129,23 @@ onMounted(() => {
   })
   ganttWith.value = ganttRef.value!.offsetWidth
 
+  // 监听甘特图的滚动条事件，同步列表视图的滚动条
+  // Listen for scroll events on the Gantt chart and synchronize the scroll bar of the list view
   ganttTimelineRef.value!.addEventListener('scroll', () => {
     ganttListRef.value!.scrollTo({
       top: ganttTimelineRef.value!.scrollTop,
     })
   })
+  // 监听甘特图的鼠标滚轮事件，同步列表视图的鼠标滚轮事件
+  // Listen for mouse wheel events on the Gantt chart and synchronize the mouse wheel events of the list view
   ganttTimelineRef.value!.addEventListener('wheel', (e) => {
     e.preventDefault()
     ganttTimelineRef.value!.scrollTo({
       left: ganttTimelineRef.value!.scrollLeft + e.deltaY,
     })
   })
+  // 监听列表视图的鼠标滚轮事件，同步甘特图的鼠标滚轮事件
+  // Listen for mouse wheel events on the list view and synchronize the mouse wheel events of the Gantt chart
   ganttListRef.value!.addEventListener('wheel', (e) => {
     e.preventDefault()
     ganttListRef.value!.scrollTo({
@@ -116,13 +154,25 @@ onMounted(() => {
   })
 })
 
+// 监听布局配置变化
+// Listen for layout configuration changes
 watch(props.layoutConf, async () => {
   if (!props.layoutConf.data) {
     return
   }
+  // 生成甘特图信息
+  // Generate Gantt information
   await generateGanttInfo(props.layoutConf.data)
 })
 
+/**
+ * 设置新的宽度
+ *
+ * Set new width
+ *
+ * @param timelineWidth 时间线宽度 / Timeline width
+ * @param _itemId 项ID，此处不需要 / Item ID,not needed here
+ */
 async function setNewWidth(timelineWidth: number, _itemId?: string) {
   const changedLayoutReq: LayoutModifyProps = {
     gantt: {
@@ -137,6 +187,13 @@ async function setNewWidth(timelineWidth: number, _itemId?: string) {
   await eb.modifyLayout(changedLayoutReq)
 }
 
+/**
+ * 修改显示类型
+ *
+ * Change the display type
+ *
+ * @param showKind 显示类型 / Display type
+ */
 async function changeShowKind(showKind: GanttShowKind) {
   const changedLayoutReq: LayoutModifyProps = {
     gantt: {
@@ -159,6 +216,8 @@ async function changeShowKind(showKind: GanttShowKind) {
     class="iw-gantt flex h-full relative"
   >
     <div ref="ganttListRef" class="overflow-y-hidden overflow-x-auto" :style="`width: ${ganttWith - props.ganttProps.timelineWidth}px`">
+      <!-- 甘特图列表，直接引用列表视图 -->
+      <!-- Gantt chart list, directly reference the list view -->
       <ListComp :layout-conf="props.layoutConf" :table-conf="props.tableConf" :columns-conf="props.columnsConf" />
     </div>
     <div
@@ -172,6 +231,8 @@ async function changeShowKind(showKind: GanttShowKind) {
         :style="getTimelineActualWidth()"
       >
         <GanttTimelineHeaderComp :gantt-info="ganttInfo" :layout-id="props.layoutConf.id" :style-props="props.tableConf.styles" />
+        <!-- 与列表视图保持一致，不分组模式的处理 -->
+        <!-- Consistent with the list view, the processing of non-grouping mode -->
         <template v-if="props.layoutConf.data && !Array.isArray(props.layoutConf.data)">
           <GanttTimelineRowComp
             :layout-id="props.layoutConf.id"
@@ -184,11 +245,16 @@ async function changeShowKind(showKind: GanttShowKind) {
             :gantt-info="ganttInfo"
           />
         </template>
+        <!-- 与列表视图保持一致，分组模式的处理 -->
+        <!-- Consistent with the list view, the processing of grouping mode -->
         <template v-else-if="props.layoutConf.data && Array.isArray(props.layoutConf.data)">
           <template v-for="groupData in props.layoutConf.data" :key="`${props.layoutConf.id}-${groupData.groupValue}`">
             <div
+              v-if="layoutConf.agg"
               :class="`${props.tableConf.styles.rowClass} iw-gantt-timeline-row flex bg-base-100 border-y border-y-base-300 border-r border-r-base-300 text-sm`"
             >
+              <!-- 模拟聚合功能的占位 -->
+              <!-- Placeholder for simulating aggregation function -->
               <div class="iw-gantt-timeline-cell">
                 &nbsp;
               </div>
@@ -206,6 +272,8 @@ async function changeShowKind(showKind: GanttShowKind) {
             <div
               class="flex justify-end p-2 min-h-0"
             >
+              <!-- 模拟分页功能的占位 -->
+              <!-- Placeholder for simulating pagination function -->
               <div>
                 <button class="iw-btn ml-1 iw-btn-xs" style="visibility: hidden;">
                   For placeholder only, highly aligned with paging controls

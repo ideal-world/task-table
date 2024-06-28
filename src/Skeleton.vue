@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Ref } from 'vue'
-import { computed, onMounted, ref, watch } from 'vue'
+import { nextTick, onMounted, watch } from 'vue'
 import ScrollableComp from './components/common/Scrollable.vue'
 import type { ColumnConf, LayoutConf, TableConf } from './components/conf'
 import { init } from './components/conf'
@@ -17,26 +17,70 @@ import { LayoutKind } from './props/enumProps'
 import { delegateEvent } from './utils/basic'
 
 const _props = defineProps<SimpleTableProps>()
+
 const { tableConf, layoutsConf, currentLayoutId }: {
+  // 表格配置
+  // Table configuration
   tableConf: TableConf
+  // 布局配置
+  // Layout configuration
   layoutsConf: LayoutConf[]
+  // 当前布局ID
+  // Current layout ID
   currentLayoutId: Ref<string>
 } = init(_props)
 
-const currentLayoutConf = computed<LayoutConf>(() => {
+/**
+ * 获取当前布局配置
+ *
+ * Get current layout configuration
+ */
+function getCurrentLayoutConf(): LayoutConf {
   return layoutsConf.find(conf => conf.id === currentLayoutId.value)!
-})
+}
 
-const currentLayoutColumnsConf = computed<ColumnConf[]>(() => {
-  return currentLayoutConf.value.columns.filter(column => !column.hide).map((column) => {
+/**
+ * 获取当前布局列配置
+ *
+ * Get current layout column configuration
+ */
+function getCurrentLayoutColumnConf(): ColumnConf[] {
+  return getCurrentLayoutConf().columns.filter(column => !column.hide).map((column) => {
     return {
       ...tableConf.columns.find(col => col.name === column.name)!,
       ...column,
     }
   })
-})
+}
 
-const scrollableCompRefs = ref()
+/**
+ * 设置高度
+ *
+ * Set height
+ */
+function setHeight() {
+  nextTick(() => {
+    // Set table height
+    Array.prototype.forEach.call(document.getElementsByClassName('iw-tt'), (ttEle) => {
+      const outHeight = ttEle.parentElement?.clientHeight
+      const headerEle = ttEle.getElementsByClassName('iw-tt-header')
+      const headerHeight = headerEle.length > 0 ? headerEle[0].offsetHeight : 0
+      Array.prototype.forEach.call(ttEle.getElementsByClassName('iw-tt-layout'), (layoutEle) => {
+        if (layoutEle.id !== `iw-tt-layout-${currentLayoutId.value}`) {
+          return
+        }
+        const toolbarEle = layoutEle.getElementsByClassName('iw-tt-toolbar')
+        const toolbarHeight = toolbarEle.length > 0 ? toolbarEle[0].offsetHeight : 0
+        const layoutStyleHeight = layoutEle.getElementsByClassName('iw-tt-footer')[0].style.height
+        const footerHeight = layoutStyleHeight || layoutEle.getElementsByClassName('iw-tt-footer')[0].offsetHeight
+        if (!layoutStyleHeight) {
+          layoutEle.getElementsByClassName('iw-tt-footer')[0].style.height = `${footerHeight}px`
+        }
+        layoutEle.getElementsByClassName('iw-tt-table')[0].style.height = `${outHeight - headerHeight - toolbarHeight - footerHeight}px`
+      })
+    })
+  })
+}
 
 watch(
   () => layoutsConf.length,
@@ -47,39 +91,9 @@ watch(
     else {
       currentLayoutId.value = layoutsConf[0].id
     }
-    setTimeout(() => {
-      setHeight()
-    })
+    setHeight()
   },
 )
-
-function setHeight() {
-  // Set table height
-  Array.prototype.forEach.call(document.getElementsByClassName('iw-tt'), (ttEle) => {
-    const outHeight = ttEle.parentElement?.clientHeight
-    const headerEle = ttEle.getElementsByClassName('iw-tt-header')
-    const headerHeight = headerEle.length > 0 ? headerEle[0].offsetHeight : 0
-    Array.prototype.forEach.call(ttEle.getElementsByClassName('iw-tt-layout'), (layoutEle) => {
-      if (layoutEle.id !== `iw-tt-layout-${currentLayoutId.value}`)
-        return
-
-      const toolbarEle = layoutEle.getElementsByClassName('iw-tt-toolbar')
-      const toolbarHeight = toolbarEle.length > 0 ? toolbarEle[0].offsetHeight : 0
-      const layoutStyleHeight = layoutEle.getElementsByClassName('iw-tt-footer')[0].style.height
-      const footerHeight = layoutStyleHeight || layoutEle.getElementsByClassName('iw-tt-footer')[0].offsetHeight
-      if (!layoutStyleHeight) {
-        layoutEle.getElementsByClassName('iw-tt-footer')[0].style.height = `${footerHeight}px`
-      }
-      layoutEle.getElementsByClassName('iw-tt-table')[0].style.height = `${outHeight - headerHeight - toolbarHeight - footerHeight}px`
-    })
-  })
-}
-
-function reSetScrollableWidth() {
-  setTimeout(() => {
-    setHeight()
-  })
-}
 
 onMounted(async () => {
   delegateEvent(`#iw-tt-${tableConf.id}`, 'click', '.iw-tt-header__item', (e: Event) => {
@@ -87,13 +101,11 @@ onMounted(async () => {
     const layoutId = target.dataset.layoutId
     if (layoutId) {
       currentLayoutId.value = layoutId
-      reSetScrollableWidth()
+      setHeight()
     }
   })
   await eb.watch()
-  setTimeout(() => {
-    setHeight()
-  })
+  setHeight()
 })
 </script>
 
@@ -160,8 +172,8 @@ onMounted(async () => {
         <TableSettingComp
           v-if="!tableConf.mini"
           :table-conf="tableConf"
-          :layout-conf="currentLayoutConf"
-          :columns-conf="currentLayoutColumnsConf"
+          :layout-conf="getCurrentLayoutConf()"
+          :columns-conf="getCurrentLayoutColumnConf()"
           :layout-length="layoutsConf.length"
         />
       </div>
@@ -172,15 +184,15 @@ onMounted(async () => {
           v-if="!tableConf.mini && (layout.sort || layout.filter)"
           class="iw-tt-toolbar flex items-center h-8 p-0.5"
         >
-          <RowSortSettingComp v-if="layout.sort" :layout-id="layout.id" :sort="layout.sort" :columns-conf="currentLayoutColumnsConf" />
+          <RowSortSettingComp v-if="layout.sort" :layout-id="layout.id" :sort="layout.sort" :columns-conf="getCurrentLayoutColumnConf()" />
           <div class="iw-divider iw-divider-horizontal m-0.5" />
-          <ScrollableComp v-if="layout.filter" ref="scrollableCompRefs" class="flex-1" :data-layout-id="layout.id">
-            <FilterSettingComp :layout-id="layout.id" :filter="layout.filter" :columns-conf="currentLayoutColumnsConf" />
+          <ScrollableComp v-if="layout.filter" class="flex-1" :data-layout-id="layout.id">
+            <FilterSettingComp :layout-id="layout.id" :filter="layout.filter" :columns-conf="getCurrentLayoutColumnConf()" />
           </ScrollableComp>
         </div>
         <div class="iw-tt-table overflow-auto w-full border border-base-300">
-          <ListComp v-if="layout.layoutKind === LayoutKind.LIST" :layout-conf="layout" :table-conf="tableConf" :columns-conf="currentLayoutColumnsConf" />
-          <GanttComp v-else-if="layout.layoutKind === LayoutKind.GANTT && layout.gantt" :gantt-props="layout.gantt" :layout-conf="layout" :table-conf="tableConf" :columns-conf="currentLayoutColumnsConf" />
+          <ListComp v-if="layout.layoutKind === LayoutKind.LIST" :layout-conf="layout" :table-conf="tableConf" :columns-conf="getCurrentLayoutColumnConf()" />
+          <GanttComp v-else-if="layout.layoutKind === LayoutKind.GANTT && layout.gantt" :gantt-props="layout.gantt" :layout-conf="layout" :table-conf="tableConf" :columns-conf="getCurrentLayoutColumnConf()" />
         </div>
         <div
           :class="`${tableConf.styles.footerClass} iw-tt-footer flex justify-between p-1 min-h-0`"

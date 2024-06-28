@@ -9,7 +9,7 @@ import type { ColumnConf } from '../conf'
 import * as eb from '../eventbus'
 
 const props = defineProps<{
-  // 布局Id
+  // 布局ID
   // Layout ID
   layoutId: string
   // 排序配置
