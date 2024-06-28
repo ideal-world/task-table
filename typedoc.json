@@ -7,7 +7,6 @@
   "entryPoints": [
     "src/index.ts"
   ],
-  "includes": "src/*.ts",
   "readme": "none",
   "includeVersion": true,
   "disableSources": false,

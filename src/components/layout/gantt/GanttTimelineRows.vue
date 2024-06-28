@@ -323,7 +323,7 @@ onUnmounted(() => {
       :key="`${props.layoutId}-${row[props.pkColumnName]}`"
       :data-pk="row[props.pkColumnName]"
       :data-parent-pk="props.parentPkColumnName ? row[props.parentPkColumnName] : undefined"
-      :class="`${props.styleProps.rowClass} relative iw-gantt-timeline-row flex bg-base-100 border-b border-b-base-300 border-r-base-300`"
+      :class="`${props.styleProps.rowClass} relative iw-gantt-timeline-row flex bg-base-100 border-b border-b-base-300`"
     >
       <div
         v-for="(timeline, idx) in ganttInfo.timeline" :key="`${props.layoutId}-${idx}`"
