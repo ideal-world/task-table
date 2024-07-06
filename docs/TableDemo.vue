@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import type { Ref } from 'vue';
-import { onMounted, ref, toRaw } from 'vue';
-import { IwEvents, IwProps, IwUtils } from '../src';
-import type { EditableDataResp } from '../src/props';
+import type { Ref } from 'vue'
+import { onMounted, ref } from 'vue'
+import { IwEvents, IwProps, IwUtils } from '../src'
+import type { EditableDataResp } from '../src/props'
+import { deepToRaw } from '../src/utils/vueHelper'
 
 const selectedRecordPks: Ref<any[]> = ref([])
 
@@ -69,7 +70,7 @@ function attachDict(data: { [columnName: string]: any }[]) {
 
 const events: IwProps.TableEventProps = {
   loadData: async (quickSearchContent?: string, filter?: IwProps.FilterDataProps, sort?: IwProps.SortDataProps, group?: IwProps.GroupDataProps, agg?: IwProps.AggDataProps, hideSubData?: boolean, byGroupValue?: any, slice?: IwProps.DataQuerySliceReq, returnColumnNames?: string[], _returnOnlyAgg?: boolean): Promise<IwProps.DataResp | IwProps.DataGroupResp[]> => {
-    let data: { [columnName: string]: any }[] = toRaw(DATA)
+    let data: { [columnName: string]: any }[] = deepToRaw(DATA)
     if (quickSearchContent) {
       data = data.filter((d) => {
         return d.name.includes(quickSearchContent)

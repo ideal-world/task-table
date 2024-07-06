@@ -1,5 +1,4 @@
 import type { Ref } from 'vue'
-import { toRaw } from 'vue'
 import locales from '../locales'
 
 import type { DataGroupResp, DataQuerySliceReq, DataResp, DictItemsResp, EditableDataResp, LayoutModifyProps, SimpleLayoutProps, TableStyleModifyProps } from '../props'
@@ -45,7 +44,7 @@ export async function watch() {
 export async function loadData(byGroupValue?: any, returnOnlyAgg?: boolean, layoutId?: string) {
   const layout = layoutId ? layoutsConf.find(layout => layout.id === layoutId)! : layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
-  const rawLayout = toRaw(layout)
+  const rawLayout = deepToRaw(layout)
 
   const showColumns = rawLayout.columns.filter(column => !column.hide).map(column => column.name).slice()
   if (tableConf.parentPkColumnName && rawLayout.columns.findIndex(column => column.name === tableConf.parentPkColumnName) === -1) {
@@ -153,7 +152,7 @@ export async function loadData(byGroupValue?: any, returnOnlyAgg?: boolean, layo
  * @param newRecords 要新建的数据 / Records to be created
  */
 export async function newData(newRecords: { [columnName: string]: any }[]) {
-  newRecords = toRaw(newRecords)
+  newRecords = deepToRaw(newRecords)
   const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.newData) {
@@ -182,7 +181,7 @@ export async function newData(newRecords: { [columnName: string]: any }[]) {
  * @param targetRecordPks 要复制的数据主键 / Data primary keys to be copied
  */
 export async function copyData(targetRecordPks: any[]) {
-  targetRecordPks = toRaw(targetRecordPks)
+  targetRecordPks = deepToRaw(targetRecordPks)
   const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.copyData) {
@@ -211,7 +210,7 @@ export async function copyData(targetRecordPks: any[]) {
  * @param changedRecords 要修改的数据 / Data to be modified
  */
 export async function modifyData(changedRecords: { [columnName: string]: any }[]) {
-  changedRecords = toRaw(changedRecords)
+  changedRecords = deepToRaw(changedRecords)
 
   const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
@@ -243,7 +242,7 @@ export async function modifyData(changedRecords: { [columnName: string]: any }[]
  * @param deletedRecordPks 要删除的数据主键 / Data primary keys to be deleted
  */
 export async function deleteData(deletedRecordPks: any[]) {
-  deletedRecordPks = toRaw(deletedRecordPks)
+  deletedRecordPks = deepToRaw(deletedRecordPks)
 
   const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
@@ -273,7 +272,7 @@ export async function deleteData(deletedRecordPks: any[]) {
  * @param checkRecordPks 要检查的数据主键 / Data primary keys to be checked
  */
 export async function loadEditableData(checkRecordPks: any[]): Promise<EditableDataResp> {
-  checkRecordPks = toRaw(checkRecordPks)
+  checkRecordPks = deepToRaw(checkRecordPks)
 
   const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
@@ -299,7 +298,7 @@ export async function loadEditableData(checkRecordPks: any[]): Promise<EditableD
  * @param selectedRecordPks 选择的数据主键 / Selected data primary keys
  */
 export async function selectData(selectedRecordPks: any[]) {
-  selectedRecordPks = toRaw(selectedRecordPks)
+  selectedRecordPks = deepToRaw(selectedRecordPks)
 
   const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
@@ -354,7 +353,7 @@ export async function clickCell(clickedRecordPk: any, clickedColumnName: string)
  * @returns 字典项列表 / Dictionary item list
  */
 export async function loadCellDictItems(dictName: string, filterValue?: any, slice?: DataQuerySliceReq): Promise<DictItemsResp> {
-  slice = toRaw(slice)
+  slice = deepToRaw(slice)
 
   const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
@@ -381,8 +380,8 @@ export async function loadCellDictItems(dictName: string, filterValue?: any, sli
  * @returns 字典项列表 / Dictionary item list
  */
 export async function loadCellDictItemsWithMultiConds(conds: { [columnName: string]: any[] }, slice?: DataQuerySliceReq): Promise<{ [columnName: string]: DictItemsResp }> {
-  conds = toRaw(conds)
-  slice = toRaw(slice)
+  conds = deepToRaw(conds)
+  slice = deepToRaw(slice)
 
   const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
@@ -407,7 +406,7 @@ export async function loadCellDictItemsWithMultiConds(conds: { [columnName: stri
  * @param changedStyleProps 修改的样式属性 / Modified style properties
  */
 export async function modifyStyles(changedStyleProps: TableStyleModifyProps) {
-  changedStyleProps = toRaw(changedStyleProps)
+  changedStyleProps = deepToRaw(changedStyleProps)
 
   const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
@@ -525,9 +524,10 @@ export async function modifyLayout(changedLayoutProps: LayoutModifyProps, byGrou
 
   changedLayoutProps.slice !== undefined && (layout.slice = changedLayoutProps.slice)
   changedLayoutProps.showSelectColumn !== undefined && (layout.showSelectColumn = changedLayoutProps.showSelectColumn)
+  changedLayoutProps.actionColumn !== undefined && (layout.actionColumn = changedLayoutProps.actionColumn)
+
   changedLayoutProps.subDataShowKind !== undefined && (layout.subDataShowKind = changedLayoutProps.subDataShowKind)
 
-  changedLayoutProps.actionColumn !== undefined && (layout.actionColumn = changedLayoutProps.actionColumn)
   changedLayoutProps.gantt !== undefined && (layout.gantt = changedLayoutProps.gantt)
   changedLayoutProps.filter !== undefined && (layout.filter = changedLayoutProps.filter)
   changedLayoutProps.group !== undefined && (layout.group = changedLayoutProps.group)
