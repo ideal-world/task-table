@@ -152,17 +152,19 @@ function processParentSelect(rowEle: HTMLElement) {
   if (rowEle.dataset.parentPk) {
     const parentRowEle = listEle.querySelector(`.iw-data-row[data-pk='${rowEle.dataset.parentPk}']`)
     if (parentRowEle) {
+      const childrenCheckBoxEle = parentRowEle.querySelector('.iw-row-select-cell__chk') as HTMLInputElement
       const parentPk = props.pkKindIsNumber ? Number.parseInt((parentRowEle as HTMLElement).dataset.pk as string) : (parentRowEle as HTMLElement).dataset.pk
-      // 从已选中列表中移除主键
-      // Remove the primary key from the selected list
-      props.selectedPks.includes(parentPk) && props.selectedPks.splice(props.selectedPks.indexOf(parentPk), 1)
+      if (props.selectedPks.includes(parentPk)) {
+        // 已选中，表明这个父节点不是半选状态，是明确选中状态，故受子节点取消选择的影响，直接返回
+        // Already selected, indicating that this parent node is not in an indeterminate state, but in a clear selected state, so it is affected by the deselection of the child node, and the return is directly
+        return
+      }
       // 判断子数据是否有选中
       // Judge whether the sub-data is selected
       const childHasSelected = Array.prototype.some.call(listEle.querySelectorAll(`.iw-data-row[data-parent-pk='${parentPk}']`), (element) => {
         const childPk = props.pkKindIsNumber ? Number.parseInt((element as HTMLElement).dataset.pk as string) : (element as HTMLElement).dataset.pk
         return props.selectedPks.includes(childPk)
       })
-      const childrenCheckBoxEle = parentRowEle.querySelector('.iw-row-select-cell__chk') as HTMLInputElement
       if (!childHasSelected) {
         // 取消选择
         // Remove selection
