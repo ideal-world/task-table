@@ -2,7 +2,8 @@ import type { Ref } from 'vue'
 import { toRaw } from 'vue'
 import locales from '../locales'
 
-import { type DataGroupResp, type DataQuerySliceReq, type DataResp, type DictItemsResp, type LayoutModifyProps, type SimpleLayoutProps, type TableStyleModifyProps, generateLayoutProps } from '../props'
+import type { DataGroupResp, DataQuerySliceReq, DataResp, DictItemsResp, EditableDataResp, LayoutModifyProps, SimpleLayoutProps, TableStyleModifyProps } from '../props'
+import { generateLayoutProps } from '../props'
 
 import { SubDataShowKind } from '../props/enumProps'
 import type { TableEventProps } from '../props/eventProps'
@@ -262,6 +263,32 @@ export async function deleteData(deletedRecordPks: any[]) {
   layoutsConf.forEach(async (layout) => {
     await loadData(undefined, undefined, layout.id)
   })
+}
+
+/**
+ * 加载可编辑数据
+ *
+ * Load editable data
+ *
+ * @param checkRecordPks 要检查的数据主键 / Data primary keys to be checked
+ */
+export async function loadEditableData(checkRecordPks: any[]): Promise<EditableDataResp> {
+  checkRecordPks = toRaw(checkRecordPks)
+
+  const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
+
+  if (!events.loadEditableData) {
+    showAlert(t('_.event.notConfigured', { name: 'loadEditableData' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    throw new Error('[events.loadEditableData] Event not Configured')
+  }
+
+  try {
+    return await events.loadEditableData(checkRecordPks)
+  }
+  catch (e: any) {
+    showAlert(t('_.event.invokeError', { msg: e.message }), 6, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    throw new Error(`[events.loadEditableData] Invoke Error:${e.message}`)
+  }
 }
 
 /**

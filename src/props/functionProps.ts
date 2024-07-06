@@ -503,3 +503,27 @@ export function generateEditDataProps(tableSimple?: SimpleEditDataProps, layoutS
     markEditable: layoutSimple?.markEditable ?? tableSimple?.markEditable ?? false,
   }
 }
+
+/**
+ * 编辑数据返回对象
+ *
+ * Edit data response object
+ */
+export interface EditableDataResp {
+  /**
+   * 白名单模式，该模式下只有在此列表中的行列才会被编辑
+   *
+   * White list mode, in this mode, only rows and columns in this list will be edited
+   */
+  whiteListMode: boolean
+  /**
+   * 行列
+   *
+   * Rows and columns to be edited
+   *
+   * 格式：{行主键: 列名[]}
+   *
+   * Format: {row primary key: column name[]}
+   */
+  cells: { [pk: string | number]: string[] }
+}

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
-import type { EditDataProps } from '../../props'
+import type { EditDataProps, EditableDataResp } from '../../props'
 import type { DataGroupResp, DataResp } from '../../props/basicProps'
 import { DataKind, getInputTypeByDataKind } from '../../props/enumProps'
 import { delegateEvent } from '../../utils/basic'
@@ -44,6 +44,10 @@ const props = defineProps<{
 // 编辑容器，用于显示编辑功能
 // Edit container, used to display edit function
 const cellEditContainerRef = ref<InstanceType<typeof HTMLElement>>()
+
+// 可编辑数据
+// Editable data
+const editableDataResp = ref<EditableDataResp>()
 
 // 当前正在编辑的列配置
 // Column configuration currently being edited
@@ -125,30 +129,31 @@ async function setValue(value: any) {
  * Check if it is editable
  *
  * 逻辑：
- * 1. 优先看返回数据的要求：
- *    1. 如果存在不可编辑的数据行的主键，且当前主键值在不可编辑主键值列表中，则不可编辑
- *    2. 如果存在可编辑的数据行的主键，且当前主键值不在可编辑主键值列表中，则不可编辑
+ * 1. 优先看可编辑数据：
+ *    1. 白名单模式 且 存在行列，返回可编辑
+ *    2. 黑名单模式 且 不存在行列，返回可编辑
+ *    3. 其他情况返回不可编辑
  * 2. 最后看配置的列是否可编辑
  *
  * Logic:
- * 1. First look at the requirements of the returned data:
- *   1. If there are primary keys of data rows that cannot be edited, and the current primary key value is in the list of primary keys that cannot be edited, it cannot be edited
- *   2. If there are primary keys of data rows that can be edited, and the current primary key value is not in the list of primary keys that can be edited, it cannot be edited
- * 2. Finally, see if the configured column is editable
+ * 1. Check editable data first:
+ *   1. White list mode and row-column exist, return editable
+ *   2. Blacklist mode and row-column do not exist, return editable
+ *   3. Return not editable in other cases
+ * 2. Finally check if the configured column is editable
  *
- * @param data 数据 / Data
  * @param pkValue 主键值 / Primary key value
- * @param columnConf 列配置 / Column configuration
+ * @param columnName 列名称 / Column name
+ * @param editable 可编辑数据，用于进一步限定编辑范围 / Editable data, used to further limit the editing range
  * @returns 是否可编辑 / Whether it is editable
  */
-function checkEditable(data: DataResp, pkValue: any, columnConf: ColumnConf) {
-  if (data.nonEditablePks?.includes(pkValue)) {
-    return false
+function checkEditable(pkValue: any, columnName: string, editable?: EditableDataResp): boolean {
+  if (editable) {
+    return editable.cells[pkValue]?.includes(columnName) && editable.whiteListMode
   }
-  if (data.editablePks && !data.editablePks.includes(pkValue)) {
-    return false
+  else {
+    return props.edit.enabledColumnNames.includes(columnName) ?? false
   }
-  return props.edit.enabledColumnNames.includes(columnConf.name) ?? false
 }
 
 /**
@@ -176,7 +181,6 @@ function markEditable(containerEle: HTMLElement) {
     // Find row information
     const editRowEle = ele as HTMLElement
     const pkValue = props.pkKindIsNumber ? Number.parseInt(editRowEle.dataset[props.editRowPkValueProp]!) : editRowEle.dataset[props.editRowPkValueProp]!
-    const data: DataResp = Array.isArray(props.data) ? props.data.find(groupData => groupData.records.some(record => record[props.pkColumnName] === pkValue))! : props.data
 
     editRowEle.querySelectorAll(`.${props.editCellClass}`).forEach((ele) => {
       // 找到单元格信息，并附加可编辑标记
@@ -184,7 +188,7 @@ function markEditable(containerEle: HTMLElement) {
       const editCellEle = ele as HTMLElement
       const columnName = editCellEle.dataset[props.editCellColumnNameProp] as string
       const columnConf = props.columnsConf.find(column => column.name === columnName)!
-      if (checkEditable(data, pkValue, columnConf)) {
+      if (checkEditable(pkValue, columnConf.name, editableDataResp.value)) {
         editCellEle.appendChild(editableMarkEles.cloneNode(true))
       }
     })
@@ -193,8 +197,10 @@ function markEditable(containerEle: HTMLElement) {
 
 // 监听配置变化，重新标记可编辑单元格
 // Listen for configuration changes and re-mark editable cells
-watch([() => props.columnsConf, () => props.data], () => {
+watch([() => props.columnsConf, () => props.data], async () => {
   if (props.edit.markEditable) {
+    const pks: any[] = Array.isArray(props.data) ? props.data.flatMap(d => d.records.map(r => r[props.pkColumnName])) : props.data.records.map(r => r[props.pkColumnName])
+    editableDataResp.value = await eb.loadEditableData(pks)
     markEditable(cellEditContainerRef.value!.closest(`.${props.containerClass}`) as HTMLElement)
   }
 })
@@ -213,7 +219,7 @@ onMounted(() => {
     const columnConf = props.columnsConf.find(column => column.name === columnName)!
     const pkValue = props.pkKindIsNumber ? Number.parseInt(editRowEle.dataset[props.editRowPkValueProp]!) : editRowEle.dataset[props.editRowPkValueProp]!
     const data: DataResp = Array.isArray(props.data) ? props.data.find(groupData => groupData.records.some(record => record[props.pkColumnName] === pkValue))! : props.data
-    if (checkEditable(data, pkValue, columnConf)) {
+    if (checkEditable(pkValue, columnConf.name, editableDataResp.value)) {
       const value = data.records.find(record => record[props.pkColumnName] === pkValue)![columnName]!
       enterEditMode(value, pkValue, columnConf, editCellEle)
     }

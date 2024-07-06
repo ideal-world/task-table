@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import type { Ref } from 'vue'
-import { onMounted, ref, toRaw } from 'vue'
-import { IwEvents, IwProps, IwUtils } from '../src'
+import type { Ref } from 'vue';
+import { onMounted, ref, toRaw } from 'vue';
+import { IwEvents, IwProps, IwUtils } from '../src';
+import type { EditableDataResp } from '../src/props';
 
 const selectedRecordPks: Ref<any[]> = ref([])
 
@@ -300,8 +301,18 @@ const events: IwProps.TableEventProps = {
         records: attachDict(records),
         totalNumber: data.length,
         aggs: aggResult,
-        nonEditablePks: [1],
       }
+    }
+  },
+
+  loadEditableData: async (_checkRecordPks: any): Promise<EditableDataResp> => {
+    return {
+      whiteListMode: true,
+      cells: {
+        1: ['name', 'creator', 'stats', 'planStartTime', 'planEndTime', 'actualStartTime', 'actualEndTime', 'disabled', 'attachment'],
+        11: ['name'],
+        17: ['name'],
+      },
     }
   },
 

@@ -30,26 +30,6 @@ export interface DataResp {
    * Total number
    */
   totalNumber: number
-  /**
-   * 不可编辑的数据行的主键
-   *
-   * Primary key of non-editable data row
-   *
-   * 最高优先级
-   *
-   * Highest priority
-   */
-  nonEditablePks?: any[]
-  /**
-   * 可编辑的数据行的主键
-   *
-   * Primary key of editable data row
-   *
-   * 优先级低于 nonEditablePks
-   *
-   * Priority lower than nonEditablePks
-   */
-  editablePks?: any[]
 }
 
 /**

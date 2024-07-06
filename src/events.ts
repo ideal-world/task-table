@@ -4,7 +4,7 @@
  */
 
 import * as eb from './components/eventbus'
-import type { DataQuerySliceReq, DictItemsResp, LayoutModifyProps, SimpleLayoutProps, TableStyleModifyProps } from './props'
+import type { LayoutModifyProps, SimpleLayoutProps, TableStyleModifyProps } from './props'
 
 /**
  * 加载数据
@@ -74,33 +74,6 @@ export async function deleteData(deletedRecordPks: any[]) {
  */
 export async function selectData(selectedRecordPks: any[]) {
   await eb.selectData(selectedRecordPks)
-}
-
-/**
- * 加载字典项列表
- *
- * Load dictionary item list
- *
- * @param dictName 字典名 / Dictionary name
- * @param filterValue 过滤值 / Filter value
- * @param slice 分片 / Slice
- * @returns 字典项列表 / Dictionary item list
- */
-export async function loadCellDictItems(dictName: string, filterValue?: any, slice?: DataQuerySliceReq): Promise<DictItemsResp> {
-  return await eb.loadCellDictItems(dictName, filterValue, slice)
-}
-
-/**
- * 加载多条件字典项列表
- *
- * Load multi-condition dictionary item list
- *
- * @param conds 条件 / Conditions
- * @param slice 分片 / Slice
- * @returns 字典项列表 / Dictionary item list
- */
-export async function loadCellDictItemsWithMultiConds(conds: { [dictName: string]: any[] }, slice?: DataQuerySliceReq): Promise<{ [dictName: string]: DictItemsResp }> {
-  return await eb.loadCellDictItemsWithMultiConds(conds, slice)
 }
 
 /**
