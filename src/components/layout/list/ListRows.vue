@@ -84,7 +84,7 @@ const props = defineProps<{
     <!-- Normal data column -->
     <div
       v-for="(column, colIdx) in props.columnsConf.slice(1)" :key="`${props.layoutId}-${column.name}`"
-      :class="`${props.styleProps.cellClass} iw-list-cell iw-data-cell flex items-center bg-base-100 border-l border-l-base-300 ${column.wrap ? 'break-words flex-wrap' : 'whitespace-nowrap text-ellipsis flex-nowrap'}`"
+      :class="`${props.styleProps.cellClass} iw-list-cell iw-data-cell flex items-center bg-base-100 border-l border-l-base-300 overflow-hidden ${column.wrap ? 'break-words flex-wrap' : 'whitespace-nowrap text-ellipsis flex-nowrap'}`"
       :data-column-name="column.name" :style="{ ...column.styles, ...props.setColumnStyles(colIdx + 1) }"
     >
       <!-- 优先使用自定义渲染 -->
