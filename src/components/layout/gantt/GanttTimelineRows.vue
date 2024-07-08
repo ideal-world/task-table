@@ -7,7 +7,7 @@ import { GanttShowKind, SubDataShowKind } from '../../../props/enumProps'
 
 import type { GanttLayoutProps, TableStyleProps } from '../../../props'
 import { registerRowTreeTriggerEvent, unregisterRowTreeTriggerEvent } from '../../function/RowTree'
-import { type GanttInfo, getTimelineColumnWidth, getWeekdays } from './gantt'
+import { type GanttInfo, dragLinePositionEnum, getTimelineColumnWidth, getWeekdays, operationDateEnum } from './gantt'
 
 const props = defineProps<{
   // 布局ID
@@ -287,6 +287,14 @@ watch(() => props.ganttInfo, () => {
   })
 })
 
+const dragBarRef = ref<HTMLElement>() //  拖拽条
+const isDragging = ref(false) // 是否正在拖拽
+const operationDate = ref('') // 当前操作的日期
+const curTimelineBar = ref<HTMLElement>() // 当前操作的甘特图时间线条
+const dragLinePosition = ref(dragLinePositionEnum.LEFT) // 当前操作条的方向
+const timelineRowRef = ref() // 甘特图时间线
+const curTimelineRowRef = ref() // 当前操作的甘特图时间线
+
 let rowTreeEventId: string | null = null
 onMounted(() => {
   // 生成时间线栏
@@ -307,6 +315,20 @@ onMounted(() => {
       generateDataRelLine()
     }
   })
+
+  dragBarRef.value!.onpointerdown = (e: PointerEvent) => {
+    isDragging.value = true
+    dragBarRef.value!.setPointerCapture(e.pointerId)
+  }
+  dragBarRef.value!.onpointerup = (e: PointerEvent) => {
+    stopResize(e, true)
+  }
+  dragBarRef.value!.onpointerleave = (e: PointerEvent) => {
+    stopResize(e, false)
+  }
+  dragBarRef.value!.onpointermove = (e: PointerEvent) => {
+    updateResize(e)
+  }
 })
 
 onUnmounted(() => {
@@ -314,12 +336,90 @@ onUnmounted(() => {
   // Unregister row tree trigger event
   unregisterRowTreeTriggerEvent(rowTreeEventId!)
 })
+
+function handleMouseMove(event: MouseEvent, date: string, idx: number) {
+  if (curTimelineBar.value && curTimelineBar.value !== event.target) {
+    isDragging.value = false
+    dragBarRef.value!.style.display = 'none'
+  }
+
+  const parentRect = ganttTimelineRef.value!.getBoundingClientRect()
+  const childRect = (event.target as HTMLElement).getBoundingClientRect()
+
+  const leftPosInParent = childRect.left - parentRect.left
+  const rightPosInParent = childRect.right - parentRect.left
+
+  const heightDeviation = date === operationDateEnum.PLAN ? 16 : -8
+  operationDate.value = date
+
+  dragBarRef.value!.style.display = 'none'
+  if (Math.abs(event.clientX - childRect.left) <= 5) {
+    dragBarRef.value!.style.left = `${leftPosInParent}px`
+    dragBarRef.value!.style.top = `${childRect.top - parentRect.top - heightDeviation}px`
+    dragBarRef.value!.style.display = 'block'
+    dragLinePosition.value = dragLinePositionEnum.LEFT
+  }
+  if (Math.abs(childRect.right - event.clientX) <= 5) {
+    dragBarRef.value!.style.left = `${rightPosInParent - 5}px`
+    dragBarRef.value!.style.top = `${childRect.top - parentRect.top - heightDeviation}px`
+    dragBarRef.value!.style.display = 'block'
+    dragLinePosition.value = dragLinePositionEnum.RIGHT
+  }
+
+  curTimelineBar.value = (event.target as HTMLElement)
+  curTimelineRowRef.value = timelineRowRef.value[idx]
+}
+
+async function stopResize(e: PointerEvent, isSave = false) {
+  dragBarRef.value!.releasePointerCapture(e.pointerId)
+  isDragging.value = false
+  dragBarRef.value!.style.display = 'none'
+
+  if (isSave) {
+    const timelineColumnWidth = getTimelineColumnWidth(props.ganttInfo.ganttShowKind)
+    const ganttLeft = dragLinePosition.value === dragLinePositionEnum.LEFT ? Number.parseFloat(curTimelineBar.value!.style.left) : Number.parseFloat(curTimelineBar.value!.style.left) + Number.parseFloat(curTimelineBar.value!.style.width)
+    const travelDistance = Number.parseFloat(dragBarRef.value!.style.left) - ganttLeft // 拖拽的距离
+    let cellIdx // 获取当前拖拽到的格的索引0
+    if (dragLinePosition.value === dragLinePositionEnum.LEFT) {
+      // 拖拽左边临界值
+      if (Number.parseFloat(dragBarRef.value!.style.left) < 0) {
+        dragBarRef.value!.style.left = curTimelineBar.value!.style.left
+        return
+      }
+      curTimelineBar.value!.style.width = `${Number.parseFloat(curTimelineBar.value!.style.width) - travelDistance}px`
+      curTimelineBar.value!.style.left = dragBarRef.value!.style.left
+      cellIdx = Math.floor((Number.parseFloat(curTimelineBar.value!.style.left) / timelineColumnWidth))
+    }
+    else {
+      // 拖拽右边临界值
+      if (Number.parseFloat(curTimelineBar.value!.style.width) + travelDistance + Number.parseFloat(curTimelineBar.value!.style.left) > curTimelineRowRef.value!.offsetWidth) {
+        return
+      }
+      curTimelineBar.value!.style.width = `${Number.parseFloat(curTimelineBar.value!.style.width) + travelDistance}px`
+      cellIdx = Math.floor(((Number.parseFloat(curTimelineBar.value!.style.width) + Number.parseFloat(curTimelineBar.value!.style.left)) / timelineColumnWidth))
+    }
+    // 获取到拖拽到哪个格子
+    if (cellIdx || cellIdx === 0) {
+      console.log(
+        curTimelineRowRef.value.children[cellIdx].dataset,
+      )
+    }
+  }
+}
+
+function updateResize(e: PointerEvent) {
+  if (!isDragging.value)
+    return
+  const rect = ganttTimelineRef.value!.getBoundingClientRect()
+  dragBarRef.value!.style.left = `${e.clientX - rect.left}px`
+}
 </script>
 
 <template>
-  <div ref="ganttTimelineRef" class="relative">
+  <div ref="ganttTimelineRef" class="relative iw-gantt-timeline-area">
     <div
-      v-for="row in props.records"
+      v-for="(row, rowIdx) in props.records"
+      ref="timelineRowRef"
       :key="`${props.layoutId}-${row[props.pkColumnName]}`"
       :data-pk="row[props.pkColumnName]"
       :data-parent-pk="props.parentPkColumnName ? row[props.parentPkColumnName] : undefined"
@@ -351,6 +451,7 @@ onUnmounted(() => {
         :title="getTimelineBarTitle(row, true)"
         :data-start-time="row[props.ganttProps.planStartTimeColumnName]"
         :data-end-time="row[props.ganttProps.planEndTimeColumnName]"
+        @mousemove="(e) => { handleMouseMove(e, operationDateEnum.PLAN, rowIdx) }"
       />
       <div
         v-if="props.ganttProps.actualStartTimeColumnName && props.ganttProps.actualEndTimeColumnName && (row[props.ganttProps.actualStartTimeColumnName] || row[props.ganttProps.actualEndTimeColumnName])"
@@ -358,7 +459,12 @@ onUnmounted(() => {
         :title="getTimelineBarTitle(row, false)"
         :data-start-time="row[props.ganttProps.actualStartTimeColumnName]"
         :data-end-time="row[props.ganttProps.actualEndTimeColumnName]"
+        @mousemove="(e) => { handleMouseMove(e, operationDateEnum.ACT, rowIdx) }"
       />
     </div>
+    <div
+      ref="dragBarRef"
+      class="hidden absolute cursor-e-resize bg-red-300 px-1 h-[20px]"
+    />
   </div>
 </template>

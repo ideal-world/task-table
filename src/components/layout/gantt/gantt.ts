@@ -264,3 +264,23 @@ export function getWeekdays(startDate: Date, endDate: Date, holidays: Dayjs[]): 
   }
   return weekdays
 }
+
+/**
+ * 甘特图操作日期类型
+ *
+ * Gantt operation date type
+ */
+export enum operationDateEnum {
+  PLAN = 'PLAN',
+  ACT = 'ACT',
+}
+
+/**
+ * 甘特图拖拽线在时间条的位置方向
+ *
+ * Gantt drag the line in the direction of the time bar position
+ */
+export enum dragLinePositionEnum {
+  LEFT = 'LEFT',
+  RIGHT = 'RIGHT',
+}
