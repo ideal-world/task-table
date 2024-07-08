@@ -15,7 +15,9 @@ import {
  * @param sourceObj Vue的引用对象 / Vue reference object
  * @returns 原始对象 / Original object
  */
-export function deepToRaw<T extends Record<string, any>>(sourceObj: T): T {
+export function deepToRaw<T extends Record<string, any>>(sourceObj?: T): T {
+  if (sourceObj === undefined)
+    return {} as T
   const objectIterator = (input: any): any => {
     if (Array.isArray(input)) {
       return input.map(item => objectIterator(item))

@@ -582,7 +582,7 @@ export function getOperatorKindsByDataKind(dataKind?: DataKind): OperatorKind[] 
     case DataKind.AMOUNT:
       return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.LT, OperatorKind.LE, OperatorKind.GT, OperatorKind.GE, OperatorKind.IN, OperatorKind.NOT_IN, OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]
     case DataKind.BOOLEAN:
-      return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]
+      return [OperatorKind.EQ, OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]
     case DataKind.FILE:
     case DataKind.IMAGE:
       return [OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]

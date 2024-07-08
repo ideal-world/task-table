@@ -4,7 +4,7 @@
 
 import type { DataGroupResp, DataResp, DictItemsResp } from './basicProps'
 import type { LayoutKind } from './enumProps'
-import type { AggDataProps, DataQuerySliceReq, FilterDataProps, GroupDataProps, SortDataProps } from './functionProps'
+import type { AggDataProps, DataQuerySliceReq, EditableDataResp, FilterDataProps, GroupDataProps, SortDataProps } from './functionProps'
 import type { LayoutModifyProps, LayoutProps, TableStyleModifyProps } from './kernelProps'
 
 /**
@@ -83,6 +83,15 @@ export interface TableEventProps {
    * @param deletedRecordPks 要删除的数据主键 / Data primary keys to be deleted
    */
   deleteData?: (deletedRecordPks: any[]) => Promise<void>
+
+  /**
+   * 加载可编辑数据
+   *
+   * Load editable data
+   *
+   * @param checkRecordPks 要检查的数据主键 / Data primary keys to be checked
+   */
+  loadEditableData?: (checkRecordPks: any[]) => Promise<EditableDataResp>
 
   /**
    * 选择数据

@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import Sortable from 'sortablejs'
-import { onMounted, ref, toRaw } from 'vue'
+import { onMounted, ref } from 'vue'
 import * as iconSvg from '../../assets/icon'
 import type { SortDataProps } from '../../props'
+import { deepToRaw } from '../../utils/vueHelper'
 import { MenuOffsetKind } from '../common/Menu'
 import MenuComp from '../common/Menu.vue'
 import type { ColumnConf } from '../conf'
@@ -33,7 +34,7 @@ onMounted(() => {
     async onEnd(evt) {
       if (evt.oldIndex !== evt.newIndex && evt.oldIndex !== -1 && evt.newIndex !== -1) {
         const oriSort = props.sort.items[evt.oldIndex! - 1]
-        const sort = toRaw(props.sort)
+        const sort = deepToRaw(props.sort)
         sort.items.splice(evt.oldIndex! - 1, 1)
         sort.items.splice(evt.newIndex! - 1, 0, oriSort)
         await eb.modifyLayout({

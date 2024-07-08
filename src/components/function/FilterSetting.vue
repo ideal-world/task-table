@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, toRaw } from 'vue'
+import { onMounted, ref } from 'vue'
 import * as iconSvg from '../../assets/icon'
 import type { DataKind, DictItemProps, DictItemsResp, FilterDataGroupProps, FilterDataItemProps, FilterDataProps, LayoutModifyProps } from '../../props'
 import { OperatorKind, translateOperatorKind } from '../../props'
@@ -9,6 +9,7 @@ import { MenuOffsetKind, MenuSizeKind } from '../common/Menu'
 import MenuComp from '../common/Menu.vue'
 import type { ColumnConf } from '../conf'
 import * as eb from '../eventbus'
+import { deepToRaw } from '../../utils/vueHelper'
 
 const props = defineProps<{
   // 布局ID
@@ -153,7 +154,7 @@ async function showFilterGroupContainer(e: Event, filterGroupIdx?: number) {
 
     // 设置已选中的过滤项
     // Set the selected filter item
-    const filterItems = toRaw(props.filter.groups[filterGroupIdx].items)
+    const filterItems = deepToRaw(props.filter.groups[filterGroupIdx].items)
     selectedFilterItems.value = filterItems.map((item: FilterDataItemProps) => {
       return convertFilterDataItemToFilterItem(item)
     })
@@ -182,7 +183,7 @@ async function showFilterGroupContainer(e: Event, filterGroupIdx?: number) {
  * @param filterGroupIdx 过滤组ID / Filter group ID
  */
 async function deleteFilterGroup(filterGroupIdx: number) {
-  const filter = toRaw(props.filter!)
+  const filter = deepToRaw(props.filter!)
   filter.groups.splice(filterGroupIdx, 1)
   await eb.modifyLayout({
     filter,
@@ -439,7 +440,7 @@ async function saveFilterGroup() {
   if (currFilterGroup.items.length === 0) {
     return
   }
-  const filterGroups = toRaw(props.filter.groups)
+  const filterGroups = deepToRaw(props.filter.groups)
   if (selectedFilterGroupIdx.value === undefined) {
     filterGroups.push(currFilterGroup)
   }

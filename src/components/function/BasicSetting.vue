@@ -15,9 +15,9 @@ const props = defineProps<{
 }>()
 const iconPickerCompRef = ref<InstanceType<typeof MenuComp>>()
 
-async function renameLayoutTitle() {
+async function renameLayoutTitle(e: Event) {
   const layout: LayoutModifyProps = {
-    title: props.layoutConf.title,
+    title: (e.target as HTMLInputElement).value,
   }
   await eb.modifyLayout(layout)
 }
@@ -37,7 +37,7 @@ async function setLayoutIcon(icon: string) {
       class="cursor-pointer" @click="e => { iconPickerCompRef?.show(e, MenuOffsetKind.RIGHT_TOP, undefined, true) }"
     />
     <input
-      v-model="props.layoutConf.title" class="flex-1 iw-input iw-input-bordered iw-input-sm w-28" type="text"
+      :value="props.layoutConf.title" class="flex-1 iw-input iw-input-bordered iw-input-sm w-28" type="text"
       :placeholder="$t('layout.title.rename')"
       @change="renameLayoutTitle"
     >

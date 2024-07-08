@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { h, ref, toRaw } from 'vue'
+import { h, ref } from 'vue'
 import type { AggDataProps, AggregateKind, TableStyleProps } from '../../../props'
 import { showAggMappingByDataKind, translateAggregateKind } from '../../../props'
 import { MenuOffsetKind, MenuSizeKind } from '../../common/Menu'
 import MenuComp from '../../common/Menu.vue'
 import type { ColumnConf } from '../../conf'
 import * as eb from '../../eventbus'
+import { deepToRaw } from '../../../utils/vueHelper'
 
 const props = defineProps<{
   // 布局ID
@@ -72,7 +73,7 @@ function showAggsContextMenu(e: MouseEvent, colIdx: number) {
 }
 
 async function changeColumnAggs(aggKind: AggregateKind, columnName: string) {
-  const agg = toRaw(props.agg)
+  const agg = deepToRaw(props.agg)
   const idx = agg.items.findIndex(item => item.columnName === columnName)
   if (idx === -1) {
     agg.items.push({ columnName, aggKind })
