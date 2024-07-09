@@ -110,9 +110,6 @@ async function leaveEditMode() {
  */
 async function setValue(value: any) {
   if (value !== curValue.value) {
-    if (curColumnConf.value!.dataKind === DataKind.DATETIME) {
-      value = new Date(value)
-    }
     await eb.modifyData([{
       [props.pkColumnName]: curPk.value,
       [curColumnConf.value!.name]: value,
