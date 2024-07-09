@@ -4,6 +4,7 @@
 
 import { getRandomString } from '../utils/basic'
 import type { ChangeAllOptional, ChangeOptionalExcept } from '../utils/tsHelper'
+import type { DictItemProps } from './basicProps'
 import { DataKind, LayoutKind, SizeKind, SubDataShowKind, getDefaultIconByDataKind, getDefaultIconByLayoutKind } from './enumProps'
 
 import type { TableEventProps } from './eventProps'
@@ -686,6 +687,16 @@ export interface TableColumnProps extends CommonColumnProps {
    */
   multiValue: boolean
   /**
+   * 固定字典项
+   *
+   * Fixed dictionary items
+   *
+   * 存在固定字典项时，字典项将不会从后端获取。
+   *
+   * When there are fixed dictionary items, the dictionary items will not be obtained from the backend.
+   */
+  fixedDictItems?: DictItemProps[]
+  /**
    * 日期时间格式
    *
    * Date-time format
@@ -713,6 +724,7 @@ function generateTableColumnProps(simple: SimpleTableColumnProps): TableColumnPr
     dataKind: simple.dataKind ?? DataKind.TEXT,
     useDict: simple.useDict ?? false,
     multiValue: simple.multiValue ?? false,
+    fixedDictItems: simple.fixedDictItems,
     ...generateCommonColumnProps(simple),
   }
 }

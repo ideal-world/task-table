@@ -48,9 +48,28 @@ export function unregisterRowTreeTriggerEvent(id: string) {
  *
  * Sort by tree data
  *
- * 将子数据排在父数据后面。
+ * 将子数据排在父数据后面并添加深度标识。
  *
- * Put the child data after the parent data.
+ * Put the child data after the parent data and add the depth flag.
+ *
+ * @example
+ *
+ * inputData = [
+ *   {no:1,name:'d1'},
+ *   {no:2,name:'d2'},
+ *   {no:3,pno:2,name:'d3'},
+ *   {no:4,name:'d4'},
+ *   {no:5,pno:3,name:'d5'},
+ * ]
+ * 
+ * exportData = [
+ *   { no: 1, name: 'd1', __node_depth: 0 },
+ *   { no: 3, pno: 2, name: 'd3', __node_depth: 1 },
+ *   { no: 5, pno: 3, name: 'd5', __node_depth: 2 },
+ *   { no: 2, name: 'd2', __node_depth: 0 },
+ *   { no: 4, name: 'd4', __node_depth: 0 },
+ * ]
+ *
  *
  * @param data 数据
  * @param pkColumnName 主键列名
