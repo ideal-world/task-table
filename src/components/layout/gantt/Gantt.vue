@@ -4,9 +4,9 @@ import type { Ref } from 'vue'
 import { onMounted, ref, watch } from 'vue'
 import * as iconSvg from '../../../assets/icon'
 import type { DataGroupResp, DataResp, GanttLayoutProps, LayoutModifyProps } from '../../../props'
-import { GanttShowKind, translateGanttShowKind } from '../../../props/enumProps'
+import { AlertKind, GanttShowKind, translateGanttShowKind } from '../../../props/enumProps'
 import { getParentWithClass } from '../../../utils/basic'
-import { AlertKind, showAlert } from '../../common/Alert'
+import { AlertLevel } from '../../common/Alert'
 import { MenuOffsetKind, MenuSizeKind } from '../../common/Menu'
 import MenuComp from '../../common/Menu.vue'
 import type { ColumnConf, LayoutConf, TableConf } from '../../conf'
@@ -78,7 +78,7 @@ async function generateGanttInfo(data: DataResp | DataGroupResp[]) {
         }
       }
       catch (e: any) {
-        showAlert(e.message, 2, AlertKind.WARNING, getParentWithClass(ganttRef.value, 'iw-tt')!)
+        eb.handleAlert(AlertKind.DATA_ERROR, e.message, AlertLevel.WARNING, 4, getParentWithClass(ganttRef.value, 'iw-tt')!)
         hasError = true
       }
     })
@@ -90,7 +90,7 @@ async function generateGanttInfo(data: DataResp | DataGroupResp[]) {
       timelineEndDate = endDate
     }
     catch (e: any) {
-      showAlert(e.message, 2, AlertKind.WARNING, getParentWithClass(ganttRef.value, 'iw-tt')!)
+      eb.handleAlert(AlertKind.DATA_ERROR, e.message, AlertLevel.WARNING, 4, getParentWithClass(ganttRef.value, 'iw-tt')!)
       hasError = true
       return
     }

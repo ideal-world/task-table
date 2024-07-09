@@ -3,7 +3,7 @@
  */
 
 import type { DataGroupResp, DataResp, DictItemsResp } from './basicProps'
-import type { LayoutKind } from './enumProps'
+import type { AlertKind, LayoutKind } from './enumProps'
 import type { AggDataProps, DataQuerySliceReq, EditableDataResp, FilterDataProps, GroupDataProps, SortDataProps } from './functionProps'
 import type { LayoutModifyProps, LayoutProps, TableStyleModifyProps } from './kernelProps'
 
@@ -185,4 +185,14 @@ export interface TableEventProps {
    * @returns 假日列表 / Holidays
    */
   loadHolidays?: (startTime: Date, endTime: Date) => Promise<Date[]>
+
+  /**
+   * 自定义警告处理
+   *
+   * Custom alert handling
+   *
+   * @param errorKind 警告类型 / Alert kind
+   * @param message 警告消息 / Alert message
+   */
+  handleAlert?: (alertKind: AlertKind, message: string) => void
 }
