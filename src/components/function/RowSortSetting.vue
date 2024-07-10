@@ -29,7 +29,7 @@ function showRowSortContextMenu(event: MouseEvent) {
 }
 
 onMounted(() => {
-  Sortable.create(document.getElementsByClassName('iw-row-sort')[0] as HTMLElement, {
+  Sortable.create(sortCompRef.value?.menuDom as HTMLElement, {
     draggable: '.iw-row-sort__item',
     async onEnd(evt) {
       if (evt.oldIndex !== evt.newIndex && evt.oldIndex !== -1 && evt.newIndex !== -1) {
@@ -93,7 +93,7 @@ function addSortCond(columnName: string, orderDesc: boolean) {
       class="iw-row-sort__item p-1 flex w-full justify-between cursor-move"
     >
       <div>
-        <i :class="`${iconSvg.GRABBER} cursor-pointer mr-0.5`" />
+        <i :class="`${iconSvg.GRABBER} mr-0.5`" />
         <i :class="`${props.columnsConf.find(col => col.name === column.columnName)?.icon} mr-0.5`" />
         {{ props.columnsConf.find(col => col.name === column.columnName)?.title }}
       </div>
