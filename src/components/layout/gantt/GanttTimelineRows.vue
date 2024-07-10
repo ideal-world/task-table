@@ -7,6 +7,7 @@ import { GanttShowKind, SubDataShowKind } from '../../../props/enumProps'
 
 import type { GanttLayoutProps, TableStyleProps } from '../../../props'
 import { registerRowTreeTriggerEvent, unregisterRowTreeTriggerEvent } from '../../function/RowTree'
+import * as eb from '../../eventbus'
 import { type GanttInfo, dragLinePositionEnum, getTimelineColumnWidth, getWeekdays, operationDateEnum } from './gantt'
 
 const props = defineProps<{
@@ -400,9 +401,18 @@ async function stopResize(e: PointerEvent, isSave = false) {
     }
     // 获取到拖拽到哪个格子
     if (cellIdx || cellIdx === 0) {
-      console.log(
-        curTimelineRowRef.value.children[cellIdx].dataset,
-      )
+      let columnConfName = ''
+      if (operationDate.value === operationDateEnum.PLAN) {
+        columnConfName = dragLinePosition.value === dragLinePositionEnum.LEFT ? props.ganttProps.planStartTimeColumnName : props.ganttProps.planEndTimeColumnName
+      }
+      else if (operationDate.value === operationDateEnum.ACT) {
+        columnConfName = (dragLinePosition.value === dragLinePositionEnum.LEFT ? props.ganttProps.actualStartTimeColumnName : props.ganttProps.actualEndTimeColumnName) as string
+      }
+
+      await eb.modifyData([{
+        [props.pkColumnName]: curTimelineRowRef.value.dataset.pk,
+        [columnConfName]: `${curTimelineRowRef.value.children[cellIdx].dataset.groupValue}-${curTimelineRowRef.value.children[cellIdx].dataset.value}`,
+      }])
     }
   }
 }
