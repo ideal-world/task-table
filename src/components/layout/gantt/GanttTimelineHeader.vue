@@ -59,12 +59,12 @@ function ganttTimeLineYearHeight() {
         {{ cateColumTimeline.cateTitle }}
       </div>
     </div>
-    <div class="flex items-center gantt-timeline-column">
+    <div class="flex items-center gantt-timeline-column" :style="`height:${ganttInfo.ganttShowKind === GanttShowKind.YEAR && ganttTimeLineYearHeight()}`">
       <div
         v-for="(timeline, idx) in ganttInfo.timeline" :key="`${layoutId}-${idx}`"
         :data-value="timeline.value"
         :data-group-value="timeline.categoryTitle"
-        :style="`width: ${getTimelineColumnWidth(props.ganttInfo.ganttShowKind)}px;height:${ganttInfo.ganttShowKind === GanttShowKind.YEAR && ganttTimeLineYearHeight()}`"
+        :style="`width: ${getTimelineColumnWidth(props.ganttInfo.ganttShowKind)}px`"
         :title="`${timeline.value} (${timeline.categoryTitle})`"
         :class="`${props.styleProps.cellClass} iw-gantt-timeline-cell flex justify-center items-center bg-base-200 ${idx !== 0 && 'border-l border-l-base-300'}`"
       >

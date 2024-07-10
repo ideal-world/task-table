@@ -338,7 +338,7 @@ onUnmounted(() => {
   unregisterRowTreeTriggerEvent(rowTreeEventId!)
 })
 
-function handleMouseMove(event: MouseEvent, date: string, idx: number) {
+function handleMouseMove(event: MouseEvent, date: string) {
   if (props.ganttInfo.ganttShowKind !== GanttShowKind.DAY)
     return
   if (curTimelineBar.value && curTimelineBar.value !== event.target) {
@@ -370,7 +370,7 @@ function handleMouseMove(event: MouseEvent, date: string, idx: number) {
   }
 
   curTimelineBar.value = (event.target as HTMLElement)
-  curTimelineRowRef.value = timelineRowRef.value[idx]
+  curTimelineRowRef.value = (event.target as HTMLElement).parentElement
 }
 
 async function stopResize(e: PointerEvent, isSave = false) {
@@ -436,7 +436,7 @@ function updateResize(e: PointerEvent) {
 <template>
   <div ref="ganttTimelineRef" class="relative iw-gantt-timeline-area">
     <div
-      v-for="(row, rowIdx) in props.records"
+      v-for="row in props.records"
       ref="timelineRowRef"
       :key="`${props.layoutId}-${row[props.pkColumnName]}`"
       :data-pk="row[props.pkColumnName]"
@@ -469,7 +469,7 @@ function updateResize(e: PointerEvent) {
         :title="getTimelineBarTitle(row, true)"
         :data-start-time="row[props.ganttProps.planStartTimeColumnName]"
         :data-end-time="row[props.ganttProps.planEndTimeColumnName]"
-        @mousemove="(e) => { handleMouseMove(e, operationDateEnum.PLAN, rowIdx) }"
+        @mousemove="(e) => { handleMouseMove(e, operationDateEnum.PLAN) }"
       />
       <div
         v-if="props.ganttProps.actualStartTimeColumnName && props.ganttProps.actualEndTimeColumnName && (row[props.ganttProps.actualStartTimeColumnName] || row[props.ganttProps.actualEndTimeColumnName])"
@@ -477,7 +477,7 @@ function updateResize(e: PointerEvent) {
         :title="getTimelineBarTitle(row, false)"
         :data-start-time="row[props.ganttProps.actualStartTimeColumnName]"
         :data-end-time="row[props.ganttProps.actualEndTimeColumnName]"
-        @mousemove="(e) => { handleMouseMove(e, operationDateEnum.ACT, rowIdx) }"
+        @mousemove="(e) => { handleMouseMove(e, operationDateEnum.ACT) }"
       />
     </div>
     <div
