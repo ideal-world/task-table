@@ -154,6 +154,12 @@ defineExpose({
    * 注册菜单关闭时的监听器
    */
   onClose: registerOnCloseListener,
+  /**
+   * 菜单DOM
+   *
+   * menu DOM
+   */
+  menuDom: contextmenuRef,
 })
 
 // eslint-disable-next-line ts/no-use-before-define
