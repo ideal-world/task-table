@@ -339,6 +339,8 @@ onUnmounted(() => {
 })
 
 function handleMouseMove(event: MouseEvent, date: string, idx: number) {
+  if (props.ganttInfo.ganttShowKind !== GanttShowKind.DAY)
+    return
   if (curTimelineBar.value && curTimelineBar.value !== event.target) {
     isDragging.value = false
     dragBarRef.value!.style.display = 'none'
@@ -354,13 +356,13 @@ function handleMouseMove(event: MouseEvent, date: string, idx: number) {
   operationDate.value = date
 
   dragBarRef.value!.style.display = 'none'
-  if (Math.abs(event.clientX - childRect.left) <= 5) {
+  if (Math.abs(event.clientX - childRect.left) <= 5 && (event.target as HTMLElement).dataset.startTime) {
     dragBarRef.value!.style.left = `${leftPosInParent}px`
     dragBarRef.value!.style.top = `${childRect.top - parentRect.top - heightDeviation}px`
     dragBarRef.value!.style.display = 'block'
     dragLinePosition.value = dragLinePositionEnum.LEFT
   }
-  if (Math.abs(childRect.right - event.clientX) <= 5) {
+  if (Math.abs(childRect.right - event.clientX) <= 5 && (event.target as HTMLElement).dataset.endTime) {
     dragBarRef.value!.style.left = `${rightPosInParent - 5}px`
     dragBarRef.value!.style.top = `${childRect.top - parentRect.top - heightDeviation}px`
     dragBarRef.value!.style.display = 'block'
@@ -396,8 +398,14 @@ async function stopResize(e: PointerEvent, isSave = false) {
       if (Number.parseFloat(curTimelineBar.value!.style.width) + travelDistance + Number.parseFloat(curTimelineBar.value!.style.left) > curTimelineRowRef.value!.offsetWidth) {
         return
       }
-      curTimelineBar.value!.style.width = `${Number.parseFloat(curTimelineBar.value!.style.width) + travelDistance}px`
-      cellIdx = Math.floor(((Number.parseFloat(curTimelineBar.value!.style.width) + Number.parseFloat(curTimelineBar.value!.style.left)) / timelineColumnWidth))
+      if (!curTimelineBar.value!.dataset.startTime) {
+        curTimelineBar.value!.style.left = dragBarRef.value!.style.left
+        cellIdx = Math.floor((Number.parseFloat(curTimelineBar.value!.style.left) / timelineColumnWidth))
+      }
+      else {
+        curTimelineBar.value!.style.width = `${Number.parseFloat(curTimelineBar.value!.style.width) + travelDistance}px`
+        cellIdx = Math.floor(((Number.parseFloat(curTimelineBar.value!.style.width) + Number.parseFloat(curTimelineBar.value!.style.left)) / timelineColumnWidth))
+      }
     }
     // 获取到拖拽到哪个格子
     if (cellIdx || cellIdx === 0) {
@@ -473,8 +481,9 @@ function updateResize(e: PointerEvent) {
       />
     </div>
     <div
+      v-if="props.ganttInfo.ganttShowKind === GanttShowKind.DAY"
       ref="dragBarRef"
-      class="hidden absolute cursor-e-resize bg-red-300 px-1 h-[20px]"
+      class="hidden absolute cursor-e-resize bg-red-300 px-1 h-[20px] z-[3199]"
     />
   </div>
 </template>
