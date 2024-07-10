@@ -536,6 +536,11 @@ const events: IwProps.TableEventProps = {
     })
     return resp
   },
+
+  handleAlert(alertKind, message) {
+    // eslint-disable-next-line no-alert
+    alert(message)
+  },
 }
 
 const columns: IwProps.SimpleTableColumnProps[] = [

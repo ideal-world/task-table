@@ -1,9 +1,9 @@
 /**
- * 消息提示类型
+ * 消息提示等级
  *
- * Message prompt type
+ * Message prompt level
  */
-export enum AlertKind {
+export enum AlertLevel {
   ERROR,
   WARNING,
   INFO,
@@ -17,25 +17,25 @@ export enum AlertKind {
  *
  * @param message 提示的消息 / Message to prompt
  * @param showTimeSec 显示的时间（秒） / Display time (seconds)
- * @param kind  消息类型 / Message type
+ * @param level  消息等级 / Message level
  * @param attachEle 附加到的元素 / Element to attach
  */
-export function showAlert(message: string, showTimeSec: number = 4, kind: AlertKind = AlertKind.WARNING, attachEle: HTMLElement = document.body) {
+export function showAlert(message: string, showTimeSec: number = 4, level: AlertLevel = AlertLevel.WARNING, attachEle: HTMLElement = document.body) {
   let alertDiv = ``
-  switch (kind) {
-    case AlertKind.ERROR: {
+  switch (level) {
+    case AlertLevel.ERROR: {
       alertDiv = `  <div role="alert" class="iw-alert-wrap iw-alert-wrap--error">${message}</div>`
       break
     }
-    case AlertKind.WARNING: {
+    case AlertLevel.WARNING: {
       alertDiv = `  <div role="alert" class="iw-alert-wrap iw-alert-wrap--warning">${message}</div>`
       break
     }
-    case AlertKind.INFO: {
+    case AlertLevel.INFO: {
       alertDiv = `  <div role="alert" class="iw-alert-wrap iw-alert-wrap--info">${message}</div>`
       break
     }
-    case AlertKind.SUCCESS: {
+    case AlertLevel.SUCCESS: {
       alertDiv = `  <div role="alert" class="iw-alert-wrap iw-alert-wrap--success">${message}</div>`
       break
     }

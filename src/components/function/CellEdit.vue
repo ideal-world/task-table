@@ -110,9 +110,6 @@ async function leaveEditMode() {
  */
 async function setValue(value: any) {
   if (value !== curValue.value) {
-    if (curColumnConf.value!.dataKind === DataKind.DATETIME) {
-      value = new Date(value)
-    }
     await eb.modifyData([{
       [props.pkColumnName]: curPk.value,
       [curColumnConf.value!.name]: value,
@@ -169,7 +166,7 @@ function markEditable(containerEle: HTMLElement) {
   editableMarkEles.style.position = 'absolute'
   editableMarkEles.style.right = '0.1rem'
   editableMarkEles.style.bottom = '0.1rem'
-  // 生成一个红色的圆点
+  // 生成一个蓝色的圆点
   // Generate a red dot
   editableMarkEles.style.borderRadius = '50%'
   editableMarkEles.style.width = '0.2rem'

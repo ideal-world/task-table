@@ -4,11 +4,11 @@ import locales from '../locales'
 import type { DataGroupResp, DataQuerySliceReq, DataResp, DictItemsResp, EditableDataResp, LayoutModifyProps, SimpleLayoutProps, TableStyleModifyProps } from '../props'
 import { generateLayoutProps } from '../props'
 
-import { SubDataShowKind } from '../props/enumProps'
+import { AlertKind, SubDataShowKind } from '../props/enumProps'
 import type { TableEventProps } from '../props/eventProps'
 import { getParentWithClass } from '../utils/basic'
 import { deepToRaw } from '../utils/vueHelper'
-import { AlertKind, showAlert } from './common/Alert'
+import { AlertLevel, showAlert } from './common/Alert'
 import type { LayoutConf, TableConf } from './conf'
 import { sortByTree } from './function/RowTree'
 
@@ -75,7 +75,7 @@ export async function loadData(byGroupValue?: any, returnOnlyAgg?: boolean, layo
     )
   }
   catch (e: any) {
-    showAlert(t('_.event.invokeError', { msg: e.message }), 6, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    handleAlert(AlertKind.EVENT_INVOKE_ERROR, t('_.event.invokeError', { msg: e.message }))
     throw new Error(`[events.loadData] Invoke Error:${e.message}`)
   }
 
@@ -91,7 +91,7 @@ export async function loadData(byGroupValue?: any, returnOnlyAgg?: boolean, layo
       }
     }
     else {
-      showAlert(t('_.event.loadDataInvalidScene'), 2, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+      handleAlert(AlertKind.LOAD_DATA_INVALID_SCENE, t('_.event.loadDataInvalidScene'))
       throw new Error('[events.loadData] Invalid scene')
     }
   }
@@ -111,7 +111,7 @@ export async function loadData(byGroupValue?: any, returnOnlyAgg?: boolean, layo
       }
     }
     else {
-      showAlert(t('_.event.loadDataInvalidScene'), 2, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+      handleAlert(AlertKind.LOAD_DATA_INVALID_SCENE, t('_.event.loadDataInvalidScene'))
       throw new Error('[events.loadData] Invalid scene')
     }
   }
@@ -134,12 +134,12 @@ export async function loadData(byGroupValue?: any, returnOnlyAgg?: boolean, layo
       }
     }
     else {
-      showAlert(t('_.event.loadDataInvalidScene'), 2, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+      handleAlert(AlertKind.LOAD_DATA_INVALID_SCENE, t('_.event.loadDataInvalidScene'))
       throw new Error('[events.loadData] Invalid scene')
     }
   }
   else {
-    showAlert(t('_.event.loadDataInvalidScene'), 2, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    handleAlert(AlertKind.LOAD_DATA_INVALID_SCENE, t('_.event.loadDataInvalidScene'))
     throw new Error('[events.loadData] Invalid scene')
   }
 }
@@ -153,10 +153,9 @@ export async function loadData(byGroupValue?: any, returnOnlyAgg?: boolean, layo
  */
 export async function newData(newRecords: { [columnName: string]: any }[]) {
   newRecords = deepToRaw(newRecords)
-  const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.newData) {
-    showAlert(t('_.event.notConfigured', { name: 'newData' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    handleAlert(AlertKind.EVENT_NOT_CONFIGURED, t('_.event.notConfigured', { name: 'newData' }))
     throw new Error('[events.newData] Event not Configured')
   }
 
@@ -164,7 +163,7 @@ export async function newData(newRecords: { [columnName: string]: any }[]) {
     await events.newData(newRecords)
   }
   catch (e: any) {
-    showAlert(t('_.event.invokeError', { msg: e.message }), 6, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    handleAlert(AlertKind.EVENT_INVOKE_ERROR, t('_.event.invokeError', { msg: e.message }))
     throw new Error(`[events.newData] Invoke Error:${e.message}`)
   }
 
@@ -182,10 +181,9 @@ export async function newData(newRecords: { [columnName: string]: any }[]) {
  */
 export async function copyData(targetRecordPks: any[]) {
   targetRecordPks = deepToRaw(targetRecordPks)
-  const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.copyData) {
-    showAlert(t('_.event.notConfigured', { name: 'copyData' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    handleAlert(AlertKind.EVENT_NOT_CONFIGURED, t('_.event.notConfigured', { name: 'copyData' }))
     throw new Error('[events.copyData] Event not Configured')
   }
 
@@ -193,7 +191,7 @@ export async function copyData(targetRecordPks: any[]) {
     await events.copyData(targetRecordPks)
   }
   catch (e: any) {
-    showAlert(t('_.event.invokeError', { msg: e.message }), 6, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    handleAlert(AlertKind.EVENT_INVOKE_ERROR, t('_.event.invokeError', { msg: e.message }))
     throw new Error(`[events.copyData] Invoke Error:${e.message}`)
   }
 
@@ -212,10 +210,8 @@ export async function copyData(targetRecordPks: any[]) {
 export async function modifyData(changedRecords: { [columnName: string]: any }[]) {
   changedRecords = deepToRaw(changedRecords)
 
-  const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
-
   if (!events.modifyData) {
-    showAlert(t('_.event.notConfigured', { name: 'modifyData' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    handleAlert(AlertKind.EVENT_NOT_CONFIGURED, t('_.event.notConfigured', { name: 'modifyData' }))
     throw new Error('[events.modifyData] Event not Configured')
   }
 
@@ -223,7 +219,7 @@ export async function modifyData(changedRecords: { [columnName: string]: any }[]
     await events.modifyData(changedRecords)
   }
   catch (e: any) {
-    showAlert(t('_.event.invokeError', { msg: e.message }), 6, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    handleAlert(AlertKind.EVENT_INVOKE_ERROR, t('_.event.invokeError', { msg: e.message }))
     throw new Error(`[events.modifyData] Invoke Error:${e.message}`)
   }
 
@@ -244,10 +240,8 @@ export async function modifyData(changedRecords: { [columnName: string]: any }[]
 export async function deleteData(deletedRecordPks: any[]) {
   deletedRecordPks = deepToRaw(deletedRecordPks)
 
-  const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
-
   if (!events.deleteData) {
-    showAlert(t('_.event.notConfigured', { name: 'deleteData' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    handleAlert(AlertKind.EVENT_NOT_CONFIGURED, t('_.event.notConfigured', { name: 'deleteData' }))
     throw new Error('[events.deleteData] Event not Configured')
   }
 
@@ -255,7 +249,7 @@ export async function deleteData(deletedRecordPks: any[]) {
     await events.deleteData(deletedRecordPks)
   }
   catch (e: any) {
-    showAlert(t('_.event.invokeError', { msg: e.message }), 6, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    handleAlert(AlertKind.EVENT_INVOKE_ERROR, t('_.event.invokeError', { msg: e.message }))
     throw new Error(`[events.deleteData] Invoke Error:${e.message}`)
   }
 
@@ -274,10 +268,8 @@ export async function deleteData(deletedRecordPks: any[]) {
 export async function loadEditableData(checkRecordPks: any[]): Promise<EditableDataResp> {
   checkRecordPks = deepToRaw(checkRecordPks)
 
-  const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
-
   if (!events.loadEditableData) {
-    showAlert(t('_.event.notConfigured', { name: 'loadEditableData' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    handleAlert(AlertKind.EVENT_NOT_CONFIGURED, t('_.event.notConfigured', { name: 'loadEditableData' }))
     throw new Error('[events.loadEditableData] Event not Configured')
   }
 
@@ -285,7 +277,7 @@ export async function loadEditableData(checkRecordPks: any[]): Promise<EditableD
     return await events.loadEditableData(checkRecordPks)
   }
   catch (e: any) {
-    showAlert(t('_.event.invokeError', { msg: e.message }), 6, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    handleAlert(AlertKind.EVENT_INVOKE_ERROR, t('_.event.invokeError', { msg: e.message }))
     throw new Error(`[events.loadEditableData] Invoke Error:${e.message}`)
   }
 }
@@ -303,7 +295,7 @@ export async function selectData(selectedRecordPks: any[]) {
   const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.selectData) {
-    showAlert(t('_.event.notConfigured', { name: 'selectData' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    handleAlert(AlertKind.EVENT_NOT_CONFIGURED, t('_.event.notConfigured', { name: 'selectData' }))
     throw new Error('[events.selectData] Event not Configured')
   }
 
@@ -311,7 +303,7 @@ export async function selectData(selectedRecordPks: any[]) {
     await events.selectData(selectedRecordPks)
   }
   catch (e: any) {
-    showAlert(t('_.event.invokeError', { msg: e.message }), 6, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    handleAlert(AlertKind.EVENT_INVOKE_ERROR, t('_.event.invokeError', { msg: e.message }))
     throw new Error(`[events.selectData] Invoke Error:${e.message}`)
   }
 
@@ -330,14 +322,14 @@ export async function clickCell(clickedRecordPk: any, clickedColumnName: string)
   const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.clickCell) {
-    showAlert(t('_.event.notConfigured', { name: 'clickCell' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    handleAlert(AlertKind.EVENT_NOT_CONFIGURED, t('_.event.notConfigured', { name: 'clickCell' }))
     throw new Error('[events.clickCell] Event not Configured')
   }
   try {
     await events.clickCell(clickedRecordPk, clickedColumnName, layout.id, layout.layoutKind)
   }
   catch (e: any) {
-    showAlert(t('_.event.invokeError', { msg: e.message }), 6, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    handleAlert(AlertKind.EVENT_INVOKE_ERROR, t('_.event.invokeError', { msg: e.message }))
     throw new Error(`[events.clickCell] Invoke Error:${e.message}`)
   }
 }
@@ -355,17 +347,15 @@ export async function clickCell(clickedRecordPk: any, clickedColumnName: string)
 export async function loadCellDictItems(dictName: string, filterValue?: any, slice?: DataQuerySliceReq): Promise<DictItemsResp> {
   slice = deepToRaw(slice)
 
-  const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
-
   if (!events.loadDictItems) {
-    showAlert(t('_.event.notConfigured', { name: 'loadCellDictItems' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    handleAlert(AlertKind.EVENT_NOT_CONFIGURED, t('_.event.notConfigured', { name: 'loadCellDictItems' }))
     throw new Error('[events.loadCellDictItems] Event not Configured')
   }
   try {
     return await events.loadDictItems(dictName, filterValue, slice)
   }
   catch (e: any) {
-    showAlert(t('_.event.invokeError', { msg: e.message }), 6, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    handleAlert(AlertKind.EVENT_INVOKE_ERROR, t('_.event.invokeError', { msg: e.message }))
     throw new Error(`[events.loadCellDictItems] Invoke Error:${e.message}`)
   }
 }
@@ -383,17 +373,15 @@ export async function loadCellDictItemsWithMultiConds(conds: { [columnName: stri
   conds = deepToRaw(conds)
   slice = deepToRaw(slice)
 
-  const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
-
   if (!events.loadDictItemsWithMultiConds) {
-    showAlert(t('_.event.notConfigured', { name: 'loadCellDictItemsWithMultiConds' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    handleAlert(AlertKind.EVENT_NOT_CONFIGURED, t('_.event.notConfigured', { name: 'loadCellDictItemsWithMultiConds' }))
     throw new Error('[events.loadCellDictItemsWithMultiConds] Event not Configured')
   }
   try {
     return await events.loadDictItemsWithMultiConds(conds, slice)
   }
   catch (e: any) {
-    showAlert(t('_.event.invokeError', { msg: e.message }), 6, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    handleAlert(AlertKind.EVENT_INVOKE_ERROR, t('_.event.invokeError', { msg: e.message }))
     throw new Error(`[events.loadCellDictItemsWithMultiConds] Invoke Error:${e.message}`)
   }
 }
@@ -408,10 +396,8 @@ export async function loadCellDictItemsWithMultiConds(conds: { [columnName: stri
 export async function modifyStyles(changedStyleProps: TableStyleModifyProps) {
   changedStyleProps = deepToRaw(changedStyleProps)
 
-  const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
-
   if (!events.modifyStyles) {
-    showAlert(t('_.event.notConfigured', { name: 'modifyStyles' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    handleAlert(AlertKind.EVENT_NOT_CONFIGURED, t('_.event.notConfigured', { name: 'modifyStyles' }))
     throw new Error('[events.modifyStyles] Event not Configured')
   }
 
@@ -419,7 +405,7 @@ export async function modifyStyles(changedStyleProps: TableStyleModifyProps) {
     await events.modifyStyles(changedStyleProps)
   }
   catch (e: any) {
-    showAlert(t('_.event.invokeError', { msg: e.message }), 6, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    handleAlert(AlertKind.EVENT_INVOKE_ERROR, t('_.event.invokeError', { msg: e.message }))
     throw new Error(`[events.modifyStyles] Invoke Error:${e.message}`)
   }
 
@@ -468,10 +454,8 @@ export async function newLayout(newLayoutProps: SimpleLayoutProps) {
     ...deepToRaw(tableConf),
   })
 
-  const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
-
   if (!events.newLayout) {
-    showAlert(t('_.event.notConfigured', { name: 'newLayout' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    handleAlert(AlertKind.EVENT_NOT_CONFIGURED, t('_.event.notConfigured', { name: 'newLayout' }))
     throw new Error('[events.newLayout] Event not Configured')
   }
 
@@ -485,7 +469,7 @@ export async function newLayout(newLayoutProps: SimpleLayoutProps) {
     })
   }
   catch (e: any) {
-    showAlert(t('_.event.invokeError', { msg: e.message }), 6, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    handleAlert(AlertKind.EVENT_INVOKE_ERROR, t('_.event.invokeError', { msg: e.message }))
     throw new Error(`[events.newLayout] Invoke Error:${e.message}`)
   }
 
@@ -506,7 +490,7 @@ export async function modifyLayout(changedLayoutProps: LayoutModifyProps, byGrou
   const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
 
   if (!events.modifyLayout) {
-    showAlert(t('_.event.notConfigured', { name: 'modifyLayout' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    handleAlert(AlertKind.EVENT_NOT_CONFIGURED, t('_.event.notConfigured', { name: 'modifyLayout' }))
     throw new Error('[events.modifyLayout] Event not Configured')
   }
 
@@ -514,7 +498,7 @@ export async function modifyLayout(changedLayoutProps: LayoutModifyProps, byGrou
     await events.modifyLayout(currentLayoutId.value, changedLayoutProps)
   }
   catch (e: any) {
-    showAlert(t('_.event.invokeError', { msg: e.message }), 6, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    handleAlert(AlertKind.EVENT_INVOKE_ERROR, t('_.event.invokeError', { msg: e.message }))
     throw new Error(`[events.modifyLayout] Invoke Error:${e.message}`)
   }
 
@@ -561,10 +545,8 @@ export async function modifyLayout(changedLayoutProps: LayoutModifyProps, byGrou
  * @param deletedLayoutId 删除的布局ID / Deleted layout ID
  */
 export async function deleteLayout(deletedLayoutId: string) {
-  const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
-
   if (!events.deleteLayout) {
-    showAlert(t('_.event.notConfigured', { name: 'deleteLayout' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    handleAlert(AlertKind.EVENT_NOT_CONFIGURED, t('_.event.notConfigured', { name: 'deleteLayout' }))
     throw new Error('[events.deleteLayout] Event not Configured')
   }
 
@@ -572,7 +554,7 @@ export async function deleteLayout(deletedLayoutId: string) {
     await events.deleteLayout(deletedLayoutId)
   }
   catch (e: any) {
-    showAlert(t('_.event.invokeError', { msg: e.message }), 6, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    handleAlert(AlertKind.EVENT_INVOKE_ERROR, t('_.event.invokeError', { msg: e.message }))
     throw new Error(`[events.deleteLayout] Invoke Error:${e.message}`)
   }
 
@@ -590,10 +572,8 @@ export async function deleteLayout(deletedLayoutId: string) {
  * @returns 假日列表 / Holidays
  */
 export async function loadHolidays(startTime: Date, endTime: Date): Promise<Date[]> {
-  const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
-
   if (!events.loadHolidays) {
-    showAlert(t('_.event.notConfigured', { name: 'loadHolidays' }), 2, AlertKind.WARNING, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    handleAlert(AlertKind.EVENT_NOT_CONFIGURED, t('_.event.notConfigured', { name: 'loadHolidays' }))
     throw new Error('[events.loadHolidays] Event not Configured')
   }
 
@@ -601,7 +581,27 @@ export async function loadHolidays(startTime: Date, endTime: Date): Promise<Date
     return await events.loadHolidays(startTime, endTime)
   }
   catch (e: any) {
-    showAlert(t('_.event.invokeError', { msg: e.message }), 6, AlertKind.ERROR, getParentWithClass(document.getElementById(`iw-tt-layout-${layout.id}`), 'iw-tt')!)
+    handleAlert(AlertKind.EVENT_INVOKE_ERROR, t('_.event.invokeError', { msg: e.message }))
     throw new Error(`[events.loadHolidays] Invoke Error:${e.message}`)
+  }
+}
+
+/**
+ * 自定义警告处理
+ *
+ * Custom alert handling
+ *
+ * @param errorKind 警告类型 / Alert kind
+ * @param message 警告消息 / Alert message
+ * @param alertLevel  消息类型 / Message type
+ * @param showTimeSec 显示的时间（秒） / Display time (seconds)
+ * @param attachEle 附加到的元素 / Element to attach
+ */
+export function handleAlert(errorKind: AlertKind, message: string, alertLevel: AlertLevel = AlertLevel.WARNING, showTimeSec: number = 4, attachEle?: HTMLElement) {
+  if (events.handleAlert) {
+    events.handleAlert(errorKind, message)
+  }
+  else {
+    showAlert(message, showTimeSec, alertLevel, attachEle ?? getParentWithClass(document.getElementById(`iw-tt-layout-${currentLayoutId.value}`), 'iw-tt')!)
   }
 }

@@ -774,3 +774,35 @@ export function showAggMappingByDataKind(dataKind: DataKind): AggItem[] {
   }
   return items
 }
+
+/**
+ * 警告类型
+ *
+ * Alert kind
+ */
+export enum AlertKind {
+  /**
+   * 事件未配置
+   *
+   * Event not configured
+   */
+  EVENT_NOT_CONFIGURED = 'EVENT_NOT_CONFIGURED',
+  /**
+   * 事件调用错误
+   *
+   * Event invoke error
+   */
+  EVENT_INVOKE_ERROR = 'EVENT_INVOKE_ERROR',
+  /**
+   * 加载数据场景无效
+   *
+   * Load data invalid scene
+   */
+  LOAD_DATA_INVALID_SCENE = 'LOAD_DATA_INVALID_SCENE',
+  /**
+   * 数据错误
+   *
+   * Data error
+   */
+  DATA_ERROR = 'DATA_ERROR',
+}
