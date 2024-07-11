@@ -5,7 +5,7 @@ import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import locales from '../../../locales'
 import { GanttShowKind, SubDataShowKind } from '../../../props/enumProps'
 
-import type { GanttLayoutProps, TableStyleProps } from '../../../props'
+import type { EditableDataResp, GanttLayoutProps, TableStyleProps } from '../../../props'
 import { registerRowTreeTriggerEvent, unregisterRowTreeTriggerEvent } from '../../function/RowTree'
 import * as eb from '../../eventbus'
 import { type GanttInfo, dragLinePositionEnum, getTimelineColumnWidth, getWeekdays, operationDateEnum } from './gantt'
@@ -288,13 +288,29 @@ watch(() => props.ganttInfo, () => {
   })
 })
 
-const dragBarRef = ref<HTMLElement>() //  拖拽条
-const isDragging = ref(false) // 是否正在拖拽
-const operationDate = ref('') // 当前操作的日期
-const curTimelineBar = ref<HTMLElement>() // 当前操作的甘特图时间线条
-const dragLinePosition = ref(dragLinePositionEnum.LEFT) // 当前操作条的方向
-const timelineRowRef = ref() // 甘特图时间线
-const curTimelineRowRef = ref() // 当前操作的甘特图时间线
+// 拖拽条
+// Drag bar
+const dragBarRef = ref<HTMLElement>()
+// 是否正在拖拽
+// Whether the drag bar is being dragged
+const isDragging = ref(false)
+// 操作的日期类型
+// The type of date being operated
+const operateDateType = ref('')
+// 当前操作的甘特图时间线条
+// The current Gantt chart time line being operated
+const curTimelineBar = ref<HTMLElement>()
+// 当前操作条的位置
+// The position of the current operation bar
+const dragLinePosition = ref(dragLinePositionEnum.LEFT)
+// 甘特图时间线
+// Gantt chart timeline DOM element
+const timelineRowRef = ref()
+// 当前操作的甘特图时间线
+// The current Gantt chart time line being operated DOM element
+const curTimelineRowRef = ref()// 可编辑数据
+// Editable data
+const editableDataResp = ref<EditableDataResp>()
 
 let rowTreeEventId: string | null = null
 onMounted(() => {
@@ -338,41 +354,68 @@ onUnmounted(() => {
   unregisterRowTreeTriggerEvent(rowTreeEventId!)
 })
 
+/**
+ * 处理鼠标移动事件
+ *
+ * Handle mouse move event
+ */
 function handleMouseMove(event: MouseEvent, date: string) {
+  // 只允许日试图进行编辑
+  // If day view editing is allowed
   if (props.ganttInfo.ganttShowKind !== GanttShowKind.DAY)
     return
+  // 如果当前操作的记录不在可编辑数据中，则不处理
+  // If the current operation record is not in the editable data, do not process
+  if (!editableDataResp.value.cells[(event.target as HTMLElement).parentElement.dataset.pk])
+    return
+  // 切换时间线清除拖拽条
+  // Switch timeline to clear drag bar
   if (curTimelineBar.value && curTimelineBar.value !== event.target) {
     isDragging.value = false
     dragBarRef.value!.style.display = 'none'
   }
 
+  curTimelineBar.value = (event.target as HTMLElement)
+  curTimelineRowRef.value = (event.target as HTMLElement).parentElement
+
   const parentRect = ganttTimelineRef.value!.getBoundingClientRect()
   const childRect = (event.target as HTMLElement).getBoundingClientRect()
-
   const leftPosInParent = childRect.left - parentRect.left
   const rightPosInParent = childRect.right - parentRect.left
 
   const heightDeviation = date === operationDateEnum.PLAN ? 16 : -8
-  operationDate.value = date
-
+  operateDateType.value = date
   dragBarRef.value!.style.display = 'none'
+  let columnConfName: string
+  // 拖拽条左侧位置
+  // Drag bar left position
   if (Math.abs(event.clientX - childRect.left) <= 5 && (event.target as HTMLElement).dataset.startTime) {
+    dragLinePosition.value = dragLinePositionEnum.LEFT
+    columnConfName = getColumnConfName()
+    if (!editableDataResp.value.cells[curTimelineRowRef.value.dataset.pk].includes(columnConfName))
+      return
     dragBarRef.value!.style.left = `${leftPosInParent}px`
     dragBarRef.value!.style.top = `${childRect.top - parentRect.top - heightDeviation}px`
     dragBarRef.value!.style.display = 'block'
-    dragLinePosition.value = dragLinePositionEnum.LEFT
   }
+  // 拖拽条右侧位置
+  // Drag bar right position
   if (Math.abs(childRect.right - event.clientX) <= 5 && (event.target as HTMLElement).dataset.endTime) {
+    dragLinePosition.value = dragLinePositionEnum.RIGHT
+    columnConfName = getColumnConfName()
+    if (!editableDataResp.value.cells[curTimelineRowRef.value.dataset.pk].includes(columnConfName))
+      return
     dragBarRef.value!.style.left = `${rightPosInParent - 5}px`
     dragBarRef.value!.style.top = `${childRect.top - parentRect.top - heightDeviation}px`
     dragBarRef.value!.style.display = 'block'
-    dragLinePosition.value = dragLinePositionEnum.RIGHT
   }
-
-  curTimelineBar.value = (event.target as HTMLElement)
-  curTimelineRowRef.value = (event.target as HTMLElement).parentElement
 }
 
+/**
+ * 停止拖拽 是否保存
+ *
+ * Stop dragging Whether to save
+ */
 async function stopResize(e: PointerEvent, isSave = false) {
   dragBarRef.value!.releasePointerCapture(e.pointerId)
   isDragging.value = false
@@ -380,11 +423,16 @@ async function stopResize(e: PointerEvent, isSave = false) {
 
   if (isSave) {
     const timelineColumnWidth = getTimelineColumnWidth(props.ganttInfo.ganttShowKind)
+    // 拖拽的距离
+    // Drag distance
     const ganttLeft = dragLinePosition.value === dragLinePositionEnum.LEFT ? Number.parseFloat(curTimelineBar.value!.style.left) : Number.parseFloat(curTimelineBar.value!.style.left) + Number.parseFloat(curTimelineBar.value!.style.width)
-    const travelDistance = Number.parseFloat(dragBarRef.value!.style.left) - ganttLeft // 拖拽的距离
-    let cellIdx // 获取当前拖拽到的格的索引0
+    const travelDistance = Number.parseFloat(dragBarRef.value!.style.left) - ganttLeft
+    // 获取当前拖拽到的格的索引
+    // Get the index of the grid dragged to
+    let cellIdx
     if (dragLinePosition.value === dragLinePositionEnum.LEFT) {
       // 拖拽左边临界值
+      // Left edge of drag
       if (Number.parseFloat(dragBarRef.value!.style.left) < 0) {
         dragBarRef.value!.style.left = curTimelineBar.value!.style.left
         return
@@ -395,6 +443,7 @@ async function stopResize(e: PointerEvent, isSave = false) {
     }
     else {
       // 拖拽右边临界值
+      // Right edge of drag
       if (Number.parseFloat(curTimelineBar.value!.style.width) + travelDistance + Number.parseFloat(curTimelineBar.value!.style.left) > curTimelineRowRef.value!.offsetWidth) {
         return
       }
@@ -407,16 +456,10 @@ async function stopResize(e: PointerEvent, isSave = false) {
         cellIdx = Math.floor(((Number.parseFloat(curTimelineBar.value!.style.width) + Number.parseFloat(curTimelineBar.value!.style.left)) / timelineColumnWidth))
       }
     }
-    // 获取到拖拽到哪个格子
     if (cellIdx || cellIdx === 0) {
-      let columnConfName = ''
-      if (operationDate.value === operationDateEnum.PLAN) {
-        columnConfName = dragLinePosition.value === dragLinePositionEnum.LEFT ? props.ganttProps.planStartTimeColumnName : props.ganttProps.planEndTimeColumnName
-      }
-      else if (operationDate.value === operationDateEnum.ACT) {
-        columnConfName = (dragLinePosition.value === dragLinePositionEnum.LEFT ? props.ganttProps.actualStartTimeColumnName : props.ganttProps.actualEndTimeColumnName) as string
-      }
-
+      // 编辑列column名
+      // Edit column name
+      const columnConfName = getColumnConfName()
       await eb.modifyData([{
         [props.pkColumnName]: curTimelineRowRef.value.dataset.pk,
         [columnConfName]: `${curTimelineRowRef.value.children[cellIdx].dataset.groupValue}-${curTimelineRowRef.value.children[cellIdx].dataset.value}`,
@@ -425,12 +468,53 @@ async function stopResize(e: PointerEvent, isSave = false) {
   }
 }
 
+/**
+ * 拖拽时更新位置
+ *
+ * Update position during dragging
+ */
 function updateResize(e: PointerEvent) {
   if (!isDragging.value)
     return
   const rect = ganttTimelineRef.value!.getBoundingClientRect()
   dragBarRef.value!.style.left = `${e.clientX - rect.left}px`
 }
+
+/**
+ * 判断是否可以拖拽
+ *
+ * Judge whether it can be dragged
+ */
+async function judgeDragEdit() {
+  const pks = props.records.map(row => row[props.pkColumnName])
+  editableDataResp.value = await eb.loadEditableData(pks)
+}
+
+/**
+ * 获取列名
+ *
+ * Get column name
+ */
+function getColumnConfName(): string {
+  let name
+  if (operateDateType.value === operationDateEnum.PLAN) {
+    name = dragLinePosition.value === dragLinePositionEnum.LEFT ? props.ganttProps.planStartTimeColumnName : props.ganttProps.planEndTimeColumnName
+  }
+  else if (operateDateType.value === operationDateEnum.ACT) {
+    name = (dragLinePosition.value === dragLinePositionEnum.LEFT ? props.ganttProps.actualStartTimeColumnName : props.ganttProps.actualEndTimeColumnName) as string
+  }
+  return name
+}
+
+// 监听甘特图数据变化
+// Listen for changes in Gantt chart data
+watch(
+  () => props.records,
+  () => {
+    judgeDragEdit()
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
