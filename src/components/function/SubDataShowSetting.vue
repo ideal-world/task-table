@@ -1,62 +1,63 @@
 <script setup lang="ts">
-import * as iconSvg from '../../assets/icon'
-import type { LayoutModifyProps } from '../../props'
-import { SubDataShowKind } from '../../props'
-import * as eb from '../eventbus'
+import { ref } from "vue";
+import TableSetCommon from "../common/TableSetCommon.vue";
+import * as iconSvg from "../../assets/icon";
+import type { LayoutModifyProps } from "../../props";
+import { SubDataShowKind } from "../../props";
+import * as eb from "../eventbus";
 
 const props = defineProps<{
   // 子数据展示方式
   // Sub-data display method
-  subDataShowKind: SubDataShowKind
-}>()
+  subDataShowKind: SubDataShowKind;
+}>();
+
+const showList = ref([
+  {
+    icon: iconSvg.TILE_ALL_DATA,
+    title: "function.subData.tileAllDataTitle",
+    value: SubDataShowKind.TILE_ALL_DATA,
+  },
+  {
+    icon: iconSvg.FOLD_SUB_DATA,
+    title: "function.subData.foldSubDataTitle",
+    value: SubDataShowKind.FOLD_SUB_DATA,
+  },
+  {
+    icon: iconSvg.ICON_EYE_CLOSED,
+    title: "function.subData.onlyParentDataTitle",
+    value: SubDataShowKind.ONLY_PARENT_DATA,
+  },
+]);
 
 async function setSubDataShow(subDataShowKind: SubDataShowKind) {
   const changedLayoutReq: LayoutModifyProps = {
     subDataShowKind,
-  }
-  await eb.modifyLayout(changedLayoutReq)
+  };
+  await eb.modifyLayout(changedLayoutReq);
 }
 </script>
 
 <template>
-  <div class="iw-divider cursor-pointer iw-table-setting-title">
-    {{ $t('function.subData.title') }}
-  </div>
-  <div class="w-full" style="display: none;">
-    <div class="flex justify-between">
-      <button
-        class="iw-btn m-1 flex-1"
-        :title="$t('function.subData.tileAllData')"
-        :class="props.subDataShowKind === SubDataShowKind.TILE_ALL_DATA ? 'iw-btn-neutral' : 'iw-btn-outline '"
-        @click="setSubDataShow(SubDataShowKind.TILE_ALL_DATA)"
+  <TableSetCommon :title="$t('function.subData.title')">
+    <div class="flex justify-between border-8 rounded-2xl border-gray-200">
+      <div
+        v-for="item in showList"
+        :key="item.value"
+        @click="setSubDataShow(item.value)"
+        :class="[
+          'flex-1 px-2 flex justify-center items-center cursor-pointer hover:bg-primary hover:text-white',
+          SubDataShowKind.TILE_ALL_DATA === item.value && 'rounded-l-2xl',
+          SubDataShowKind.ONLY_PARENT_DATA === item.value && 'rounded-r-2xl',
+          props.subDataShowKind === item.value ? 'bg-primary text-white' : 'iw-btn-outline'
+
+        ]"
       >
-        <div class="flex items-center flex-col pb-1">
-          <i :class="`${iconSvg.TILE_ALL_DATA}`" class="text-lg" />
-          <span class="text-xs font-normal">{{ $t('function.subData.tileAllDataTitle') }}</span>
-        </div>
-      </button>
-      <button
-        class="iw-btn m-1 flex-1"
-        :title="$t('function.subData.foldSubData')"
-        :class="props.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA ? 'iw-btn-neutral' : 'iw-btn-outline'"
-        @click="setSubDataShow(SubDataShowKind.FOLD_SUB_DATA)"
-      >
-        <div class="flex items-center flex-col pb-1">
-          <i :class="`${iconSvg.FOLD_SUB_DATA}`" class="text-lg" />
-          <span class="text-xs font-normal">{{ $t('function.subData.foldSubDataTitle') }}</span>
-        </div>
-      </button>
-      <button
-        class="iw-btn m-1 flex-1"
-        :title="$t('function.subData.onlyParentData')"
-        :class="props.subDataShowKind === SubDataShowKind.ONLY_PARENT_DATA ? 'iw-btn-neutral' : 'iw-btn-outline'"
-        @click="setSubDataShow(SubDataShowKind.ONLY_PARENT_DATA)"
-      >
-        <div class="flex items-center flex-col pb-1">
-          <i :class="`${iconSvg.ONLY_PARENT_DATA}`" class="text-lg" />
-          <span class="text-xs font-normal">{{ $t('function.subData.onlyParentDataTitle') }}</span>
-        </div>
-      </button>
+        <i :class="`${item.icon}`" class="text-lg mr-1" />
+        <span class="text-xs font-normal">{{
+          $t(item.title)
+        }}</span>
+      </div>
     </div>
-  </div>
+  </TableSetCommon>
 </template>

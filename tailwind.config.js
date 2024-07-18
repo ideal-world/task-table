@@ -9,6 +9,11 @@ export default {
   plugins: [daisyui],
   daisyui: {
     prefix: 'iw-',
-    themes: ['light', 'dark', 'cupcake', 'forest', 'lofi', 'black', 'acid', 'lemonade', 'night', 'coffee'],
+    themes: [{
+      light: {
+        ...require("daisyui/src/theming/themes")["light"],
+        "primary": "#4393f8",
+      }
+    }],
   },
 }
