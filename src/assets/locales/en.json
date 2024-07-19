@@ -120,7 +120,9 @@
       "hideEmptyTitle": "Hide empty group"
     },
     "column": {
-      "showTitle": "Show column"
+      "showTitle": "Show column",
+      "displayedColumns": "Displayed Columns",
+      "availableColumns": "Available Columns"
     },
     "pagination": {
       "total": "Total {number} rows"

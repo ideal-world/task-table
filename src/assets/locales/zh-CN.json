@@ -120,7 +120,9 @@
       "hideEmptyTitle": "隐藏空组"
     },
     "column": {
-      "showTitle": "显示列"
+      "showTitle": "显示列",
+      "displayedColumns": "已显示的列",
+      "availableColumns": "未显示的列"
     },
     "pagination": {
       "total": "共 {number} 条"

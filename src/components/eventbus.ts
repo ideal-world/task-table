@@ -519,6 +519,7 @@ export async function modifyLayout(changedLayoutProps: LayoutModifyProps, byGrou
   changedLayoutProps.sort !== undefined && (layout.sort = changedLayoutProps.sort)
   changedLayoutProps.agg !== undefined && (layout.agg = changedLayoutProps.agg)
   changedLayoutProps.edit !== undefined && (layout.edit = changedLayoutProps.edit)
+  changedLayoutProps.columns !== undefined && (layout.columns = changedLayoutProps.columns)
 
   if (changedLayoutProps.changedColumn) {
     const oldLayoutColumnIdx = layout.columns.findIndex(column => column.name === changedLayoutProps.changedColumn?.name)

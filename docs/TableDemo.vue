@@ -416,6 +416,9 @@ const events: IwProps.TableEventProps = {
     if (changedLayoutProps.agg) {
       currLayout.agg = changedLayoutProps.agg
     }
+    if (changedLayoutProps.columns) {
+      currLayout.columns = changedLayoutProps.columns
+    }
     if (changedLayoutProps.changedColumn) {
       const col = currLayout.columns!.find((col) => {
         return col.name === changedLayoutProps.changedColumn!.name
