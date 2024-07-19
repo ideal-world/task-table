@@ -527,3 +527,46 @@ export interface EditableDataResp {
    */
   cells: { [pk: string | number]: string[] }
 }
+
+/**
+ * 上下文菜单项属性
+ *
+ * Context menu item props
+ */
+export interface ContextMenuItemProps {
+  /**
+   * ID
+   *
+   * id
+   */
+  id: string
+  /**
+   * 名称
+   *
+   * label
+   */
+  label: string
+}
+
+/**
+ * 上下文菜单属性
+ *
+ * Context menu props
+ */
+export interface ContextMenuProps {
+  /**
+   * 菜单项
+   *
+   * Context menu items
+   */
+  items: { [columnName: string]: ContextMenuItemProps[] }
+}
+
+/**
+ * 简单上下文菜单属性
+ */
+export type SimpleContextMenuProps = ContextMenuProps
+
+export function generateContextMenuProps(tableSimple?: SimpleContextMenuProps, layoutSimple?: SimpleContextMenuProps): ContextMenuProps | undefined {
+  return layoutSimple ?? tableSimple
+}

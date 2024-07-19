@@ -4,7 +4,7 @@
 
 import type { DataGroupResp, DataResp, DictItemsResp } from './basicProps'
 import type { AlertKind, LayoutKind } from './enumProps'
-import type { AggDataProps, DataQuerySliceReq, EditableDataResp, FilterDataProps, GroupDataProps, SortDataProps } from './functionProps'
+import type { AggDataProps, ContextMenuItemProps, DataQuerySliceReq, EditableDataResp, FilterDataProps, GroupDataProps, SortDataProps } from './functionProps'
 import type { LayoutModifyProps, LayoutProps, TableStyleModifyProps } from './kernelProps'
 
 /**
@@ -195,4 +195,13 @@ export interface TableEventProps {
    * @param message 警告消息 / Alert message
    */
   handleAlert?: (alertKind: AlertKind, message: string) => void
+
+  /**
+   * 选择上下文菜单
+   *
+   * Select content menu
+   *
+   * @param item 上下文菜单项 / Context menu item
+   */
+  selectContextMenu?: (item: ContextMenuItemProps) => void
 }

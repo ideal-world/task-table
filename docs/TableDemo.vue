@@ -541,6 +541,9 @@ const events: IwProps.TableEventProps = {
     // eslint-disable-next-line no-alert
     alert(message)
   },
+  selectContextMenu(item: IwProps.ContextMenuItemProps) {
+    // select context menu option
+  },
 }
 
 const columns: IwProps.SimpleTableColumnProps[] = [
@@ -710,6 +713,12 @@ const _tableProps: IwProps.SimpleTableProps = {
   edit: {
     enabledColumnNames: ['name', 'creator', 'stats', 'planStartTime', 'disabled'],
     markEditable: true,
+  },
+  contextMenu: {
+    items: {
+      name: [{ id: 'edit', label: '编辑' }],
+      no: [{ id: 'delete', label: '删除' }],
+    },
   },
 }
 

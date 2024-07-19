@@ -8,8 +8,8 @@ import type { DictItemProps } from './basicProps'
 import { DataKind, LayoutKind, SizeKind, SubDataShowKind, getDefaultIconByDataKind, getDefaultIconByLayoutKind } from './enumProps'
 
 import type { TableEventProps } from './eventProps'
-import type { ActionColumnProps, AggDataProps, DataSliceProps, EditDataProps, FilterDataProps, GanttLayoutProps, GroupDataProps, QuickSearchProps, SimpleAggDataProps, SimpleDataSliceProps, SimpleEditDataProps, SimpleFilterDataProps, SimpleGanttLayoutProps, SimpleGroupDataProps, SimpleSortDataProps, SortDataProps } from './functionProps'
-import { generateAggDataProps, generateDataSliceProps, generateEditDataProps, generateFilterDataProps, generateGanttLayoutProps, generateGroupDataProps, generateSortDataProps } from './functionProps'
+import type { ActionColumnProps, AggDataProps, ContextMenuProps, DataSliceProps, EditDataProps, FilterDataProps, GanttLayoutProps, GroupDataProps, QuickSearchProps, SimpleAggDataProps, SimpleContextMenuProps, SimpleDataSliceProps, SimpleEditDataProps, SimpleFilterDataProps, SimpleGanttLayoutProps, SimpleGroupDataProps, SimpleSortDataProps, SortDataProps } from './functionProps'
+import { generateAggDataProps, generateContextMenuProps, generateDataSliceProps, generateEditDataProps, generateFilterDataProps, generateGanttLayoutProps, generateGroupDataProps, generateSortDataProps } from './functionProps'
 
 // --------------------------------------------------------- Common ---------------------------------------------------------
 
@@ -81,6 +81,12 @@ export interface CommonFunctionProps {
    * Edit
    */
   edit?: EditDataProps
+  /**
+   * 上下文菜单
+   *
+   * Context Menu
+   */
+  contextMenu?: ContextMenuProps
 }
 /**
  * 表格级别与布局级别共用的简单公共功能属性
@@ -150,6 +156,12 @@ interface SimpleCommonFunctionProps {
    * Edit
    */
   edit?: SimpleEditDataProps
+  /**
+   * 上下文菜单
+   *
+   * Context Menu
+   */
+  contextMenu?: SimpleContextMenuProps
 }
 /**
  * 生成表格级别与布局级别共用的公共功能属性
@@ -172,6 +184,7 @@ function generateCommonFunctionProps(tableSimple: SimpleCommonFunctionProps, lay
     sort: (layoutSimple?.sort ?? tableSimple.sort) && generateSortDataProps(tableSimple.sort, layoutSimple?.sort),
     agg: (layoutSimple?.agg ?? tableSimple.agg) && generateAggDataProps(tableSimple.agg, layoutSimple?.agg),
     edit: (layoutSimple?.edit ?? tableSimple.edit) && generateEditDataProps(tableSimple.edit, layoutSimple?.edit),
+    contextMenu: (layoutSimple?.contextMenu ?? tableSimple.contextMenu) && generateContextMenuProps(tableSimple.contextMenu, layoutSimple?.contextMenu),
   }
 }
 

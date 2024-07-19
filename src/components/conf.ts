@@ -61,6 +61,7 @@ export function init(props: SimpleTableProps): {
     sort: tableProps.sort,
     agg: tableProps.agg,
     edit: tableProps.edit,
+    contextMenu: tableProps.contextMenu,
   })
   const layoutsConf = reactive(tableProps.layouts.map((layout) => {
     return {

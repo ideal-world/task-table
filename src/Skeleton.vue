@@ -15,6 +15,7 @@ import ListComp from './components/layout/list/List.vue'
 import type { SimpleTableProps } from './props'
 import { LayoutKind } from './props/enumProps'
 import { delegateEvent } from './utils/basic'
+import ContextMenuComp from './components/function/ContextMenu.vue'
 
 const _props = defineProps<SimpleTableProps>()
 
@@ -107,6 +108,18 @@ onMounted(async () => {
   await eb.watch()
   setHeight()
 })
+
+/**
+ * 获取上下文菜单
+ * @param columnName 列名 / Column name
+ */
+function getContextMenu(columnName: string) {
+  const currentLayout = layoutsConf.find(l => l.id === currentLayoutId.value)
+  if (!currentLayout || !currentLayout.contextMenu || !currentLayout.contextMenu.items[columnName]) {
+    return []
+  }
+  return (currentLayout.contextMenu.items[columnName])
+}
 </script>
 
 <!--
@@ -191,8 +204,10 @@ onMounted(async () => {
           </ScrollableComp>
         </div>
         <div class="iw-tt-table overflow-auto w-full border border-base-300">
-          <ListComp v-if="layout.layoutKind === LayoutKind.LIST" :layout-conf="layout" :table-conf="tableConf" :columns-conf="getCurrentLayoutColumnConf()" />
-          <GanttComp v-else-if="layout.layoutKind === LayoutKind.GANTT && layout.gantt" :gantt-props="layout.gantt" :layout-conf="layout" :table-conf="tableConf" :columns-conf="getCurrentLayoutColumnConf()" />
+          <ContextMenuComp class="h-full" :get-context-menu="getContextMenu">
+            <ListComp v-if="layout.layoutKind === LayoutKind.LIST" :layout-conf="layout" :table-conf="tableConf" :columns-conf="getCurrentLayoutColumnConf()" />
+            <GanttComp v-else-if="layout.layoutKind === LayoutKind.GANTT && layout.gantt" :gantt-props="layout.gantt" :layout-conf="layout" :table-conf="tableConf" :columns-conf="getCurrentLayoutColumnConf()" />
+          </ContextMenuComp>
         </div>
         <div
           :class="`${tableConf.styles.footerClass} iw-tt-footer flex justify-between p-1 min-h-0`"

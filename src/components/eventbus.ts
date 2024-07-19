@@ -8,6 +8,7 @@ import { AlertKind, SubDataShowKind } from '../props/enumProps'
 import type { TableEventProps } from '../props/eventProps'
 import { getParentWithClass } from '../utils/basic'
 import { deepToRaw } from '../utils/vueHelper'
+import type { ContextMenuItemProps } from '../props/functionProps'
 import { AlertLevel, showAlert } from './common/Alert'
 import type { LayoutConf, TableConf } from './conf'
 import { sortByTree } from './function/RowTree'
@@ -604,4 +605,15 @@ export function handleAlert(errorKind: AlertKind, message: string, alertLevel: A
   else {
     showAlert(message, showTimeSec, alertLevel, attachEle ?? getParentWithClass(document.getElementById(`iw-tt-layout-${currentLayoutId.value}`), 'iw-tt')!)
   }
+}
+
+/**
+ * 选择上下文内容
+ *
+ * Select context menu item
+ *
+ * @param item 上下文菜单项 / Context menu item
+ */
+export function selectContextMenu(item: ContextMenuItemProps) {
+  events.selectContextMenu && events.selectContextMenu(item)
 }
