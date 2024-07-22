@@ -743,3 +743,15 @@ onMounted(() => {
     <iw-task-table v-bind="tableProps" />
   </div>
 </template>
+
+<style>
+.VPDoc .aside{
+    display: none !important;
+}
+.VPDoc:not(.has-sidebar) .content, .VPDoc.has-aside .content-container {
+  max-width: 100% !important;
+}
+.VPDoc.has-aside .content-container {
+  max-width: 100%;
+}
+</style>

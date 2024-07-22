@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import TableSetCommon from '../common/TableSetCommon.vue'
 import * as iconSvg from '../../assets/icon'
 import type { GroupDataProps } from '../../props'
 import type { ColumnConf } from '../conf'
@@ -103,41 +104,39 @@ async function setGroupHideEmpty() {
 </script>
 
 <template>
-  <div
-    class="iw-divider cursor-pointer iw-table-setting-title"
-  >
-    {{ $t('function.group.groupTitle') }}
-  </div>
-  <div class="w-full" style="display: none;">
-    <div
-      class="iw-divider iw-divider-end mt-1 mb-1 ml-2 mr-2"
-    >
-      {{ $t('function.group.columnsTitle') }}
+  <TableSetCommon :title="$t('function.group.groupTitle')">
+    <div class="text-gray-400 font-medium mb-4">
+      {{ $t("function.group.columnsTitle") }}
     </div>
-    <div
-      v-for="column in props.columnsConf.filter(col => props.group.enabledColumnNames.includes(col.name))"
-      :key="`${props.layoutId}=${column.name}`" class="iw-contextmenu__item flex items-center justify-between w-full"
-    >
-      <span>
-        <i :class="column.icon" />
-        {{ column.title }}
-      </span>
-      <input
-        type="checkbox" class="iw-toggle iw-toggle-xs"
-        :checked="column.name === props.group.item?.columnName"
-        @click="setGroupColumn(column.name)"
+    <div class="grid grid-cols-1 divide-y bg-gray-100 p-2 rounded-md mb-2">
+      <div
+        v-for="column in props.columnsConf.filter((col) =>
+          props.group.enabledColumnNames.includes(col.name),
+        )"
+        :key="`${props.layoutId}=${column.name}`"
+        class="flex items-center justify-between w-full py-2"
       >
+        <span>
+          <i :class="column.icon" />
+          {{ column.title }}
+        </span>
+        <input
+          type="checkbox"
+          class="iw-toggle iw-toggle-primary iw-toggle-xs"
+          :checked="column.name === props.group.item?.columnName"
+          @click="setGroupColumn(column.name)"
+        >
+      </div>
     </div>
-    <div
-      class="iw-divider mt-1 mb-1 ml-2 mr-2"
-    />
-    <div class="flex justify-between items-center w-full mr-2">
+
+    <div class="flex justify-between items-center w-full mr-2 pb-2">
       <span>
         <i :class="iconSvg.SORT" />
-        {{ $t('function.group.groupSortTitle') }}
+        {{ $t("function.group.groupSortTitle") }}
       </span>
       <input
-        type="checkbox" class="iw-toggle iw-toggle-xs"
+        type="checkbox"
+        class="iw-toggle iw-toggle-primary iw-toggle-xs"
         :checked="props.group.item?.orderDesc"
         @click="setGroupDescSort"
       >
@@ -145,13 +144,14 @@ async function setGroupHideEmpty() {
     <div class="flex justify-between items-center w-full mr-2">
       <span>
         <i :class="iconSvg.SORT" />
-        {{ $t('function.group.hideEmptyTitle') }}
+        {{ $t("function.group.hideEmptyTitle") }}
       </span>
       <input
-        type="checkbox" class="iw-toggle iw-toggle-xs"
+        type="checkbox"
+        class="iw-toggle iw-toggle-xs"
         :checked="props.group.item?.hideEmptyRecord"
         @click="setGroupHideEmpty"
       >
     </div>
-  </div>
+  </TableSetCommon>
 </template>

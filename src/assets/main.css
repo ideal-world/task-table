@@ -9,7 +9,6 @@ a {
   text-decoration: none !important;
 }
 
-
 button,
 input,
 optgroup,
@@ -37,4 +36,9 @@ textarea {
 
 .iw-alert-wrap--error {
   @apply iw-alert-error;
+}
+
+.iw-input:focus,
+.iw-input:focus-within {
+  outline-width: 0;
 }
