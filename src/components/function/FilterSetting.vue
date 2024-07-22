@@ -485,36 +485,52 @@ onMounted(() => {
   <div class="flex items-center text-nowrap">
     <!-- 显示已保存的过滤组 -->
     <!-- Display saved filter groups -->
-    <button v-for="(filterGroup, filterGroupIdx) in props.filter.groups" :key="`${props.layoutId}-${filterGroupIdx}`" class="iw-btn iw-btn-outline iw-btn-xs flex-none mr-1">
-      <span class="flex items-center" @click="e => showFilterGroupContainer(e, filterGroupIdx)">
-        <template v-if="filterGroup.items.length === 1">
-          <!-- 只有一个过滤项时显示详情 -->
-          <!-- Show details when there is only one filter item -->
-          <span class="mr-0.5">{{ props.columnsConf.find(col => col.name === filterGroup.items[0].columnName)?.title }}</span>
-          <span class="mr-0.5">{{ translateOperatorKind(filterGroup.items[0].operator) }}</span>
-          <span class="mr-0.5 max-w-[100px] whitespace-nowrap overflow-hidden text-ellipsis">
-            <span
-              v-for="(dictItemOrRawValue, valueIdx) in tryParseDictItems(filterGroup.items[0].columnName, filterGroup.items[0].value)"
-              :key="`${filterGroup.items[0].columnName}-${valueIdx}`"
-              :style="`background-color: ${dictItemOrRawValue.color ?? ''}`"
-              class="iw-badge"
-            >
-              <span v-if="dictItemOrRawValue.avatar !== undefined" class="avatar">
-                <img :src="dictItemOrRawValue.avatar" class="w-4 rounded-full">
+    <div
+      v-for="(filterGroup, filterGroupIdx) in props.filter.groups" :key="`${props.layoutId}-${filterGroupIdx}`"
+      class="button-box w-max flex items-center mr-3"
+    >
+      <button class="iw-btn iw-btn-sm rounded-sm flex-none">
+        <span class="flex items-center" @click="e => showFilterGroupContainer(e, filterGroupIdx)">
+          <template v-if="filterGroup.items.length === 1">
+            <!-- 只有一个过滤项时显示详情 -->
+            <!-- Show details when there is only one filter item -->
+            <span class="mr-0.5">{{ props.columnsConf.find(col => col.name === filterGroup.items[0].columnName)?.title
+            }}</span>
+            <span class="mr-0.5 p-1 bg-gray-200 rounded-sm text-gray-500">{{
+              translateOperatorKind(filterGroup.items[0].operator)
+            }}</span>
+            <span class="mr-0.5 max-w-[100px] whitespace-nowrap overflow-hidden text-ellipsis">
+              <span
+                v-for="(dictItemOrRawValue, valueIdx) in tryParseDictItems(filterGroup.items[0].columnName, filterGroup.items[0].value)"
+                :key="`${filterGroup.items[0].columnName}-${valueIdx}`"
+                :style="`background-color: ${dictItemOrRawValue.color ?? ''}`" class="iw-badge"
+              >
+                <span v-if="dictItemOrRawValue.avatar !== undefined" class="avatar">
+                  <img :src="dictItemOrRawValue.avatar" class="w-4 rounded-full">
+                </span>
+                <span class="ml-1 whitespace-nowrap">{{ dictItemOrRawValue.title ?? dictItemOrRawValue }}</span>
               </span>
-              <span class="ml-1 whitespace-nowrap">{{ dictItemOrRawValue.title ?? dictItemOrRawValue }}</span>
             </span>
-          </span>
-        </template>
-        <template v-else>
-          <!-- 多个过滤项时显示数量 -->
-          <!-- Show quantity when there are multiple filter items -->
-          <span class="mr-0.5">{{ filterGroup.items.length }}</span>
-          {{ $t('function.filter.items') }}
-        </template>
+          </template>
+          <template v-else>
+            <!-- 多个过滤项时显示数量 -->
+            <!-- Show quantity when there are multiple filter items -->
+            <span class="mr-0.5">{{ filterGroup.items.length }}</span>
+            {{ $t('function.filter.items') }}
+          </template>
+        </span>
+        <i
+          :class="`${iconSvg.DELETE} hover:text-secondary hover:font-bold`"
+          @click="deleteFilterGroup(filterGroupIdx)"
+        />
+      </button>
+      <span
+        v-if="props.filter.groups.length > 0 && filterGroupIdx !== props.filter.groups.length - 1"
+        class="text-gray-400 pl-3"
+      >或
       </span>
-      <i :class="`${iconSvg.DELETE} hover:text-secondary hover:font-bold`" @click="deleteFilterGroup(filterGroupIdx)" />
-    </button>
+    </div>
+
     <div class="self-center cursor-pointer" @click="showFilterGroupContainer">
       <i :class="iconSvg.NEW" />
       <span>{{ $t('function.filter.new') }}</span>
@@ -522,20 +538,30 @@ onMounted(() => {
   </div>
   <!-- 过滤组容器 -->
   <!-- Filter group container -->
-  <MenuComp ref="filterGroupContainerCompRef">
+  <MenuComp ref="filterGroupContainerCompRef" class="p-2">
     <!-- 显示已选中的过滤项 -->
     <!-- Display selected filter items -->
-    <div v-for="(filterItem, filterItemIdx) in selectedFilterItems" :key="`${layoutId}-${selectedFilterGroupIdx}-${filterItemIdx}`" class="iw-contextmenu__item p-1 flex items-center w-full">
+    <div
+      v-for="(filterItem, filterItemIdx) in selectedFilterItems"
+      :key="`${layoutId}-${selectedFilterGroupIdx}-${filterItemIdx}`"
+      class="iw-contextmenu__item p-1 flex items-center w-full"
+    >
       <!-- 列名 -->
       <!-- Column name -->
-      <button class="iw-btn iw-btn-outline iw-btn-xs mr-1" :title="filterItem.title" @click="e => { showFilterColumns(e, filterItemIdx) }">
-        <i :class="filterItem.icon " />
+      <button
+        class="iw-btn  border-gray-200 bg-white iw-btn-xs rounded-sm mr-1 h-[30px]" :title="filterItem.title"
+        @click="e => { showFilterColumns(e, filterItemIdx) }"
+      >
+        <i :class="filterItem.icon" />
         <span class="mr-0.5 max-w-[40px] overflow-hidden text-ellipsis whitespace-nowrap">{{ filterItem.title }}</span>
         <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />
       </button>
       <!-- 操作符 -->
       <!-- Operator -->
-      <button class="iw-btn iw-btn-outline iw-btn-xs mr-1" @click="e => { showFilterOps(e, filterItemIdx) }">
+      <button
+        class="iw-btn border-gray-200 bg-white iw-btn-xs rounded-sm mr-1 h-[30px]"
+        @click="e => { showFilterOps(e, filterItemIdx) }"
+      >
         <span class="mr-0.5">{{ translateOperatorKind(filterItem.operator) }}</span>
         <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />
       </button>
@@ -550,49 +576,46 @@ onMounted(() => {
           :value="filterItem.values"
           @change="e => { setFilterAValue((e.target as HTMLInputElement).value, filterItemIdx) }"
         >
-        <label v-else class="iw-input iw-input-xs iw-input-bordered flex items-center gap-2 h-[30px]">
+        <label v-else class="iw-input iw-input-xs iw-input-bordered flex items-center gap-2 h-[30px] rounded-sm">
           <!-- 已添加的多值列表 -->
           <!-- List of multiple values already added -->
           <span
             v-for="(dictItemOrRawValue, valueIdx) in tryParseDictItems(filterItem.columnName, filterItem.values)"
-            :key="`${filterItem.columnName}-${valueIdx}`"
-            :style="`background-color: ${dictItemOrRawValue.color ?? ''}`"
+            :key="`${filterItem.columnName}-${valueIdx}`" :style="`background-color: ${dictItemOrRawValue.color ?? ''}`"
             class="iw-badge"
           >
             <span v-if="dictItemOrRawValue.avatar !== undefined" class="avatar">
               <img :src="dictItemOrRawValue.avatar" class="w-4 rounded-full">
             </span>
             <span class="ml-1 whitespace-nowrap">{{ dictItemOrRawValue.title ?? dictItemOrRawValue }}</span>
-            <i
-              :class="`${iconSvg.DELETE} ml-0.5 cursor-pointer`"
-              @click="deleteAValue(filterItemIdx, valueIdx)"
-            />
+            <i :class="`${iconSvg.DELETE} ml-0.5 cursor-pointer`" @click="deleteAValue(filterItemIdx, valueIdx)" />
           </span>
           <!-- 不是字典的多值添加 -->
           <!-- Multiple value addition that is not a dictionary -->
           <input
-            v-if="!filterItem.useDict"
-            :type="getInputTypeByDataKind(filterItem.dataKind)"
+            v-if="!filterItem.useDict" :type="getInputTypeByDataKind(filterItem.dataKind)"
             :data-value-input-idx="filterItemIdx"
             @change="e => setFilterAValue((e.target as HTMLInputElement).value, filterItemIdx)"
           >
           <!-- 字典的多值添加 -->
           <!-- Multiple value addition of dictionary -->
           <input
-            v-else
-            :class="filterItem.values && filterItem.values.length > 0 ? 'w-12' : ''"
+            v-else :class="filterItem.values && filterItem.values.length > 0 ? 'w-12' : ''"
             class="pl-1 rounded-md iw-input-bordered" :type="getInputTypeByDataKind(filterItem.dataKind)"
             :data-value-input-idx="filterItemIdx"
+            @click="e => { showDictItems((e.target as HTMLInputElement).value, filterItemIdx, e) }"
             @keyup="e => { showDictItems((e.target as HTMLInputElement).value, filterItemIdx, e) }"
           >
         </label>
       </div>
-      <i :class="`${iconSvg.DELETE} hover:text-secondary hover:font-bold ml-1 cursor-pointer`" @click="deleteFilterItem(filterItemIdx)" />
+      <button class="iw-btn iw-btn-sm iw-btn-square ml-2 rounded-sm" @click="deleteFilterItem(filterItemIdx)">
+        <i :class="`${iconSvg.DELETE} ml-1 cursor-pointer`" />
+      </button>
     </div>
     <!-- 可添加的过滤列 -->
     <!-- Filter columns that can be added -->
-    <button class="iw-btn iw-btn-xs ml-1 mb-1" @click="showFilterColumns">
-      <span class="mr-0.5">{{ $t('function.filter.selectColumnPlaceholder') }}</span>
+    <button class="iw-btn iw-btn-xs bg-white border-gray-200 ml-1 my-2" @click="showFilterColumns">
+      <span class="mr-0.5 text-gray-400">{{ $t('function.filter.selectColumnPlaceholder') }}</span>
       <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />
     </button>
     <span class="absolute bottom-1 right-1 text-xs text-neutral-content">{{ $t('function.filter.note') }}</span>
@@ -600,8 +623,8 @@ onMounted(() => {
 
   <MenuComp ref="filterColumnCompRef" @click="setFilterColumn">
     <div
-      v-for="column in props.columnsConf.filter(col => props.filter.enabledColumnNames.includes(col.name))" :key="column.name" class="iw-contextmenu__item flex w-full cursor-pointer"
-      :data-column-name="column.name"
+      v-for="column in props.columnsConf.filter(col => props.filter.enabledColumnNames.includes(col.name))"
+      :key="column.name" class="iw-contextmenu__item flex w-full cursor-pointer" :data-column-name="column.name"
     >
       <i :class="`${column.icon} mr-0.5`" />
       {{ column.title }}
@@ -611,8 +634,7 @@ onMounted(() => {
   <MenuComp ref="filterOpCompRef" @click="setFilterOp">
     <template v-if="selectedFilterItemIdx !== undefined">
       <div
-        v-for="op in getOperatorKindsByDataKind(selectedFilterItems?.[selectedFilterItemIdx!].dataKind)"
-        :key="op"
+        v-for="op in getOperatorKindsByDataKind(selectedFilterItems?.[selectedFilterItemIdx!].dataKind)" :key="op"
         class="iw-contextmenu__item flex w-full cursor-pointer" :data-op="op"
       >
         {{ translateOperatorKind(op) }}
@@ -623,19 +645,19 @@ onMounted(() => {
   <MenuComp ref="dictContainerCompRef">
     <div @click="setFilterADictValue">
       <div
-        v-for="dictItem in queryDictItemsResp?.records" :key="`${props.layoutId}-${selectedFilterGroupIdx}-${selectedFilterItemIdx}-${dictItem.value}`"
+        v-for="dictItem in queryDictItemsResp?.records"
+        :key="`${props.layoutId}-${selectedFilterGroupIdx}-${selectedFilterItemIdx}-${dictItem.value}`"
         :style="`background-color: ${dictItem.color}`"
         class="iw-contextmenu__item flex cursor-pointer iw-badge m-1.5 pl-0.5"
         :class="selectedFilterItems?.[selectedFilterItemIdx!]?.values.includes(dictItem.value) ? 'iw-badge-primary' : 'iw-badge-outline'"
-        :data-value="dictItem.value"
-        :data-title="dictItem.title"
-        :data-avatar="dictItem.avatar"
+        :data-value="dictItem.value" :data-title="dictItem.title" :data-avatar="dictItem.avatar"
         :data-color="dictItem.color"
       >
         <div v-if="dictItem.avatar !== undefined" class="avatar">
           <img :src="dictItem.avatar" class="w-4 rounded-full">
         </div>
-        <span class="ml-1 whitespace-nowrap">{{ dictItem.title }}{{ dictItem.title !== dictItem.value ? `(${dictItem.value})` : '' }}</span>
+        <span class="ml-1 whitespace-nowrap">{{ dictItem.title }}{{ dictItem.title !== dictItem.value
+          ? `(${dictItem.value})` : '' }}</span>
       </div>
     </div>
   </MenuComp>

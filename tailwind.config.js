@@ -11,9 +11,8 @@ export default {
     prefix: 'iw-',
     themes: [{
       light: {
-        ...require("daisyui/src/theming/themes")["light"],
-        "primary": "#4393f8",
-      }
+        ...require('daisyui/src/theming/themes').light,
+      },
     }],
   },
 }

@@ -77,70 +77,74 @@ function addSortCond(columnName: string, orderDesc: boolean) {
 </script>
 
 <template>
-  <button class="iw-btn iw-btn-outline iw-btn-xs" @click="showRowSortContextMenu">
+  <button class="iw-btn iw-btn-primary h-[28px] rounded-md  iw-btn-outline iw-btn-xs" @click="showRowSortContextMenu">
     <i :class="iconSvg.SORT" />
     <span class="mr-0.5">{{ props.sort.items.length }}</span>
     {{ $t(props.sort.items.length! > 1 ? 'function.rowSort.multiTitle' : 'function.rowSort.singleTitle') }}
     <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />
   </button>
-  <MenuComp ref="sortCompRef" class="iw-row-sort">
-    <div class="iw-divider">
-      {{ $t('function.rowSort.sortedColumns') }}
+  <MenuComp ref="sortCompRef" class="iw-row-sort w-[265px] p-4">
+    <div class="font-medium text-gray-400">
+      {{ $t('function.rowSort.sortedColumns') }}（{{ props.sort.items?.length || 0 }}）
     </div>
-    <div
-      v-for="column in props.sort.items"
-      :key="`${props.layoutId}-${column.columnName}`"
-      class="iw-row-sort__item p-1 flex w-full justify-between cursor-move"
-    >
-      <div>
-        <i :class="`${iconSvg.GRABBER} mr-0.5`" />
-        <i :class="`${props.columnsConf.find(col => col.name === column.columnName)?.icon} mr-0.5`" />
-        {{ props.columnsConf.find(col => col.name === column.columnName)?.title }}
-      </div>
-      <div class="iw-join ml-1">
-        <button
-          class="iw-join-item iw-btn iw-btn-xs"
-          :class="props.sort.items?.find(cond => cond.columnName === column.columnName && !cond.orderDesc) ? 'iw-btn-active' : ''"
-          :title="$t('function.rowSort.asc')" @click="toggleSortCond(column.columnName, false)"
-        >
-          <i :class="`${iconSvg.ASC}`" />
-        </button>
-        <button
-          class="iw-join-item iw-btn iw-btn-xs"
-          :class="props.sort.items?.find(cond => cond.columnName === column.columnName && cond.orderDesc) ? 'iw-btn-active' : ''"
-          :title="$t('function.rowSort.desc')" @click="toggleSortCond(column.columnName, true)"
-        >
-          <i :class="`${iconSvg.DESC}`" />
-        </button>
+    <div class="grid grid-cols-1 divide-y divide-dashed w-full">
+      <div
+        v-for="column in props.sort.items" :key="`${props.layoutId}-${column.columnName}`"
+        class="iw-row-sort__item p-1 flex w-full justify-between cursor-move py-2"
+      >
+        <div>
+          <i :class="`${iconSvg.GRABBER} mr-0.5`" />
+          <i :class="`${props.columnsConf.find(col => col.name === column.columnName)?.icon} mr-0.5`" />
+          {{ props.columnsConf.find(col => col.name === column.columnName)?.title }}
+        </div>
+        <div class="iw-join ml-1">
+          <button
+            class="iw-join-item iw-btn iw-btn-xs"
+            :class="props.sort.items?.find(cond => cond.columnName === column.columnName && !cond.orderDesc) ? 'iw-btn-primary text-white' : ''"
+            :title="$t('function.rowSort.asc')" @click="toggleSortCond(column.columnName, false)"
+          >
+            <i class="text-[16px]" :class="[`${iconSvg.ASC}`]" />
+          </button>
+          <button
+            class="iw-join-item iw-btn iw-btn-xs"
+            :class="props.sort.items?.find(cond => cond.columnName === column.columnName && cond.orderDesc) ? 'iw-btn-primary text-white' : ''"
+            :title="$t('function.rowSort.desc')" @click="toggleSortCond(column.columnName, true)"
+          >
+            <i class="text-[16px]" :class="[`${iconSvg.DESC}`]" />
+          </button>
+        </div>
       </div>
     </div>
-    <div class="iw-divider">
+
+    <div class="font-medium text-gray-400 mt-2">
       {{ $t('function.rowSort.sortableColumns') }}
     </div>
-    <div
-      v-for="column in props.columnsConf.filter(col => props.sort.enabledColumnNames.includes(col.name) && !props.sort.items?.find(cond => cond.columnName === col.name))"
-      :key="`${props.layoutId}-${column.name}`"
-      class="p-1 flex w-full justify-between cursor-pointer" :data-column-name="column.name"
-    >
-      <div>
-        <i :class="`${column.icon} mr-0.5 ml-1`" />
-        {{ column.title }}
-      </div>
-      <div class="iw-join ml-1">
-        <button
-          class="iw-join-item iw-btn iw-btn-xs"
-          :class="props.sort.items?.find(cond => cond.columnName === column.name && !cond.orderDesc) ? 'iw-btn-active' : ''"
-          :title="$t('function.rowSort.asc')" @click="toggleSortCond(column.name, false)"
-        >
-          <i :class="`${iconSvg.ASC}`" />
-        </button>
-        <button
-          class="iw-join-item iw-btn iw-btn-xs"
-          :class="props.sort.items?.find(cond => cond.columnName === column.name && cond.orderDesc) ? 'iw-btn-active' : ''"
-          :title="$t('function.rowSort.desc')" @click="toggleSortCond(column.name, true)"
-        >
-          <i :class="`${iconSvg.DESC}`" />
-        </button>
+    <div class="grid grid-cols-1 divide-y divide-dashed w-full">
+      <div
+        v-for="column in props.columnsConf.filter(col => props.sort.enabledColumnNames.includes(col.name) && !props.sort.items?.find(cond => cond.columnName === col.name))"
+        :key="`${props.layoutId}-${column.name}`" class="p-1 flex w-full justify-between cursor-pointer py-2"
+        :data-column-name="column.name"
+      >
+        <div>
+          <i :class="`${column.icon} mr-0.5 ml-1`" />
+          {{ column.title }}
+        </div>
+        <div class="iw-join ml-1">
+          <button
+            class="iw-join-item iw-btn iw-btn-xs"
+            :class="props.sort.items?.find(cond => cond.columnName === column.name && !cond.orderDesc) ? 'iw-btn-active' : ''"
+            :title="$t('function.rowSort.asc')" @click="toggleSortCond(column.name, false)"
+          >
+            <i class="text-[16px]" :class="[`${iconSvg.ASC}`]" />
+          </button>
+          <button
+            class="iw-join-item iw-btn iw-btn-xs"
+            :class="props.sort.items?.find(cond => cond.columnName === column.name && cond.orderDesc) ? 'iw-btn-active' : ''"
+            :title="$t('function.rowSort.desc')" @click="toggleSortCond(column.name, true)"
+          >
+            <i class="text-[16px]" :class="[`${iconSvg.DESC}`]" />
+          </button>
+        </div>
       </div>
     </div>
   </MenuComp>

@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import TableSetCommon from "../common/TableSetCommon.vue";
-import * as iconSvg from "../../assets/icon";
-import type { GroupDataProps } from "../../props";
-import type { ColumnConf } from "../conf";
-import * as eb from "../eventbus";
+import TableSetCommon from '../common/TableSetCommon.vue'
+import * as iconSvg from '../../assets/icon'
+import type { GroupDataProps } from '../../props'
+import type { ColumnConf } from '../conf'
+import * as eb from '../eventbus'
 
 const props = defineProps<{
   // 布局ID
   // Layout ID
-  layoutId: string;
+  layoutId: string
   // 分组配置
   // Group configuration
-  group: GroupDataProps;
+  group: GroupDataProps
   // 可能涉及的列配置
   // Possible column configuration
-  columnsConf: ColumnConf[];
-}>();
+  columnsConf: ColumnConf[]
+}>()
 
 /**
  * 设置分组
@@ -36,14 +36,16 @@ async function setGroupColumn(columnName: string) {
         },
         slices: props.group.slices,
       },
-    });
-  } else if (props.group.item) {
+    })
+  }
+  else if (props.group.item) {
     await eb.modifyLayout({
       group: {
         enabledColumnNames: props.group.enabledColumnNames,
       },
-    });
-  } else {
+    })
+  }
+  else {
     await eb.modifyLayout({
       group: {
         enabledColumnNames: props.group.enabledColumnNames,
@@ -54,7 +56,7 @@ async function setGroupColumn(columnName: string) {
         },
         slices: props.group.slices,
       },
-    });
+    })
   }
 }
 
@@ -75,7 +77,7 @@ async function setGroupDescSort() {
         },
         slices: props.group.slices,
       },
-    });
+    })
   }
 }
 
@@ -96,7 +98,7 @@ async function setGroupHideEmpty() {
         },
         slices: props.group.slices,
       },
-    });
+    })
   }
 }
 </script>
@@ -109,7 +111,7 @@ async function setGroupHideEmpty() {
     <div class="grid grid-cols-1 divide-y bg-gray-100 p-2 rounded-md mb-2">
       <div
         v-for="column in props.columnsConf.filter((col) =>
-          props.group.enabledColumnNames.includes(col.name)
+          props.group.enabledColumnNames.includes(col.name),
         )"
         :key="`${props.layoutId}=${column.name}`"
         class="flex items-center justify-between w-full py-2"
@@ -123,7 +125,7 @@ async function setGroupHideEmpty() {
           class="iw-toggle iw-toggle-primary iw-toggle-xs"
           :checked="column.name === props.group.item?.columnName"
           @click="setGroupColumn(column.name)"
-        />
+        >
       </div>
     </div>
 
@@ -137,7 +139,7 @@ async function setGroupHideEmpty() {
         class="iw-toggle iw-toggle-primary iw-toggle-xs"
         :checked="props.group.item?.orderDesc"
         @click="setGroupDescSort"
-      />
+      >
     </div>
     <div class="flex justify-between items-center w-full mr-2">
       <span>
@@ -149,7 +151,7 @@ async function setGroupHideEmpty() {
         class="iw-toggle iw-toggle-xs"
         :checked="props.group.item?.hideEmptyRecord"
         @click="setGroupHideEmpty"
-      />
+      >
     </div>
   </TableSetCommon>
 </template>

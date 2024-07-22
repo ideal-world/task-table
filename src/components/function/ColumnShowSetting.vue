@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import TableSetCommon from "../common/TableSetCommon.vue";
-import type { LayoutColumnProps, LayoutModifyProps } from "../../props";
-import type { TableConf } from "../conf";
-import * as eb from "../eventbus";
+import TableSetCommon from '../common/TableSetCommon.vue'
+import type { LayoutColumnProps, LayoutModifyProps } from '../../props'
+import type { TableConf } from '../conf'
+import * as eb from '../eventbus'
 
 const props = defineProps<{
   // 布局ID
   // Layout ID
-  layoutId: string;
+  layoutId: string
   // 布局列
   // Layout columns
-  layoutColumns: LayoutColumnProps[];
+  layoutColumns: LayoutColumnProps[]
   // 表格配置
   // Table configuration
-  tableConf: TableConf;
-}>();
+  tableConf: TableConf
+}>()
 
 async function setShowToggleColumn(column: LayoutColumnProps) {
   const changedLayoutReq: LayoutModifyProps = {
@@ -22,8 +22,8 @@ async function setShowToggleColumn(column: LayoutColumnProps) {
       ...column,
       hide: !column.hide,
     },
-  };
-  await eb.modifyLayout(changedLayoutReq);
+  }
+  await eb.modifyLayout(changedLayoutReq)
 }
 </script>
 
@@ -36,7 +36,7 @@ async function setShowToggleColumn(column: LayoutColumnProps) {
     <div class="grid grid-cols-1 divide-y divide-dashed">
       <div
         v-for="column in props.layoutColumns.filter(
-          (col) => col.name !== props.tableConf.pkColumnName
+          (col) => col.name !== props.tableConf.pkColumnName,
         )"
         :key="`${props.layoutId}-${column.name}`"
         class="iw-contextmenu__item flex items-center justify-between w-full py-2"
@@ -47,7 +47,7 @@ async function setShowToggleColumn(column: LayoutColumnProps) {
               props.tableConf.columns.find((col) => col.name === column.name)
                 ?.icon
             "
-          ></i>
+          />
           {{
             props.tableConf.columns.find((col) => col.name === column.name)
               ?.title
@@ -58,7 +58,7 @@ async function setShowToggleColumn(column: LayoutColumnProps) {
           class="iw-toggle iw-toggle-primary iw-toggle-xs"
           :checked="!props.layoutColumns.find(col => col.name === column.name)!.hide"
           @click="setShowToggleColumn(column)"
-        />
+        >
       </div>
     </div>
   </TableSetCommon>

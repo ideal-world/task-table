@@ -731,6 +731,7 @@ onMounted(() => {
     <iw-task-table v-bind="tableProps" />
   </div>
 </template>
+
 <style>
 .VPDoc .aside{
     display: none !important;

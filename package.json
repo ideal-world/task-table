@@ -50,6 +50,10 @@
   "files": [
     "dist"
   ],
+  "engines": {
+    "node": ">=16.0.0",
+    "pnpm": ">=8.0.0"
+  },
   "scripts": {
     "build": "rimraf dist && vue-tsc && vite build",
     "docs:dev": "vitepress dev docs --host 0.0.0.0",
@@ -92,9 +96,5 @@
     "vitepress": "^1.2.3",
     "vitest": "^1.6.0",
     "vue-tsc": "^2.0.22"
-  },
-  "engines": {
-    "node": ">=16.0.0",
-    "pnpm": ">=8.0.0"
   }
 }
