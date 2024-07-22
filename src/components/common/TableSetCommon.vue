@@ -1,6 +1,7 @@
 <script setup lang="ts">
 defineProps<{
   title: string
+  isShow?: boolean
 }>()
 </script>
 
@@ -14,10 +15,10 @@ defineProps<{
       </div>
       <i
         class="octicon-triangle-down-16 pointer-events-none duration-200"
-        style="transform: rotate(0deg)"
+        :style="{ transform: isShow ? 'rotate(-180deg)': 'rotate(0deg)'}"
       />
     </div>
-    <div class="w-full p-3" style="display: none">
+    <div class="w-full p-3" :style="{ display: isShow ? 'block':'none' }">
       <slot />
     </div>
   </div>

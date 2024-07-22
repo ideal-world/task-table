@@ -39,7 +39,7 @@ async function setSubDataShow(subDataShowKind: SubDataShowKind) {
 </script>
 
 <template>
-  <TableSetCommon :title="$t('function.subData.title')">
+  <TableSetCommon :title="$t('function.subData.title')" isShow>
     <div class="flex justify-between border-8 rounded-2xl border-gray-200">
       <div
         v-for="item in showList"

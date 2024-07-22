@@ -32,7 +32,14 @@ onMounted(() => {
   tableLayoutSettingRef.value?.onInit(async (menuEle: HTMLElement) => {
     delegateEvent(menuEle, 'click', '.iw-table-setting-title', (e: Event) => {
       const toggleEle = (e.target as HTMLElement).nextSibling as HTMLElement
+      const arrowEle = (e.target as HTMLElement).childNodes[1] as HTMLElement
       toggleEle.style.display = toggleEle.style.display === 'none' ? 'block' : 'none'
+      if (!arrowEle)
+        return
+      arrowEle.style.transform
+        = arrowEle.style.transform === 'rotate(0deg)'
+          ? 'rotate(-180deg)'
+          : 'rotate(0deg)'
     })
   })
 })
@@ -48,9 +55,9 @@ defineExpose({
 </script>
 
 <template>
-  <MenuComp ref="tableLayoutSettingRef">
-    <BasicSettingComp :layout-conf="props.layoutConf" />
-    <LayoutSettingComp :table-conf="props.tableConf" :layout-conf="props.layoutConf" :layout-length="props.layoutLength" />
+  <MenuComp ref="tableLayoutSettingRef" style="width: 372px">
+    <BasicSettingComp :layout-conf="props.layoutConf" :layout-length="props.layoutLength" />
+    <!-- <LayoutSettingComp :table-conf="props.tableConf" :layout-conf="props.layoutConf" :layout-length="props.layoutLength" /> -->
     <template v-if="props.tableConf.parentPkColumnName">
       <SubDataShowSettingComp :sub-data-show-kind="props.layoutConf.subDataShowKind" />
     </template>

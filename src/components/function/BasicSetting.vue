@@ -110,7 +110,7 @@ async function copyLayout() {
       >
       <i class="octicon-pencil-24 icon-edit pointer-events-none" style="display: block; margin-left: -10px" />
     </div>
-    <div class="rightbox">
+    <div class="right-box">
       <i
         class="text-lg cursor-pointer mr-2" :class="[`${iconSvg.RESET}`]" :title="$t('layout.reset.title')" @click="(e) => {
           confirmResetLayoutCompRef?.show(
