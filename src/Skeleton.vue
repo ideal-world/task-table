@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Ref } from 'vue'
-import { nextTick, onMounted, watch } from 'vue'
+import { nextTick, onMounted, ref, watch } from 'vue'
 import ScrollableComp from './components/common/Scrollable.vue'
 import type { ColumnConf, LayoutConf, TableConf } from './components/conf'
 import { init } from './components/conf'
@@ -9,13 +9,16 @@ import FilterSettingComp from './components/function/FilterSetting.vue'
 import PaginationComp from './components/function/Pagination.vue'
 import QuickSearchComp from './components/function/QuickSearch.vue'
 import RowSortSettingComp from './components/function/RowSortSetting.vue'
-import TableSettingComp from './components/function/TableSetting.vue'
 import GanttComp from './components/layout/gantt/Gantt.vue'
 import ListComp from './components/layout/list/List.vue'
 import type { SimpleTableProps } from './props'
 import { LayoutKind } from './props/enumProps'
 import { delegateEvent } from './utils/basic'
 import ContextMenuComp from './components/function/ContextMenu.vue'
+import CreateLayout from './components/function/CreateLayout.vue'
+import TableLayoutSettingComp from './components/function/TableLayoutSetting.vue'
+import { MenuOffsetKind } from './components/common/Menu'
+import * as iconSvg from './assets/icon'
 
 const _props = defineProps<SimpleTableProps>()
 
@@ -30,6 +33,10 @@ const { tableConf, layoutsConf, currentLayoutId }: {
   // Current layout ID
   currentLayoutId: Ref<string>
 } = init(_props)
+
+// 布局设置组件
+// Layout setting component
+const tableLayoutSettingCompRef = ref<InstanceType<typeof TableLayoutSettingComp>>()
 
 /**
  * 获取当前布局配置
@@ -98,7 +105,7 @@ watch(
 
 onMounted(async () => {
   delegateEvent(`#iw-tt-${tableConf.id}`, 'click', '.iw-tt-header__item', (e: Event) => {
-    const target = e.target as HTMLElement
+    const target = (e.target as HTMLElement).closest('.iw-tt-header__item') as HTMLElement
     const layoutId = target.dataset.layoutId
     if (layoutId) {
       currentLayoutId.value = layoutId
@@ -119,6 +126,12 @@ function getContextMenu(columnName: string) {
     return []
   }
   return (currentLayout.contextMenu.items[columnName])
+}
+
+// 显示布局菜单
+// Show layout menu
+function showLayoutTableSetting(e: MouseEvent) {
+  tableLayoutSettingCompRef.value?.tableLayoutSettingRef?.show(e, MenuOffsetKind.RIGHT_TOP, { width: 220 }, false, (e.target as HTMLElement).closest('.iw-tt') as HTMLElement)
 }
 </script>
 
@@ -166,12 +179,30 @@ function getContextMenu(columnName: string) {
             :key="layout.id"
             :data-layout-id="layout.id"
             role="tab"
-            class="iw-tt-header__item iw-tab flex flex-nowrap"
+            class="iw-tt-header__item iw-tab flex flex-nowrap mr-2 bg-white"
             :class="currentLayoutId === layout.id ? 'iw-tab-active' : ''"
           >
-            <i :class="`${layout.icon}`" class="mr-1" /> {{ layout.title }}
+            <i :class="`${layout.icon}`" class="mr-1" />
+            <div class="h-full flex items-center">
+              {{ layout.title }}
+            </div>
+            <i
+              v-if="currentLayoutId === layout.id"
+              :class="iconSvg.SETTING"
+              class="text-base ml-2"
+              @click="(e) => showLayoutTableSetting(e)"
+            />
           </a>
+          <CreateLayout :table-conf="tableConf" />
         </div>
+        <TableLayoutSettingComp
+          v-if="currentLayoutId === currentLayoutId && !tableConf.mini"
+          ref="tableLayoutSettingCompRef"
+          :table-conf="tableConf"
+          :layout-conf="getCurrentLayoutConf()"
+          :columns-conf="getCurrentLayoutColumnConf()"
+          :layout-length="layoutsConf.length"
+        />
       </ScrollableComp>
       <div v-else class="flex-1">
         &nbsp;
@@ -182,13 +213,7 @@ function getContextMenu(columnName: string) {
           class="mx-2"
           :quick-search="tableConf.quickSearch"
         />
-        <TableSettingComp
-          v-if="!tableConf.mini"
-          :table-conf="tableConf"
-          :layout-conf="getCurrentLayoutConf()"
-          :columns-conf="getCurrentLayoutColumnConf()"
-          :layout-length="layoutsConf.length"
-        />
+        <slot name="header-extra" />
       </div>
     </div>
     <template v-for="layout in layoutsConf" :key="layout.id">
