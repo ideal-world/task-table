@@ -121,8 +121,8 @@
     },
     "column": {
       "showTitle": "Show column",
-      "displayedColumns": "Displayed Columns",
-      "availableColumns": "Available Columns"
+      "showColumns": "Displayed Columns",
+      "hideColumns": "Available Columns"
     },
     "pagination": {
       "total": "Total {number} rows"

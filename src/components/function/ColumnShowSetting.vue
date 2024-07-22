@@ -27,10 +27,10 @@ const sortCompRef = ref<HTMLElement>()
 const pkColumn = computed(() => props.layoutColumns.find(col => col.name === props.tableConf.pkColumnName))
 // 显示列
 // Displayed columns
-const displayedColumns = computed(() => props.layoutColumns.filter(col => col.name !== props.tableConf.pkColumnName && !col.hide))
-// 未显示列
+const showColumns = computed(() => props.layoutColumns.filter(col => col.name !== props.tableConf.pkColumnName && !col.hide))
+// 隐藏列
 // Available columns
-const availableColumns = computed(() => props.layoutColumns.filter(col => col.name !== props.tableConf.pkColumnName && col.hide))
+const hideColumns = computed(() => props.layoutColumns.filter(col => col.name !== props.tableConf.pkColumnName && col.hide))
 
 async function setShowToggleColumn(column: LayoutColumnProps) {
   const changedLayoutReq: LayoutModifyProps = {
@@ -49,16 +49,16 @@ onMounted(() => {
       if (evt.oldIndex !== evt.newIndex && evt.oldIndex !== -1 && evt.newIndex !== -1) {
         // 移动的列
         // move column
-        const moveColumn = displayedColumns.value.find(col => col.name === evt.item.dataset.columnName)
+        const moveColumn = showColumns.value.find(col => col.name === evt.item.dataset.columnName)
         // 可排序的列
         // sort columns
-        const sortColumns = deepToRaw(displayedColumns.value)
+        const sortColumns = deepToRaw(showColumns.value)
 
         sortColumns.splice(evt.oldIndex! - 1, 1)
         sortColumns.splice(evt.newIndex! - 1, 0, moveColumn as LayoutColumnProps)
 
         await eb.modifyLayout({
-          columns: [pkColumn.value as LayoutColumnProps, ...sortColumns, ...availableColumns.value],
+          columns: [pkColumn.value as LayoutColumnProps, ...sortColumns, ...hideColumns.value],
         })
       }
     },
@@ -73,13 +73,11 @@ onMounted(() => {
   <div class="w-full" style="display: none"> -->
   <TableSetCommon :title="$t('function.column.showTitle')">
     <div ref="sortCompRef" class="grid grid-cols-1 divide-y divide-dashed">
-      <div
-        class="iw-divider iw-divider-end mt-1 mb-1 ml-2 mr-2"
-      >
-        {{ $t('function.column.displayedColumns') }}
+      <div class="text-gray-400 font-medium pt-1">
+        {{ $t('function.column.showColumns') }}
       </div>
       <div
-        v-for="column in displayedColumns"
+        v-for="column in showColumns"
         :key="`${props.layoutId}-${column.name}`"
         class="iw-contextmenu__item flex items-center justify-between w-full py-2 iw-row-sort__item"
         :data-column-name="column.name"
@@ -103,13 +101,11 @@ onMounted(() => {
           @click="setShowToggleColumn(column)"
         >
       </div>
-      <div
-        class="iw-divider iw-divider-end mt-1 mb-1 ml-2 mr-2"
-      >
-        {{ $t('function.column.availableColumns') }}
+      <div class="text-gray-400 font-medium pt-1">
+        {{ $t('function.column.hideColumns') }}
       </div>
       <div
-        v-for="column in availableColumns"
+        v-for="column in hideColumns"
         :key="`${props.layoutId}-${column.name}`"
         class="iw-contextmenu__item flex items-center justify-between w-full py-2"
       >

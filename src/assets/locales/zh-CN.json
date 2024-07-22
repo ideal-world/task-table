@@ -121,8 +121,8 @@
     },
     "column": {
       "showTitle": "显示列",
-      "displayedColumns": "已显示的列",
-      "availableColumns": "未显示的列"
+      "showColumns": "显示",
+      "hideColumns": "隐藏"
     },
     "pagination": {
       "total": "共 {number} 条"
