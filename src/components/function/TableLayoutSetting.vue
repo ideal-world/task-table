@@ -7,7 +7,6 @@ import type { ColumnConf, LayoutConf, TableConf } from '../conf'
 import BasicSettingComp from './BasicSetting.vue'
 import ColumnShowSettingComp from './ColumnShowSetting.vue'
 import GroupSettingComp from './GroupSetting.vue'
-import LayoutSettingComp from './LayoutSetting.vue'
 import SubDataShowSettingComp from './SubDataShowSetting.vue'
 
 const props = defineProps<{
@@ -56,8 +55,7 @@ defineExpose({
 
 <template>
   <MenuComp ref="tableLayoutSettingRef" style="width: 372px">
-    <BasicSettingComp :layout-conf="props.layoutConf" :layout-length="props.layoutLength" />
-    <!-- <LayoutSettingComp :table-conf="props.tableConf" :layout-conf="props.layoutConf" :layout-length="props.layoutLength" /> -->
+    <BasicSettingComp :table-layout-setting-ref="tableLayoutSettingRef" :layout-conf="props.layoutConf" :layout-length="props.layoutLength" />
     <template v-if="props.tableConf.parentPkColumnName">
       <SubDataShowSettingComp :sub-data-show-kind="props.layoutConf.subDataShowKind" />
     </template>
