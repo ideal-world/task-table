@@ -33,12 +33,13 @@ const menuData = ref<ContextMenuItemProps[]>([])
  * @param e 鼠标事件
  */
 function showMenu(e: MouseEvent) {
-  if (!e.target.closest('.iw-data-cell'))
+  const target = (e.target as HTMLElement)?.closest('.iw-data-cell') as HTMLElement
+  if (!target)
     return
   e.preventDefault()
   e.stopPropagation()
   // 获取菜单数据
-  const list = props.getContextMenu((e.target as HTMLElement).closest('.iw-data-cell').dataset.columnName)
+  const list = props.getContextMenu(target.dataset.columnName)
   if (!list?.length)
     return
   menuData.value = list
@@ -63,13 +64,13 @@ function selectMenu(item: ContextMenuItemProps) {
 }
 
 onMounted(() => {
-  contextMenuRef.value!.addEventListener('contextmenu', showMenu)
+  contextMenuRef.value?.addEventListener('contextmenu', showMenu)
   window.addEventListener('click', closeMenu, true)
   window.addEventListener('contextmenu', closeMenu, true)
 })
 
 onUnmounted(() => {
-  contextMenuRef.value!.removeEventListener('contextmenu', showMenu)
+  contextMenuRef.value?.removeEventListener('contextmenu', showMenu)
 })
 </script>
 
