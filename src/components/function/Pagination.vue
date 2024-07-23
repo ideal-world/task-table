@@ -156,7 +156,7 @@ async function setSlice(newPage?: number, newFetchNumber?: number) {
 function changePageSizeStyle(e: Event) {
   const target = e.target as HTMLElement
   const arrowEl = target.children[0] as HTMLElement
-  arrowEl.style.transform = target.style.borderColor
+  arrowEl.style.transform = (arrowEl.style.transform === 'rotate(0deg)' || !arrowEl.style.transform)
     ? 'rotate(180deg)'
     : 'rotate(0deg)'
 }
@@ -165,7 +165,7 @@ function changePageSizeStyle(e: Event) {
 <template>
   <div style="position: sticky; right: 0; " class="z-[3000] flex items-center">
     <span class="text-sm">{{ $t('function.pagination.total', { number: props.totalNumber }) }}</span>
-    <button class="border rounded mx-4 py-1 px-3 cursor-pointer transition-all flex items-center hover:border-[#4393f8]" @blur="(e) => changePageSizeStyle(e)" @focus="(e) => changePageSizeStyle(e)" @click="(e) => { fetchNumberSelectCompRef?.show(e.target as HTMLElement, MenuOffsetKind.MEDIUM_BOTTOM, MenuSizeKind.MINI) }">
+    <button class="border rounded mx-4 py-1 px-3 cursor-pointer transition-all flex items-center iw-btn-outline iw-btn-primary" @blur="(e) => changePageSizeStyle(e)" @focus="(e) => changePageSizeStyle(e)" @click="(e) => { fetchNumberSelectCompRef?.show(e.target as HTMLElement, MenuOffsetKind.MEDIUM_BOTTOM, MenuSizeKind.MINI) }">
       {{ $t('function.pagination.pageSize', { number: getActualSlice().fetchNumber }) }}
       <i class="block transition-all" :class="iconSvg.SHRINK" />
     </button>
@@ -178,7 +178,7 @@ function changePageSizeStyle(e: Event) {
     <button
       v-for="page in getShowPages()"
       :key="page"
-      :class="`pl-3 pr-3 ml-2 py-1 w-[30px] h-[30px] rounded ${page === getCurrentPage() ? 'iw-btn-active' : ''}`"
+      :class="`flex justify-center px-3 ml-2 py-1 w-[30px] h-[30px] rounded transition-all iw-btn-outline iw-btn-primary ${page === getCurrentPage() ? 'iw-btn-active' : ''}`"
       :disabled="page === getCurrentPage()"
       @click="setCurrentPage(page)"
     >
@@ -193,7 +193,7 @@ function changePageSizeStyle(e: Event) {
     <MenuComp ref="fetchNumberSelectCompRef">
       <div
         v-for="number in getActualSlice().fetchNumbers" :key="number"
-        class="p-2 hover:cursor-pointer text-xs"
+        class="p-2 text-center transition-all cursor-pointer rounded hover:bg-primary hover:text-white"
         @click="setFetchNumber(number)"
       >
         {{ number }}
