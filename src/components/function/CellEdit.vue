@@ -204,9 +204,20 @@ watch([() => props.columnsConf, () => props.data], async () => {
 
 onMounted(() => {
   const containerEle = cellEditContainerRef.value!.closest(`.${props.containerClass}`) as HTMLElement
+  // 容器冒泡捕捉到单击事件后，尝试离开编辑模式
+  // After the container captures the click event, try to leave edit mode
+  containerEle.addEventListener('click', (e) => {
+    if (!curColumnConf.value
+      || (e.target && e.target instanceof HTMLElement && e.target.closest(`.iw-edit-container`))) {
+      return
+    }
+    // 在编辑模式下，且点击的不是编辑容器(cellEditContainerRef)，则尝试离开编辑模式
+    // In edit mode, and if you click on something other than the edit container, try to leave edit mode
+    leaveEditMode()
+  })
   // 双击尝试进入编辑模式
   // Double-click to try to enter edit mode
-  delegateEvent(containerEle, 'dblclick', `.${props.editCellClass}`, (e) => {
+  delegateEvent(containerEle, 'click', `.${props.editCellClass}`, (e) => {
     if (!e.target || !(e.target instanceof HTMLElement)) {
       return
     }
@@ -223,17 +234,6 @@ onMounted(() => {
     else {
       leaveEditMode()
     }
-  })
-  // 容器冒泡捕捉到单击事件后，尝试离开编辑模式
-  // After the container captures the click event, try to leave edit mode
-  containerEle.addEventListener('click', (e) => {
-    if (!curColumnConf.value
-      || (e.target && e.target instanceof HTMLElement && e.target.closest(`.iw-edit-container`))) {
-      return
-    }
-    // 在编辑模式下，且点击的不是编辑容器(cellEditContainerRef)，则尝试离开编辑模式
-    // In edit mode, and if you click on something other than the edit container, try to leave edit mode
-    leaveEditMode()
   })
 })
 </script>
