@@ -366,7 +366,7 @@ function handleMouseMove(event: MouseEvent, date: string) {
     return
   // 如果当前操作的记录不在可编辑数据中，则不处理
   // If the current operation record is not in the editable data, do not process
-  if (!editableDataResp.value.cells[(event.target as HTMLElement).parentElement.dataset.pk])
+  if (!editableDataResp.value?.cells[(event.target as HTMLElement).parentElement?.dataset.pk as string])
     return
   // 切换时间线清除拖拽条
   // Switch timeline to clear drag bar
@@ -392,7 +392,7 @@ function handleMouseMove(event: MouseEvent, date: string) {
   if (Math.abs(event.clientX - childRect.left) <= 5 && (event.target as HTMLElement).dataset.startTime) {
     dragLinePosition.value = dragLinePositionEnum.LEFT
     columnConfName = getColumnConfName()
-    if (!editableDataResp.value.cells[curTimelineRowRef.value.dataset.pk].includes(columnConfName))
+    if (!editableDataResp.value?.cells[curTimelineRowRef.value.dataset.pk].includes(columnConfName))
       return
     dragBarRef.value!.style.left = `${leftPosInParent}px`
     dragBarRef.value!.style.top = `${childRect.top - parentRect.top - heightDeviation}px`
@@ -403,7 +403,7 @@ function handleMouseMove(event: MouseEvent, date: string) {
   if (Math.abs(childRect.right - event.clientX) <= 5 && (event.target as HTMLElement).dataset.endTime) {
     dragLinePosition.value = dragLinePositionEnum.RIGHT
     columnConfName = getColumnConfName()
-    if (!editableDataResp.value.cells[curTimelineRowRef.value.dataset.pk].includes(columnConfName))
+    if (!editableDataResp.value?.cells[curTimelineRowRef.value.dataset.pk].includes(columnConfName))
       return
     dragBarRef.value!.style.left = `${rightPosInParent - 5}px`
     dragBarRef.value!.style.top = `${childRect.top - parentRect.top - heightDeviation}px`

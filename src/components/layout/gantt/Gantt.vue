@@ -140,17 +140,39 @@ onMounted(() => {
   // Listen for mouse wheel events on the Gantt chart and synchronize the mouse wheel events of the list view
   ganttTimelineRef.value!.addEventListener('wheel', (e) => {
     e.preventDefault()
-    ganttTimelineRef.value!.scrollTo({
-      left: ganttTimelineRef.value!.scrollLeft + e.deltaY,
-    })
+    // 水平滚动
+    // Horizontal scrolling
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+      ganttTimelineRef.value!.scrollTo({
+        left: ganttTimelineRef.value!.scrollLeft + e.deltaX,
+      })
+    }
+    // 垂直滚动
+    // Vertical scrolling
+    else {
+      ganttTimelineRef.value!.scrollTo({
+        left: ganttTimelineRef.value!.scrollLeft + e.deltaY,
+      })
+    }
   })
   // 监听列表视图的鼠标滚轮事件，同步甘特图的鼠标滚轮事件
   // Listen for mouse wheel events on the list view and synchronize the mouse wheel events of the Gantt chart
   ganttListRef.value!.addEventListener('wheel', (e) => {
     e.preventDefault()
-    ganttListRef.value!.scrollTo({
-      left: ganttListRef.value!.scrollLeft + e.deltaY,
-    })
+    // 水平滚动
+    // Horizontal scrolling
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+      ganttListRef.value!.scrollTo({
+        left: ganttListRef.value!.scrollLeft + e.deltaX,
+      })
+    }
+    // 垂直滚动
+    // Vertical scrolling
+    else {
+      ganttListRef.value!.scrollTo({
+        left: ganttListRef.value!.scrollLeft + e.deltaY,
+      })
+    }
   })
 })
 
