@@ -125,7 +125,8 @@
       "hideColumns": "隐藏"
     },
     "pagination": {
-      "total": "共 {number} 条"
+      "total": "共 {number} 项数据",
+      "pageSize": "{number} 条/页"
     },
     "subData": {
       "title": "子数据显示",

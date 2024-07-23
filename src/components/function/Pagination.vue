@@ -145,10 +145,30 @@ async function setSlice(newPage?: number, newFetchNumber?: number) {
     await eb.modifyLayout(changedLayoutReq, props.groupValue)
   }
 }
+
+/**
+ * 改变每页数量样式
+ *
+ * Change page size style
+ *
+ * @param e 事件 / Event
+ */
+function changePageSizeStyle(e: Event) {
+  const target = e.target as HTMLElement
+  const arrowEl = target.children[0] as HTMLElement
+  arrowEl.style.transform = target.style.borderColor
+    ? 'rotate(180deg)'
+    : 'rotate(0deg)'
+}
 </script>
 
 <template>
-  <div style="position: sticky; right: 0; " class="z-[3000]">
+  <div style="position: sticky; right: 0; " class="z-[3000] flex items-center">
+    <span class="text-sm">{{ $t('function.pagination.total', { number: props.totalNumber }) }}</span>
+    <button class="border rounded mx-4 py-1 px-3 cursor-pointer transition-all flex items-center hover:border-[#4393f8]" @blur="(e) => changePageSizeStyle(e)" @focus="(e) => changePageSizeStyle(e)" @click="(e) => { fetchNumberSelectCompRef?.show(e.target as HTMLElement, MenuOffsetKind.MEDIUM_BOTTOM, MenuSizeKind.MINI) }">
+      {{ $t('function.pagination.pageSize', { number: getActualSlice().fetchNumber }) }}
+      <i class="block transition-all" :class="iconSvg.SHRINK" />
+    </button>
     <button v-if="getCurrentPage() > 2" class="iw-btn iw-btn-ghost px-1 iw-btn-xs" @click="setCurrentPage(1)">
       <i :class="iconSvg.FIRST" />
     </button>
@@ -158,7 +178,7 @@ async function setSlice(newPage?: number, newFetchNumber?: number) {
     <button
       v-for="page in getShowPages()"
       :key="page"
-      :class="`iw-btn iw-btn-ghost pl-3 pr-3 ml-1 iw-btn-xs ${page === getCurrentPage() ? 'iw-btn-active' : ''}`"
+      :class="`pl-3 pr-3 ml-2 py-1 w-[30px] h-[30px] rounded ${page === getCurrentPage() ? 'iw-btn-active' : ''}`"
       :disabled="page === getCurrentPage()"
       @click="setCurrentPage(page)"
     >
@@ -170,9 +190,6 @@ async function setSlice(newPage?: number, newFetchNumber?: number) {
     <button v-if="getCurrentPage() < getTotalPage() - 1" class="iw-btn iw-btn-ghost px-1 ml-1 iw-btn-xs" @click="setCurrentPage(getTotalPage())">
       <i :class="iconSvg.LAST" />
     </button>
-    <button class="iw-btn ml-1 mr-1 iw-btn-xs" @click="(e) => { fetchNumberSelectCompRef?.show(e.target as HTMLElement, MenuOffsetKind.MEDIUM_BOTTOM, MenuSizeKind.MINI) }">
-      {{ getActualSlice().fetchNumber }}
-    </button>
     <MenuComp ref="fetchNumberSelectCompRef">
       <div
         v-for="number in getActualSlice().fetchNumbers" :key="number"
@@ -182,6 +199,5 @@ async function setSlice(newPage?: number, newFetchNumber?: number) {
         {{ number }}
       </div>
     </MenuComp>
-    <span class="text-sm">{{ $t('function.pagination.total', { number: props.totalNumber }) }}</span>
   </div>
 </template>

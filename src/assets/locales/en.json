@@ -125,7 +125,8 @@
       "hideColumns": "Available Columns"
     },
     "pagination": {
-      "total": "Total {number} rows"
+      "total": "Total {number} items",
+      "pageSize": "{number} rows/page"
     },
     "subData": {
       "title": "Show sub Data",
