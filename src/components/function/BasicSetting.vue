@@ -22,7 +22,7 @@ const props = defineProps<{
   layoutLength: number
   // 表格布局设置组件
   // Table layout setting component
-  tableLayoutSettingRef: InstanceType<typeof MenuComp>
+  tableLayoutSettingRef?: InstanceType<typeof MenuComp>
 }>()
 const iconPickerCompRef = ref<InstanceType<typeof MenuComp>>()
 const confirmDeleteLayoutCompRef = ref<InstanceType<typeof MenuComp>>()
@@ -50,7 +50,7 @@ function handleToggle(e: Event, isShow: boolean) {
 async function deleteLayout() {
   await eb.deleteLayout(props.layoutConf.id)
   confirmDeleteLayoutCompRef.value?.close()
-  props.tableLayoutSettingRef.close()
+  props.tableLayoutSettingRef?.close()
 }
 
 async function resetLayout() {
@@ -87,7 +87,7 @@ async function copyLayout() {
   newLayout.selectedDataPks = []
   newLayout.title = `${props.layoutConf.title} - Copy`
   await eb.newLayout(newLayout)
-  props.tableLayoutSettingRef.close()
+  props.tableLayoutSettingRef?.close()
 }
 </script>
 

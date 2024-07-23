@@ -33,7 +33,6 @@ onMounted(() => {
     delegateEvent(menuEle, 'click', '.iw-table-setting-title', (e: Event) => {
       const toggleEle = (e.target as HTMLElement).nextSibling as HTMLElement
       const arrowEle = (e.target as HTMLElement).childNodes[1] as HTMLElement
-      console.log('e.target', arrowEle)
       if (!toggleEle)
         return
       toggleEle.style.display

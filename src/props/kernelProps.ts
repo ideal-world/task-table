@@ -87,12 +87,6 @@ export interface CommonFunctionProps {
    * Context Menu
    */
   contextMenu?: ContextMenuProps
-  /**
-   * 列
-   *
-   * column
-   */
-  columns?: LayoutColumnProps[]
 }
 /**
  * 表格级别与布局级别共用的简单公共功能属性
@@ -168,12 +162,6 @@ interface SimpleCommonFunctionProps {
    * Context Menu
    */
   contextMenu?: SimpleContextMenuProps
-  /**
-   * 列
-   *
-   * columns
-   */
-  columns?: LayoutColumnProps[]
 }
 /**
  * 生成表格级别与布局级别共用的公共功能属性
@@ -919,4 +907,10 @@ export interface LayoutModifyProps extends Partial<CommonFunctionProps> {
    * Changed column
    */
   changedColumn?: LayoutColumnProps
+  /**
+   * 列
+   *
+   * columns
+   */
+  columns?: LayoutColumnProps[]
 }

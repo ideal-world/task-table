@@ -503,7 +503,7 @@ function getColumnConfName(): string {
   else if (operateDateType.value === operationDateEnum.ACT) {
     name = (dragLinePosition.value === dragLinePositionEnum.LEFT ? props.ganttProps.actualStartTimeColumnName : props.ganttProps.actualEndTimeColumnName) as string
   }
-  return name
+  return name as string
 }
 
 // 监听甘特图数据变化
