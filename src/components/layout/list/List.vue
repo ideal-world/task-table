@@ -98,7 +98,7 @@ onMounted(() => {
     :class="`iw-list iw-row-select-container relative iw-list--size${props.tableConf.styles.size}`"
     :style="setTableWidth()"
   >
-    <HeaderComp :columns-conf="props.columnsConf" :layout-conf="props.layoutConf" :table-conf="props.tableConf" :set-column-styles="setColumnStyles" />
+    <HeaderComp :columns-conf="props.columnsConf" :layout-conf="props.layoutConf" :table-conf="props.tableConf" :set-column-styles="setColumnStyles" :sort="layoutConf.sort" />
     <!-- 不分组模式 -->
     <!-- Non-grouping mode -->
     <template v-if="props.layoutConf.data && !Array.isArray(props.layoutConf.data)">
