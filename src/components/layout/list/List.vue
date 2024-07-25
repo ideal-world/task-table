@@ -34,7 +34,7 @@ const listRef: Ref<HTMLDivElement | null> = ref(null)
 
 // 选择列宽度
 // Select column width
-const selectColumnWidth = computed(() => props.layoutConf.showSelectColumn ? 25 : 0)
+const selectColumnWidth = computed(() => props.layoutConf.showSelectColumn ? 35 : 0)
 // 操作列宽度
 // Action column width
 const actionColumnWidth = computed(() => props.layoutConf.actionColumn ? props.layoutConf.actionColumn.width : 0)

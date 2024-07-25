@@ -68,7 +68,7 @@ const props = defineProps<{
       :class="`${props.styleProps.cellClass} iw-list-cell flex justify-center items-center bg-base-100 whitespace-nowrap flex-nowrap`"
       :style="props.setColumnStyles(-1)"
     >
-      <input type="checkbox" class="iw-row-select-cell__chk iw-checkbox iw-checkbox-xs">
+      <input type="checkbox" class="iw-row-select-cell__chk iw-checkbox iw-checkbox-xs rounded">
     </div>
     <!-- 主键数据列 -->
     <!-- Primary key data column -->
@@ -116,7 +116,7 @@ const props = defineProps<{
     <!-- Action column -->
     <div
       v-if="props.actionColumnRender"
-      :class="`${props.styleProps.cellClass} iw-list-cell flex justify-center items-center bg-base-100 border-l border-l-base-300 whitespace-nowrap flex-nowrap`"
+      :class="`${props.styleProps.cellClass} iw-active-cell iw-list-cell flex justify-center items-center bg-base-100 border-l border-l-base-300 whitespace-nowrap flex-nowrap`"
       :style="props.setColumnStyles(-2)"
       v-html="props.actionColumnRender(row, props.layoutKind)"
     />

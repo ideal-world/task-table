@@ -567,7 +567,7 @@ watch(
     <div
       v-if="props.ganttInfo.ganttShowKind === GanttShowKind.DAY"
       ref="dragBarRef"
-      class="hidden absolute cursor-e-resize bg-red-300 px-1 h-[20px] z-[3199]"
+      class="hidden absolute cursor-e-resize bg-info px-1 h-[20px] z-[3199]"
     />
   </div>
 </template>
