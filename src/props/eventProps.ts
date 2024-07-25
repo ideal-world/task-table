@@ -203,5 +203,5 @@ export interface TableEventProps {
    *
    * @param item 上下文菜单项 / Context menu item
    */
-  selectContextMenu?: (item: ContextMenuItemProps) => void
+  selectContextMenu?: (item: ContextMenuItemProps, target: HTMLElement) => void
 }
