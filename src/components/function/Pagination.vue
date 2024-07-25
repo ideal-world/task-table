@@ -165,7 +165,7 @@ function changePageSizeStyle(e: Event) {
 <template>
   <div style="position: sticky; right: 0; " class="z-[3000] flex items-center">
     <span class="text-sm">{{ $t('function.pagination.total', { number: props.totalNumber }) }}</span>
-    <button class="border rounded mx-4 py-1 px-3 cursor-pointer transition-all flex items-center iw-btn-outline iw-btn-primary" @blur="(e) => changePageSizeStyle(e)" @focus="(e) => changePageSizeStyle(e)" @click="(e) => { fetchNumberSelectCompRef?.show(e.target as HTMLElement, MenuOffsetKind.MEDIUM_BOTTOM, MenuSizeKind.MINI) }">
+    <button class="border rounded ml-4 mr-2 py-1 px-3 cursor-pointer transition-all flex items-center iw-btn-outline iw-btn-primary" @blur="(e) => changePageSizeStyle(e)" @focus="(e) => changePageSizeStyle(e)" @click="(e) => { fetchNumberSelectCompRef?.show(e.target as HTMLElement, MenuOffsetKind.MEDIUM_BOTTOM, MenuSizeKind.MINI) }">
       {{ $t('function.pagination.pageSize', { number: getActualSlice().fetchNumber }) }}
       <i class="block transition-all" :class="iconSvg.SHRINK" />
     </button>

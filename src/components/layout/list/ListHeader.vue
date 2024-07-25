@@ -201,7 +201,7 @@ function handleSort(column) {
       >
         <!-- 选择列 -->
         <!-- Select column -->
-        <input type="checkbox" class="iw-row-select-all-cell__chk iw-checkbox iw-checkbox-xs">
+        <input type="checkbox" class="iw-row-select-all-cell__chk iw-checkbox iw-checkbox-xs rounded">
       </div>
       <!-- 数据列 -->
       <!-- Data column -->
