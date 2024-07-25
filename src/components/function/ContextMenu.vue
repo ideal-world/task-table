@@ -27,6 +27,9 @@ const contextMenuRef = ref<HTMLElement>()
 // 菜单数据
 // Menu data
 const menuData = ref<ContextMenuItemProps[]>([])
+// 当前菜单目标
+// Current menu target
+const curContextMenuTarget = ref()
 
 /**
  *
@@ -42,6 +45,7 @@ function showMenu(e: MouseEvent) {
   const list = props.getContextMenu(target.dataset.columnName)
   if (!list?.length)
     return
+  curContextMenuTarget.value = e.target
   menuData.value = list
   x.value = e.clientX
   y.value = e.clientY
@@ -60,7 +64,7 @@ function closeMenu() {
  * @param item 菜单项
  */
 function selectMenu(item: ContextMenuItemProps) {
-  eb.selectContextMenu(item)
+  eb.selectContextMenu(item, curContextMenuTarget.value)
 }
 
 onMounted(() => {
