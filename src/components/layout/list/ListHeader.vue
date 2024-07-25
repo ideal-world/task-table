@@ -8,6 +8,12 @@ import ColumnResizeComp from '../../function/ColumnResize.vue'
 import ColumnFixedComp from './ListColumnFixed.vue'
 import ColumnWrapComp from './ListColumnWrap.vue'
 
+enum ORDER_ENUM {
+  POSITIVE_SORT = false, //正序
+  INVERT_SORT= true, //倒序
+  UNDEFINED = null //不排序
+}
+
 const props = defineProps<{
   // 列配置
   // Column configuration
@@ -75,6 +81,24 @@ const cateColumns = computed(() => {
 })
 
 /**
+ * 组装sort数据到columns（sort: { enabledColumnNames: ['no'], items: [{ columnName: 'no', orderDesc: false }] }）
+ * Assemble sort data into columns
+ */
+const columnsWithSort = computed(()=> {
+
+  return props.columnsConf.map(e=> {
+    const canSort = props.layoutConf.sort.enabledColumnNames.includes(e.name);
+    if(canSort) {
+      return {
+        ...e,
+        orderDesc: props.layoutConf.sort.items?.find(f=> f.columnName === e.name)?.orderDesc ?? ORDER_ENUM.UNDEFINED
+      }
+    }
+    return e;
+  })
+})
+
+/**
  * 设置新的列宽
  *
  * Set new column width
@@ -93,6 +117,44 @@ async function setNewWidth(newWidth: number, columnName?: string) {
     }
     await eb.modifyLayout(changedLayoutReq)
   }
+}
+
+/**
+ * 排序事件 sort event
+ * @param column 列
+ */
+function handleSort(column) {
+  const { orderDesc , name } = column;
+  const items = props.layoutConf.sort?.items || [];
+  const currentIndex = items?.findIndex(f=> f.columnName === name)
+  const currentItem = items?.find(f=> f.columnName === name)
+  if(currentItem) {//存在修改 exist modify
+    switch(orderDesc){
+      case ORDER_ENUM.POSITIVE_SORT: 
+        currentItem.orderDesc = ORDER_ENUM.INVERT_SORT;
+        break;
+      case ORDER_ENUM.INVERT_SORT: 
+        items.splice(currentIndex, 1)
+        // currentItem.orderDesc = ORDER_ENUM.UNDEFINED;
+        break;
+      case ORDER_ENUM.UNDEFINED: 
+        currentItem.orderDesc = ORDER_ENUM.POSITIVE_SORT;
+        break;
+      
+    }
+  }else {//不存在添加 no exist add
+    items.push({
+      columnName: column.name,
+      orderDesc: ORDER_ENUM.POSITIVE_SORT,
+    })
+  }
+  
+  eb.modifyLayout({
+    sort: {
+      enabledColumnNames: props.layoutConf.sort.enabledColumnNames,
+      items,
+    },
+  })
 }
 </script>
 
@@ -144,7 +206,7 @@ async function setNewWidth(newWidth: number, columnName?: string) {
       <!-- 数据列 -->
       <!-- Data column -->
       <div
-        v-for="(column, colIdx) in columnsConf" :key="`${props.layoutConf.id}-${column.name}`"
+        v-for="(column, colIdx) in columnsWithSort" :key="`${props.layoutConf.id}-${column.name}`"
         :class="`${props.tableConf.styles.cellClass} iw-list-cell iw-resize-item flex items-center bg-base-200 ${(colIdx !== 0 || props.layoutConf.showSelectColumn) && 'border-l border-l-base-300'} whitespace-nowrap overflow-hidden text-ellipsis flex-nowrap hover:cursor-pointer`"
         :data-column-name="column.name"
         :style="props.setColumnStyles(colIdx)"
@@ -152,6 +214,10 @@ async function setNewWidth(newWidth: number, columnName?: string) {
         @click="(event: MouseEvent) => showHeaderContextMenu(event, column.name)"
       >
         <i :class="`${column.icon} mr-1`" /> {{ column.title }}
+        <div v-if="column.hasOwnProperty('orderDesc')" class="sort-box flex flex-col items-center justify-center ml-2" @click.stop="handleSort(column)">
+          <i class="sort-icon octicon-chevron-up-12" :class="`${column.orderDesc === false ? 'text-primary' : ''}`" />
+          <i class="sort-icon octicon-chevron-down-12 mt-[-12px]" :class="column.orderDesc ? 'text-primary' : ''" />
+        </div>
       </div>
       <!-- 操作列 -->
       <!-- Action column -->
