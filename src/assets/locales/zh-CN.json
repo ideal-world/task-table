@@ -110,7 +110,8 @@
       "new": "新的过滤",
       "items": "条件",
       "selectColumnPlaceholder": "新增列",
-      "note": "组内多个条件为AND，组间为OR"
+      "note": "组内多个条件为AND，组间为OR",
+      "confirm": "确定"
     },
     "group": {
       "groupTitle": "分组",

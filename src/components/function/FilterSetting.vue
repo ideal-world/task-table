@@ -417,6 +417,10 @@ function setFilterADictValue(e: Event) {
  */
 async function saveFilterGroup() {
   if (selectedFilterItems.value?.length === 0) {
+    if(selectedFilterGroupIdx.value !== undefined){
+      deleteFilterGroup(selectedFilterGroupIdx.value)
+      filterGroupContainerCompRef.value?.close()
+    }  
     return
   }
   // 组装当前过滤组
@@ -454,6 +458,7 @@ async function saveFilterGroup() {
     },
   }
   await eb.modifyLayout(layout)
+  filterGroupContainerCompRef.value?.close()
 }
 
 async function initDictItemsByFilterGroups(filterGroups: FilterDataGroupProps[]) {
@@ -473,7 +478,7 @@ onMounted(() => {
   filterGroupContainerCompRef.value?.onClose(async (_) => {
     // 关闭时保存过滤组
     // Save filter group when closing
-    await saveFilterGroup()
+    // await saveFilterGroup()
   })
   // 初始化字典项
   // Initialize dictionary items
@@ -538,7 +543,7 @@ onMounted(() => {
   </div>
   <!-- 过滤组容器 -->
   <!-- Filter group container -->
-  <MenuComp ref="filterGroupContainerCompRef" class="p-2">
+  <MenuComp ref="filterGroupContainerCompRef" class="p-2 pb-6">
     <!-- 显示已选中的过滤项 -->
     <!-- Display selected filter items -->
     <div
@@ -618,6 +623,7 @@ onMounted(() => {
       <span class="mr-0.5 text-gray-400">{{ $t('function.filter.selectColumnPlaceholder') }}</span>
       <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />
     </button>
+    <button v-if="(selectedFilterItems && selectedFilterItems.length) || selectedFilterGroupIdx !== undefined" class="iw-btn block iw-btn-xs iw-btn-primary absolute right-2 bottom-6" @click="saveFilterGroup">{{ $t('function.filter.confirm') }}</button>
     <span class="absolute bottom-1 right-1 text-xs text-neutral-content">{{ $t('function.filter.note') }}</span>
   </MenuComp>
 
