@@ -156,16 +156,21 @@ async function setSlice(newPage?: number, newFetchNumber?: number) {
 function changePageSizeStyle(e: Event) {
   const target = e.target as HTMLElement
   const arrowEl = target.children[0] as HTMLElement
-  arrowEl.style.transform = (arrowEl.style.transform === 'rotate(0deg)' || !arrowEl.style.transform)
-    ? 'rotate(180deg)'
-    : 'rotate(0deg)'
+  if (arrowEl.style.transform === 'rotate(180deg)') {
+    arrowEl.style.transform = 'rotate(0deg)'
+    target.style.borderColor = ''
+  }
+  else {
+    target.style.borderColor = 'oklch(var(--in))'
+    arrowEl.style.transform = 'rotate(180deg)'
+  }
 }
 </script>
 
 <template>
   <div style="position: sticky; right: 0; " class="z-[3000] flex items-center">
     <span class="text-sm">{{ $t('function.pagination.total', { number: props.totalNumber }) }}</span>
-    <button class="border rounded ml-4 mr-2 py-1 px-3 cursor-pointer transition-all flex items-center iw-btn-outline iw-btn-primary" @blur="(e) => changePageSizeStyle(e)" @focus="(e) => changePageSizeStyle(e)" @click="(e) => { fetchNumberSelectCompRef?.show(e.target as HTMLElement, MenuOffsetKind.MEDIUM_BOTTOM, MenuSizeKind.MINI) }">
+    <button class="border border-neutral-400 rounded ml-4 mr-2 py-1 px-3 cursor-pointer transition-all flex items-center" @blur="(e) => changePageSizeStyle(e)" @focus="(e) => changePageSizeStyle(e)" @click="(e) => { fetchNumberSelectCompRef?.show(e.target as HTMLElement, MenuOffsetKind.MEDIUM_BOTTOM, MenuSizeKind.MINI) }">
       {{ $t('function.pagination.pageSize', { number: getActualSlice().fetchNumber }) }}
       <i class="block transition-all" :class="iconSvg.SHRINK" />
     </button>
@@ -178,7 +183,7 @@ function changePageSizeStyle(e: Event) {
     <button
       v-for="page in getShowPages()"
       :key="page"
-      :class="`flex justify-center px-3 ml-2 py-1 w-[30px] h-[30px] rounded transition-all iw-btn-outline iw-btn-primary ${page === getCurrentPage() ? 'iw-btn-active' : ''}`"
+      :class="`flex justify-center px-3 ml-2 py-1 w-[30px] h-[30px] rounded transition-all border-none ${page === getCurrentPage() ? 'text-[oklch(var(--in))]' : ''}`"
       :disabled="page === getCurrentPage()"
       @click="setCurrentPage(page)"
     >
@@ -193,10 +198,11 @@ function changePageSizeStyle(e: Event) {
     <MenuComp ref="fetchNumberSelectCompRef">
       <div
         v-for="number in getActualSlice().fetchNumbers" :key="number"
-        class="p-2 text-center transition-all cursor-pointer rounded hover:bg-primary hover:text-white"
+        class="p-2 text-center transition-all cursor-pointer rounded hover:bg-gray-100"
+        :class="`${number === getActualSlice().fetchNumber ? 'text-[oklch(var(--in))]' : ''}`"
         @click="setFetchNumber(number)"
       >
-        {{ number }}
+        {{ $t('function.pagination.pageSize', { number }) }}
       </div>
     </MenuComp>
   </div>
