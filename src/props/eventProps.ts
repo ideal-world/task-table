@@ -202,6 +202,8 @@ export interface TableEventProps {
    * Select content menu
    *
    * @param item 上下文菜单项 / Context menu item
+   *
+   * @param rowPk 列表行主键 / Row PK
    */
-  selectContextMenu?: (item: ContextMenuItemProps, target: HTMLElement) => void
+  selectContextMenu?: (item: ContextMenuItemProps, rowPk: string) => void
 }
