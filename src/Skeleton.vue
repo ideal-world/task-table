@@ -15,10 +15,7 @@ import type { SimpleTableProps } from './props'
 import { LayoutKind } from './props/enumProps'
 import { delegateEvent } from './utils/basic'
 import ContextMenuComp from './components/function/ContextMenu.vue'
-import CreateLayout from './components/function/CreateLayout.vue'
-import TableLayoutSettingComp from './components/function/TableLayoutSetting.vue'
-import { MenuOffsetKind } from './components/common/Menu'
-import * as iconSvg from './assets/icon'
+import TableHeaderItem from './components/function/TableHeaderItem.vue'
 
 const _props = defineProps<SimpleTableProps>()
 
@@ -33,10 +30,6 @@ const { tableConf, layoutsConf, currentLayoutId }: {
   // Current layout ID
   currentLayoutId: Ref<string>
 } = init(_props)
-
-// 布局设置组件
-// Layout setting component
-const tableLayoutSettingCompRef = ref<InstanceType<typeof TableLayoutSettingComp>>()
 
 /**
  * 获取当前布局配置
@@ -117,7 +110,10 @@ onMounted(async () => {
 })
 
 /**
- * 获取上下文菜单
+ * 通过columnName获取上下文菜单
+ *
+ * Gets the context menu by column name
+ *
  * @param columnName 列名 / Column name
  */
 function getContextMenu(columnName: string) {
@@ -127,19 +123,13 @@ function getContextMenu(columnName: string) {
   }
   return (currentLayout.contextMenu.items[columnName])
 }
-
-// 显示布局菜单
-// Show layout menu
-function showLayoutTableSetting(e: MouseEvent) {
-  tableLayoutSettingCompRef.value?.tableLayoutSettingRef?.show(e, MenuOffsetKind.RIGHT_TOP, { width: 220 }, false, (e.target as HTMLElement).closest('.iw-tt') as HTMLElement)
-}
 </script>
 
 <!--
 +-----------------------------------------+
 | iw-tt                                   |
 | +-------------------------------------+ |
-| |w-tt-header                          | |
+| |iw-tt-header                          | |
 | +------------------+------------------+ |
 | |iw-tt-header__item|iw-tt-header__item| |
 | +------------------+------------------+ |
@@ -169,41 +159,13 @@ function showLayoutTableSetting(e: MouseEvent) {
       v-if="!tableConf.mini || tableConf.quickSearch"
       :class="`${tableConf.styles.headerClass} iw-tt-header flex justify-between p-0 min-h-0`"
     >
-      <ScrollableComp
+      <TableHeaderItem
         v-if="!tableConf.mini"
-        class="flex-1"
-      >
-        <div class="tablist iw-tabs iw-tabs-sm iw-tabs-boxed">
-          <a
-            v-for="layout in layoutsConf"
-            :key="layout.id"
-            :data-layout-id="layout.id"
-            role="tab"
-            class="iw-tt-header__item iw-tab flex flex-nowrap mr-2 bg-white"
-            :class="currentLayoutId === layout.id ? 'iw-tab-active' : ''"
-          >
-            <i :class="`${layout.icon}`" class="mr-1" />
-            <div class="h-full flex items-center">
-              {{ layout.title }}
-            </div>
-            <i
-              v-if="currentLayoutId === layout.id"
-              :class="iconSvg.SETTING"
-              class="text-base ml-2"
-              @click="(e) => showLayoutTableSetting(e)"
-            />
-          </a>
-          <CreateLayout :table-conf="tableConf" />
-        </div>
-        <TableLayoutSettingComp
-          v-if="currentLayoutId === currentLayoutId && !tableConf.mini"
-          ref="tableLayoutSettingCompRef"
-          :table-conf="tableConf"
-          :layout-conf="getCurrentLayoutConf()"
-          :columns-conf="getCurrentLayoutColumnConf()"
-          :layout-length="layoutsConf.length"
-        />
-      </ScrollableComp>
+        :table-conf="tableConf" :layouts-conf="layoutsConf"
+        :current-layout-id="currentLayoutId"
+        :get-current-layout-conf="getCurrentLayoutConf"
+        :get-current-layout-column-conf="getCurrentLayoutColumnConf"
+      />
       <div v-else class="flex-1">
         &nbsp;
       </div>
