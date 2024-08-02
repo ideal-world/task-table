@@ -52,9 +52,9 @@ function ganttTimeLineYearHeight() {
     <div v-if="ganttInfo.ganttShowKind !== GanttShowKind.YEAR" class="flex items-center gantt-timeline-cate-column">
       <div
         v-for="(cateColumTimeline, idx) in getCateColumTimeline()" :key="`${layoutId}-${idx}`"
-        :style="`width:${cateColumTimeline.offset * getTimelineColumnWidth(props.ganttInfo.ganttShowKind)}px`"
+        :style="`width:${cateColumTimeline.offset * getTimelineColumnWidth(props.ganttInfo.ganttShowKind)}px;border-left:${idx !== 0 && '1px solid var(--fallback-b3,oklch(var(--b3)/var(--tw-border-opacity)))'}`"
         :title="`${cateColumTimeline.cateTitle}`"
-        :class="`${props.styleProps.cellClass} iw-gantt-timeline-cell flex justify-center items-center bg-base-200 border-b border-b-base-300 ${idx !== 0 && 'border-l border-l-base-300'} whitespace-nowrap overflow-hidden text-ellipsis flex-nowrap`"
+        :class="`${props.styleProps.cellClass} iw-gantt-timeline-cell flex justify-center items-center bg-base-200 border-b border-b-base-300 whitespace-nowrap overflow-hidden text-ellipsis flex-nowrap`"
       >
         {{ cateColumTimeline.cateTitle }}
       </div>
@@ -64,9 +64,9 @@ function ganttTimeLineYearHeight() {
         v-for="(timeline, idx) in ganttInfo.timeline" :key="`${layoutId}-${idx}`"
         :data-value="timeline.value"
         :data-group-value="timeline.categoryTitle"
-        :style="`width: ${getTimelineColumnWidth(props.ganttInfo.ganttShowKind)}px`"
+        :style="`width: ${getTimelineColumnWidth(props.ganttInfo.ganttShowKind)}px;border-left:${idx !== 0 && '1px solid var(--fallback-b3,oklch(var(--b3)/var(--tw-border-opacity)))'}`"
         :title="`${timeline.value} (${timeline.categoryTitle})`"
-        :class="`${props.styleProps.cellClass} iw-gantt-timeline-cell flex justify-center items-center bg-base-200 ${idx !== 0 && 'border-l border-l-base-300'}`"
+        :class="`${props.styleProps.cellClass} iw-gantt-timeline-cell flex justify-center items-center bg-base-200'}`"
       >
         {{ timeline.value }}
       </div>
