@@ -58,8 +58,24 @@ function getCurrentPage() {
 function getShowPages(): number[] {
   const totalPages = getTotalPage()
   const currentPage = getCurrentPage()
-  const startPage = Math.max(currentPage - 2, 1)
-  const endPage = Math.min(currentPage + 2, totalPages)
+  let startCount = 1
+  let endCount = 2
+  if (totalPages - currentPage === 0) {
+    startCount = 3
+  }
+  else if (totalPages - currentPage === 1) {
+    startCount = 2
+  }
+  else if (totalPages - currentPage === 2 || totalPages - currentPage === 3) {
+    startCount = 1
+    endCount = 3
+  }
+  if (currentPage === 1) {
+    endCount = 3
+  }
+  const startPage = Math.max(currentPage - startCount, 1)
+  const endPage = Math.min(currentPage + endCount, totalPages)
+
   const pages = []
   for (let i = startPage; i <= endPage; i++) {
     pages.push(i)
@@ -189,6 +205,15 @@ function changePageSizeStyle(e: Event) {
     >
       {{ page }}
     </button>
+    <div v-if="getTotalPage() - getCurrentPage() > 3" class="flex items-center">
+      <div>...</div>
+      <button
+        :class="`flex justify-center px-3 ml-2 py-1 w-[30px] h-[30px] rounded transition-all border-none ${page === getCurrentPage() ? 'text-[oklch(var(--in))]' : ''}`"
+        @click="setCurrentPage(getTotalPage())"
+      >
+        {{ getTotalPage() }}
+      </button>
+    </div>
     <button v-if="getCurrentPage() < getTotalPage()" class="iw-btn iw-btn-ghost px-1 ml-1 iw-btn-xs" @click="setCurrentPage(getCurrentPage() + 1)">
       <i :class="iconSvg.NEXT" />
     </button>
