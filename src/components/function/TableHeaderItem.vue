@@ -82,7 +82,7 @@ onMounted(() => {
     class="flex-grow flex items-center"
   >
     <div
-      class="tablist iw-tabs iw-tabs-sm iw-tabs-boxed flex iw-tabs-layouts z-[3099]"
+      class="tablist iw-tabs iw-tabs-sm iw-tabs-boxed flex iw-tabs-layouts z-[2000]"
     >
       <div
         class="flex flex-1"
