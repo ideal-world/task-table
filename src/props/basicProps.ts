@@ -127,7 +127,7 @@ export interface DictItemsResp {
   /**
    * 字典项列表
    */
-  records: DictItemProps[]
+  records: DictItemProps[] | { [name: string]: any }[]
   /**
    * 总数
    */

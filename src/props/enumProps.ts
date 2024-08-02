@@ -806,3 +806,24 @@ export enum AlertKind {
    */
   DATA_ERROR = 'DATA_ERROR',
 }
+
+/**
+ * 字典类型
+ * 
+ * dictionary kind
+ */
+
+export enum DictKind {
+  /**
+   * select下拉
+   *
+   * select dropdown
+   */
+  SELECT = 'select',
+  /**
+   * 树形下拉
+   *
+   * tree select
+   */
+  TREE_SELECT = 'treeSelect'
+}
