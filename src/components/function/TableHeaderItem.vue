@@ -63,7 +63,7 @@ async function createNewLayout(layoutKind: LayoutKind) {
 
 onMounted(() => {
   const observer = new ResizeObserver(() => {
-    dropSplitStartIndex.value = Math.floor(layoutContentRef.value?.offsetWidth as number / 140)
+    dropSplitStartIndex.value = Math.floor(layoutContentRef.value?.offsetWidth as number / 155)
     if (Number.isInteger(dropSplitStartIndex.value) && dropSplitStartIndex.value > 2) {
       dropSplitStartIndex.value = dropSplitStartIndex.value - 1
     }
@@ -101,12 +101,14 @@ onMounted(() => {
           <div class="h-full flex items-center w-[90px]">
             <p class="overflow-hidden text-ellipsis whitespace-nowrap">{{ layout.title }}</p>
           </div>
-          <i
-            v-if="currentLayoutId === layout.id"
-            :class="iconSvg.SETTING"
-            class="text-base ml-2"
-            @click="(e) => showLayoutTableSetting(e)"
-          />
+          <div class="w-[16px]">
+            <i
+              v-if="currentLayoutId === layout.id"
+              :class="iconSvg.SETTING"
+              class="text-base ml-2"
+              @click="(e) => showLayoutTableSetting(e)"
+            />
+          </div>
         </a>
       </div>
       <div class="iw-dropdown">
@@ -125,7 +127,7 @@ onMounted(() => {
             :key="layout.id"
             :data-layout-id="layout.id"
             role="tab"
-            class="iw-tt-header__item iw-tab flex flex-nowrap mr-2 bg-white transition-all"
+            class="iw-tt-header__item iw-tab flex flex-nowrap mr-2 bg-white transition-all justify-start"
             :class="currentLayoutId === layout.id ? 'iw-tab-active' : ''"
             :title="layout.title"
           >
