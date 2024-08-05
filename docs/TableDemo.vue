@@ -2,13 +2,21 @@
 import type { Ref } from 'vue'
 import { onMounted, ref } from 'vue'
 import { IwEvents, IwProps, IwUtils } from '../src'
-import type { EditableDataResp } from '../src/props'
+import { DictKind, type EditableDataResp } from '../src/props'
 import { deepToRaw } from '../src/utils/vueHelper'
+import { getTreeParentData } from './utils'
 
 const selectedRecordPks: Ref<any[]> = ref([])
 
 const NAME_DICT = [{ title: '星航', value: 'xh', avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg' }, { title: '星杨', value: 'xy', avatar: 'https://pic1.zhimg.com/v2-770e9580d5febfb49cbb23c409cea85d_r.jpg' }, { title: '星辰', value: 'xc' }]
 const STATS_DICT = [{ title: '初始化', value: 'init', color: '#43ad7f7f' }, { title: '进行中', value: 'progress' }, { title: '有风险', value: 'risk', color: '#be14807f' }, { title: '已完成', value: 'finish' }, { title: '已关闭', value: 'close' }]
+const TREE_DICT = [
+  {no:1,pno: null, title:'d1', value: 'dd'},
+  {no:2,pno: null, title:'d2', value: 'sf'},
+  {no:3,pno:2,title:'d3', value: 's'},
+  {no:4,pno: null, title:'d4', value: 'g'},
+  {no:5,pno:3,title:'d5', value: 'sdf'},
+]
 
 const DATA: { [columnName: string]: any }[] = [
   { no: 1, pno: null, name: 'v1.0优化任务集合', creator: 'xh', stats: ['init'], planStartTime: '2023-10-22', planEndTime: '2023-12-01', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: 'https://idealworld.group/img/home-bg.jpg' },
@@ -487,7 +495,7 @@ const events: IwProps.TableEventProps = {
         totalNumber,
       }
     }
-    else {
+    else  if(dictName === 'stats'){
       let statsDict: IwProps.DictItemProps[] = JSON.parse(JSON.stringify(STATS_DICT))
       if (filterValue) {
         statsDict = statsDict.filter((dict) => {
@@ -501,6 +509,37 @@ const events: IwProps.TableEventProps = {
       return {
         records: statsDict,
         totalNumber,
+      }
+    }
+    else if(dictName === 'module'){
+      let moduleDict: { [name: string]: any }[] = JSON.parse(
+        JSON.stringify(TREE_DICT)
+      )
+      if (filterValue) {
+        const filterData = moduleDict.filter((dict) => {
+          return (
+            dict.title.includes(filterValue) || dict.value.includes(filterValue)
+          )
+        })
+        const treeParentData = getTreeParentData(moduleDict, filterData)
+        moduleDict = [
+          ...filterData.map((item) => {
+            item.filter = true
+            return item
+          }),
+          ...treeParentData
+        ]
+      }
+      const totalNumber = moduleDict.length
+      if (slice) {
+        moduleDict = moduleDict.slice(
+          slice.offsetNumber,
+          slice.offsetNumber + slice.fetchNumber
+        )
+      }
+      return {
+        records: moduleDict,
+        totalNumber
       }
     }
   },
@@ -562,6 +601,7 @@ const columns: IwProps.SimpleTableColumnProps[] = [
   } },
   { name: 'creator', title: '创建人', useDict: true },
   { name: 'stats', title: '状态', useDict: true, multiValue: true },
+  { name: 'module', title: '模块', useDict: true, dictKind: DictKind.TREE_SELECT},
   { name: 'avatar', title: '头像', dataKind: IwProps.DataKind.IMAGE },
   { name: 'attachment', title: '附件', dataKind: IwProps.DataKind.FILE },
   { name: 'planStartTime', title: '计划开始时间', dataKind: IwProps.DataKind.DATETIME },
@@ -578,6 +618,8 @@ const layouts: IwProps.SimpleLayoutProps[] = [
     layoutKind: IwProps.LayoutKind.GANTT,
     columns: [{
       name: 'name',
+    }, {
+      name: 'module',
     }, {
       name: 'creator',
     }, {
@@ -600,6 +642,8 @@ const layouts: IwProps.SimpleLayoutProps[] = [
       name: 'name',
     }, {
       name: 'stats',
+    }, {
+      name: 'module',
     }, {
       name: 'creator',
     }, {
@@ -689,7 +733,7 @@ const _tableProps: IwProps.SimpleTableProps = {
     actualEndTimeColumnName: 'actualEndTime',
   },
   filter: {
-    enabledColumnNames: ['no', 'name', 'creator', 'stats', 'planStartTime', 'planEndTime', 'actualStartTime', 'actualEndTime', 'disabled'],
+    enabledColumnNames: ['no', 'name', 'module', 'creator', 'stats', 'planStartTime', 'planEndTime', 'actualStartTime', 'actualEndTime', 'disabled'],
     groups: [
       {
         items: [{
@@ -701,7 +745,7 @@ const _tableProps: IwProps.SimpleTableProps = {
     ],
   },
   sort: {
-    enabledColumnNames: ['no', 'name', 'creator', 'stats', 'planStartTime', 'planEndTime', 'actualStartTime', 'actualEndTime', 'disabled'],
+    enabledColumnNames: ['no', 'name', 'module', 'creator', 'stats', 'planStartTime', 'planEndTime', 'actualStartTime', 'actualEndTime', 'disabled'],
   },
   group: {
     enabledColumnNames: ['creator', 'stats', 'disabled'],

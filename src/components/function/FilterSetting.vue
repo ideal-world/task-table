@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import * as iconSvg from '../../assets/icon'
-import type { DataKind, DictItemProps, DictItemsResp, FilterDataGroupProps, FilterDataItemProps, FilterDataProps, LayoutModifyProps } from '../../props'
+import { DataKind, DictItemProps, DictItemsResp, DictKind, FilterDataGroupProps, FilterDataItemProps, FilterDataProps, LayoutModifyProps } from '../../props'
+
 import { OperatorKind, translateOperatorKind } from '../../props'
 import { getInputTypeByDataKind, getOperatorKindsByDataKind } from '../../props/enumProps'
+
 import { groupBy } from '../../utils/basic'
 import { MenuOffsetKind, MenuSizeKind } from '../common/Menu'
 import MenuComp from '../common/Menu.vue'
 import type { ColumnConf } from '../conf'
 import * as eb from '../eventbus'
 import { deepToRaw } from '../../utils/vueHelper'
+import MenuTreeComp from '../base/MenuTree/index.vue'
 
 const props = defineProps<{
   // 布局ID
@@ -35,6 +38,9 @@ const filterOpCompRef = ref<InstanceType<typeof MenuComp>>()
 // 字典容器组件引用
 // Dictionary container component reference
 const dictContainerCompRef = ref<InstanceType<typeof MenuComp>>()
+  // tree字典容器组件引用
+// Dictionary container component reference
+const dictTreeContainerCompRef = ref<InstanceType<typeof MenuComp>>()
 // 查询字典项响应
 // Query dictionary item response
 const queryDictItemsResp = ref<DictItemsResp>()
@@ -56,6 +62,8 @@ interface FilterItemProps {
   dataKind: DataKind
   useDict: boolean
   multiValue: boolean
+  fixedDictItems?: DictItemProps[]
+  dictKind?: DictKind
 }
 // 已选中的过滤组ID，在显示过滤组容器时设置
 // Selected filter group ID, set when showing the filter group container
@@ -88,6 +96,8 @@ function convertFilterDataItemToFilterItem(filterDataItem: FilterDataItemProps):
     title: columnConf.title,
     dataKind: columnConf.dataKind,
     useDict: columnConf.useDict,
+    fixedDictItems: columnConf.fixedDictItems,
+    dictKind: columnConf.dictKind,
     multiValue: columnConf.multiValue,
   }
 }
@@ -278,6 +288,8 @@ function setFilterColumn(e: Event) {
     currFilterItem!.title = columnConf.title
     currFilterItem!.dataKind = columnConf.dataKind
     currFilterItem!.useDict = columnConf.useDict
+    currFilterItem!.dictKind = columnConf.dictKind
+    currFilterItem!.fixedDictItems = columnConf.fixedDictItems
     currFilterItem!.multiValue = columnConf.multiValue
   }
   else {
@@ -291,6 +303,8 @@ function setFilterColumn(e: Event) {
       title: columnConf.title,
       dataKind: columnConf.dataKind,
       useDict: columnConf.useDict,
+      dictKind: columnConf.dictKind,
+      fixedDictItems: columnConf.fixedDictItems,
       multiValue: columnConf.multiValue,
     })
   }
@@ -333,6 +347,7 @@ function setFilterAValue(value: any, filterItemIdx: number) {
   else {
     // 不存在，添加
     // Does not exist, add
+    // currFilterItem!.values = [...currFilterItem!.values, value]
     if (currFilterItem?.operator === OperatorKind.IN || currFilterItem?.operator === OperatorKind.NOT_IN) {
       currFilterItem!.values = [...currFilterItem!.values, value]
     }
@@ -378,7 +393,16 @@ async function showDictItems(value: any, filterItemIdx: number, e: Event) {
     offsetNumber: 0,
     fetchNumber: 20,
   })
-  dictContainerCompRef.value?.show(e.target as HTMLElement, MenuOffsetKind.LEFT_TOP, undefined, true)
+  /**
+   * 根据dictKind判断显示menu
+   */
+  const dictKind = currFilterItem?.dictKind
+  let containerRef = dictContainerCompRef.value
+  if(dictKind === DictKind.TREE_SELECT){
+    containerRef = dictTreeContainerCompRef.value
+  }
+  // dictTreeContainerCompRef
+  containerRef?.show(e.target as HTMLElement, MenuOffsetKind.LEFT_TOP, undefined, true)
 }
 
 /**
@@ -392,6 +416,7 @@ function setFilterADictValue(e: Event) {
   if (!(e.target instanceof HTMLElement)) {
     return
   }
+  if(e.target.closest('.icon-tree-arrow')) return
   const itemEle = e.target.closest('.iw-contextmenu__item')
   if (!itemEle || !(itemEle instanceof HTMLElement)) {
     return
@@ -405,9 +430,9 @@ function setFilterADictValue(e: Event) {
     avatar: itemEle.dataset.avatar,
     color: itemEle.dataset.color,
   }
-  if (currFilterItem?.operator !== OperatorKind.IN && currFilterItem?.operator !== OperatorKind.NOT_IN) {
-    dictContainerCompRef.value?.close()
-  }
+  // if (currFilterItem?.operator !== OperatorKind.IN && currFilterItem?.operator !== OperatorKind.NOT_IN) {
+  //   dictContainerCompRef.value?.close()
+  // }
 }
 
 /**
@@ -417,6 +442,10 @@ function setFilterADictValue(e: Event) {
  */
 async function saveFilterGroup() {
   if (selectedFilterItems.value?.length === 0) {
+    if(selectedFilterGroupIdx.value !== undefined){
+      deleteFilterGroup(selectedFilterGroupIdx.value)
+      filterGroupContainerCompRef.value?.close()
+    }  
     return
   }
   // 组装当前过滤组
@@ -454,6 +483,7 @@ async function saveFilterGroup() {
     },
   }
   await eb.modifyLayout(layout)
+  filterGroupContainerCompRef.value?.close()
 }
 
 async function initDictItemsByFilterGroups(filterGroups: FilterDataGroupProps[]) {
@@ -473,12 +503,20 @@ onMounted(() => {
   filterGroupContainerCompRef.value?.onClose(async (_) => {
     // 关闭时保存过滤组
     // Save filter group when closing
-    await saveFilterGroup()
+    // await saveFilterGroup()
   })
   // 初始化字典项
   // Initialize dictionary items
   initDictItemsByFilterGroups(props.filter.groups)
 })
+
+const treeData = ref([
+  {no:1,pno: null, title:'d1', value: 'dd'},
+  {no:2,pno: null, title:'d2', value: 'sf'},
+  {no:3,pno:2,title:'d3', value: 's'},
+  {no:4,pno: null, title:'d4', value: 'g'},
+  {no:5,pno:3,title:'d5', value: 'sdf'},
+])
 </script>
 
 <template>
@@ -538,7 +576,7 @@ onMounted(() => {
   </div>
   <!-- 过滤组容器 -->
   <!-- Filter group container -->
-  <MenuComp ref="filterGroupContainerCompRef" class="p-2">
+  <MenuComp ref="filterGroupContainerCompRef" class="p-2 pb-6">
     <!-- 显示已选中的过滤项 -->
     <!-- Display selected filter items -->
     <div
@@ -549,11 +587,11 @@ onMounted(() => {
       <!-- 列名 -->
       <!-- Column name -->
       <button
-        class="iw-btn  border-gray-200 bg-white iw-btn-xs rounded-sm mr-1 h-[30px]" :title="filterItem.title"
+        class="iw-btn  border-gray-200 bg-white iw-btn-xs rounded-sm mr-1 w-[100px] h-[30px]" :title="filterItem.title"
         @click="e => { showFilterColumns(e, filterItemIdx) }"
       >
         <i :class="filterItem.icon" />
-        <span class="mr-0.5 max-w-[40px] overflow-hidden text-ellipsis whitespace-nowrap">{{ filterItem.title }}</span>
+        <span class="mr-0.5 w-[38px] overflow-hidden text-ellipsis whitespace-nowrap">{{ filterItem.title }}</span>
         <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />
       </button>
       <!-- 操作符 -->
@@ -618,6 +656,7 @@ onMounted(() => {
       <span class="mr-0.5 text-gray-400">{{ $t('function.filter.selectColumnPlaceholder') }}</span>
       <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />
     </button>
+    <button v-if="(selectedFilterItems && selectedFilterItems.length) || selectedFilterGroupIdx !== undefined" class="iw-btn block iw-btn-xs iw-btn-primary absolute right-2 bottom-6" @click="saveFilterGroup">{{ $t('function.filter.confirm') }}</button>
     <span class="absolute bottom-1 right-1 text-xs text-neutral-content">{{ $t('function.filter.note') }}</span>
   </MenuComp>
 
@@ -661,4 +700,5 @@ onMounted(() => {
       </div>
     </div>
   </MenuComp>
+  <MenuTreeComp ref="dictTreeContainerCompRef" :values="selectedFilterItems?.[selectedFilterItemIdx!]?.values"  :options="queryDictItemsResp?.records" :setFilterADictValue="setFilterADictValue"/>
 </template>

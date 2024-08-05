@@ -110,7 +110,8 @@
       "new": "New Filter",
       "items": "Items",
       "selectColumnPlaceholder": "New column",
-      "note": "Between Groups And, Within Groups OR"
+      "note": "Between Groups And, Within Groups OR",
+      "confirm": "confirm"
     },
     "group": {
       "groupTitle": "Group",

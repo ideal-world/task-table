@@ -5,7 +5,7 @@
 import { getRandomString } from '../utils/basic'
 import type { ChangeAllOptional, ChangeOptionalExcept } from '../utils/tsHelper'
 import type { DictItemProps } from './basicProps'
-import { DataKind, LayoutKind, SizeKind, SubDataShowKind, getDefaultIconByDataKind, getDefaultIconByLayoutKind } from './enumProps'
+import { DataKind, DictKind, LayoutKind, SizeKind, SubDataShowKind, getDefaultIconByDataKind, getDefaultIconByLayoutKind } from './enumProps'
 
 import type { TableEventProps } from './eventProps'
 import type { ActionColumnProps, AggDataProps, ContextMenuProps, DataSliceProps, EditDataProps, FilterDataProps, GanttLayoutProps, GroupDataProps, QuickSearchProps, SimpleAggDataProps, SimpleContextMenuProps, SimpleDataSliceProps, SimpleEditDataProps, SimpleFilterDataProps, SimpleGanttLayoutProps, SimpleGroupDataProps, SimpleSortDataProps, SortDataProps } from './functionProps'
@@ -710,6 +710,16 @@ export interface TableColumnProps extends CommonColumnProps {
    */
   fixedDictItems?: DictItemProps[]
   /**
+   * 字典类型
+   *
+   * dictionary type
+   *
+   * 存在树形结构等数据显示
+   *
+   * Data such as a tree structure is displayed
+   */
+  dictKind?: DictKind
+  /**
    * 日期时间格式
    *
    * Date-time format
@@ -738,6 +748,7 @@ function generateTableColumnProps(simple: SimpleTableColumnProps): TableColumnPr
     useDict: simple.useDict ?? false,
     multiValue: simple.multiValue ?? false,
     fixedDictItems: simple.fixedDictItems,
+    dictKind: simple.useDict ? simple.dictKind || DictKind.SELECT : undefined,
     ...generateCommonColumnProps(simple),
   }
 }
