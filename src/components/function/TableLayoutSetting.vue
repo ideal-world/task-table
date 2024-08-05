@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
-import { delegateEvent } from '../../utils/basic'
+import { ref } from 'vue'
 import { MenuOffsetKind } from '../common/Menu'
 import MenuComp from '../common/Menu.vue'
 import type { ColumnConf, LayoutConf, TableConf } from '../conf'
@@ -26,22 +25,6 @@ const props = defineProps<{
 // 表格布局设置菜单
 // Table layout setting menu
 const tableLayoutSettingRef = ref<InstanceType<typeof MenuComp>>()
-
-onMounted(() => {
-  tableLayoutSettingRef.value?.onInit(async (menuEle: HTMLElement) => {
-    delegateEvent(menuEle, 'click', '.iw-table-setting-title', (e: Event) => {
-      const toggleEle = (e.target as HTMLElement).nextSibling as HTMLElement
-      const arrowEle = (e.target as HTMLElement).childNodes[1] as HTMLElement
-      toggleEle.style.display = toggleEle.style.display === 'none' ? 'block' : 'none'
-      if (!arrowEle)
-        return
-      arrowEle.style.transform
-        = arrowEle.style.transform === 'rotate(0deg)'
-          ? 'rotate(-180deg)'
-          : 'rotate(0deg)'
-    })
-  })
-})
 
 defineExpose({
   /**
