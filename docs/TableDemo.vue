@@ -495,7 +495,7 @@ const events: IwProps.TableEventProps = {
         totalNumber,
       }
     }
-    else  if(dictName === 'stat'){
+    else  if(dictName === 'stats'){
       let statsDict: IwProps.DictItemProps[] = JSON.parse(JSON.stringify(STATS_DICT))
       if (filterValue) {
         statsDict = statsDict.filter((dict) => {
