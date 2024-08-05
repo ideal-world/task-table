@@ -84,11 +84,15 @@ const props = defineProps<{
     <!-- Normal data column -->
     <div
       v-for="(column, colIdx) in props.columnsConf.slice(1)" :key="`${props.layoutId}-${column.name}`"
+      class="group/item"
       :class="`${props.styleProps.cellClass} iw-list-cell iw-data-cell flex items-center bg-base-100 border-l border-l-base-300 overflow-hidden ${column.wrap ? 'break-words flex-wrap' : 'whitespace-nowrap text-ellipsis flex-nowrap'}`"
       :data-column-name="column.name" :data-row-pk="row[props.pkColumnName]" :style="{ ...column.styles, ...props.setColumnStyles(colIdx + 1) }"
     >
       <!-- 优先使用自定义渲染 -->
       <!-- Prefer custom rendering -->
+      <div v-if="column.name === 'name'" style="display: none;" class="hover-edit invisible group-hover/item:visible cursor-pointer bg-white h-full flex items-center absolute right-0 top-0 pr-1">
+        <i class="octicon-pencil-24"></i>
+      </div>
       <div v-if="column.render" v-html="column.render(row, props.layoutKind)" />
       <template v-else-if="column.dataKind === DataKind.DATE || column.dataKind === DataKind.TIME || column.dataKind === DataKind.DATETIME">
         {{ column.kindDateTimeFormat ? dayjs(row[column.name]).format(column.kindDateTimeFormat) : row[column.name] }}

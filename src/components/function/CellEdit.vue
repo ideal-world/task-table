@@ -183,10 +183,11 @@ function markEditable(containerEle: HTMLElement) {
       // 找到单元格信息，并附加可编辑标记
       // Find cell information and attach editable mark
       const editCellEle = ele as HTMLElement
+      const hoverEditEle = (ele as HTMLElement).querySelector('.hover-edit') // 鼠标悬停编辑单元格
       const columnName = editCellEle.dataset[props.editCellColumnNameProp] as string
       const columnConf = props.columnsConf.find(column => column.name === columnName)!
       if (checkEditable(pkValue, columnConf.name, editableDataResp.value)) {
-        editCellEle.appendChild(editableMarkEles.cloneNode(true))
+        hoverEditEle ? ((hoverEditEle as HTMLElement)!.style!.display = 'flex') : editCellEle.appendChild(editableMarkEles.cloneNode(true))
       }
     })
   })
@@ -223,21 +224,40 @@ onMounted(() => {
     if (!e.target || !(e.target instanceof HTMLElement)) {
       return
     }
-    const editCellEle = e.target.closest(`.${props.editCellClass}`) as HTMLElement
-    const columnName = editCellEle.dataset[props.editCellColumnNameProp] as string
-    const editRowEle = editCellEle.closest(`.${props.editRowClass}`) as HTMLElement
-    const columnConf = props.columnsConf.find(column => column.name === columnName)!
-    const pkValue = props.pkKindIsNumber ? Number.parseInt(editRowEle.dataset[props.editRowPkValueProp]!) : editRowEle.dataset[props.editRowPkValueProp]!
-    const data: DataResp = Array.isArray(props.data) ? props.data.find(groupData => groupData.records.some(record => record[props.pkColumnName] === pkValue))! : props.data
-    if (checkEditable(pkValue, columnConf.name, editableDataResp.value)) {
-      const value = data.records.find(record => record[props.pkColumnName] === pkValue)![columnName]!
-      enterEditMode(value, pkValue, columnConf, editCellEle)
+    clickEvent(e, false)
+  })
+
+  delegateEvent(containerEle, 'click', `.hover-edit`, (e) => {
+    if (!e.target || !(e.target instanceof HTMLElement)) {
+      return
     }
-    else {
-      leaveEditMode()
-    }
+    clickEvent(e, true)
   })
 })
+
+/**
+ * 
+ * @param e 单击事件 click event
+
+
+ * @param isHoverEdit 是否是鼠标悬停编辑 whether it is mouse hover edit
+ */
+function clickEvent(e: Event, isHoverEdit: boolean){
+  const editCellEle = (e.target as HTMLElement).closest(`.${props.editCellClass}`) as HTMLElement
+  const columnName = editCellEle.dataset[props.editCellColumnNameProp] as string
+  const editRowEle = editCellEle.closest(`.${props.editRowClass}`) as HTMLElement
+  const columnConf = props.columnsConf.find(column => column.name === columnName)!
+  if(isHoverEdit?columnConf.name !== 'name':columnConf.name === 'name') return
+  const pkValue = props.pkKindIsNumber ? Number.parseInt(editRowEle.dataset[props.editRowPkValueProp]!) : editRowEle.dataset[props.editRowPkValueProp]!
+  const data: DataResp = Array.isArray(props.data) ? props.data.find(groupData => groupData.records.some(record => record[props.pkColumnName] === pkValue))! : props.data
+  if (checkEditable(pkValue, columnConf.name, editableDataResp.value)) {
+    const value = data.records.find(record => record[props.pkColumnName] === pkValue)![columnName]!
+    enterEditMode(value, pkValue, columnConf, editCellEle)
+  }
+  else {
+    leaveEditMode()
+  }
+}
 </script>
 
 <template>
