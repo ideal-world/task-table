@@ -74,7 +74,7 @@ const props = defineProps<{
     <!-- Primary key data column -->
     <div
       :class="`${props.styleProps.cellClass} iw-list-cell iw-data-cell flex items-center bg-base-100 ${props.showSelectColumn && 'border-l border-l-base-300 '} whitespace-nowrap flex-nowrap`"
-      :data-column-name="props.pkColumnName" :style="{ ...props.columnsConf[0].styles, ...props.setColumnStyles(0) }"
+      :data-column-name="props.pkColumnName" :data-row-pk="row[props.pkColumnName]" :style="{ ...props.columnsConf[0].styles, ...props.setColumnStyles(0) }"
     >
       <div v-if="props.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA && props.parentPkColumnName" class="flex justify-end" :style="{ width: `${15 * (row[NODE_DEPTH_FLAG] + 1)}px` }" v-html="renderTreeToggleHandler(props.records[idx + 1] && row[props.pkColumnName] === props.records[idx + 1][props.parentPkColumnName])" />
       <i v-else-if="props.subDataShowKind === SubDataShowKind.TILE_ALL_DATA && props.parentPkColumnName && row[props.parentPkColumnName]" :class="`${iconSvg.SUB}`" />
@@ -85,7 +85,7 @@ const props = defineProps<{
     <div
       v-for="(column, colIdx) in props.columnsConf.slice(1)" :key="`${props.layoutId}-${column.name}`"
       :class="`${props.styleProps.cellClass} iw-list-cell iw-data-cell flex items-center bg-base-100 border-l border-l-base-300 overflow-hidden ${column.wrap ? 'break-words flex-wrap' : 'whitespace-nowrap text-ellipsis flex-nowrap'}`"
-      :data-column-name="column.name" :style="{ ...column.styles, ...props.setColumnStyles(colIdx + 1) }"
+      :data-column-name="column.name" :data-row-pk="row[props.pkColumnName]" :style="{ ...column.styles, ...props.setColumnStyles(colIdx + 1) }"
     >
       <!-- 优先使用自定义渲染 -->
       <!-- Prefer custom rendering -->

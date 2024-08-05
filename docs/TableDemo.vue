@@ -583,7 +583,7 @@ const events: IwProps.TableEventProps = {
     // eslint-disable-next-line no-alert
     alert(message)
   },
-  selectContextMenu(item: IwProps.ContextMenuItemProps, target: HTMLElement) {
+  selectContextMenu(item: IwProps.ContextMenuItemProps, rowPk: string) {
     // select context menu option
   },
 }

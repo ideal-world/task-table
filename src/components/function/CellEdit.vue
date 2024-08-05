@@ -200,6 +200,8 @@ watch([() => props.columnsConf, () => props.data], async () => {
     editableDataResp.value = await eb.loadEditableData(pks)
     markEditable(cellEditContainerRef.value!.closest(`.${props.containerClass}`) as HTMLElement)
   }
+}, {
+  immediate: true,
 })
 
 onMounted(() => {

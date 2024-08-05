@@ -615,6 +615,6 @@ export function handleAlert(errorKind: AlertKind, message: string, alertLevel: A
  *
  * @param item 上下文菜单项 / Context menu item
  */
-export function selectContextMenu(item: ContextMenuItemProps, target: HTMLElement) {
-  events.selectContextMenu && events.selectContextMenu(item, target)
+export function selectContextMenu(item: ContextMenuItemProps, rowPk: string) {
+  events.selectContextMenu && events.selectContextMenu(item, rowPk)
 }

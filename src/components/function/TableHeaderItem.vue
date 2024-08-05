@@ -63,7 +63,7 @@ async function createNewLayout(layoutKind: LayoutKind) {
 
 onMounted(() => {
   const observer = new ResizeObserver(() => {
-    dropSplitStartIndex.value = Math.floor((layoutContentRef.value?.offsetWidth as number - 60) / 130)
+    dropSplitStartIndex.value = Math.floor(layoutContentRef.value?.offsetWidth as number / 140)
     if (Number.isInteger(dropSplitStartIndex.value) && dropSplitStartIndex.value > 2) {
       dropSplitStartIndex.value = dropSplitStartIndex.value - 1
     }
@@ -79,12 +79,14 @@ onMounted(() => {
   <div
     v-if="!tableConf.mini"
     ref="layoutContentRef"
-    class="flex-1 flex"
+    class="flex-grow flex items-center"
   >
     <div
-      class="tablist iw-tabs iw-tabs-sm iw-tabs-boxed flex iw-tabs-layouts z-[3099]"
+      class="tablist iw-tabs iw-tabs-sm iw-tabs-boxed flex iw-tabs-layouts z-[2000]"
     >
-      <div class="flex flex-1">
+      <div
+        class="flex flex-1"
+      >
         <a
           v-for="(layout, index) in layoutsConf"
           v-show="dropSplitStartIndex ? index < dropSplitStartIndex : true"

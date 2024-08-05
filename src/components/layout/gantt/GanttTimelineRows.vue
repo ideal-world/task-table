@@ -531,12 +531,11 @@ watch(
         v-for="(timeline, idx) in ganttInfo.timeline" :key="`${props.layoutId}-${idx}`"
         :data-value="timeline.value"
         :data-group-value="timeline.categoryTitle"
-        :style="`width: ${getTimelineColumnWidth(props.ganttInfo.ganttShowKind)}px`"
+        :style="`width: ${getTimelineColumnWidth(props.ganttInfo.ganttShowKind)}px;border-left:${idx !== 0 && '1px solid var(--fallback-b3,oklch(var(--b3)/var(--tw-border-opacity)))'}`"
         :title="`${timeline.value} (${timeline.categoryTitle})`"
         :class="`${props.styleProps.cellClass}
       iw-gantt-timeline-cell iw-gantt-timeline-value-cell flex justify-center items-center bg-base-100
-      ${timeline.holiday && 'bg-base-200'}
-      ${idx !== 0 && 'border-l border-l-base-300'}`"
+      ${timeline.holiday && 'bg-base-200'}`"
       >
         <!-- 特殊标记当前天的列 -->
         <!-- Special mark the current day column -->
