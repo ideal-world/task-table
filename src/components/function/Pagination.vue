@@ -206,9 +206,11 @@ function changePageSizeStyle(e: Event) {
       {{ page }}
     </button>
     <div v-if="getTotalPage() - getCurrentPage() > 3" class="flex items-center">
-      <div>...</div>
+      <div v-if="getTotalPage() - getCurrentPage() !== 4">
+        ...
+      </div>
       <button
-        :class="`flex justify-center px-3 ml-2 py-1 w-[30px] h-[30px] rounded transition-all border-none ${page === getCurrentPage() ? 'text-[oklch(var(--in))]' : ''}`"
+        class="flex justify-center px-3 ml-2 py-1 w-[30px] h-[30px] rounded transition-all border-none"
         @click="setCurrentPage(getTotalPage())"
       >
         {{ getTotalPage() }}
