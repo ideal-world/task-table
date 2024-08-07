@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Ref } from 'vue'
-import { nextTick, onMounted, ref, watch } from 'vue'
+import { nextTick, onMounted, watch } from 'vue'
 import ScrollableComp from './components/common/Scrollable.vue'
 import type { ColumnConf, LayoutConf, TableConf } from './components/conf'
 import { init } from './components/conf'
@@ -114,14 +114,29 @@ onMounted(async () => {
  *
  * Gets the context menu by column name
  *
- * @param columnName 列名 / Column name
+ * @param e 鼠标事件 / Mouse event
  */
-function getContextMenu(columnName: string) {
+function getContextMenu(e: MouseEvent) {
+  const target = (e.target as HTMLElement)?.closest('.iw-data-cell') as HTMLElement
+  const columnName = target.dataset?.columnName as string
   const currentLayout = layoutsConf.find(l => l.id === currentLayoutId.value)
   if (!currentLayout || !currentLayout.contextMenu || !currentLayout.contextMenu.items[columnName]) {
     return []
   }
   return (currentLayout.contextMenu.items[columnName])
+}
+
+//
+/**
+ * 菜单额外参数
+ *
+ * ContextMenu extra argument
+ *
+ * @param e 鼠标事件 / Mouse event
+ */
+function exContextMenuArg(e: MouseEvent) {
+  const target = (e.target as HTMLElement)?.closest('.iw-data-cell') as HTMLElement
+  return target.dataset.rowPk
 }
 </script>
 
@@ -191,7 +206,7 @@ function getContextMenu(columnName: string) {
           </ScrollableComp>
         </div>
         <div class="iw-tt-table overflow-auto w-full border border-base-300">
-          <ContextMenuComp class="h-full" :get-context-menu="getContextMenu">
+          <ContextMenuComp class="h-full" :get-context-menu="getContextMenu" :ex-context-menu-arg="exContextMenuArg">
             <ListComp v-if="layout.layoutKind === LayoutKind.LIST" :layout-conf="layout" :table-conf="tableConf" :columns-conf="getCurrentLayoutColumnConf()" />
             <GanttComp v-else-if="layout.layoutKind === LayoutKind.GANTT && layout.gantt" :gantt-props="layout.gantt" :layout-conf="layout" :table-conf="tableConf" :columns-conf="getCurrentLayoutColumnConf()" />
           </ContextMenuComp>

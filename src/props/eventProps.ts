@@ -205,5 +205,5 @@ export interface TableEventProps {
    *
    * @param rowPk 列表行主键 / Row PK
    */
-  selectContextMenu?: (item: ContextMenuItemProps, rowPk: string) => void
+  selectContextMenu?: (item: ContextMenuItemProps, exArg?: any) => void
 }

@@ -10,6 +10,9 @@ const props = defineProps<{
   // 获取右键菜单
   // Get context menu
   getContextMenu: Function
+  // 菜单额外参数
+  // ContextMenu extra argument
+  exContextMenuArg?: Function
 }>()
 
 // 菜单x轴位置
@@ -27,25 +30,24 @@ const contextMenuRef = ref<HTMLElement>()
 // 菜单数据
 // Menu data
 const menuData = ref<ContextMenuItemProps[]>([])
-// 当前列表row的主键
-// current list row pk
-const curRowPk = ref()
+// 菜单额外参数
+// ContextMenu extra argument
+const exArg = ref()
 
 /**
  *
  * @param e 鼠标事件
  */
 function showMenu(e: MouseEvent) {
-  const target = (e.target as HTMLElement)?.closest('.iw-data-cell') as HTMLElement
-  if (!target)
-    return
   e.preventDefault()
   e.stopPropagation()
+  if (props.exContextMenuArg) {
+    exArg.value = props.exContextMenuArg(e)
+  }
   // 获取菜单数据
-  const list = props.getContextMenu(target.dataset.columnName)
+  const list = props.getContextMenu(e)
   if (!list?.length)
     return
-  curRowPk.value = target.dataset.rowPk
   menuData.value = list
   x.value = e.clientX
   y.value = e.clientY
@@ -64,7 +66,12 @@ function closeMenu() {
  * @param item 菜单项
  */
 function selectMenu(item: ContextMenuItemProps) {
-  eb.selectContextMenu(item, curRowPk.value)
+  if (props.exContextMenuArg) {
+    eb.selectContextMenu(item, exArg.value)
+  }
+  else {
+    eb.selectContextMenu(item)
+  }
 }
 
 onMounted(() => {
