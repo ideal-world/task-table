@@ -460,8 +460,12 @@ async function stopResize(e: PointerEvent, isSave = false) {
       // 编辑列column名
       // Edit column name
       const columnConfName = getColumnConfName()
+      // eslint-disable-next-line eqeqeq
+      const record = props.records.find(r => r[props.pkColumnName] == curTimelineRowRef.value.dataset.pk)
+      if (!record)
+        return
       await eb.modifyData([{
-        [props.pkColumnName]: curTimelineRowRef.value.dataset.pk,
+        [props.pkColumnName]: record[props.pkColumnName],
         [columnConfName]: `${curTimelineRowRef.value.children[cellIdx].dataset.groupValue}-${curTimelineRowRef.value.children[cellIdx].dataset.value}`,
       }])
     }
@@ -548,7 +552,7 @@ watch(
       <!-- Add plan and actual timeline bars at the end of each row -->
       <div
         v-if="row[props.ganttProps.planStartTimeColumnName] || row[props.ganttProps.planEndTimeColumnName]"
-        class="iw-gantt-timeline-plan-bar absolute hidden py-1 border-2 border-info rounded"
+        class="iw-gantt-timeline-plan-bar iw-gantt-timeline-bar absolute hidden py-1 border-2 border-info rounded"
         :title="getTimelineBarTitle(row, true)"
         :data-start-time="row[props.ganttProps.planStartTimeColumnName]"
         :data-end-time="row[props.ganttProps.planEndTimeColumnName]"
@@ -556,7 +560,7 @@ watch(
       />
       <div
         v-if="props.ganttProps.actualStartTimeColumnName && props.ganttProps.actualEndTimeColumnName && (row[props.ganttProps.actualStartTimeColumnName] || row[props.ganttProps.actualEndTimeColumnName])"
-        class="iw-gantt-timeline-actual-bar absolute hidden py-1 bg-success rounded-sm"
+        class="iw-gantt-timeline-actual-bar iw-gantt-timeline-bar absolute hidden py-1 bg-success rounded-sm"
         :title="getTimelineBarTitle(row, false)"
         :data-start-time="row[props.ganttProps.actualStartTimeColumnName]"
         :data-end-time="row[props.ganttProps.actualEndTimeColumnName]"

@@ -13,6 +13,8 @@ import type { ColumnConf, LayoutConf, TableConf } from '../../conf'
 import * as eb from '../../eventbus'
 import ColumnResizeComp from '../../function/ColumnResize.vue'
 import ListComp from '../list/List.vue'
+import ContextMenuComp from '../../function/ContextMenu.vue'
+import type { ContextMenuItemProps } from '../../../props/functionProps'
 import { type GanttInfo, generateTimeline, getStartAndEndDay, getTimelineColumnWidth } from './gantt'
 import GanttTimelineHeaderComp from './GanttTimelineHeader.vue'
 import GanttTimelineRowComp from './GanttTimelineRows.vue'
@@ -53,6 +55,10 @@ const ganttInfo: Ref<GanttInfo | null> = ref(null)
 // 显示类型菜单引用
 // Show type menu reference
 const showKindCompRef = ref<InstanceType<typeof MenuComp>>()
+
+// 当前单元格行主键
+// Current cell row pk
+const curCellRowPk = ref()
 
 /**
  * 生成甘特图信息
@@ -230,6 +236,67 @@ async function changeShowKind(showKind: GanttShowKind) {
   await eb.modifyLayout(changedLayoutReq)
   showKindCompRef.value?.close()
 }
+
+/**
+ * 获取上下文菜单
+ *
+ * Get context menu
+ *
+ * @return ContextMenuProps[]
+ *
+ */
+function getContextMenu() {
+  // eslint-disable-next-line eqeqeq
+  const row = props.layoutConf.data?.records?.find(ele => ele[props.tableConf.pkColumnName] == curCellRowPk.value)
+  const contextMenu: ContextMenuItemProps[] = []
+
+  if (!row[props.ganttProps.actualStartTimeColumnName] && !row[props.ganttProps.actualEndTimeColumnName]) {
+    contextMenu.push({
+      id: 'actualData',
+      label: '实际周期',
+    })
+  }
+  if (!row[props.ganttProps.planStartTimeColumnName] && !row[props.ganttProps.planEndTimeColumnName]) {
+    contextMenu.push({
+      id: 'planData',
+      label: '计划周期',
+    })
+  }
+
+  return contextMenu
+}
+
+/**
+ *
+ * 上下文菜单额外传参
+ *
+ * ContextMenu extra args
+ *
+ * @param e 鼠标事件 / Mouse event
+ * @returns 当前行的主键值 / current row pk , 修改的值 / change value
+ *
+ */
+function exContextMenuArg(e: MouseEvent) {
+  const target = e.target as HTMLElement
+  if (Array.from(target.classList).includes('iw-gantt-timeline-bar')) {
+    const rowTarget = target.closest('.iw-gantt-timeline-row')
+    curCellRowPk.value = rowTarget.dataset.pk
+    const cellTargetWidth = rowTarget.children[0].offsetWidth
+    const rowClientX = e.offsetX + Number.parseFloat(target.style.left)
+    const curCellTarget = rowTarget.children[Math.floor(rowClientX / cellTargetWidth)]
+    return {
+      pk: curCellRowPk.value,
+      value: `${curCellTarget.dataset.groupValue}-${curCellTarget.dataset.value}`,
+    }
+  }
+  else {
+    curCellRowPk.value = ((e.target as HTMLElement)?.closest('.iw-gantt-timeline-row') as HTMLElement).dataset.pk
+    return {
+      pk: curCellRowPk.value,
+      value: `${target.dataset.groupValue}-${target.dataset.value}`,
+    }
+  }
+}
 </script>
 
 <template>
@@ -256,16 +323,18 @@ async function changeShowKind(showKind: GanttShowKind) {
         <!-- 与列表视图保持一致，不分组模式的处理 -->
         <!-- Consistent with the list view, the processing of non-grouping mode -->
         <template v-if="props.layoutConf.data && !Array.isArray(props.layoutConf.data)">
-          <GanttTimelineRowComp
-            :layout-id="props.layoutConf.id"
-            :gantt-props="props.ganttProps"
-            :records="props.layoutConf.data.records"
-            :pk-column-name="props.tableConf.pkColumnName"
-            :parent-pk-column-name="props.tableConf.parentPkColumnName"
-            :sub-data-show-kind="props.layoutConf.subDataShowKind"
-            :style-props="props.tableConf.styles"
-            :gantt-info="ganttInfo"
-          />
+          <ContextMenuComp class="h-full" :get-context-menu="getContextMenu" :ex-context-menu-arg="exContextMenuArg">
+            <GanttTimelineRowComp
+              :layout-id="props.layoutConf.id"
+              :gantt-props="props.ganttProps"
+              :records="props.layoutConf.data.records"
+              :pk-column-name="props.tableConf.pkColumnName"
+              :parent-pk-column-name="props.tableConf.parentPkColumnName"
+              :sub-data-show-kind="props.layoutConf.subDataShowKind"
+              :style-props="props.tableConf.styles"
+              :gantt-info="ganttInfo"
+            />
+          </ContextMenuComp>
         </template>
         <!-- 与列表视图保持一致，分组模式的处理 -->
         <!-- Consistent with the list view, the processing of grouping mode -->
