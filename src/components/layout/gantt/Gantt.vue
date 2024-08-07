@@ -247,8 +247,11 @@ async function changeShowKind(showKind: GanttShowKind) {
  */
 function getContextMenu() {
   // eslint-disable-next-line eqeqeq
-  const row = props.layoutConf.data?.records?.find(ele => ele[props.tableConf.pkColumnName] == curCellRowPk.value)
+  const row = (props.layoutConf.data as DataResp).records?.find(ele => ele[props.tableConf.pkColumnName] == curCellRowPk.value)
   const contextMenu: ContextMenuItemProps[] = []
+
+  if (!row || !props.ganttProps.actualStartTimeColumnName || !props.ganttProps.actualEndTimeColumnName)
+    return
 
   if (!row[props.ganttProps.actualStartTimeColumnName] && !row[props.ganttProps.actualEndTimeColumnName]) {
     contextMenu.push({
@@ -279,11 +282,11 @@ function getContextMenu() {
 function exContextMenuArg(e: MouseEvent) {
   const target = e.target as HTMLElement
   if (Array.from(target.classList).includes('iw-gantt-timeline-bar')) {
-    const rowTarget = target.closest('.iw-gantt-timeline-row')
+    const rowTarget = target.closest('.iw-gantt-timeline-row') as HTMLElement
     curCellRowPk.value = rowTarget.dataset.pk
-    const cellTargetWidth = rowTarget.children[0].offsetWidth
+    const cellTargetWidth = (rowTarget.children[0] as HTMLElement).offsetWidth
     const rowClientX = e.offsetX + Number.parseFloat(target.style.left)
-    const curCellTarget = rowTarget.children[Math.floor(rowClientX / cellTargetWidth)]
+    const curCellTarget = rowTarget.children[Math.floor(rowClientX / cellTargetWidth)] as HTMLElement
     return {
       pk: curCellRowPk.value,
       value: `${curCellTarget.dataset.groupValue}-${curCellTarget.dataset.value}`,
