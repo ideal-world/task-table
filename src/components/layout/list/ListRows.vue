@@ -89,7 +89,7 @@ const props = defineProps<{
     >
       <!-- 优先使用自定义渲染 -->
       <!-- Prefer custom rendering -->
-      <div v-if="column.render" v-html="column.render(row, props.layoutKind)" />
+      <div v-if="column.render" class="w-full" v-html="column.render(row, props.layoutKind)" />
       <template v-else-if="column.dataKind === DataKind.DATE || column.dataKind === DataKind.TIME || column.dataKind === DataKind.DATETIME">
         {{ column.kindDateTimeFormat ? dayjs(row[column.name]).format(column.kindDateTimeFormat) : row[column.name] }}
       </template>

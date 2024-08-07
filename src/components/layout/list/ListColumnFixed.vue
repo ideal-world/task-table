@@ -99,6 +99,7 @@ export function setFixedColumnStyles(styles: any, currColIdx: number, columnsCon
     styles.position = 'sticky'
     styles.zIndex = 1099
     styles.left = `${columnsConf.slice(0, currColIdx).reduce((count, col) => count + col.width, selectColumnWidth)}px`
+    styles.overflow = 'hidden'
     if (fixedColumnIdx === currColIdx) {
       // class: base-300
       styles.borderRight = '3px solid oklch(var(--b3))'
