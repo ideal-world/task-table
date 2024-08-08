@@ -127,7 +127,8 @@
     },
     "pagination": {
       "total": "Total {number} items",
-      "pageSize": "{number} rows/page"
+      "pageSize": "{number} rows/page",
+      "jump": "jump to"
     },
     "subData": {
       "title": "Show sub Data",
