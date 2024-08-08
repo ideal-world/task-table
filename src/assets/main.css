@@ -1,9 +1,11 @@
 @import 'octicons-css/octicons.min.css';
-
+@import 'reset.css';
+:root {
+  --sys-primary: var(--fallback-p, oklch(var(--p) / 1));
+}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
 /* Eliminating the effects of vitepress */
 a {
   text-decoration: none !important;

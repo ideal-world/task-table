@@ -105,6 +105,7 @@ defineExpose({
 <style scoped>
 .iw-tree__container .tree-item-active {
   background-color: var(--fallback-p, oklch(var(--p) / 1));
+  background-color: var(--sys-primary);
   color: #fff;
 }
 </style>
