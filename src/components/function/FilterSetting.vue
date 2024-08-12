@@ -12,6 +12,7 @@ import MenuComp from '../common/Menu.vue'
 import type { ColumnConf } from '../conf'
 import * as eb from '../eventbus'
 import { deepToRaw } from '../../utils/vueHelper'
+import MenuSelectComp from '../base/MenuSelect/index.vue'
 import MenuTreeComp from '../base/MenuTree/index.vue'
 import MInput from '../base/MInput/index.vue'
 
@@ -632,7 +633,7 @@ onMounted(() => {
     </template>
   </MenuComp>
 
-  <MenuComp ref="dictContainerCompRef">
+  <!-- <MenuComp ref="dictContainerCompRef">
     <div @click="setFilterADictValue">
       <div v-for="dictItem in queryDictItemsResp?.records"
         :key="`${props.layoutId}-${selectedFilterGroupIdx}-${selectedFilterItemIdx}-${dictItem.value}`"
@@ -648,7 +649,9 @@ onMounted(() => {
           ? `(${dictItem.value})` : '' }}</span>
       </div>
     </div>
-  </MenuComp>
+  </MenuComp> -->
+  <MenuSelectComp ref="dictContainerCompRef" :values="selectedFilterItems?.[selectedFilterItemIdx!]?.values"
+    :options="queryDictItemsResp?.records" :setFilterADictValue="setFilterADictValue" />
   <MenuTreeComp ref="dictTreeContainerCompRef" :values="selectedFilterItems?.[selectedFilterItemIdx!]?.values"
     :options="queryDictItemsResp?.records" :setFilterADictValue="setFilterADictValue" />
 </template>

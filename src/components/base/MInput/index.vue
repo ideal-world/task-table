@@ -52,6 +52,7 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+    inputRef.value!.value = ''
     selectedObserver.value?.unobserve(selectedBoxRef.value)
 })
 
@@ -59,6 +60,13 @@ function handleInputClick() {
     inputRef.value?.focus()
     inputRef.value?.click()
 }
+function clearInput() {
+    inputRef.value!.value = ''
+}
+defineExpose({
+    inputRef,
+    clearInput,
+})
 </script>
 <template>
     <div class="value-input iw-input iw-input-xs iw-input-bordered flex items-center gap-2 h-[30px] rounded-sm"
@@ -68,7 +76,7 @@ function handleInputClick() {
         <div ref="selectedBoxRef" class="selected-box flex">
             <Badge
                 v-for="(dictItemOrRawValue, valueIdx) in showBreviary ? options.slice(0, breviaryShowCount) : options"
-                :key="`${filterItem.columnName}-${valueIdx}`" class="iw-badge max-w-24 flex"
+                :key="`${filterItem?.columnName}-${valueIdx}`" class="iw-badge max-w-24 flex"
                 :dictItemOrRawValue="dictItemOrRawValue" @click="handleInputClick"
                 @delete="deleteAValue(filterItemIdx, valueIdx)" />
             <div v-if="showBreviary && breviaryCount > 0" class="iw-dropdown iw-dropdown-hover">
@@ -78,7 +86,7 @@ function handleInputClick() {
                 <div tabindex="0"
                     class="min-h-20 flex flex-wrap iw-dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
                     <Badge v-for="(dictItemOrRawValue, valueIdx) in options.slice(breviaryShowCount)"
-                        :key="`${filterItem.columnName}-${valueIdx}`" class="iw-badge max-w-24 flex"
+                        :key="`${filterItem?.columnName}-${valueIdx}`" class="iw-badge max-w-24 flex"
                         :dictItemOrRawValue="dictItemOrRawValue"
                         @delete="deleteAValue(filterItemIdx, breviaryShowCount + valueIdx)" />
                 </div>
