@@ -203,7 +203,7 @@ export interface TableEventProps {
    *
    * @param item 上下文菜单项 / Context menu item
    *
-   * @param rowPk 列表行主键 / Row PK
+   * @param exArg 额外参数 / Extra argument
    */
   selectContextMenu?: (item: ContextMenuItemProps, exArg?: any) => void
 }

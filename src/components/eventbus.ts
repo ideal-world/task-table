@@ -614,7 +614,10 @@ export function handleAlert(errorKind: AlertKind, message: string, alertLevel: A
  * Select context menu item
  *
  * @param item 上下文菜单项 / Context menu item
+ * @param exArg 额外参数 / Extra argument
  */
 export function selectContextMenu(item: ContextMenuItemProps, exArg?: any) {
-  events.selectContextMenu && events.selectContextMenu(item, exArg)
+  if (events.selectContextMenu) {
+    events.selectContextMenu(item, exArg)
+  }
 }
