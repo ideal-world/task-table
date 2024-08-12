@@ -51,7 +51,7 @@ import {
 const props = defineProps<{
   options: any[] | undefined
   values: any
-  setFilterADictValue: (e) => void
+  setFilterADictValue: (e: Event) => void
 }>()
 const treeRef: Ref<HTMLDivElement | null> = ref(null)
 const dictTreeContainerCompRef = ref<InstanceType<typeof MenuComp>>(
@@ -86,7 +86,7 @@ function handleClose(
   return dictTreeContainerCompRef.value?.close(...args)
 }
 
-function handleClick(e) {
+function handleClick(e: Event) {
   if (!(e.target instanceof HTMLElement)) {
     return
   }

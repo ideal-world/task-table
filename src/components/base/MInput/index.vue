@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { getInputTypeByDataKind } from '../../../props/enumProps'
+import { DataKind, getInputTypeByDataKind } from '../../../props/enumProps'
 import Badge from '../../common/Badge.vue';
 
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 
 const props = defineProps<{
     //过滤项
-    filterItem: any
+    filterItem?: any
     //过滤项的索引
-    filterItemIdx: number
+    filterItemIdx?: number
     // 已筛选项
     options: any[]
     showDictItems: Function
@@ -88,7 +88,7 @@ function handleInputClick() {
         <!-- 字典的多值添加 -->
         <!-- Multiple value addition of dictionary -->
         <input ref="inputRef" class="pl-1 rounded-md iw-input-bordered w-4 border-none flex-1"
-            :type="getInputTypeByDataKind(filterItem.dataKind)" :data-value-input-idx="filterItemIdx"
+            :type="getInputTypeByDataKind(DataKind.TEXT)" :data-value-input-idx="filterItemIdx"
             @click="e => { showDictItems((e.target as HTMLInputElement).value, filterItemIdx, e) }"
             @keyup="e => { showDictItems((e.target as HTMLInputElement).value, filterItemIdx, e) }">
     </div>

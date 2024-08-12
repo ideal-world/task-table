@@ -218,7 +218,7 @@ function handleSort(column: ColumnConfWithSort) {
         @click="(event: MouseEvent) => showHeaderContextMenu(event, column.name)"
       >
         <i :class="`${column.icon} mr-1`" /> {{ column.title }}
-        <div v-if="column.hasOwnProperty('orderDesc')" class="sort-box flex flex-col items-center justify-center ml-2" @click.stop="handleSort(column)">
+        <div v-if="column.hasOwnProperty('orderDesc')" class="sort-box flex flex-col items-center justify-center ml-2" @click.stop="handleSort(column as ColumnConfWithSort)">
           <i class="sort-icon octicon-chevron-up-12" :class="`${column.orderDesc === false ? 'text-primary' : ''}`" />
           <i class="sort-icon octicon-chevron-down-12 mt-[-12px]" :class="column.orderDesc ? 'text-primary' : ''" />
         </div>

@@ -225,7 +225,7 @@ function handleJump(e: Event) {
     <div v-if="getTotalPage() - getCurrentPage() > 3" class="flex items-center">
       <div>...</div>
       <button
-        :class="`flex justify-center px-3 ml-2 py-1 w-[30px] h-[30px] rounded transition-all border-none ${page === getCurrentPage() ? 'text-[oklch(var(--in))]' : ''}`"
+        :class="`flex justify-center px-3 ml-2 py-1 w-[30px] h-[30px] rounded transition-all border-none ${getTotalPage() === getCurrentPage() ? 'text-[oklch(var(--in))]' : ''}`"
         @click="setCurrentPage(getTotalPage())"
       >
         {{ getTotalPage() }}

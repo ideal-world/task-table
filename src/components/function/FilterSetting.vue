@@ -140,7 +140,7 @@ async function addDictItemsByFilterItems(filterItems: FilterItemProps[]) {
   // Set dictionary items
   Object.entries(dictItemResp).forEach(([columnName, resp]) => {
     resp.records.forEach((dictItem) => {
-      cachedAllSelectedDictItems.value[`${columnName}-${dictItem.value}`] = dictItem
+      cachedAllSelectedDictItems.value[`${columnName}-${dictItem.value}`] = dictItem as any
     })
   })
 }
