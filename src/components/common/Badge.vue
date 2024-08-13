@@ -10,7 +10,7 @@ const emits = defineEmits<{
 }>()
 </script>
 <template>
-    <div class="iw-badge px-1 flex rounded-md border-none" :style="`background-color: ${option.color ?? ''};color: ${option.color ? '#fff':''}`">
+    <div class="iw-badge px-1 inline-flex rounded-md border-none" :style="`background-color: ${option.color ?? ''};color: ${option.color ? '#fff':''}`">
         <span v-if="option.avatar !== undefined" class="avatar mr-1">
             <img :src="option.avatar" class="w-4 rounded-full">
         </span>
