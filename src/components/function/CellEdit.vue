@@ -84,12 +84,16 @@ async function enterEditMode(
   curColumnConf.value = columnConf
   curPk.value = pkValue
   curValue.value = value
+const {
+  offsetLeft,
+  offsetTop,
+  offsetWidth,
+  offsetHeight,
+} = editCellEle
 
-  cellEditContainerRef.value!.style.left = `${editCellEle.offsetLeft - 1}px`
-  cellEditContainerRef.value!.style.top = `${editCellEle.offsetTop - 1}px`
-  cellEditContainerRef.value!.style.width = `${editCellEle.offsetWidth + 2}px`
-  cellEditContainerRef.value!.style.height = `${editCellEle.offsetHeight + 2}px`
-  cellEditContainerRef.value!.style.display = `flex`
+  cellEditContainerRef.value!.style.cssText = 
+   `display: flex;left: ${offsetLeft - 1}px;top: ${offsetTop - 1}px;width: ${offsetWidth + 2}px;;height: ${offsetHeight + 2}px;`
+
   if (!curColumnConf.value.useDict) {
     const inputEle = cellEditContainerRef.value!.children[0] as HTMLElement
     inputEle.focus()
@@ -327,7 +331,7 @@ function clickEvent(e: Event, isHoverEdit: boolean){
     </template>
 
     <template v-else>
-      <Select
+      <DictSelect
         :value="curValue"
         :dict-name="curColumnConf.name"
         filterable
