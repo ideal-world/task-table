@@ -1,0 +1,48 @@
+/* button  start*/
+.iw-tt .iw-btn-primary {
+  background-color: var(--sys-primary);
+  outline-color: var(--sys-primary);
+  border-color: var(--sys-primary);
+}
+
+.iw-tt .iw-btn-outline.iw-btn-primary {
+  color: var(--sys-primary);
+  background-color: transparent;
+}
+.iw-tt .iw-btn-outline.iw-btn-primary:hover {
+  background-color: var(--sys-primary);
+  border-color: var(--sys-primary);
+  color: #fff;
+}
+.iw-tt .iw-btn.iw-btn-primary:hover {
+  opacity: 0.8;
+  background-color: var(--sys-primary);
+  border-color: var(--sys-primary);
+}
+/* button  end*/
+
+/* tabs start*/
+.iw-tt
+  .iw-tabs-boxed
+  :is(.iw-tab-active, [aria-selected='true']):not(.iw-tab-disabled):not(
+    [disabled]
+  ),
+.iw-tabs-boxed :is(input:checked) {
+  background-color: var(--sys-primary);
+  color: #fff;
+}
+/* tabs end*/
+/* switch start*/
+.iw-tt .iw-toggle-primary:checked,
+.iw-toggle-primary[aria-checked='true'] {
+  background-color: var(--sys-primary);
+  border-color: var(--sys-primary);
+}
+/* switch  end*/
+
+/* badge start */
+.iw-tt .iw-badge-primary {
+  background-color: var(--sys-primary);
+  border-color: var(--sys-primary);
+}
+/* badge end */

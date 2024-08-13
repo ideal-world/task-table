@@ -55,6 +55,7 @@
     "pnpm": ">=8.0.0"
   },
   "scripts": {
+    "dev": "vite --host",
     "build": "rimraf dist && vue-tsc && vite build",
     "docs:dev": "vitepress dev docs --host 0.0.0.0",
     "docs:build": "pnpm run publish-typedoc && vitepress build docs",

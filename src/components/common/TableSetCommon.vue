@@ -1,14 +1,20 @@
 <script setup lang="ts">
-defineProps<{
+import { ref } from 'vue'
+const props = defineProps<{
   title: string
   isShow?: boolean
 }>()
+
+const isShow = ref(props.isShow || false)
+
+
 </script>
 
 <template>
   <div class="w-full">
     <div
       class="w-full cursor-pointer iw-table-setting-title flex justify-between px-3 border-b border-b-gray-200 py-2"
+      @click="isShow = !isShow"
     >
       <div class="title font-medium pointer-events-none">
         {{ title }}

@@ -19,7 +19,7 @@ const TREE_DICT = [
 ]
 
 const DATA: { [columnName: string]: any }[] = [
-  { no: 1, pno: null, name: 'v1.0优化任务集合', creator: 'xh', stats: ['init'], planStartTime: '2023-10-22', planEndTime: '2023-12-01', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: 'https://idealworld.group/img/home-bg.jpg', module: 'dd' },
+  { no: 1, pno: null, name: 'v1.0优化任务集合', creator: 'xh', stats: ['init'], planStartTime: '2023-10-22', planEndTime: '2023-12-01', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: 'https://idealworld.group/img/home-bg.jpg' },
   { no: 2, pno: null, name: '测试报告导出', creator: 'xh', stats: ['init'], planStartTime: '2023-10-14', planEndTime: '2024-01-01', actualStartTime: '2023-10-15', actualEndTime: '2023-11-24', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: 'https://idealworld.group/img/home-bg.jpg' },
   { no: 3, pno: 1, name: '平台支持修改工程下默认分支', creator: 'xh', stats: ['progress', 'risk'], planStartTime: '2023-10-25', planEndTime: '2023-11-29', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: '' },
   { no: 4, pno: 1, name: '工作项优化', creator: 'xh', stats: ['init'], planStartTime: '2023-10-26', planEndTime: '2023-11-25', disabled: false, avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg', attachment: 'https://idealworld.group/img/home-bg.jpg' },
@@ -71,9 +71,6 @@ function attachDict(data: { [columnName: string]: any }[]) {
       d[`stats${IwProps.DATA_DICT_POSTFIX}`] = d.stats.map((s) => {
         return STATS_DICT.find(dict => dict.value === s)!
       })
-    }
-    if (d.module) {
-      d[`module${IwProps.DATA_DICT_POSTFIX}`] = [TREE_DICT.find(dict => dict.value === d.module)!]
     }
     return d
   })
@@ -321,7 +318,7 @@ const events: IwProps.TableEventProps = {
     return {
       whiteListMode: true,
       cells: {
-        1: ['name', 'creator', 'stats', 'planStartTime', 'planEndTime', 'actualStartTime', 'actualEndTime', 'disabled', 'attachment', 'module'],
+        1: ['name', 'creator', 'stats', 'planStartTime', 'planEndTime', 'actualStartTime', 'actualEndTime', 'disabled', 'attachment'],
         11: ['name'],
         17: ['name'],
       },
@@ -564,22 +561,8 @@ const events: IwProps.TableEventProps = {
           totalNumber,
         }
       }
-      else if(columnName === 'stats'){
+      else {
         let statsDict: IwProps.DictItemProps[] = JSON.parse(JSON.stringify(STATS_DICT))
-        statsDict = statsDict.filter((dict) => {
-          return values.find(val => dict.title.includes(val) || dict.value.includes(val))
-        })
-        const totalNumber = statsDict.length
-        if (slice) {
-          statsDict = statsDict.slice(slice.offsetNumber, slice.offsetNumber + slice.fetchNumber)
-        }
-        resp[columnName] = {
-          records: statsDict,
-          totalNumber,
-        }
-      }
-      else if(columnName === 'module'){
-        let statsDict: IwProps.DictItemProps[] = JSON.parse(JSON.stringify(TREE_DICT))
         statsDict = statsDict.filter((dict) => {
           return values.find(val => dict.title.includes(val) || dict.value.includes(val))
         })
@@ -775,7 +758,7 @@ const _tableProps: IwProps.SimpleTableProps = {
     ],
   },
   edit: {
-    enabledColumnNames: ['name', 'creator', 'stats', 'planStartTime', 'disabled', 'module'],
+    enabledColumnNames: ['name', 'creator', 'stats', 'planStartTime', 'disabled'],
     markEditable: true,
   },
   contextMenu: {

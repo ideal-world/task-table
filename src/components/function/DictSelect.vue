@@ -50,7 +50,7 @@ async function loadDictItems(dictName: string, dictValues: any[]): Promise<DictI
     offsetNumber: 0,
     fetchNumber: dictValues.length,
   })
-  return dictResp[dictName].records
+  return dictResp[dictName].records as DictItemProps[]
 }
 
 /**
@@ -134,7 +134,7 @@ async function showSelectableDictItems(inputValue: any, e: Event) {
     // TODO
     fetchNumber: 20,
   })
-  selectableDictItems.value = [...selectableResp.records]
+  selectableDictItems.value = [...selectableResp.records] as any[]
   dictContainerCompRef.value?.show(e.target as HTMLElement, MenuOffsetKind.LEFT_TOP, undefined, true)
 }
 

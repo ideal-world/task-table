@@ -8,10 +8,13 @@ import ColumnResizeComp from '../../function/ColumnResize.vue'
 import ColumnFixedComp from './ListColumnFixed.vue'
 import ColumnWrapComp from './ListColumnWrap.vue'
 
-enum ORDER_ENUM {
-  POSITIVE_SORT = false, //正序
-  INVERT_SORT= true, //倒序
-  UNDEFINED = null //不排序
+interface ColumnConfWithSort extends ColumnConf{
+  orderDesc: boolean
+}
+const  ORDER_ENUM = {
+  POSITIVE_SORT : false, //正序
+  INVERT_SORT : true, //倒序
+  UNDEFINED : null //不排序
 }
 
 const props = defineProps<{
@@ -86,16 +89,17 @@ const cateColumns = computed(() => {
  */
 const columnsWithSort = computed(()=> {
 
-  return props.columnsConf.map(e=> {
-    const canSort = props.layoutConf.sort.enabledColumnNames.includes(e.name);
-    if(canSort) {
+  const a =  props.columnsConf.map(e=> {
+    const canSort = props.layoutConf.sort!.enabledColumnNames.includes(e.name);
+    // if(canSort) {
       return {
         ...e,
-        orderDesc: props.layoutConf.sort.items?.find(f=> f.columnName === e.name)?.orderDesc ?? ORDER_ENUM.UNDEFINED
+        orderDesc: canSort?props.layoutConf.sort!.items?.find(f=> f.columnName === e.name)?.orderDesc ?? ORDER_ENUM.UNDEFINED: ORDER_ENUM.UNDEFINED
       }
-    }
-    return e;
+    // }
+    // return e;
   })
+  return a
 })
 
 /**
@@ -123,7 +127,7 @@ async function setNewWidth(newWidth: number, columnName?: string) {
  * 排序事件 sort event
  * @param column 列
  */
-function handleSort(column) {
+function handleSort(column: ColumnConfWithSort) {
   const { orderDesc , name } = column;
   const items = props.layoutConf.sort?.items || [];
   const currentIndex = items?.findIndex(f=> f.columnName === name)
@@ -151,7 +155,7 @@ function handleSort(column) {
   
   eb.modifyLayout({
     sort: {
-      enabledColumnNames: props.layoutConf.sort.enabledColumnNames,
+      enabledColumnNames: props.layoutConf.sort!.enabledColumnNames,
       items,
     },
   })
@@ -214,7 +218,7 @@ function handleSort(column) {
         @click="(event: MouseEvent) => showHeaderContextMenu(event, column.name)"
       >
         <i :class="`${column.icon} mr-1`" /> {{ column.title }}
-        <div v-if="column.hasOwnProperty('orderDesc')" class="sort-box flex flex-col items-center justify-center ml-2" @click.stop="handleSort(column)">
+        <div v-if="column.hasOwnProperty('orderDesc')" class="sort-box flex flex-col items-center justify-center ml-2" @click.stop="handleSort(column as ColumnConfWithSort)">
           <i class="sort-icon octicon-chevron-up-12" :class="`${column.orderDesc === false ? 'text-primary' : ''}`" />
           <i class="sort-icon octicon-chevron-down-12 mt-[-12px]" :class="column.orderDesc ? 'text-primary' : ''" />
         </div>
