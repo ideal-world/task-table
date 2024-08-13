@@ -46,3 +46,8 @@
   border-color: var(--sys-primary);
 }
 /* badge end */
+/* text start */
+.iw-tt .text-primary {
+  color: var(--sys-primary);
+}
+/* text end */
