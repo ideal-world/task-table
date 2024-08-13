@@ -127,7 +127,8 @@
     },
     "pagination": {
       "total": "共 {number} 项数据",
-      "pageSize": "{number} 条/页"
+      "pageSize": "{number} 条/页",
+      "jump": "跳至"
     },
     "subData": {
       "title": "子数据显示",

@@ -181,6 +181,23 @@ function changePageSizeStyle(e: Event) {
     arrowEl.style.transform = 'rotate(180deg)'
   }
 }
+
+function handleJump(e: Event) {
+  const value = Number((e.target as HTMLInputElement).value)
+  const total = getTotalPage()
+  if(!value) return
+  let jumpVal = 1
+  if(value>0 &&value<total) {
+    jumpVal=value
+  }
+  else if(value>=total){
+    jumpVal = total
+  }
+  else if(value<1){
+    jumpVal = 1
+  }
+  setCurrentPage(jumpVal)
+}
 </script>
 
 <template>
@@ -210,7 +227,7 @@ function changePageSizeStyle(e: Event) {
         ...
       </div>
       <button
-        class="flex justify-center px-3 ml-2 py-1 w-[30px] h-[30px] rounded transition-all border-none"
+        :class="`flex justify-center px-3 ml-2 py-1 w-[30px] h-[30px] rounded transition-all border-none ${getTotalPage() === getCurrentPage() ? 'text-[oklch(var(--in))]' : ''}`"
         @click="setCurrentPage(getTotalPage())"
       >
         {{ getTotalPage() }}
@@ -222,6 +239,8 @@ function changePageSizeStyle(e: Event) {
     <button v-if="getCurrentPage() < getTotalPage() - 1" class="iw-btn iw-btn-ghost px-1 ml-1 iw-btn-xs" @click="setCurrentPage(getTotalPage())">
       <i :class="iconSvg.LAST" />
     </button>
+    <span class="mx-2">{{ $t('function.pagination.jump')}}</span>
+    <input type="number" class="iw-input iw-input-bordered iw-input-xs rounded-sm w-10" :value="getCurrentPage()" @keyup.enter="handleJump" @blur="handleJump"  />
     <MenuComp ref="fetchNumberSelectCompRef">
       <div
         v-for="number in getActualSlice().fetchNumbers" :key="number"

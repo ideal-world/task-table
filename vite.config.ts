@@ -15,6 +15,12 @@ export default defineConfig({
     // Use to analyze package size
     // visualizer({ open: true }),
   ],
+  server: {
+    // Listening on all local IPs
+    host: true,
+    open: true,
+    port: 3001,
+  },
   build: {
     lib: {
       entry: path.resolve(__dirname, 'src/index.ts'),
