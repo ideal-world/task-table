@@ -85,9 +85,10 @@ function setHeight() {
 
 watch(
   () => layoutsConf.length,
-  (_newVal, oldVal) => {
-    if (oldVal) {
-      currentLayoutId.value = layoutsConf[layoutsConf.length - 1].id
+  () => {
+    const idx = layoutsConf.findIndex(ele => ele.id === currentLayoutId.value)
+    if (idx !== -1) {
+      currentLayoutId.value = layoutsConf[idx].id
     }
     else {
       currentLayoutId.value = layoutsConf[0].id
