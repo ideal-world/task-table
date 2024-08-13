@@ -51,8 +51,8 @@ import {
 const props = defineProps<{
   options: any[] | undefined
   values: any
-  setFilterADictValue: (e: Event) => void
 }>()
+const emits = defineEmits(['click'])
 const treeRef: Ref<HTMLDivElement | null> = ref(null)
 const dictTreeContainerCompRef = ref<InstanceType<typeof MenuComp>>(
   {} as InstanceType<typeof MenuComp>
@@ -93,7 +93,7 @@ function handleClick(e: Event) {
   if (arrowEle) {
     return
   }
-  props.setFilterADictValue(e)
+  emits('click', e)
 }
 
 defineExpose({

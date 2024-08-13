@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import * as iconSvg from '../../assets/icon'
 import { DataKind, DictItemProps, DictItemsResp, DictKind, FilterDataGroupProps, FilterDataItemProps, FilterDataProps, LayoutModifyProps } from '../../props'
 
@@ -15,6 +15,7 @@ import { deepToRaw } from '../../utils/vueHelper'
 import MenuSelectComp from '../base/MenuSelect/index.vue'
 import MenuTreeComp from '../base/MenuTree/index.vue'
 import MInput from '../base/MInput/index.vue'
+import Badge from '../common/Badge.vue'
 
 const props = defineProps<{
   // 布局ID
@@ -79,7 +80,26 @@ const selectedFilterItemIdx = ref<number | undefined>()
 // 所有过滤组中已选中的字典项，格式：列名 + '-' + 列值 -> 字典项
 // Dictionary items selected in all filter groups, format: column name + '-' + column value -> dictionary item
 const cachedAllSelectedDictItems = ref<{ [key: string | number]: DictItemProps }>({})
-
+//可过滤的列
+// Filterable columns
+const filterColumnOptions = computed(()=> props.columnsConf.filter(col => props.filter.enabledColumnNames.includes(col.name)).map(e=> {
+  return {
+    ...e, 
+    value: e.name
+  }
+}))
+// 选中过滤单项
+// Selected filter item
+const selectedFilterItem = computed(()=> selectedFilterItems.value?.[selectedFilterItemIdx.value!])
+//操作符 operator
+const operatorOptions = computed(()=> {
+  return getOperatorKindsByDataKind(selectedFilterItem.value?.dataKind).map(e=> {
+    return {
+      title: translateOperatorKind(e),
+      value: e,
+    }
+  })
+})
 /**
  * 将过滤数据项转换为过滤项
  *
@@ -254,7 +274,8 @@ function showFilterOps(e: Event, filterItemIdx: number) {
   // 设置已选中的过滤项ID
   // Set the selected filter item ID
   selectedFilterItemIdx.value = filterItemIdx
-  filterOpCompRef.value?.show(e.target as HTMLElement, undefined, MenuSizeKind.MINI, true)
+  const targetEle = (e.target as HTMLElement).closest('.iw-btn')
+  filterOpCompRef.value?.show(targetEle as HTMLElement, undefined, MenuSizeKind.MINI, true)
 }
 
 /**
@@ -276,13 +297,20 @@ async function deleteFilterItem(filterItemIdx: number) {
  * @param e 事件 / Event
  */
 function setFilterColumn(e: Event) {
-  const targetEle = e.target as HTMLElement
-  const currColumnName = targetEle.dataset.columnName!
+  if (!(e.target instanceof HTMLElement)) {
+    return
+  }
+  const itemEle = e.target.closest('.iw-contextmenu__item')
+  if (!itemEle || !(itemEle instanceof HTMLElement)) {
+    return
+  }
+  const currColumnName = itemEle.dataset.value!
   const columnConf = props.columnsConf.find(col => col.name === currColumnName)!
   if (selectedFilterItemIdx.value !== undefined) {
     // 存在已选中的过滤项，重置过滤项到初始状态
     // There is a selected filter item, reset the filter item to the initial state
     const currFilterItem = selectedFilterItems.value?.[selectedFilterItemIdx.value]
+    if(currFilterItem!.columnName === currColumnName) return
     currFilterItem!.columnName = currColumnName
     currFilterItem!.operator = OperatorKind.EQ
     currFilterItem!.values = []
@@ -321,8 +349,14 @@ function setFilterColumn(e: Event) {
  * @param e 事件 / Event
  */
 function setFilterOp(e: Event) {
-  const targetEle = e.target as HTMLElement
-  const selectedOp = targetEle.dataset.op as OperatorKind
+  if (!(e.target instanceof HTMLElement)) {
+    return
+  }
+  const targetEle = e.target!.closest('.iw-contextmenu__item')
+  if (!targetEle || !(targetEle instanceof HTMLElement)) {
+    return
+  }
+  const selectedOp = targetEle!.dataset!.value as OperatorKind
   const currFilterItem = selectedFilterItems.value?.[selectedFilterItemIdx.value!]
   currFilterItem!.operator = selectedOp
   // 重置值
@@ -531,15 +565,13 @@ onMounted(() => {
               translateOperatorKind(filterGroup.items[0].operator)
               }}</span>
             <span class="mr-0.5 max-w-[100px] whitespace-nowrap overflow-hidden text-ellipsis">
-              <span
+              <Badge
                 v-for="(dictItemOrRawValue, valueIdx) in tryParseDictItems(filterGroup.items[0].columnName, filterGroup.items[0].value)"
                 :key="`${filterGroup.items[0].columnName}-${valueIdx}`"
+                readonly
+                :option="dictItemOrRawValue"
                 :style="`background-color: ${dictItemOrRawValue.color ?? ''}`" class="iw-badge">
-                <span v-if="dictItemOrRawValue.avatar !== undefined" class="avatar">
-                  <img :src="dictItemOrRawValue.avatar" class="w-4 rounded-full">
-                </span>
-                <span class="ml-1 whitespace-nowrap">{{ dictItemOrRawValue.title ?? dictItemOrRawValue }}</span>
-              </span>
+              </Badge>
             </span>
           </template>
           <template v-else>
@@ -582,7 +614,7 @@ onMounted(() => {
       <!-- Operator -->
       <button class="iw-btn border-gray-200 bg-white iw-btn-xs rounded-sm mr-1 h-[30px]"
         @click="e => { showFilterOps(e, filterItemIdx) }">
-        <span class="mr-0.5">{{ translateOperatorKind(filterItem.operator) }}</span>
+        <span class="mr-0.5 w-[28px] overflow-hidden text-ellipsis whitespace-nowrap">{{ translateOperatorKind(filterItem.operator) }}</span>
         <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />
       </button>
       <!-- 值 -->
@@ -616,42 +648,12 @@ onMounted(() => {
     <span class="absolute bottom-1 right-1 text-xs text-neutral-content">{{ $t('function.filter.note') }}</span>
   </MenuComp>
 
-  <MenuComp ref="filterColumnCompRef" @click="setFilterColumn">
-    <div v-for="column in props.columnsConf.filter(col => props.filter.enabledColumnNames.includes(col.name))"
-      :key="column.name" class="iw-contextmenu__item flex w-full cursor-pointer" :data-column-name="column.name">
-      <i :class="`${column.icon} mr-0.5`" />
-      {{ column.title }}
-    </div>
-  </MenuComp>
-
-  <MenuComp ref="filterOpCompRef" @click="setFilterOp">
-    <template v-if="selectedFilterItemIdx !== undefined">
-      <div v-for="op in getOperatorKindsByDataKind(selectedFilterItems?.[selectedFilterItemIdx!].dataKind)" :key="op"
-        class="iw-contextmenu__item flex w-full cursor-pointer" :data-op="op">
-        {{ translateOperatorKind(op) }}
-      </div>
-    </template>
-  </MenuComp>
-
-  <!-- <MenuComp ref="dictContainerCompRef">
-    <div @click="setFilterADictValue">
-      <div v-for="dictItem in queryDictItemsResp?.records"
-        :key="`${props.layoutId}-${selectedFilterGroupIdx}-${selectedFilterItemIdx}-${dictItem.value}`"
-        :style="`background-color: ${dictItem.color}`"
-        class="iw-contextmenu__item flex cursor-pointer iw-badge m-1.5 pl-0.5"
-        :class="selectedFilterItems?.[selectedFilterItemIdx!]?.values.includes(dictItem.value) ? 'iw-badge-primary' : 'iw-badge-outline'"
-        :data-value="dictItem.value" :data-title="dictItem.title" :data-avatar="dictItem.avatar"
-        :data-color="dictItem.color">
-        <div v-if="dictItem.avatar !== undefined" class="avatar">
-          <img :src="dictItem.avatar" class="w-4 rounded-full">
-        </div>
-        <span class="ml-1 whitespace-nowrap">{{ dictItem.title }}{{ dictItem.title !== dictItem.value
-          ? `(${dictItem.value})` : '' }}</span>
-      </div>
-    </div>
-  </MenuComp> -->
-  <MenuSelectComp ref="dictContainerCompRef" :values="selectedFilterItems?.[selectedFilterItemIdx!]?.values"
-    :options="queryDictItemsResp?.records" :setFilterADictValue="setFilterADictValue" />
-  <MenuTreeComp ref="dictTreeContainerCompRef" :values="selectedFilterItems?.[selectedFilterItemIdx!]?.values"
-    :options="queryDictItemsResp?.records" :setFilterADictValue="setFilterADictValue" />
+  <MenuSelectComp ref="filterColumnCompRef" :values="[selectedFilterItem?.columnName]"
+    :options="filterColumnOptions" @click="setFilterColumn" />
+  <MenuSelectComp ref="filterOpCompRef" :values="[selectedFilterItem?.operator]"
+    :options="operatorOptions" @click="setFilterOp" />
+  <MenuSelectComp ref="dictContainerCompRef" :values="selectedFilterItem?.values"
+    :options="queryDictItemsResp?.records" @click="setFilterADictValue" />
+  <MenuTreeComp ref="dictTreeContainerCompRef" :values="selectedFilterItem?.values"
+    :options="queryDictItemsResp?.records" @click="setFilterADictValue" />
 </template>

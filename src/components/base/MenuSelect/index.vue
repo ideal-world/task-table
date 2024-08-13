@@ -1,5 +1,5 @@
 <template>
-  <MenuComp ref="dictContainerCompRef" class="p2">
+  <MenuComp ref="menuSelectRef" class="p2">
     <div ref="SelectRef" @click="handleClick" class="iw-tree__container w-full">
       <div
         v-for="dictItem in selectOptions"
@@ -17,6 +17,9 @@
         <div v-if="dictItem.avatar !== undefined" class="avatar">
           <img :src="dictItem.avatar" class="w-4 rounded-full" />
         </div>
+        <div v-if="dictItem.icon !== undefined">
+          <i :class="`${dictItem.icon} mr-0.5`" />
+        </div>
         <span
           :class="['ml-1 whitespace-nowrap', { 'border-b-2': dictItem.filter }]"
           >{{ dictItem.title }}</span
@@ -33,10 +36,10 @@ import MenuComp from '../../common/Menu.vue'
 const props = defineProps<{
   options: any[] | undefined
   values: any
-  setFilterADictValue: (e: Event) => void
 }>()
+const emits = defineEmits(['click'])
 const treeRef: Ref<HTMLDivElement | null> = ref(null)
-const dictContainerCompRef = ref<InstanceType<typeof MenuComp>>(
+const menuSelectRef = ref<InstanceType<typeof MenuComp>>(
   {} as InstanceType<typeof MenuComp>
 )
 const selectOptions = ref<any[]>([])
@@ -50,21 +53,21 @@ watch(
 
 
 function handleShow(
-  ...args: Parameters<typeof dictContainerCompRef.value.show>
+  ...args: Parameters<typeof menuSelectRef.value.show>
 ) {
-  return dictContainerCompRef.value?.show(...args)
+  return menuSelectRef.value?.show(...args)
 }
 function handleClose(
-  ...args: Parameters<typeof dictContainerCompRef.value.close>
+  ...args: Parameters<typeof menuSelectRef.value.close>
 ) {
-  return dictContainerCompRef.value?.close(...args)
+  return menuSelectRef.value?.close(...args)
 }
 
 function handleClick(e: Event) {
   if (!(e.target instanceof HTMLElement)) {
     return
   }
-  props.setFilterADictValue(e)
+  emits('click', e)
 }
 
 defineExpose({
