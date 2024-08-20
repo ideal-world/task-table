@@ -621,3 +621,16 @@ export function selectContextMenu(item: ContextMenuItemProps, exArg?: any) {
     events.selectContextMenu(item, exArg)
   }
 }
+
+/**
+ * 获取微应用偏移
+ *
+ * get micro app offset
+ *
+ */
+export function getMicroAppOffset() {
+  if (events.getMicroAppOffset) {
+    return events.getMicroAppOffset()
+  }
+  return { left: 0, top: 0 }
+}

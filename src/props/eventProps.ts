@@ -206,4 +206,10 @@ export interface TableEventProps {
    * @param exArg 额外参数 / Extra argument
    */
   selectContextMenu?: (item: ContextMenuItemProps, exArg?: any) => void
+  /**
+   * 获取微应用偏移
+   *
+   * get micro app offset
+   */
+  getMicroAppOffset?: () => {left: number, top: number}
 }

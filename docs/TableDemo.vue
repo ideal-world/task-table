@@ -603,6 +603,12 @@ const events: IwProps.TableEventProps = {
   selectContextMenu(item: IwProps.ContextMenuItemProps, rowPk: string) {
     // select context menu option
   },
+  getMicroAppOffset() {
+    return {
+      left: -20,
+      top: -20,
+    }
+  },
 }
 
 const columns: IwProps.SimpleTableColumnProps[] = [

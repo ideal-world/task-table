@@ -1,4 +1,5 @@
 import { getParentWithClass } from '../../utils/basic'
+import * as eb from '../../components/eventbus'
 
 /**
  * 上下文菜单的位置偏移类型
@@ -129,6 +130,12 @@ export function getInitOffset(attachObj: HTMLElement | MouseEvent, offset: MenuO
     if ((top + contextMenuEle.offsetHeight) > boundaryEleRect.bottom) {
       top = boundaryEleRect.bottom - contextMenuEle.offsetHeight
     }
+  }
+
+  if(eb.getMicroAppOffset){
+    const { left: microAppLeft, top: microAppTop } = eb.getMicroAppOffset()
+    left -= microAppLeft
+    top -= microAppTop
   }
 
   return { left, top }

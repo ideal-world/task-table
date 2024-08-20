@@ -175,7 +175,8 @@ export const FUN_CLOSE_CONTEXT_MENU_TYPE = Symbol('FUN_CLOSE_CONTEXT_MENU_TYPE')
     v-show="isInit"
     :id="'iw-contextmenu-' + `${contextmenuMathRandom}`"
     ref="contextmenuRef"
-    class="iw-contextmenu flex flex-col items-start fixed z-[3100] bg-base-100 p-1 rounded-md border border-base-300"
+    class="iw-contextmenu overflow-auto flex flex-col items-start fixed z-[3100] bg-base-100 p-1 rounded-md border border-base-300"
+    :style="{'maxHeight': '600px'}"
   >
     <!-- 仅在初始化后渲染插槽信息 -->
     <!-- Only render slot information after initialization -->
