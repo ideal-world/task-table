@@ -177,7 +177,7 @@ function changePageSizeStyle(e: Event) {
     target.style.borderColor = ''
   }
   else {
-    target.style.borderColor = 'oklch(var(--in))'
+    target.style.borderColor = 'var(--sys-primary)'
     arrowEl.style.transform = 'rotate(180deg)'
   }
 }
@@ -185,15 +185,16 @@ function changePageSizeStyle(e: Event) {
 function handleJump(e: Event) {
   const value = Number((e.target as HTMLInputElement).value)
   const total = getTotalPage()
-  if(!value) return
+  if (!value)
+    return
   let jumpVal = 1
-  if(value>0 &&value<total) {
-    jumpVal=value
+  if (value > 0 && value < total) {
+    jumpVal = value
   }
-  else if(value>=total){
+  else if (value >= total) {
     jumpVal = total
   }
-  else if(value<1){
+  else if (value < 1) {
     jumpVal = 1
   }
   setCurrentPage(jumpVal)
@@ -216,7 +217,7 @@ function handleJump(e: Event) {
     <button
       v-for="page in getShowPages()"
       :key="page"
-      :class="`flex justify-center px-3 ml-2 py-1 w-[30px] h-[30px] rounded transition-all border-none ${page === getCurrentPage() ? 'text-[oklch(var(--in))]' : ''}`"
+      :class="`flex justify-center px-3 ml-2 py-1 w-[30px] h-[30px] rounded transition-all border-none ${page === getCurrentPage() ? 'text-[var(--sys-primary)]' : ''}`"
       :disabled="page === getCurrentPage()"
       @click="setCurrentPage(page)"
     >
@@ -227,7 +228,7 @@ function handleJump(e: Event) {
         ...
       </div>
       <button
-        :class="`flex justify-center px-3 ml-2 py-1 w-[30px] h-[30px] rounded transition-all border-none ${getTotalPage() === getCurrentPage() ? 'text-[oklch(var(--in))]' : ''}`"
+        :class="`flex justify-center px-3 ml-2 py-1 w-[30px] h-[30px] rounded transition-all border-none ${getTotalPage() === getCurrentPage() ? 'text-[var(--sys-primary)]' : ''}`"
         @click="setCurrentPage(getTotalPage())"
       >
         {{ getTotalPage() }}
@@ -239,13 +240,13 @@ function handleJump(e: Event) {
     <button v-if="getCurrentPage() < getTotalPage() - 1" class="iw-btn iw-btn-ghost px-1 ml-1 iw-btn-xs" @click="setCurrentPage(getTotalPage())">
       <i :class="iconSvg.LAST" />
     </button>
-    <span class="mx-2">{{ $t('function.pagination.jump')}}</span>
-    <input type="number" class="iw-input iw-input-bordered iw-input-xs rounded-sm w-10" :value="getCurrentPage()" @keyup.enter="handleJump" @blur="handleJump"  />
+    <span class="mx-2">{{ $t('function.pagination.jump') }}</span>
+    <input type="number" class="iw-input iw-input-bordered iw-input-xs rounded-sm w-10" :value="getCurrentPage()" @keyup.enter="handleJump" @blur="handleJump">
     <MenuComp ref="fetchNumberSelectCompRef">
       <div
         v-for="number in getActualSlice().fetchNumbers" :key="number"
         class="p-2 text-center transition-all cursor-pointer rounded hover:bg-gray-100"
-        :class="`${number === getActualSlice().fetchNumber ? 'text-[oklch(var(--in))]' : ''}`"
+        :class="`${number === getActualSlice().fetchNumber ? 'text-[var(--sys-primary)]' : ''}`"
         @click="setFetchNumber(number)"
       >
         {{ $t('function.pagination.pageSize', { number }) }}
