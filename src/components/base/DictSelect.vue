@@ -202,5 +202,5 @@ async function loadDictItems(
 <template>
   <MInput ref="MInputRef" :options="selectedOptions" :showDictItems="showMenuComp" :deleteAValue="(_:number, index:number)=> deleteSelectedDictValue(index)" />
     <MenuSelectComp ref="selectContainerCompRef" :values="selectedOptions.map(e=>e.value)"
-    :options="showOptions" :setFilterADictValue="addSelectedDictValue" />
+    :options="showOptions" @click="addSelectedDictValue" />
 </template>

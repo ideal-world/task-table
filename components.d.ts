@@ -7,12 +7,13 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    Badge: typeof import('./src/components/common/Badge.vue')['default']
     BasicSetting: typeof import('./src/components/function/BasicSetting.vue')['default']
     CellEdit: typeof import('./src/components/function/CellEdit.vue')['default']
     ColumnResize: typeof import('./src/components/function/ColumnResize.vue')['default']
     ColumnShowSetting: typeof import('./src/components/function/ColumnShowSetting.vue')['default']
     ContextMenu: typeof import('./src/components/function/ContextMenu.vue')['default']
-    DictSelect: typeof import('./src/components/function/DictSelect.vue')['default']
+    DictSelect: typeof import('./src/components/base/DictSelect.vue')['default']
     FilterSetting: typeof import('./src/components/function/FilterSetting.vue')['default']
     Gantt: typeof import('./src/components/layout/gantt/Gantt.vue')['default']
     GanttTimelineHeader: typeof import('./src/components/layout/gantt/GanttTimelineHeader.vue')['default']
@@ -28,7 +29,9 @@ declare module 'vue' {
     ListRows: typeof import('./src/components/layout/list/ListRows.vue')['default']
     ListRowSelect: typeof import('./src/components/layout/list/ListRowSelect.vue')['default']
     Menu: typeof import('./src/components/common/Menu.vue')['default']
+    MenuSelect: typeof import('./src/components/base/MenuSelect/index.vue')['default']
     MenuTree: typeof import('./src/components/base/MenuTree/index.vue')['default']
+    MInput: typeof import('./src/components/base/MInput/index.vue')['default']
     Pagination: typeof import('./src/components/function/Pagination.vue')['default']
     QuickSearch: typeof import('./src/components/function/QuickSearch.vue')['default']
     RowSortSetting: typeof import('./src/components/function/RowSortSetting.vue')['default']
@@ -42,5 +45,6 @@ declare module 'vue' {
     TableSetCommon: typeof import('./src/components/common/TableSetCommon.vue')['default']
     TableSetting: typeof import('./src/components/function/TableSetting.vue')['default']
     TableThemeSetting: typeof import('./src/components/function/TableThemeSetting.vue')['default']
+    TreeSelect: typeof import('./src/components/base/TreeSelect.vue')['default']
   }
 }
