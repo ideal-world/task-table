@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Sortable from 'sortablejs'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import * as iconSvg from '../../assets/icon'
 import type { SortDataProps } from '../../props'
 import { deepToRaw } from '../../utils/vueHelper'
@@ -21,15 +21,16 @@ const props = defineProps<{
   columnsConf: ColumnConf[]
 }>()
 
-const sortCompRef = ref<InstanceType<typeof MenuComp>>()
+const menuCompRef = ref<InstanceType<typeof MenuComp>>() // 菜单组件
+const sortTableRef = ref<HTMLElement>() // 拖拽排序
 
 function showRowSortContextMenu(event: MouseEvent) {
   const targetEle = event.target as HTMLElement
-  sortCompRef.value?.show(targetEle, MenuOffsetKind.LEFT_TOP)
+  menuCompRef.value?.show(targetEle, MenuOffsetKind.LEFT_TOP)
 }
 
 onMounted(() => {
-  Sortable.create(sortCompRef.value?.menuDom as HTMLElement, {
+  Sortable.create(menuCompRef.value?.menuDom as HTMLElement, {
     draggable: '.iw-row-sort__item',
     async onEnd(evt) {
       if (evt.oldIndex !== evt.newIndex && evt.oldIndex !== -1 && evt.newIndex !== -1) {
@@ -44,6 +45,29 @@ onMounted(() => {
     },
   })
 })
+
+watch(
+  () => sortTableRef.value,
+  () => {
+  // 拖拽DOM创建后进行功能注册
+    if (sortTableRef.value) {
+      Sortable.create(sortTableRef.value as HTMLElement, {
+        draggable: '.iw-row-sort__item',
+        async onEnd(evt) {
+          if (evt.oldIndex !== evt.newIndex && evt.oldIndex !== -1 && evt.newIndex !== -1) {
+            const oriSort = props.sort.items[evt.oldIndex!]
+            const sort = deepToRaw(props.sort)
+            sort.items.splice(evt.oldIndex!, 1)
+            sort.items.splice(evt.newIndex!, 0, oriSort)
+            await eb.modifyLayout({
+              sort,
+            })
+          }
+        },
+      })
+    }
+  },
+)
 
 async function toggleSortCond(columnName: string, orderDesc: boolean) {
   props.sort.items.find(cond => cond.columnName === columnName && cond.orderDesc === orderDesc)
@@ -83,11 +107,11 @@ function addSortCond(columnName: string, orderDesc: boolean) {
     {{ $t(props.sort.items.length! > 1 ? 'function.rowSort.multiTitle' : 'function.rowSort.singleTitle') }}
     <i :class="`${iconSvg.CHEVRON_DOWN} ml-0.5`" />
   </button>
-  <MenuComp ref="sortCompRef" class="iw-row-sort w-[265px] p-4">
+  <MenuComp ref="menuCompRef" class="iw-row-sort w-[265px] p-4">
     <div class="font-medium text-gray-400">
       {{ $t('function.rowSort.sortedColumns') }}（{{ props.sort.items?.length || 0 }}）
     </div>
-    <div class="grid grid-cols-1 divide-y divide-dashed w-full">
+    <div ref="sortTableRef" class="grid grid-cols-1 divide-y divide-dashed w-full">
       <div
         v-for="column in props.sort.items" :key="`${props.layoutId}-${column.columnName}`"
         class="iw-row-sort__item p-1 flex w-full justify-between cursor-move py-2"
