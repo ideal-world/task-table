@@ -85,9 +85,10 @@ function setHeight() {
 
 watch(
   () => layoutsConf.length,
-  (_newVal, oldVal) => {
-    if (oldVal) {
-      currentLayoutId.value = layoutsConf[layoutsConf.length - 1].id
+  () => {
+    const idx = layoutsConf.findIndex(ele => ele.id === currentLayoutId.value)
+    if (idx !== -1) {
+      currentLayoutId.value = layoutsConf[idx].id
     }
     else {
       currentLayoutId.value = layoutsConf[0].id
@@ -197,7 +198,7 @@ function exContextMenuArg(e: MouseEvent) {
       <div v-show="currentLayoutId === layout.id" :id="`iw-tt-layout-${layout.id}`" class="iw-tt-layout">
         <div
           v-if="!tableConf.mini && (layout.sort || layout.filter)"
-          class="iw-tt-toolbar flex items-center h-[40px] p-0.5"
+          class="iw-tt-toolbar flex items-center px-0.5 py-[10px]"
         >
           <RowSortSettingComp v-if="layout.sort" :layout-id="layout.id" :sort="layout.sort" :columns-conf="getCurrentLayoutColumnConf()" />
           <div class="iw-divider iw-divider-horizontal m-0.5" />

@@ -147,7 +147,7 @@ onMounted(() => {
       <div class="iw-dropdown">
         <div
           tabindex="0" role="button"
-          class="bg-white iw-tt-header__item iw-tab flex flex-nowrap border-none hover:bg-neutral-400 hover:text-white transition-all"
+          class="bg-white iw-tt-header__item iw-tab iw_tt_add_layout flex flex-nowrap border-none transition-all"
         >
           <i :class="`${iconSvg.NEW}`" class="text-lg" />
         </div>
