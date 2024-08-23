@@ -91,12 +91,13 @@ onUnmounted(() => {
     <teleport to="body">
       <div
         v-if="visible"
-        class="context-menu bg-info"
+        class="text-white text-[14px] fixed px-1 pt-1 rounded bg-[var(--sys-primary)] z-[10]"
         :style="{ left: `${x}px`, top: `${y}px` }"
       >
         <div
           v-for="item in menuData"
           :key="item.id"
+          class="cursor-pointer pb-1"
           @click="selectMenu(item)"
         >
           {{ item.label }}
@@ -105,17 +106,3 @@ onUnmounted(() => {
     </teleport>
   </div>
 </template>
-
-<style scoped>
-.context-menu {
-  position: fixed;
-  padding:4px 4px 0;
-  border-radius: 5px;
-  font-size: 14px;
-  color:#fff;
-  div{
-    padding-bottom: 4px;
-    cursor: pointer;
-  }
-}
-</style>
