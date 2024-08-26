@@ -344,6 +344,12 @@ export interface TableProps extends CommonFunctionProps {
    * After enabling, only the first layout will be displayed, and functions such as filter, group, sort, and table configuration will not be displayed.
    */
   mini: boolean
+  /**
+   * 主键列显示名
+   *
+   * Primary key column show name
+   */
+  pkColumnShowName?: string
 }
 /**
  * 简单表格属性
@@ -545,6 +551,12 @@ export interface SimpleTableProps extends SimpleCommonFunctionProps {
    * After enabling, only the first layout will be displayed, and functions such as filter, group, sort, and table configuration will not be displayed.
    */
   mini?: boolean
+  /**
+   * 主键列显示名
+   *
+   * Primary key column show name
+   */
+  pkColumnShowName?: string
 }
 /**
  * 生成表格属性
@@ -572,6 +584,7 @@ export function generateTableProps(simple: SimpleTableProps): TableProps {
     })),
     styles: generateTableStyleProps(simple.styles ?? {}),
     mini: simple.mini ?? false,
+    pkColumnShowName: simple.pkColumnShowName,
   }
 }
 

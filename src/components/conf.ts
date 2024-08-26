@@ -10,6 +10,7 @@ import * as eb from './eventbus'
 export interface TableConf extends CommonFunctionProps {
   id: string
   pkColumnName: string
+  pkColumnShowName?: string
   parentPkColumnName?: string
   columns: TableColumnProps[]
   styles: TableStyleProps
@@ -44,6 +45,7 @@ export function init(props: SimpleTableProps): {
     id: tableProps.id,
     pkColumnName: tableProps.pkColumnName,
     parentPkColumnName: tableProps.parentPkColumnName,
+    pkColumnShowName: tableProps.pkColumnShowName,
     columns: tableProps.columns,
     styles: tableProps.styles,
     quickSearch: tableProps.quickSearch,
