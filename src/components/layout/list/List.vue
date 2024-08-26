@@ -105,6 +105,7 @@ onMounted(() => {
       <RowsComp
         :records="props.layoutConf.data.records"
         :pk-column-name="props.tableConf.pkColumnName"
+        :pk-column-show-name="props.tableConf.pkColumnShowName"
         :parent-pk-column-name="props.tableConf.parentPkColumnName"
         :sub-data-show-kind="props.layoutConf.subDataShowKind"
         :pk-kind-is-number="pkKindIsNumber"

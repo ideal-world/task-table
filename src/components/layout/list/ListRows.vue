@@ -14,6 +14,9 @@ const props = defineProps<{
   // 主键列名
   // Primary key column name
   pkColumnName: string
+  // 主键列显示名
+  // Primary key column show name
+  pkColumnShowName?: string
   // 父主键列名
   // Parent primary key column name
   parentPkColumnName?: string
@@ -78,7 +81,7 @@ const props = defineProps<{
     >
       <div v-if="props.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA && props.parentPkColumnName" class="flex justify-end" :style="{ width: `${15 * (row[NODE_DEPTH_FLAG] + 1)}px` }" v-html="renderTreeToggleHandler(props.records[idx + 1] && row[props.pkColumnName] === props.records[idx + 1][props.parentPkColumnName])" />
       <i v-else-if="props.subDataShowKind === SubDataShowKind.TILE_ALL_DATA && props.parentPkColumnName && row[props.parentPkColumnName]" :class="`${iconSvg.SUB}`" />
-      {{ row[props.pkColumnName] }}
+      {{ row[props.pkColumnShowName || props.pkColumnName] }}
     </div>
     <!-- 常规数据列 -->
     <!-- Normal data column -->
@@ -91,7 +94,7 @@ const props = defineProps<{
       <!-- 优先使用自定义渲染 -->
       <!-- Prefer custom rendering -->
       <div v-if="column.name === 'name'" style="display: none;" class="hover-edit invisible group-hover/item:visible cursor-pointer bg-white h-full flex items-center absolute right-0 top-0 pr-1">
-        <i class="octicon-pencil-24"></i>
+        <i class="octicon-pencil-24" />
       </div>
       <div v-if="column.render" v-html="column.render(row, props.layoutKind)" />
       <template v-else-if="column.dataKind === DataKind.DATE || column.dataKind === DataKind.TIME || column.dataKind === DataKind.DATETIME">
