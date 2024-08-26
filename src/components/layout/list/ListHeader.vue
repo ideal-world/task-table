@@ -8,15 +8,9 @@ import ColumnResizeComp from '../../function/ColumnResize.vue'
 import ColumnFixedComp from './ListColumnFixed.vue'
 import ColumnWrapComp from './ListColumnWrap.vue'
 
-interface ColumnConfWithSort extends ColumnConf{
+interface ColumnConfWithSort extends ColumnConf {
   orderDesc: boolean
 }
-const  ORDER_ENUM = {
-  POSITIVE_SORT : false, //正序
-  INVERT_SORT : true, //倒序
-  UNDEFINED : null //不排序
-}
-
 const props = defineProps<{
   // 列配置
   // Column configuration
@@ -31,6 +25,12 @@ const props = defineProps<{
   // Set column style
   setColumnStyles: (colIdx: number, width?: number) => any
 }>()
+
+const ORDER_ENUM = {
+  POSITIVE_SORT: false, // 正序
+  INVERT_SORT: true, // 倒序
+  UNDEFINED: null, // 不排序
+}
 
 // 上下文菜单组件引用
 // Context menu component reference
@@ -87,15 +87,14 @@ const cateColumns = computed(() => {
  * 组装sort数据到columns（sort: { enabledColumnNames: ['no'], items: [{ columnName: 'no', orderDesc: false }] }）
  * Assemble sort data into columns
  */
-const columnsWithSort = computed(()=> {
-
-  const a =  props.columnsConf.map(e=> {
-    const canSort = props.layoutConf.sort!.enabledColumnNames.includes(e.name);
+const columnsWithSort = computed(() => {
+  const a = props.columnsConf.map((e) => {
+    const canSort = props.layoutConf.sort!.enabledColumnNames.includes(e.name)
     // if(canSort) {
-      return {
-        ...e,
-        orderDesc: canSort?props.layoutConf.sort!.items?.find(f=> f.columnName === e.name)?.orderDesc ?? ORDER_ENUM.UNDEFINED: ORDER_ENUM.UNDEFINED
-      }
+    return {
+      ...e,
+      orderDesc: canSort ? props.layoutConf.sort!.items?.find(f => f.columnName === e.name)?.orderDesc ?? ORDER_ENUM.UNDEFINED : ORDER_ENUM.UNDEFINED,
+    }
     // }
     // return e;
   })
@@ -128,31 +127,31 @@ async function setNewWidth(newWidth: number, columnName?: string) {
  * @param column 列
  */
 function handleSort(column: ColumnConfWithSort) {
-  const { orderDesc , name } = column;
-  const items = props.layoutConf.sort?.items || [];
-  const currentIndex = items?.findIndex(f=> f.columnName === name)
-  const currentItem = items?.find(f=> f.columnName === name)
-  if(currentItem) {//存在修改 exist modify
-    switch(orderDesc){
-      case ORDER_ENUM.POSITIVE_SORT: 
-        currentItem.orderDesc = ORDER_ENUM.INVERT_SORT;
-        break;
-      case ORDER_ENUM.INVERT_SORT: 
+  const { orderDesc, name } = column
+  const items = props.layoutConf.sort?.items || []
+  const currentIndex = items?.findIndex(f => f.columnName === name)
+  const currentItem = items?.find(f => f.columnName === name)
+  if (currentItem) { // 存在修改 exist modify
+    switch (orderDesc) {
+      case ORDER_ENUM.POSITIVE_SORT:
+        currentItem.orderDesc = ORDER_ENUM.INVERT_SORT
+        break
+      case ORDER_ENUM.INVERT_SORT:
         items.splice(currentIndex, 1)
         // currentItem.orderDesc = ORDER_ENUM.UNDEFINED;
-        break;
-      case ORDER_ENUM.UNDEFINED: 
-        currentItem.orderDesc = ORDER_ENUM.POSITIVE_SORT;
-        break;
-      
+        break
+      case ORDER_ENUM.UNDEFINED:
+        currentItem.orderDesc = ORDER_ENUM.POSITIVE_SORT
+        break
     }
-  }else {//不存在添加 no exist add
+  }
+  else { // 不存在添加 no exist add
     items.push({
       columnName: column.name,
       orderDesc: ORDER_ENUM.POSITIVE_SORT,
     })
   }
-  
+
   eb.modifyLayout({
     sort: {
       enabledColumnNames: props.layoutConf.sort!.enabledColumnNames,
