@@ -117,7 +117,6 @@ function addSortCond(columnName: string, orderDesc: boolean) {
         class="iw-row-sort__item p-1 flex w-full justify-between cursor-move py-2"
       >
         <div>
-          <i :class="`${iconSvg.GRABBER} mr-0.5`" />
           <i :class="`${props.columnsConf.find(col => col.name === column.columnName)?.icon} mr-0.5`" />
           {{ props.columnsConf.find(col => col.name === column.columnName)?.title }}
         </div>
@@ -150,7 +149,6 @@ function addSortCond(columnName: string, orderDesc: boolean) {
         :data-column-name="column.name"
       >
         <div>
-          <i :class="`${column.icon} mr-0.5 ml-1`" />
           {{ column.title }}
         </div>
         <div class="iw-join ml-1">

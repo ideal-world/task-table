@@ -216,10 +216,10 @@ function handleSort(column: ColumnConfWithSort) {
         :title="column.title"
         @click="(event: MouseEvent) => showHeaderContextMenu(event, column.name)"
       >
-        <i :class="`${column.icon} mr-1`" /> {{ column.title }}
+        {{ column.title }}
         <div v-if="column.hasOwnProperty('orderDesc')" class="sort-box flex flex-col items-center justify-center ml-2" @click.stop="handleSort(column as ColumnConfWithSort)">
-          <i class="sort-icon octicon-triangle-down-24 rotate-180 mb-[-3px]" :class="`${column.orderDesc === false ? 'text-primary' : ''}`" />
-          <i class="sort-icon octicon-triangle-down-24 mt-[-12px]" :class="column.orderDesc ? 'text-primary' : ''" />
+          <i class="sort-icon octicon-triangle-down-24 text-[rgb(192,196,204)] rotate-180 hover:text-[var(--sys-primary)]" :class="`${column.orderDesc === false ? 'text-primary' : ''}`" />
+          <i class="sort-icon octicon-triangle-down-24 text-[rgb(192,196,204)] mt-[-12px] hover:text-[var(--sys-primary)]" :class="column.orderDesc ? 'text-primary' : ''" />
         </div>
       </div>
       <!-- 操作列 -->
