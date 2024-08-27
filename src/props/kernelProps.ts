@@ -265,14 +265,14 @@ export type SimpleCommonColumnProps = ChangeOptionalExcept<CommonColumnProps, 'n
  */
 function generateCommonColumnProps(tableSimple: SimpleCommonColumnProps, layoutSimple?: SimpleCommonColumnProps): CommonColumnProps {
   return {
-    name: layoutSimple?.name ?? tableSimple.name,
-    wrap: layoutSimple?.wrap ?? tableSimple.wrap ?? false,
-    fixed: layoutSimple?.fixed ?? tableSimple.fixed ?? false,
-    width: layoutSimple?.width ?? tableSimple.width ?? 100,
-    hide: layoutSimple?.hide ?? tableSimple.hide ?? false,
-    styles: layoutSimple?.styles ?? tableSimple.styles ?? {},
-    categoryTitle: layoutSimple?.categoryTitle ?? tableSimple.categoryTitle,
-    render: layoutSimple?.render ?? tableSimple.render,
+    name: layoutSimple?.name ?? tableSimple?.name,
+    wrap: layoutSimple?.wrap ?? tableSimple?.wrap ?? false,
+    fixed: layoutSimple?.fixed ?? tableSimple?.fixed ?? false,
+    width: layoutSimple?.width ?? tableSimple?.width ?? 100,
+    hide: layoutSimple?.hide ?? tableSimple?.hide ?? false,
+    styles: layoutSimple?.styles ?? tableSimple?.styles ?? {},
+    categoryTitle: layoutSimple?.categoryTitle ?? tableSimple?.categoryTitle,
+    render: layoutSimple?.render ?? tableSimple?.render,
   }
 }
 
