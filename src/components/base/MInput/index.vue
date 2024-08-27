@@ -101,3 +101,8 @@ defineExpose({
             @keyup="e => { showDictItems((e.target as HTMLInputElement).value, filterItemIdx, e) }">
     </div>
 </template>
+<style scoped>
+.selected-box .iw-dropdown .iw-dropdown-content {
+    position: fixed;
+}
+</style>
