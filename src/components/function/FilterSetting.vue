@@ -652,8 +652,8 @@ onMounted(() => {
     :options="filterColumnOptions" @click="setFilterColumn" />
   <MenuSelectComp ref="filterOpCompRef" :values="[selectedFilterItem?.operator]"
     :options="operatorOptions" @click="setFilterOp" />
-  <MenuSelectComp ref="dictContainerCompRef" :values="selectedFilterItem?.values"
+  <MenuSelectComp ref="dictContainerCompRef"  v-if="selectedFilterItem?.dictKind === DictKind.SELECT" :values="selectedFilterItem?.values"
     :options="queryDictItemsResp?.records" @click="setFilterADictValue" />
-  <MenuTreeComp ref="dictTreeContainerCompRef" :values="selectedFilterItem?.values"
+  <MenuTreeComp ref="dictTreeContainerCompRef" v-if="selectedFilterItem?.dictKind === DictKind.TREE_SELECT" :values="selectedFilterItem?.values"
     :options="queryDictItemsResp?.records" @click="setFilterADictValue" />
 </template>
