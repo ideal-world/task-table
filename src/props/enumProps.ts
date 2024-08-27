@@ -819,11 +819,11 @@ export enum DictKind {
    *
    * select dropdown
    */
-  SELECT = 'select',
+  SELECT = 'SELECT',
   /**
    * 树形下拉
    *
    * tree select
    */
-  TREE_SELECT = 'treeSelect'
+  TREE_SELECT = 'TREE_SELECT'
 }
