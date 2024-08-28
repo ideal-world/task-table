@@ -71,7 +71,7 @@ export function init(props: SimpleTableProps): {
       selectedDataPks: [],
     }
   }))
-  const currentLayoutId = ref(layoutsConf[0].id)
+  const currentLayoutId = ref(layoutsConf[0]?.id)
   // Initialize events
   eb.init(tableConf, layoutsConf, currentLayoutId, props.events)
   return {

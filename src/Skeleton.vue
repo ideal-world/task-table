@@ -46,6 +46,7 @@ function getCurrentLayoutConf(): LayoutConf {
  * Get current layout column configuration
  */
 function getCurrentLayoutColumnConf(): ColumnConf[] {
+  if(!currentLayoutId.value) return {} as ColumnConf[]
   return getCurrentLayoutConf().columns.filter(column => !column.hide).map((column) => {
     return {
       ...tableConf.columns.find(col => col.name === column.name)!,
@@ -91,7 +92,7 @@ watch(
       currentLayoutId.value = layoutsConf[idx].id
     }
     else {
-      currentLayoutId.value = layoutsConf[0].id
+      currentLayoutId.value = layoutsConf[0]?.id
     }
     setHeight()
   },
@@ -194,7 +195,7 @@ function exContextMenuArg(e: MouseEvent) {
         <slot name="header-extra" />
       </div>
     </div>
-    <template v-for="layout in layoutsConf" :key="layout.id">
+    <template v-if="layoutsConf && layoutsConf.length" v-for="layout in layoutsConf" :key="layout.id">
       <div v-show="currentLayoutId === layout.id" :id="`iw-tt-layout-${layout.id}`" class="iw-tt-layout">
         <div
           v-if="!tableConf.mini && (layout.sort || layout.filter)"
