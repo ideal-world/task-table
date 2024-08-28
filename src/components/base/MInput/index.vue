@@ -69,7 +69,7 @@ defineExpose({
 })
 </script>
 <template>
-    <div class="value-input iw-input iw-input-xs iw-input-bordered flex items-center gap-2 h-[30px] rounded-sm"
+    <div class="value-input iw-input iw-input-xs iw-input-bordered flex items-center gap-2 h-auto rounded-sm"
         :style="{ width: labelWidth + 'px' }">
         <!-- 已添加的多值列表 -->
         <!-- List of multiple values already added -->
