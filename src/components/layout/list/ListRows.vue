@@ -3,7 +3,7 @@ import dayjs from 'dayjs'
 import * as iconSvg from '../../../assets/icon'
 
 import type { LayoutKind, TableStyleProps } from '../../../props'
-import { DATA_DICT_POSTFIX, DataKind, SubDataShowKind } from '../../../props/enumProps'
+import { DATA_DICT_POSTFIX, DATA_NAME_POSTFIX, DataKind, SubDataShowKind } from '../../../props/enumProps'
 import type { ColumnConf } from '../../conf'
 import { NODE_DEPTH_FLAG, renderTreeToggleHandler } from '../../function/RowTree'
 
@@ -88,7 +88,7 @@ const props = defineProps<{
     <div
       v-for="(column, colIdx) in props.columnsConf.slice(1)" :key="`${props.layoutId}-${column.name}`"
       class="group/item"
-      :class="`${props.styleProps.cellClass} iw-list-cell iw-data-cell flex items-center bg-base-100 border-l border-l-base-300 ${column.wrap ? 'break-words flex-wrap' : 'whitespace-nowrap text-ellipsis flex-nowrap'}`"
+      :class="`${props.styleProps.cellClass} iw-list-cell iw-data-cell flex items-center bg-base-100 border-l border-l-base-300 overflow-hidden ${column.wrap ? 'break-words flex-wrap' : 'whitespace-nowrap text-ellipsis flex-nowrap'}`"
       :data-column-name="column.name" :data-row-pk="row[props.pkColumnName]" :style="{ ...column.styles, ...props.setColumnStyles(colIdx + 1) }"
     >
       <!-- 优先使用自定义渲染 -->
@@ -98,27 +98,22 @@ const props = defineProps<{
       </div>
       <div v-if="column.render" class="w-full truncate" v-html="column.render(row, props.layoutKind)" />
       <template v-else-if="column.dataKind === DataKind.DATE || column.dataKind === DataKind.TIME || column.dataKind === DataKind.DATETIME">
-        <div class="w-full truncate">
+        <div class="w-full truncate" :title="column.kindDateTimeFormat ? dayjs(row[column.name]).format(column.kindDateTimeFormat) : row[column.name]">
           {{ column.kindDateTimeFormat ? dayjs(row[column.name]).format(column.kindDateTimeFormat) : row[column.name] }}
         </div>
       </template>
       <img v-else-if="column.dataKind === DataKind.IMAGE" :src="row[column.name]" class="w-4 h-4 transition duration-300 transform hover:scale-[8] hover:rounded-sm hover:z-[3000]">
-      <a v-else-if="column.dataKind === DataKind.FILE" :href="row[column.name]" target="_blank" class="underline w-full  truncate">{{ row[column.name] && row[column.name].substring(row[column.name].lastIndexOf('/') + 1) }}</a>
+      <a v-else-if="column.dataKind === DataKind.FILE" :href="row[column.name]" :title="row[column.name] && row[column.name].substring(row[column.name].lastIndexOf('/') + 1)" target="_blank" class="underline w-full  truncate">{{ row[column.name] && row[column.name].substring(row[column.name].lastIndexOf('/') + 1) }}</a>
       <template v-else-if="!column.useDict">
-        {{ row[column.name] }}
+        <div class="w-full truncate" :title="row[column.name]">
+          {{ row[column.name + DATA_NAME_POSTFIX] ?? row[column.name] }}
+        </div>
       </template>
       <div
-        v-for="dictItem in row[column.name + DATA_DICT_POSTFIX]" :key="`${column.name}-${dictItem.value}`"
+        v-for="(dictItem, index) in row[column.name + DATA_DICT_POSTFIX]" :key="`${column.name}-${dictItem.value}`"
         :data-value="dictItem.value"
-        class="iw-badge iw-badge-outline pl-0.5 mb-0.5 mr-0.5"
-        :style="`background-color: ${dictItem.color}`"
       >
-        <div v-if="dictItem.avatar !== undefined" class="avatar">
-          <div class="w-4 rounded-full">
-            <img :src="dictItem.avatar">
-          </div>
-        </div>
-        <span class="ml-1 whitespace-nowrap">{{ dictItem.title }}{{ dictItem.title !== dictItem.value ? `(${dictItem.value})` : '' }}</span>
+        {{ dictItem.title }}{{ index < row[column.name + DATA_DICT_POSTFIX].length - 1 ? ',' : '' }}
       </div>
     </div>
     <!-- 操作列 -->

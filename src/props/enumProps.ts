@@ -29,6 +29,23 @@ const { t } = locales.global
  */
 export const DATA_DICT_POSTFIX = '__dict'
 
+/**
+ * name后缀
+ *
+ * name suffix
+ *
+ * 当行数据中某列额外存在带有DATA_NAME_POSTFIX后缀字段时,优先使用DATA_NAME_POSTFIX后缀字段的value。
+ *
+ * If a column contains a DATA_NAME_POSTFIX field, the value of the DATA_NAME_POSTFIX field is preferred.
+ *
+ * @example
+ * {
+ *    primary: 1,                                 // Original field
+ *    primary__name: 一级,                        // Additional field
+ * }
+ */
+export const DATA_NAME_POSTFIX = '__name'
+
 // --------------------------------------------------------- SizeKind ---------------------------------------------------------
 
 /**
@@ -809,7 +826,7 @@ export enum AlertKind {
 
 /**
  * 字典类型
- * 
+ *
  * dictionary kind
  */
 
@@ -825,5 +842,5 @@ export enum DictKind {
    *
    * tree select
    */
-  TREE_SELECT = 'TREE_SELECT'
+  TREE_SELECT = 'TREE_SELECT',
 }
