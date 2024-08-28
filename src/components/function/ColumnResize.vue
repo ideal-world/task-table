@@ -117,7 +117,7 @@ onMounted(() => {
   dragEle.style.cursor = 'ew-resize'
   const subDragEle = document.createElement('div')
   subDragEle.style.flex = '1'
-  subDragEle.classList.add('bg-info')
+  subDragEle.classList.add('bg-primary')
   dragEle.appendChild(subDragEle)
   resizeEle.appendChild(dragEle)
 
