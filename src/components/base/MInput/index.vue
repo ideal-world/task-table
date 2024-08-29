@@ -33,6 +33,7 @@ const breviaryCount = computed(() => props.options.length - breviaryShowCount.va
 // 字典值输入框引用
 // Dictionary value input box reference
 const inputRef = ref<InstanceType<typeof HTMLInputElement>>()
+const isComposing = ref(false);
 
 onMounted(() => {
     selectedObserver.value = new ResizeObserver(() => {
@@ -49,6 +50,14 @@ onMounted(() => {
         }
     })
     selectedObserver.value?.observe(selectedBoxRef.value)
+
+    inputRef.value?.addEventListener('compositionstart', e => {
+        isComposing.value = true
+    })
+    inputRef.value?.addEventListener('compositionend', e => {
+        isComposing.value = false
+
+    })
 })
 
 onBeforeUnmount(() => {
@@ -62,6 +71,15 @@ function handleInputClick() {
 }
 function clearInput() {
     inputRef.value!.value = ''
+}
+
+function handleChange(e: Event) {
+    setTimeout(() => {
+        if (!isComposing.value) {
+            props.showDictItems((e.target as HTMLInputElement).value, props.filterItemIdx, e)
+        }
+    }, 0)
+
 }
 defineExpose({
     inputRef,
@@ -95,10 +113,11 @@ defineExpose({
         </div>
         <!-- 字典的多值添加 -->
         <!-- Multiple value addition of dictionary -->
+
         <input ref="inputRef" class="pl-1 rounded-md iw-input-bordered w-4 border-none flex-1"
             :type="getInputTypeByDataKind(DataKind.TEXT)" :data-value-input-idx="filterItemIdx"
             @click="e => { showDictItems((e.target as HTMLInputElement).value, filterItemIdx, e) }"
-            @keyup="e => { showDictItems((e.target as HTMLInputElement).value, filterItemIdx, e) }">
+            @input="handleChange">
     </div>
 </template>
 <style scoped>
