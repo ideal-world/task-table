@@ -605,8 +605,8 @@ const events: IwProps.TableEventProps = {
   },
   getMicroAppOffset() {
     return {
-      left: -20,
-      top: -20,
+      left: 0,
+      top: 0,
     }
   },
 }
