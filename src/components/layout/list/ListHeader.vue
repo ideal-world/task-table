@@ -210,7 +210,7 @@ function handleSort(column: ColumnConfWithSort) {
       <!-- Data column -->
       <div
         v-for="(column, colIdx) in columnsWithSort" :key="`${props.layoutConf.id}-${column.name}`"
-        :class="`${props.tableConf.styles.cellClass} iw-list-cell iw-resize-item flex items-center bg-base-200 ${(colIdx !== 0 || props.layoutConf.showSelectColumn) && 'border-l border-l-base-300'} whitespace-nowrap overflow-hidden text-ellipsis flex-nowrap hover:cursor-pointer`"
+        :class="`${props.tableConf.styles.cellClass} iw-list-cell iw-resize-item flex items-center bg-base-200 ${(colIdx !== 0 || props.layoutConf.showSelectColumn) && 'border-l border-l-base-300'} whitespace-nowrap overflow-hidden text-ellipsis flex-nowrap hover:cursor-pointer hover:drop-shadow-lg hover:z-10`"
         :data-column-name="column.name"
         :style="props.setColumnStyles(colIdx)"
         :title="column.title"
