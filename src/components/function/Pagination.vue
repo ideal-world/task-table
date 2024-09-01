@@ -121,6 +121,11 @@ async function setSlice(newPage?: number, newFetchNumber?: number) {
       fetchNumber: newFetchNumber ?? props.slice.fetchNumber,
       fetchNumbers: props.slice.fetchNumbers,
     }
+
+    if (newFetchNumber) {
+      newSlice.offsetNumber = 0
+    }
+
     const changedLayoutReq: LayoutModifyProps = {
       slice: newSlice,
     }
