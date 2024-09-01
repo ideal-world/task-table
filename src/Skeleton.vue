@@ -46,7 +46,8 @@ function getCurrentLayoutConf(): LayoutConf {
  * Get current layout column configuration
  */
 function getCurrentLayoutColumnConf(): ColumnConf[] {
-  if(!currentLayoutId.value) return {} as ColumnConf[]
+  if (!currentLayoutId.value)
+    return {} as ColumnConf[]
   return getCurrentLayoutConf().columns.filter(column => !column.hide).map((column) => {
     return {
       ...tableConf.columns.find(col => col.name === column.name)!,
@@ -102,7 +103,7 @@ onMounted(async () => {
   delegateEvent(`#iw-tt-${tableConf.id}`, 'click', '.iw-tt-header__item', (e: Event) => {
     const target = (e.target as HTMLElement).closest('.iw-tt-header__item') as HTMLElement
     const layoutId = target.dataset.layoutId
-    if (layoutId) {
+    if (layoutId && (currentLayoutId.value !== layoutId)) {
       currentLayoutId.value = layoutId
       setHeight()
     }
@@ -140,6 +141,10 @@ function exContextMenuArg(e: MouseEvent) {
   const target = (e.target as HTMLElement)?.closest('.iw-data-cell') as HTMLElement
   return target.dataset.rowPk
 }
+
+defineExpose({
+  currentLayoutId, // 当前布局id
+})
 </script>
 
 <!--
@@ -195,8 +200,8 @@ function exContextMenuArg(e: MouseEvent) {
         <slot name="header-extra" />
       </div>
     </div>
-    <template v-if="layoutsConf && layoutsConf.length" v-for="layout in layoutsConf" :key="layout.id">
-      <div v-show="currentLayoutId === layout.id" :id="`iw-tt-layout-${layout.id}`" class="iw-tt-layout">
+    <template v-for="layout in layoutsConf" :key="layout.id">
+      <div v-if="layoutsConf && layoutsConf.length" v-show="currentLayoutId === layout.id" :id="`iw-tt-layout-${layout.id}`" class="iw-tt-layout">
         <div
           v-if="!tableConf.mini && (layout.sort || layout.filter)"
           class="iw-tt-toolbar flex items-center px-0.5 py-[10px]"
