@@ -278,7 +278,7 @@ function generateOneTimelineBar(barEle: HTMLElement, timelineRowEle: HTMLElement
 // 监听甘特图信息变化
 // Listen for changes in Gantt chart information
 watch(() => props.ganttInfo, () => {
-  nextTick(() => {
+  setTimeout(() => {
     // 重新生成时间线栏
     // Regenerate timeline bar
     generateAllTimelineBar()
@@ -491,7 +491,7 @@ function updateResize(e: PointerEvent) {
  */
 async function judgeDragEdit() {
   const pks = props.records.map(row => row[props.pkColumnName])
-  editableDataResp.value = await eb.loadEditableData(pks)
+  editableDataResp.value = await eb.loadEditableData(pks, props.layoutId)
 }
 
 /**
