@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import type { TableStyleProps } from '../../../props'
 import { GanttShowKind } from '../../../props/enumProps'
 import { groupBy } from '../../../utils/basic'
@@ -16,6 +17,9 @@ const props = defineProps<{
   // Table style configuration
   styleProps: TableStyleProps
 }>()
+
+const timelineCateColumnRef = ref<HTMLElement>()
+const timelineColumnRef = ref<HTMLElement>()
 
 /**
  * 获取分类列时间线
@@ -39,7 +43,9 @@ function getCateColumTimeline() {
  * Gets the height of the timeline when viewing the Gantt chart year
  */
 function ganttTimeLineYearHeight() {
-  return `${(document.querySelector('.gantt-timeline-cate-column') as HTMLElement).clientHeight + (document.querySelector('.gantt-timeline-column') as HTMLElement).clientHeight}px`
+  if (!timelineCateColumnRef.value?.clientHeight || !timelineColumnRef.value?.clientHeight)
+    return
+  return `${timelineCateColumnRef.value?.clientHeight + timelineColumnRef.value?.clientHeight}px`
 }
 </script>
 
@@ -49,7 +55,7 @@ function ganttTimeLineYearHeight() {
   >
     <!-- 当甘特图显示类型不是年时，显示分类列 -->
     <!-- When the Gantt chart display type is not year, display the category column -->
-    <div v-if="ganttInfo.ganttShowKind !== GanttShowKind.YEAR" class="flex items-center gantt-timeline-cate-column">
+    <div v-show="ganttInfo.ganttShowKind !== GanttShowKind.YEAR" ref="timelineCateColumnRef" class="flex items-center gantt-timeline-cate-column">
       <div
         v-for="(cateColumTimeline, idx) in getCateColumTimeline()" :key="`${layoutId}-${idx}`"
         :style="`width:${cateColumTimeline.offset * getTimelineColumnWidth(props.ganttInfo.ganttShowKind)}px;border-left:${idx !== 0 && '1px solid var(--fallback-b3,oklch(var(--b3)/var(--tw-border-opacity)))'}`"
@@ -59,7 +65,7 @@ function ganttTimeLineYearHeight() {
         {{ cateColumTimeline.cateTitle }}
       </div>
     </div>
-    <div class="flex items-center gantt-timeline-column" :style="`height:${ganttInfo.ganttShowKind === GanttShowKind.YEAR && ganttTimeLineYearHeight()}`">
+    <div ref="timelineColumnRef" class="flex items-center gantt-timeline-column" :style="`height:${ganttInfo.ganttShowKind === GanttShowKind.YEAR && ganttTimeLineYearHeight()}`">
       <div
         v-for="(timeline, idx) in ganttInfo.timeline" :key="`${layoutId}-${idx}`"
         :data-value="timeline.value"
