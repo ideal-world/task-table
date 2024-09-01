@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import dayjs from 'dayjs'
+import { ref } from 'vue'
 import * as iconSvg from '../../../assets/icon'
-
 import type { LayoutKind, TableStyleProps } from '../../../props'
 import { DATA_DICT_POSTFIX, DATA_NAME_POSTFIX, DataKind, SubDataShowKind } from '../../../props/enumProps'
 import type { ColumnConf } from '../../conf'
@@ -48,6 +48,28 @@ const props = defineProps<{
   // Set column style
   setColumnStyles: (colIdx: number, width?: number) => any
 }>()
+
+// 字典title
+// Dict title
+const dictTitle = ref('')
+
+/**
+ *
+ * 获取字典title
+ *
+ * Get dict title
+ *
+ * @param row 行数据  Row data
+ * @param column 列配置 Column configuration
+ * @param dictData 字典数据 Dictionary data
+ */
+function getDictTitle(row: { [columnName: string]: any }, columnsConf: ColumnConf, dictData: { [columnName: string]: any }) {
+  let title = ''
+  dictData.forEach((item: { [columnName: string]: any }, index: number) => {
+    title += `${item.title}${index < row[columnsConf.name + DATA_DICT_POSTFIX].length - 1 ? ',' : ''}`
+  })
+  dictTitle.value = title
+}
 </script>
 
 <template>
@@ -60,7 +82,7 @@ const props = defineProps<{
   <div
     v-for="(row, idx) in props.records"
     :key="`${layoutId}-${row[props.pkColumnName]}-${props.subDataShowKind}`"
-    :data-pk="row[props.pkColumnName] "
+    :data-pk="row[props.pkColumnName]"
     :data-parent-pk="props.parentPkColumnName ? row[props.parentPkColumnName] : undefined"
     :class="`${props.styleProps.rowClass} iw-list-row iw-data-row ${props.subDataShowKind === SubDataShowKind.FOLD_SUB_DATA ? 'iw-data-fold' : ''} flex bg-base-100 border-b border-b-base-300 border-r border-r-base-300`"
   >
@@ -105,13 +127,15 @@ const props = defineProps<{
       <img v-else-if="column.dataKind === DataKind.IMAGE" :src="row[column.name]" class="w-4 h-4 transition duration-300 transform hover:scale-[8] hover:rounded-sm hover:z-[3000]">
       <a v-else-if="column.dataKind === DataKind.FILE" :href="row[column.name]" :title="row[column.name] && row[column.name].substring(row[column.name].lastIndexOf('/') + 1)" target="_blank" class="underline w-full  truncate">{{ row[column.name] && row[column.name].substring(row[column.name].lastIndexOf('/') + 1) }}</a>
       <template v-else-if="!column.useDict">
-        <div class="w-full truncate" :title="row[column.name]">
+        <div class="w-full truncate" :title="row[column.name + DATA_NAME_POSTFIX] ?? row[column.name]">
           {{ row[column.name + DATA_NAME_POSTFIX] ?? row[column.name] }}
         </div>
       </template>
       <div
         v-for="(dictItem, index) in row[column.name + DATA_DICT_POSTFIX]" :key="`${column.name}-${dictItem.value}`"
         :data-value="dictItem.value"
+        :title="dictTitle"
+        @mouseenter="getDictTitle(row, column, row[column.name + DATA_DICT_POSTFIX])"
       >
         {{ dictItem.title }}{{ index < row[column.name + DATA_DICT_POSTFIX].length - 1 ? ',' : '' }}
       </div>
