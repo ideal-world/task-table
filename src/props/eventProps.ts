@@ -32,6 +32,7 @@ export interface TableEventProps {
    * @param slice 分片 / Slice
    * @param returnColumnNames 返回的列名 / Returned column names
    * @param returnOnlyAgg 仅返回聚合数据 / Only return aggregated data
+   * @param layoutId layoutId / layoutId
    * @returns 数据或分组数据 / Data or grouped data
    */
   loadData: (
@@ -44,7 +45,9 @@ export interface TableEventProps {
     byGroupValue?: any,
     slice?: DataQuerySliceReq,
     returnColumnNames?: string[],
-    returnOnlyAgg?: boolean) => Promise<DataResp | DataGroupResp[]>
+    returnOnlyAgg?: boolean,
+    layoutId?: string
+  ) => Promise<DataResp | DataGroupResp[]>
 
   /**
    * 新建数据
@@ -91,7 +94,7 @@ export interface TableEventProps {
    *
    * @param checkRecordPks 要检查的数据主键 / Data primary keys to be checked
    */
-  loadEditableData?: (checkRecordPks: any[]) => Promise<EditableDataResp>
+  loadEditableData?: (checkRecordPks: any[], layoutId: string) => Promise<EditableDataResp>
 
   /**
    * 选择数据
@@ -211,5 +214,5 @@ export interface TableEventProps {
    *
    * get micro app offset
    */
-  getMicroAppOffset?: () => {left: number, top: number}
+  getMicroAppOffset?: () => { left: number, top: number }
 }

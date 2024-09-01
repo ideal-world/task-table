@@ -6,9 +6,9 @@ import { DataKind, DictKind, getInputTypeByDataKind } from '../../props/enumProp
 import { delegateEvent } from '../../utils/basic'
 import type { ColumnConf } from '../conf'
 import * as eb from '../eventbus'
-import DictSelectComp from './DictSelect.vue'
 import DictSelect from '../base/DictSelect.vue'
 import TreeSelect from '../base/TreeSelect.vue'
+import DictSelectComp from './DictSelect.vue'
 
 const props = defineProps<{
   // 容器类名，用于标识编辑元素的共同父元素。父元素必须是 ``relative`` 定位
@@ -41,6 +41,9 @@ const props = defineProps<{
   // 编辑行主键值属性，用于确定该行对应的主键值
   // Edit row primary key value attribute, used to determine the primary key value corresponding to the row
   editRowPkValueProp: string
+  // 布局ID
+  // Layout ID
+  layoutId: string
 }>()
 
 // 编辑容器，用于显示编辑功能
@@ -79,20 +82,20 @@ async function enterEditMode(
   value: any,
   pkValue: any,
   columnConf: ColumnConf,
-  editCellEle: HTMLElement
+  editCellEle: HTMLElement,
 ) {
   curColumnConf.value = columnConf
   curPk.value = pkValue
   curValue.value = value
-const {
-  offsetLeft,
-  offsetTop,
-  offsetWidth,
-  offsetHeight,
-} = editCellEle
+  const {
+    offsetLeft,
+    offsetTop,
+    offsetWidth,
+    offsetHeight,
+  } = editCellEle
 
-  cellEditContainerRef.value!.style.cssText = 
-   `display: flex;left: ${offsetLeft - 1}px;top: ${offsetTop - 1}px;width: ${offsetWidth + 2}px;;height: ${offsetHeight + 2}px;`
+  cellEditContainerRef.value!.style.cssText
+   = `display: flex;left: ${offsetLeft - 1}px;top: ${offsetTop - 1}px;width: ${offsetWidth + 2}px;;height: ${offsetHeight + 2}px;`
 
   if (!curColumnConf.value.useDict) {
     const inputEle = cellEditContainerRef.value!.children[0] as HTMLElement
@@ -124,8 +127,8 @@ async function setValue(value: any) {
     await eb.modifyData([
       {
         [props.pkColumnName]: curPk.value,
-        [curColumnConf.value!.name]: value
-      }
+        [curColumnConf.value!.name]: value,
+      },
     ])
   }
   if (!curColumnConf.value?.multiValue) {
@@ -160,13 +163,14 @@ async function setValue(value: any) {
 function checkEditable(
   pkValue: any,
   columnName: string,
-  editable?: EditableDataResp
+  editable?: EditableDataResp,
 ): boolean {
   if (editable) {
     return (
       editable.cells[pkValue]?.includes(columnName) && editable.whiteListMode
     )
-  } else {
+  }
+  else {
     return props.edit.enabledColumnNames.includes(columnName) ?? false
   }
 }
@@ -206,7 +210,7 @@ function markEditable(containerEle: HTMLElement) {
       const hoverEditEle = (ele as HTMLElement).querySelector('.hover-edit') // 鼠标悬停编辑单元格
       const columnName = editCellEle.dataset[props.editCellColumnNameProp] as string
       const columnConf = props.columnsConf.find(column => column.name === columnName)!
-      if (checkEditable(pkValue, columnConf.name, editableDataResp.value)) {
+      if (checkEditable(pkValue, columnConf?.name, editableDataResp.value)) {
         hoverEditEle ? ((hoverEditEle as HTMLElement)!.style!.display = 'flex') : editCellEle.appendChild(editableMarkEles.cloneNode(true))
       }
     })
@@ -218,13 +222,13 @@ function markEditable(containerEle: HTMLElement) {
 watch([() => props.columnsConf, () => props.data], async () => {
   if (props.edit.markEditable) {
     const pks: any[] = Array.isArray(props.data)
-      ? props.data.flatMap((d) => d.records.map((r) => r[props.pkColumnName]))
-      : props.data.records.map((r) => r[props.pkColumnName])
-    editableDataResp.value = await eb.loadEditableData(pks)
+      ? props.data.flatMap(d => d.records.map(r => r[props.pkColumnName]))
+      : props.data.records.map(r => r[props.pkColumnName])
+    editableDataResp.value = await eb.loadEditableData(pks, props.layoutId)
     markEditable(
       cellEditContainerRef.value!.closest(
-        `.${props.containerClass}`
-      ) as HTMLElement
+        `.${props.containerClass}`,
+      ) as HTMLElement,
     )
   }
 }, {
@@ -233,16 +237,16 @@ watch([() => props.columnsConf, () => props.data], async () => {
 
 onMounted(() => {
   const containerEle = cellEditContainerRef.value!.closest(
-    `.${props.containerClass}`
+    `.${props.containerClass}`,
   ) as HTMLElement
   // 容器冒泡捕捉到单击事件后，尝试离开编辑模式
   // After the container captures the click event, try to leave edit mode
   containerEle.addEventListener('click', (e) => {
     if (
-      !curColumnConf.value ||
-      (e.target &&
-        e.target instanceof HTMLElement &&
-        e.target.closest(`.iw-edit-container`))
+      !curColumnConf.value
+      || (e.target
+      && e.target instanceof HTMLElement
+      && e.target.closest(`.iw-edit-container`))
     ) {
       return
     }
@@ -268,18 +272,18 @@ onMounted(() => {
 })
 
 /**
- * 
+ *
  * @param e 单击事件 click event
-
 
  * @param isHoverEdit 是否是鼠标悬停编辑 whether it is mouse hover edit
  */
-function clickEvent(e: Event, isHoverEdit: boolean){
+function clickEvent(e: Event, isHoverEdit: boolean) {
   const editCellEle = (e.target as HTMLElement).closest(`.${props.editCellClass}`) as HTMLElement
   const columnName = editCellEle.dataset[props.editCellColumnNameProp] as string
   const editRowEle = editCellEle.closest(`.${props.editRowClass}`) as HTMLElement
   const columnConf = props.columnsConf.find(column => column.name === columnName)!
-  if(isHoverEdit?columnConf.name !== 'name':columnConf.name === 'name') return
+  if (isHoverEdit ? columnConf.name !== 'name' : columnConf.name === 'name')
+    return
   const pkValue = props.pkKindIsNumber ? Number.parseInt(editRowEle.dataset[props.editRowPkValueProp]!) : editRowEle.dataset[props.editRowPkValueProp]!
   const data: DataResp = Array.isArray(props.data) ? props.data.find(groupData => groupData.records.some(record => record[props.pkColumnName] === pkValue))! : props.data
   if (checkEditable(pkValue, columnConf.name, editableDataResp.value)) {
@@ -303,7 +307,7 @@ function clickEvent(e: Event, isHoverEdit: boolean){
         type="checkbox"
         :checked="curValue"
         @click="event => setValue((event.target as HTMLInputElement).checked)"
-      />
+      >
     </template>
     <template v-else-if="!curColumnConf?.useDict">
       <input
@@ -311,7 +315,7 @@ function clickEvent(e: Event, isHoverEdit: boolean){
         :type="getInputTypeByDataKind(curColumnConf?.dataKind)"
         :value="curValue"
         @change="event => setValue((event.target as HTMLInputElement).value)"
-      />
+      >
     </template>
     <template v-else-if="curColumnConf.dictKind === DictKind.TREE_SELECT">
       <TreeSelect

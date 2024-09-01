@@ -73,6 +73,7 @@ export async function loadData(byGroupValue?: any, returnOnlyAgg?: boolean, layo
           },
       showColumns,
       returnOnlyAgg,
+      layoutId,
     )
   }
   catch (e: any) {
@@ -266,7 +267,7 @@ export async function deleteData(deletedRecordPks: any[]) {
  *
  * @param checkRecordPks 要检查的数据主键 / Data primary keys to be checked
  */
-export async function loadEditableData(checkRecordPks: any[]): Promise<EditableDataResp> {
+export async function loadEditableData(checkRecordPks: any[], layoutId: string): Promise<EditableDataResp> {
   checkRecordPks = deepToRaw(checkRecordPks)
 
   if (!events.loadEditableData) {
@@ -275,7 +276,7 @@ export async function loadEditableData(checkRecordPks: any[]): Promise<EditableD
   }
 
   try {
-    return await events.loadEditableData(checkRecordPks)
+    return await events.loadEditableData(checkRecordPks, layoutId)
   }
   catch (e: any) {
     handleAlert(AlertKind.EVENT_INVOKE_ERROR, t('_.event.invokeError', { msg: e.message }))
@@ -531,10 +532,10 @@ export async function modifyLayout(changedLayoutProps: LayoutModifyProps, byGrou
     || changedLayoutProps.slice || changedLayoutProps.subDataShowKind
   ) {
     if (Object.entries(changedLayoutProps).length === 1 && changedLayoutProps.agg) {
-      await loadData(byGroupValue, true)
+      await loadData(byGroupValue, true, layout.id)
     }
     else {
-      await loadData(byGroupValue)
+      await loadData(byGroupValue, undefined, layout.id)
     }
   }
 }

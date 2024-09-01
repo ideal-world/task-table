@@ -180,6 +180,7 @@ onMounted(() => {
       :edit="props.layoutConf.edit"
       :columns-conf="props.columnsConf"
       :data="props.layoutConf.data"
+      :layout-id="layoutConf.id"
       container-class="iw-list"
       edit-cell-class="iw-data-cell"
       edit-cell-column-name-prop="columnName"
