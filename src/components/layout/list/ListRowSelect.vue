@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { delegateEvent, getParentWithClass } from '../../../utils/basic'
 import * as eb from '../../eventbus'
 
@@ -182,6 +182,30 @@ function processParentSelect(rowEle: HTMLElement) {
     }
   }
 }
+
+/**
+ * 清空选择
+ *
+ * Clear select
+ *
+ */
+function ClearSelect() {
+  const layoutAllSelect = listEle?.querySelector('.iw-row-select-all-cell__chk') as HTMLInputElement
+  layoutAllSelect.checked = false
+  listEle?.querySelectorAll('.iw-row-select-cell__chk')?.forEach((ele) => {
+    (ele as HTMLInputElement).checked = false
+  })
+  eb.selectData([])
+}
+
+watch(
+  () => props.selectedPks?.length,
+  (newV, oldV) => {
+    if (newV === 0 && oldV !== 0) {
+      ClearSelect()
+    }
+  },
+)
 </script>
 
 <template>
