@@ -79,7 +79,7 @@ onMounted(() => {
       <div
         v-for="column in showColumns"
         :key="`${props.layoutId}-${column.name}`"
-        class="iw-contextmenu__item flex items-center justify-between w-full py-2 iw-row-sort__item"
+        class="flex items-center justify-between w-full py-2 cursor-move iw-row-sort__item"
         :data-column-name="column.name"
       >
         <span>
@@ -107,7 +107,7 @@ onMounted(() => {
       <div
         v-for="column in hideColumns"
         :key="`${props.layoutId}-${column.name}`"
-        class="iw-contextmenu__item flex items-center justify-between w-full py-2"
+        class="flex items-center justify-between w-full py-2"
       >
         <span>
           <i
