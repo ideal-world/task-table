@@ -68,7 +68,7 @@
   "peerDependencies": {
     "dayjs": "^1.11.11",
     "sortablejs": "^1.15.2",
-    "vue": "^3.4.30",
+    "vue": "^3.3.10",
     "vue-i18n": "^9.13.1"
   },
   "devDependencies": {
