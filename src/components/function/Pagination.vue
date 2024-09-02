@@ -209,9 +209,9 @@ function handleJump(e: Event) {
 <template>
   <div style="position: sticky; right: 0; " class="z-[3000] flex items-center">
     <span class="text-sm">{{ $t('function.pagination.total', { number: props.totalNumber }) }}</span>
-    <button class="border border-neutral-400 rounded ml-4 mr-2 py-1 px-3 cursor-pointer transition-all flex items-center" @blur="(e) => changePageSizeStyle(e)" @focus="(e) => changePageSizeStyle(e)" @click="(e) => { fetchNumberSelectCompRef?.show(e.target as HTMLElement, MenuOffsetKind.MEDIUM_BOTTOM, MenuSizeKind.MINI) }">
+    <button class="border border-neutral-400 rounded ml-4 mr-2 py-1 px-3 cursor-pointer flex items-center" @click="(e) => { fetchNumberSelectCompRef?.show(e.target as HTMLElement, MenuOffsetKind.MEDIUM_BOTTOM, MenuSizeKind.MINI) }">
       {{ $t('function.pagination.pageSize', { number: getActualSlice().fetchNumber }) }}
-      <i class="block transition-all" :class="iconSvg.SHRINK" />
+      <i class="block " :class="iconSvg.SHRINK" />
     </button>
     <button v-if="getCurrentPage() > 2" class="iw-btn iw-btn-ghost px-1 iw-btn-xs" @click="setCurrentPage(1)">
       <i :class="iconSvg.FIRST" />
@@ -222,7 +222,7 @@ function handleJump(e: Event) {
     <button
       v-for="page in getShowPages()"
       :key="page"
-      :class="`flex justify-center px-3 ml-2 py-1 w-[30px] h-[30px] rounded transition-all border-none ${page === getCurrentPage() ? 'text-[var(--sys-primary)]' : ''}`"
+      :class="`flex justify-center px-3 ml-2 py-1 w-[30px] h-[30px] rounded  border-none ${page === getCurrentPage() ? 'text-[var(--sys-primary)]' : ''}`"
       :disabled="page === getCurrentPage()"
       @click="setCurrentPage(page)"
     >
@@ -233,7 +233,7 @@ function handleJump(e: Event) {
         ...
       </div>
       <button
-        :class="`flex justify-center px-3 ml-2 py-1 w-[30px] h-[30px] rounded transition-all border-none ${getTotalPage() === getCurrentPage() ? 'text-[var(--sys-primary)]' : ''}`"
+        :class="`flex justify-center px-3 ml-2 py-1 w-[30px] h-[30px] rounded  border-none ${getTotalPage() === getCurrentPage() ? 'text-[var(--sys-primary)]' : ''}`"
         @click="setCurrentPage(getTotalPage())"
       >
         {{ getTotalPage() }}
@@ -250,7 +250,7 @@ function handleJump(e: Event) {
     <MenuComp ref="fetchNumberSelectCompRef">
       <div
         v-for="number in getActualSlice().fetchNumbers" :key="number"
-        class="p-2 text-center transition-all cursor-pointer rounded hover:bg-gray-100"
+        class="p-2 text-center  cursor-pointer rounded hover:bg-gray-100"
         :class="`${number === getActualSlice().fetchNumber ? 'text-[var(--sys-primary)]' : ''}`"
         @click="setFetchNumber(number)"
       >

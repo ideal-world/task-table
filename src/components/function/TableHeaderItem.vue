@@ -93,7 +93,7 @@ onMounted(() => {
           :key="layout.id"
           :data-layout-id="layout.id"
           role="tab"
-          class="iw-tt-header__item iw-tab flex flex-nowrap mr-2 bg-white transition-all"
+          class="iw-tt-header__item iw-tab flex flex-nowrap mr-2 bg-white "
           :class="currentLayoutId === layout.id ? 'iw-tab-active' : ''"
           :title="layout.title"
         >
@@ -127,7 +127,7 @@ onMounted(() => {
             :key="layout.id"
             :data-layout-id="layout.id"
             role="tab"
-            class="iw-tt-header__item iw-tab flex flex-nowrap mr-2 bg-white transition-all justify-start"
+            class="iw-tt-header__item iw-tab flex flex-nowrap mr-2 bg-white  justify-start"
             :class="currentLayoutId === layout.id ? 'iw-tab-active' : ''"
             :title="layout.title"
           >
@@ -147,7 +147,7 @@ onMounted(() => {
       <div class="iw-dropdown">
         <div
           tabindex="0" role="button"
-          class="bg-white iw-tt-header__item iw-tab iw_tt_add_layout flex flex-nowrap border-none transition-all"
+          class="bg-white iw-tt-header__item iw-tab iw_tt_add_layout flex flex-nowrap border-none "
         >
           <i :class="`${iconSvg.NEW}`" class="text-lg" />
         </div>
