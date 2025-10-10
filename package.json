@@ -80,7 +80,7 @@
     "autoprefixer": "^10.4.19",
     "daisyui": "^4.12.10",
     "eslint": "^9.5.0",
-    "happy-dom": "^14.12.3",
+    "happy-dom": "^20.0.0",
     "octicons-css": "^19.8.0",
     "postcss": "^8.4.38",
     "postcss-import": "^16.1.0",
