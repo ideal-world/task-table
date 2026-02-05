@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { h, ref } from 'vue'
+import { computed, h, ref } from 'vue'
 import type { AggDataProps, AggregateKind, TableStyleProps } from '../../../props'
 import { showAggMappingByDataKind, translateAggregateKind } from '../../../props'
 import { MenuOffsetKind, MenuSizeKind } from '../../common/Menu'
@@ -28,6 +28,9 @@ const props = defineProps<{
   // 是否显示选择列
   // Whether to display the selection column
   showSelectColumn: boolean
+  // 是否显示主键列
+  // Whether the primary key column is show
+  showPkColumn: boolean
   // 是否显示操作列
   // Whether to display the action column
   showActionColumn: boolean
@@ -69,18 +72,24 @@ function showAggsContextMenu(e: MouseEvent, colIdx: number) {
       onClick: () => changeColumnAggs(aggItem.kind, column.name),
     }, aggItem.title),
   )
-  aggsMenuCompRef.value?.show(e, MenuOffsetKind.RIGHT_BOTTOM, MenuSizeKind.MINI)
+  aggsMenuCompRef.value?.show(e, MenuOffsetKind.RIGHT_BOTTOM, MenuSizeKind.MINI, false, (e.target as HTMLElement).closest('.iw-tt') as HTMLElement)
 }
 
-async function changeColumnAggs(aggKind: AggregateKind, columnName: string) {
+async function changeColumnAggs(aggKind: AggregateKind | undefined, columnName: string) {
   const agg = deepToRaw(props.agg)
   const idx = agg.items.findIndex(item => item.columnName === columnName)
-  if (idx === -1) {
-    agg.items.push({ columnName, aggKind })
+  if (!aggKind) {
+    agg.items.splice(idx, 1)
   }
   else {
-    agg.items[idx].aggKind = aggKind
+    if (idx === -1) {
+      agg.items.push({ columnName, aggKind })
+    }
+    else {
+      agg.items[idx].aggKind = aggKind
+    }
   }
+
   await eb.modifyLayout({
     agg,
   })
@@ -98,25 +107,32 @@ async function changeColumnAggs(aggKind: AggregateKind, columnName: string) {
     <template v-for="(column, colIdx) in props.columnsConf" :key="`${props.layoutId}-${column.name}`">
       <div
         v-if="colIdx === 0"
+        v-show="props.showPkColumn"
         :class="`${props.styleProps.cellClass} iw-list-cell iw-list-agg-cell flex items-center justify-end pr-1 bg-base-100 border-solid border-b border-b-base-300 border-l border-l-base-300 whitespace-nowrap flex-nowrap`" :data-column-name="column.name"
-        :style="props.setColumnStyles(0)"
+        :style="props.setColumnStyles(props.showPkColumn ? 0 : 1)"
       >
-        <span v-if="props.groupColumnName" class="iw-list-agg-cell__group font-bold flex-grow pl-1">{{ props.groupValue }}</span>
-        <span class="iw-list-agg-cell__agg text-xs pr-1 self-center">{{ $t('_.agg.count') }}</span>
-        <span class="iw-list-agg-cell__value text-info self-center">{{ props.dataBasic.totalNumber }}</span>
+        <span v-if="props.groupColumnName" class="iw-list-agg-cell__group font-bold flex-grow pl-1 truncate" :title="props.groupValue">{{ props.groupValue }}</span>
       </div>
       <div
         v-else-if="!props.agg.enabledColumnNames.includes(column.name)"
         :class="`${props.styleProps.cellClass} iw-list-cell iw-list-agg-cell cursor-pointer flex items-center justify-end pr-1 bg-base-100 border-solid border-b border-b-base-300 border-l border-l-base-300 hover:bg-base-200 whitespace-nowrap flex-nowrap`" :data-column-name="column.name"
         :style="props.setColumnStyles(colIdx)"
       >
-        &nbsp;
+        <template v-if="!props.showPkColumn && colIdx === 1">
+          <span v-if="props.groupColumnName" class="iw-list-agg-cell__group font-bold flex-grow pl-1 truncate" :title="props.groupValue">{{ props.groupValue }}</span>
+        </template>
+        <template v-else>
+          &nbsp;
+        </template>
       </div>
       <div
         v-else
-        :class="`${props.styleProps.cellClass} iw-list-cell iw-list-agg-cell cursor-pointer flex items-center justify-end pr-1 bg-base-100 border-solid border-b border-b-base-300 border-l border-l-base-300 hover:bg-base-200 whitespace-nowrap flex-nowrap`" :data-column-name="column.name"
+        :class="`${props.styleProps.cellClass} iw-list-cell iw-list-agg-cell cursor-pointer flex items-center justify-start pr-1 bg-base-100 border-solid border-b border-b-base-300 border-l border-l-base-300 hover:bg-base-200 whitespace-nowrap flex-nowrap`" :data-column-name="column.name"
         :style="props.setColumnStyles(colIdx)" @click="(event: MouseEvent) => showAggsContextMenu(event, colIdx)"
       >
+        <template v-if="!props.showPkColumn && colIdx === 1">
+          <span v-if="props.groupColumnName" class="iw-list-agg-cell__group font-bold flex-grow pl-1 truncate" :title="props.groupValue">{{ props.groupValue }}</span>
+        </template>
         <template v-if="props.agg.items.some(item => item.columnName === column.name)">
           <span class="iw-list-agg-cell__agg text-xs pr-1 self-center">{{
             translateAggregateKind(props.agg.items.find(item => item.columnName === column.name)!.aggKind) }}</span>

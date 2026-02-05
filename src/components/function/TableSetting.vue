@@ -63,6 +63,7 @@ function handleSetModalShow(e: Event) {
     <i :class="iconSvg.SETTING" class="text-base" @click="handleSetModalShow" /></a>
   <MenuComp ref="tableSettingCompRef" style="width: 372px">
     <BasicSettingComp
+      :table-conf="props.tableConf"
       :layout-conf="props.layoutConf"
       :layout-length="props.layoutLength"
     />
@@ -84,7 +85,7 @@ function handleSetModalShow(e: Event) {
     />
     <ColumnShowSettingComp
       :layout-id="props.layoutConf.id"
-      :layout-columns="props.layoutConf.columns"
+      :layout-conf="props.layoutConf"
       :table-conf="props.tableConf"
     />
     <!-- <div class="iw-divider cursor-pointer iw-table-setting-title">

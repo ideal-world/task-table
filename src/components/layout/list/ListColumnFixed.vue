@@ -3,7 +3,7 @@ import { inject, onMounted, ref, watch } from 'vue'
 import * as iconSvg from '../../../assets/icon'
 import type { LayoutModifyProps } from '../../../props'
 import { FUN_CLOSE_CONTEXT_MENU_TYPE } from '../../common/Menu.vue'
-import type { ColumnConf } from '../../conf'
+import type { ColumnConf, LayoutConf } from '../../conf'
 import * as eb from '../../eventbus'
 
 const props = defineProps<{
@@ -59,7 +59,7 @@ async function setFixedColumn() {
  * @param columnsConf 列配置 / Column configuration
  * @param selectColumnWidth 选择列宽度 / Select column width
  */
-export function setFixedColumnStyles(styles: any, currColIdx: number, columnsConf: ColumnConf[], selectColumnWidth: number) {
+export function setFixedColumnStyles(styles: any, currColIdx: number, columnsConf: ColumnConf[], selectColumnWidth: number, layoutConf: LayoutConf) {
   // 获取固定列索引
   // Get the fixed column index
   const fixedColumnIdx = columnsConf.findIndex(col => col.fixed)
@@ -89,7 +89,7 @@ export function setFixedColumnStyles(styles: any, currColIdx: number, columnsCon
     styles.zIndex = 1099
     styles.right = `0px`
     // class: base-300
-    styles.borderLeft = '3px solid oklch(var(--b3))'
+    styles.borderLeft = `${layoutConf.group?.item ? '1' : '3'}px solid oklch(var(--b3))`
   }
   else if (fixedColumnIdx >= currColIdx) {
     // 存在固定列，且当前列在固定列之前
@@ -102,7 +102,7 @@ export function setFixedColumnStyles(styles: any, currColIdx: number, columnsCon
     styles.overflow = 'hidden'
     if (fixedColumnIdx === currColIdx) {
       // class: base-300
-      styles.borderRight = '3px solid oklch(var(--b3))'
+      styles.borderRight = `${layoutConf.group?.item ? '1' : '3'}px solid oklch(var(--b3))`
     }
   }
   else {
@@ -118,7 +118,7 @@ export function setFixedColumnStyles(styles: any, currColIdx: number, columnsCon
   <div class="flex justify-between items-center w-full">
     <span>
       <i :class="iconSvg.PIN" />
-      {{ $t('list.columnFixed.title') }}
+      <span class="ml-1">{{ $t('list.columnFixed.title') }}</span>
     </span>
     <input
       ref="fixedInputRef"

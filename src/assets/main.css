@@ -2,6 +2,7 @@
 @import 'reset.css';
 :root {
   --sys-primary: var(--fallback-p, oklch(var(--p) / 1));
+  --sys-primary-color-2: var(--fallback-erc, oklch(var(--p) / 0.05));
 }
 @tailwind base;
 @tailwind components;
@@ -43,4 +44,9 @@ textarea {
 .iw-input:focus,
 .iw-input:focus-within {
   outline-width: 0;
+}
+
+.iw-active-button {
+  color: var(--sys-primary) !important;
+
 }

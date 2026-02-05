@@ -1,5 +1,5 @@
 import { createApp } from 'vue'
-import App from './App.vue'
 import IwTaskTable from '../src'
+import App from './App.vue'
 
 createApp(App).use(IwTaskTable).mount('#app')

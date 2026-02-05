@@ -51,6 +51,13 @@ function showMenu(e: MouseEvent) {
   menuData.value = list
   x.value = e.clientX
   y.value = e.clientY
+
+  if (eb.getMicroAppOffset) {
+    const { left: microAppLeft, top: microAppTop } = eb.getMicroAppOffset()
+    x.value -= microAppLeft
+    y.value -= microAppTop
+  }
+
   visible.value = true
 }
 
@@ -91,13 +98,13 @@ onUnmounted(() => {
     <teleport to="body">
       <div
         v-if="visible"
-        class="text-white text-[14px] fixed px-1 pt-1 rounded bg-[var(--sys-primary)] z-[10]"
+        class="border-2 text-[#606266] text-[14px] fixed bg-white z-[10] shadow-md "
         :style="{ left: `${x}px`, top: `${y}px` }"
       >
         <div
           v-for="item in menuData"
           :key="item.id"
-          class="cursor-pointer pb-1"
+          class="py-0.5 px-4 cursor-pointer hover:bg-[#c5c5c5] hover:text-#000"
           @click="selectMenu(item)"
         >
           {{ item.label }}

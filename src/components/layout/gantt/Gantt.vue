@@ -15,6 +15,7 @@ import ColumnResizeComp from '../../function/ColumnResize.vue'
 import ListComp from '../list/List.vue'
 import ContextMenuComp from '../../function/ContextMenu.vue'
 import type { ContextMenuItemProps } from '../../../props/functionProps'
+import locales from '../../../locales'
 import { type GanttInfo, generateTimeline, getStartAndEndDay, getTimelineColumnWidth } from './gantt'
 import GanttTimelineHeaderComp from './GanttTimelineHeader.vue'
 import GanttTimelineRowComp from './GanttTimelineRows.vue'
@@ -33,8 +34,13 @@ const props = defineProps<
     // 列配置
     // Column configuration
     columnsConf: ColumnConf[]
+    // 是否显示主键列
+    // Whether the primary key column is show
+    showPkColumn: boolean
   }
 >()
+
+const { t } = locales.global
 
 // 甘特图整体容器的引用
 // Reference to the overall container of the Gantt chart
@@ -255,14 +261,14 @@ function getContextMenu() {
 
   if (!row[props.ganttProps.actualStartTimeColumnName] && !row[props.ganttProps.actualEndTimeColumnName]) {
     contextMenu.push({
-      id: 'actualData',
-      label: '实际周期',
+      id: 'actualDate',
+      label: t('gantt.addActualDate'),
     })
   }
   if (!row[props.ganttProps.planStartTimeColumnName] && !row[props.ganttProps.planEndTimeColumnName]) {
     contextMenu.push({
-      id: 'planData',
-      label: '计划周期',
+      id: 'planDate',
+      label: t('gantt.addPlanDate'),
     })
   }
 
@@ -310,7 +316,7 @@ function exContextMenuArg(e: MouseEvent) {
     <div ref="ganttListRef" class="overflow-y-hidden overflow-x-auto" :style="`width: ${ganttWith - props.ganttProps.timelineWidth}px`">
       <!-- 甘特图列表，直接引用列表视图 -->
       <!-- Gantt chart list, directly reference the list view -->
-      <ListComp :layout-conf="props.layoutConf" :table-conf="props.tableConf" :columns-conf="props.columnsConf" />
+      <ListComp :layout-conf="props.layoutConf" :table-conf="props.tableConf" :columns-conf="props.columnsConf" :show-pk-column="props.showPkColumn" />
     </div>
     <div
       ref="ganttTimelineRef"

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import TableSetCommon from '../common/TableSetCommon.vue'
 import * as iconSvg from '../../assets/icon'
 import type { GroupDataProps } from '../../props'
@@ -16,6 +17,14 @@ const props = defineProps<{
   // Possible column configuration
   columnsConf: ColumnConf[]
 }>()
+
+const groupColumns = computed(() => props.columnsConf.filter(col =>
+  props.group.enabledColumnNames.includes(col.name),
+))
+
+// 正在分组
+// Grouping
+const isGrouping = computed(() => props.group.item?.columnName)
 
 /**
  * 设置分组
@@ -104,15 +113,13 @@ async function setGroupHideEmpty() {
 </script>
 
 <template>
-  <TableSetCommon :title="$t('function.group.groupTitle')">
+  <TableSetCommon v-if="groupColumns?.length" :title="$t('function.group.groupTitle')">
     <div class="text-gray-400 font-medium mb-4">
       {{ $t("function.group.columnsTitle") }}
     </div>
     <div class="grid grid-cols-1 divide-y bg-gray-100 p-2 rounded-md mb-2">
       <div
-        v-for="column in props.columnsConf.filter((col) =>
-          props.group.enabledColumnNames.includes(col.name),
-        )"
+        v-for="column in groupColumns"
         :key="`${props.layoutId}=${column.name}`"
         class="flex items-center justify-between w-full py-2"
       >
@@ -129,29 +136,31 @@ async function setGroupHideEmpty() {
       </div>
     </div>
 
-    <div class="flex justify-between items-center w-full mr-2 pb-2">
-      <span>
-        <i :class="iconSvg.SORT" />
-        {{ $t("function.group.groupSortTitle") }}
-      </span>
-      <input
-        type="checkbox"
-        class="iw-toggle iw-toggle-primary iw-toggle-xs"
-        :checked="props.group.item?.orderDesc"
-        @click="setGroupDescSort"
-      >
-    </div>
-    <div class="flex justify-between items-center w-full mr-2">
-      <span>
-        <i :class="iconSvg.SORT" />
-        {{ $t("function.group.hideEmptyTitle") }}
-      </span>
-      <input
-        type="checkbox"
-        class="iw-toggle iw-toggle-xs"
-        :checked="props.group.item?.hideEmptyRecord"
-        @click="setGroupHideEmpty"
-      >
-    </div>
+    <template v-if="isGrouping">
+      <div class="flex justify-between items-center w-full mr-2 pb-2">
+        <span>
+          <i :class="iconSvg.SORT" />
+          {{ $t("function.group.groupSortTitle") }}
+        </span>
+        <input
+          type="checkbox"
+          class="iw-toggle iw-toggle-primary iw-toggle-xs"
+          :checked="props.group.item?.orderDesc"
+          @click="setGroupDescSort"
+        >
+      </div>
+      <div class="flex justify-between items-center w-full mr-2">
+        <span>
+          <i :class="iconSvg.SORT" />
+          {{ $t("function.group.hideEmptyTitle") }}
+        </span>
+        <input
+          type="checkbox"
+          class="iw-toggle iw-toggle-primary iw-toggle-xs"
+          :checked="props.group.item?.hideEmptyRecord"
+          @click="setGroupHideEmpty"
+        >
+      </div>
+    </template>
   </TableSetCommon>
 </template>

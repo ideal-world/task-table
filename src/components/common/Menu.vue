@@ -7,6 +7,7 @@ import { EVENTS, MenuOffsetKind, MenuSizeKind, doCloseContextMenu, getInitOffset
 
 const contextmenuRef = ref<HTMLElement | null>(null)
 const isInit = ref<boolean>(false)
+const isShow = ref<boolean>(false)
 
 const contextmenuMathRandom = computed(() =>
   getRandomString(12),
@@ -84,6 +85,9 @@ async function showContextMenu(attachObj: HTMLElement | MouseEvent, offset: Menu
     // 设置菜单的显示级别，用于控制有多个菜单时隐藏方式
     // Set the display level of the menu, used to control the hiding method when there are multiple menus
     setContextmenuLevel(attachObj, contextMenuEle)
+
+    // 菜单已显示
+    isShow.value = true
   })
 }
 
@@ -126,7 +130,11 @@ function registerOnInitListener(callback: (menuEle: HTMLElement) => Promise<void
 function registerOnCloseListener(callback: (menuEle: HTMLElement) => Promise<void>, once?: boolean) {
   const contextMenuEle = contextmenuRef.value as HTMLElement
   EVENTS.close[contextMenuEle.id] = {
-    callback,
+    callback: (menuEle) => {
+      // 菜单关闭
+      isShow.value = false
+      return callback(menuEle)
+    },
     once: once ?? false,
   }
 }
@@ -160,6 +168,7 @@ defineExpose({
    * menu DOM
    */
   menuDom: contextmenuRef,
+  isShow,
 })
 
 // eslint-disable-next-line ts/no-use-before-define
@@ -176,7 +185,7 @@ export const FUN_CLOSE_CONTEXT_MENU_TYPE = Symbol('FUN_CLOSE_CONTEXT_MENU_TYPE')
     :id="'iw-contextmenu-' + `${contextmenuMathRandom}`"
     ref="contextmenuRef"
     class="iw-contextmenu overflow-auto flex flex-col items-start fixed z-[3100] bg-base-100 p-1 rounded-md border border-base-300"
-    :style="{'maxHeight': '600px'}"
+    :style="{ maxHeight: '70vh' }"
   >
     <!-- 仅在初始化后渲染插槽信息 -->
     <!-- Only render slot information after initialization -->

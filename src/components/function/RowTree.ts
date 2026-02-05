@@ -13,6 +13,11 @@ const EVENT_EXECUTE_HANDLER: {
   event: (dataPk: any, hide: boolean) => Promise<void>
 }[] = []
 
+const GANTT_NEW_EVENT_EXECUTE_HANDLER: {
+  id: string
+  event: (hide: boolean) => Promise<void>
+}[] = []
+
 /**
  * 注册树型数据行的显示/隐藏事件
  *
@@ -31,6 +36,23 @@ export function registerRowTreeTriggerEvent(event: (dataPk: any, hide: boolean) 
 }
 
 /**
+ * 注册树型数据行的显示/隐藏事件
+ *
+ * Register the show/hide event of the tree data row
+ *
+ * @param event 触发事件
+ * @returns 事件ID
+ */
+export function registerRowTreeTriggerEventForGanttNew(event: (hide: boolean) => Promise<void>): string {
+  const id = `iw-row-tree-event-${getRandomString(12)}`
+  GANTT_NEW_EVENT_EXECUTE_HANDLER.push({
+    id,
+    event,
+  })
+  return id
+}
+
+/**
  * 注销树型数据行的显示/隐藏事件
  *
  * Unregister the show/hide event of the tree data row
@@ -38,6 +60,19 @@ export function registerRowTreeTriggerEvent(event: (dataPk: any, hide: boolean) 
  * @param id 事件ID
  */
 export function unregisterRowTreeTriggerEvent(id: string) {
+  const index = EVENT_EXECUTE_HANDLER.findIndex(item => item.id === id)
+  if (index !== -1)
+    EVENT_EXECUTE_HANDLER.splice(index, 1)
+}
+
+/**
+ * 注销树型数据行的显示/隐藏事件
+ *
+ * Unregister the show/hide event of the tree data row
+ *
+ * @param id 事件ID
+ */
+export function unregisterRowTreeTriggerEventForGanttNew(id: string) {
   const index = EVENT_EXECUTE_HANDLER.findIndex(item => item.id === id)
   if (index !== -1)
     EVENT_EXECUTE_HANDLER.splice(index, 1)
@@ -80,12 +115,26 @@ export function sortByTree(data: any[], pkColumnName: string, parentPkColumnName
   if (parentPkColumnName === undefined)
     return data
 
-  return getTreeData(data, null, pkColumnName, parentPkColumnName, 0)
+  const treeData = getTreeData(data, null, pkColumnName, parentPkColumnName, 0)
+
+  // 表格列未找到父数据的数据
+  // Data in the table column that does not find the parent data
+  const notParentData = data.filter((item) => {
+    const isExist = !(treeData.some(obj => item[pkColumnName] === obj[pkColumnName]))
+    if (isExist) {
+      item.__list_not_parent__ = true
+    }
+    return isExist
+  })
+
+  // 将表格列未找到父数据的数据插入到树形数据中
+  // Insert the data in the table column that does not find the parent data into the tree data
+  return [...treeData, ...notParentData]
 }
 
 function getTreeData(data: any[], parentPk: any, pkColumnName: string, parentPkColumnName: string, depth: number): any[] {
   const treeData = []
-  const nodeData = data.filter(item => item[parentPkColumnName] === parentPk)
+  const nodeData = data.filter(item => parentPk ? item[parentPkColumnName] === parentPk : !item[parentPkColumnName])
   for (const node of nodeData) {
     node[NODE_DEPTH_FLAG] = depth
     treeData.push(node)
@@ -131,6 +180,8 @@ export function registerTreeRowToggleListener(rowsEle: HTMLElement) {
       // Trigger expand event
       EVENT_EXECUTE_HANDLER.forEach(item => item.event((node as HTMLElement).dataset.pk, false))
     })
+    GANTT_NEW_EVENT_EXECUTE_HANDLER.forEach(item => item.event((true)))
+
     // 切换图标
     // Switch icon
     ele.classList.remove(iconSvg.EXPAND)
@@ -147,6 +198,7 @@ export function registerTreeRowToggleListener(rowsEle: HTMLElement) {
     // 递归收起子行（可能有多个层级需要收起）
     // Recursively collapse child rows (may have multiple levels to collapse)
     recursionShrinkRows(rowsEle, currPk)
+    GANTT_NEW_EVENT_EXECUTE_HANDLER.forEach(item => item.event((false)))
     // 切换图标
     // Switch icon
     ele.classList.remove(iconSvg.SHRINK)

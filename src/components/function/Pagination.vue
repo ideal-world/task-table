@@ -27,8 +27,8 @@ const fetchNumberSelectCompRef = ref<InstanceType<typeof MenuComp>>()
  * Get the actual slice, if there is a group, get the group's slice, otherwise get the default slice
  */
 function getActualSlice(): DataSliceProps {
-  return props.groupValue && props.groupProps?.slices && props.groupProps?.slices[props.groupValue]
-    ? props.groupProps?.slices[props.groupValue]
+  return props.groupValue !== undefined && props.groupProps?.slices && props.groupProps?.slices[props.groupValue]
+    ? { ...props.slice, ...props.groupProps?.slices[props.groupValue] }
     : props.slice
 }
 
@@ -115,17 +115,15 @@ async function setFetchNumber(fetchNumber: number) {
  * @param newFetchNumber 新每页数量 / New number of items per page
  */
 async function setSlice(newPage?: number, newFetchNumber?: number) {
-  if (!props.groupValue) {
+  if (props.groupValue === undefined || props.groupValue === null) {
     const newSlice = {
       offsetNumber: newPage ? (newPage - 1) * (newFetchNumber ?? props.slice.fetchNumber) : props.slice.offsetNumber,
       fetchNumber: newFetchNumber ?? props.slice.fetchNumber,
       fetchNumbers: props.slice.fetchNumbers,
     }
-
     if (newFetchNumber) {
       newSlice.offsetNumber = 0
     }
-
     const changedLayoutReq: LayoutModifyProps = {
       slice: newSlice,
     }
@@ -137,7 +135,7 @@ async function setSlice(newPage?: number, newFetchNumber?: number) {
       newSlice = {
         offsetNumber: newPage ? (newPage - 1) * (newFetchNumber ?? props.groupProps?.slices[props.groupValue].fetchNumber) : 0,
         fetchNumber: newFetchNumber ?? props.groupProps?.slices[props.groupValue].fetchNumber,
-        fetchNumbers: props.groupProps?.slices[props.groupValue].fetchNumbers,
+        fetchNumbers: props.groupProps?.slices[props.groupValue].fetchNumbers ?? props.slice.fetchNumbers,
       }
     }
     else if (props.groupProps?.slices) {
@@ -207,7 +205,7 @@ function handleJump(e: Event) {
 </script>
 
 <template>
-  <div style="position: sticky; right: 0; " class="z-[3000] flex items-center">
+  <div style="position: sticky; right: 0; " class="z-[1099] flex items-center">
     <span class="text-sm">{{ $t('function.pagination.total', { number: props.totalNumber }) }}</span>
     <button class="border border-neutral-400 rounded ml-4 mr-2 py-1 px-3 cursor-pointer flex items-center" @click="(e) => { fetchNumberSelectCompRef?.show(e.target as HTMLElement, MenuOffsetKind.MEDIUM_BOTTOM, MenuSizeKind.MINI) }">
       {{ $t('function.pagination.pageSize', { number: getActualSlice().fetchNumber }) }}
@@ -222,7 +220,7 @@ function handleJump(e: Event) {
     <button
       v-for="page in getShowPages()"
       :key="page"
-      :class="`flex justify-center px-3 ml-2 py-1 w-[30px] h-[30px] rounded  border-none ${page === getCurrentPage() ? 'text-[var(--sys-primary)]' : ''}`"
+      :class="`flex justify-center px-3 ml-2 py-1 w-[30px] h-[30px] rounded  border-none ${page === getCurrentPage() ? 'text-[var(--sys-primary)] font-bold' : 'hover:text-[var(--sys-primary)]'}`"
       :disabled="page === getCurrentPage()"
       @click="setCurrentPage(page)"
     >
@@ -233,7 +231,7 @@ function handleJump(e: Event) {
         ...
       </div>
       <button
-        :class="`flex justify-center px-3 ml-2 py-1 w-[30px] h-[30px] rounded  border-none ${getTotalPage() === getCurrentPage() ? 'text-[var(--sys-primary)]' : ''}`"
+        :class="`flex justify-center px-3 ml-2 py-1 w-[30px] h-[30px] rounded  border-none ${getTotalPage() === getCurrentPage() ? 'text-[var(--sys-primary)] font-bold' : 'hover:text-[var(--sys-primary)]'}`"
         @click="setCurrentPage(getTotalPage())"
       >
         {{ getTotalPage() }}
@@ -246,16 +244,24 @@ function handleJump(e: Event) {
       <i :class="iconSvg.LAST" />
     </button>
     <span class="mx-2">{{ $t('function.pagination.jump') }}</span>
-    <input type="number" class="iw-input iw-input-bordered iw-input-xs rounded-sm w-10" :value="getCurrentPage()" @keyup.enter="handleJump" @blur="handleJump">
-    <MenuComp ref="fetchNumberSelectCompRef">
-      <div
-        v-for="number in getActualSlice().fetchNumbers" :key="number"
-        class="p-2 text-center  cursor-pointer rounded hover:bg-gray-100"
-        :class="`${number === getActualSlice().fetchNumber ? 'text-[var(--sys-primary)]' : ''}`"
-        @click="setFetchNumber(number)"
-      >
-        {{ $t('function.pagination.pageSize', { number }) }}
-      </div>
-    </MenuComp>
+    <input type="number" class="iw-input iw-input-bordered iw-input-xs page-to-input rounded-sm w-12" :value="getCurrentPage()" @keyup.enter="handleJump">
   </div>
+  <MenuComp ref="fetchNumberSelectCompRef">
+    <div
+      v-for="number in getActualSlice().fetchNumbers" :key="number"
+      class="p-2 text-center  cursor-pointer rounded hover:bg-gray-100"
+      :class="`${number === getActualSlice().fetchNumber ? 'text-[var(--sys-primary)] font-bold' : ''}`"
+      @click="setFetchNumber(number)"
+    >
+      {{ $t('function.pagination.pageSize', { number }) }}
+    </div>
+  </MenuComp>
 </template>
+
+<style scoped>
+.page-to-input[type="number"]::-webkit-inner-spin-button,
+.page-to-input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+</style>

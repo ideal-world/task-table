@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>纯Canvas高性能甘特图 (专业连线版)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/src/styles/index.css" />
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        background-color: #f8fafc;
+        color: #333;
+        overflow: hidden;
+      }
+
+      .gantt-app-container {
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        padding: 1rem;
+        gap: 1rem;
+      }
+
+      .gantt-controls {
+        flex-shrink: 0;
+      }
+
+      .gantt-main-area {
+        display: flex;
+        flex-grow: 1;
+        overflow: hidden;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e0e0e0;
+        background: white;
+      }
+
+      /* External table */
+      #external-table {
+        width: 220px;
+        flex-shrink: 0;
+        background: #fff;
+        display: flex;
+        flex-direction: column;
+        border-right: 1px solid #e2e8f0;
+        z-index: 20;
+      }
+
+      #external-table-header {
+        height: 56px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        padding: 0 16px;
+        font-weight: 600;
+        color: #475569;
+        border-bottom: 1px solid #e2e8f0;
+        box-sizing: border-box;
+        background: #f8fafc;
+      }
+
+      #external-table-scroll {
+        flex-grow: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+        position: relative;
+      }
+
+      #external-table-content {
+        position: relative;
+        width: 100%;
+      }
+
+      .external-sidebar-row {
+        display: flex;
+        align-items: center;
+        padding: 0 16px;
+        background: white;
+        box-sizing: border-box;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        border-bottom: 1px solid #f1f5f9;
+        font-size: 13px;
+        color: #334155;
+        transition: background-color 0.1s;
+      }
+
+      .external-sidebar-row:hover {
+        background-color: #f8fafc;
+      }
+    </style>
+  </head>
+  <body class="p-0 m-0">
+    <div class="gantt-app-container">
+      <!-- Controls -->
+      <div
+        class="gantt-controls p-4 bg-white rounded-lg border border-slate-200 shadow-sm flex flex-wrap gap-4 items-center"
+      >
+        <span class="font-bold text-slate-600 text-sm">视图场景:</span>
+        <div class="flex gap-2">
+          <button
+            id="btn-demo1"
+            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded shadow-sm hover:bg-blue-700 transition-colors"
+          >
+            场景1: 项目进度
+          </button>
+          <button
+            id="btn-demo2"
+            class="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 rounded hover:bg-slate-200 transition-colors"
+          >
+            场景2: 资源视图
+          </button>
+        </div>
+        <div class="w-px h-6 bg-slate-200 mx-2"></div>
+        <span class="font-bold text-slate-600 text-sm">时间粒度:</span>
+        <div class="flex gap-1">
+          <button
+            data-view="Day"
+            class="btn-view px-3 py-1.5 text-xs font-semibold text-slate-600 bg-slate-50 rounded hover:bg-slate-100"
+          >
+            日
+          </button>
+          <button
+            data-view="Week"
+            class="btn-view px-3 py-1.5 text-xs font-semibold text-slate-600 bg-slate-50 rounded hover:bg-slate-100"
+          >
+            周
+          </button>
+          <button
+            data-view="Month"
+            class="btn-view px-3 py-1.5 text-xs font-semibold text-slate-600 bg-slate-50 rounded hover:bg-slate-100"
+          >
+            月
+          </button>
+          <button
+            data-view="Year"
+            class="btn-view px-3 py-1.5 text-xs font-semibold text-slate-600 bg-slate-50 rounded hover:bg-slate-100"
+          >
+            年
+          </button>
+        </div>
+      </div>
+
+      <div class="gantt-main-area">
+        <!-- External table -->
+        <div id="external-table">
+          <div id="external-table-header">
+            <span>任务/资源</span>
+          </div>
+          <div id="external-table-scroll">
+            <div id="external-table-content"></div>
+          </div>
+        </div>
+
+        <!-- Gantt chart -->
+        <div id="__gantt-chart-wrapper" class="__gantt-chart-wrapper">
+          <!-- <div id="__gantt-chart-container" class="gantt-chart-container">
+            <div id="__gantt-scroll-dummy" class="__gantt-scroll-dummy"></div>
+            <canvas id="__gantt-header-canvas" class="gantt-header-canvas"></canvas>
+            <canvas id="__gantt-main-canvas" class="__gantt-main-canvas"></canvas>
+          </div> -->
+        </div>
+      </div>
+    </div>
+
+    <!-- <div id="__gantt-tooltip"></div> -->
+
+    <script type="module">
+      import { getDemo1Data, getDemo2Data } from './examples/main.ts';
+      import { GanttChart, DateUtils } from './src/main.ts';
+
+      document.addEventListener('DOMContentLoaded', () => {
+        const rootEl = document.getElementById('__gantt-chart-wrapper');
+        const ganttContainer = document.getElementById('gantt-chart-container');
+        const extTableContent = document.getElementById('external-table-content');
+        const extTableScroll = document.getElementById('external-table-scroll');
+        const extTableHeader = document.getElementById('external-table-header');
+
+        const chart = new GanttChart(rootEl, getDemo1Data(), { showLeftRemark: true, showRightRemark: true });
+
+        function buildExternalSidebar(data, config) {
+          let html = '';
+          for (let i = 0; i < data.length; i++) {
+            // height should match config.rowHeight
+            html += `<div class="external-sidebar-row" style="height: ${config.rowHeight}px;">${data[i].name}</div>`;
+          }
+          extTableContent.innerHTML = html;
+        }
+
+        const demo1Btn = document.getElementById('btn-demo1');
+        const demo2Btn = document.getElementById('btn-demo2');
+
+        function loadDemo1() {
+          const data = getDemo1Data();
+          chart.setData(data);
+          chart.updateConfig({
+            showCenterRemark: true,
+            showLeftRemark: true,
+            showRightRemark: true,
+            showActual: true,
+            showPlan: true,
+            rowHeight: 30,
+            tooltipColor: 'black',
+            tooltipFormat: (row, date, config) => {
+              const overlappingTasks = row.tasks.filter(task => {
+                const pStart = new Date(task.planStart),
+                  pEnd = DateUtils.addDays(new Date(task.planEnd), 1);
+                if (date >= pStart && date < pEnd) return true;
+                if (task.actualStart) {
+                  const aStart = new Date(task.actualStart),
+                    aEnd = DateUtils.addDays(new Date(task.actualEnd), 1);
+                  if (date >= aStart && date < aEnd) return true;
+                }
+                return false;
+              });
+              // console.log('row, date, config', row, date, config, overlappingTasks);
+              let planHtml = `<div><strong>资源计划分配</strong><br></div>`,
+                actualHtml = `<div><strong>资源实际分配</strong><br></div>`;
+              let planTaskIndex = 0,
+                actualTaskIndex = 0;
+
+              overlappingTasks.forEach(task => {
+                if (task.planStart && task.planEnd && !task.actualStart) {
+                  planHtml += `<span class="__gantt_tooltip-indent">任务${++planTaskIndex}: ${task.name} (${
+                    task._data?.investRatio
+                  }%)</span><br>`;
+                } else if (task.actualStart) {
+                  actualHtml += `<span class="__gantt_tooltip-indent">任务${++actualTaskIndex}: ${task.name} (${
+                    task._data?.realInvestRatio
+                  }%)</span><br>`;
+                }
+              });
+              if (!planTaskIndex && !actualTaskIndex) {
+                return false;
+              }
+
+              let html = `<strong>${row.name}</strong> (${DateUtils.format(
+                date,
+                'yyyy-MM-dd'
+              )})<hr class="__gantt_tooltip-divider">`;
+              return html + planHtml + actualHtml;
+            }
+          });
+
+          // function getTaskTooltipHtml(task) {}
+          demo1Btn.classList.replace('bg-gray-100', 'bg-blue-600');
+          demo1Btn.classList.replace('text-gray-700', 'text-white');
+          demo2Btn.classList.replace('bg-blue-600', 'bg-gray-100');
+          demo2Btn.classList.replace('text-white', 'text-gray-700');
+          extTableHeader.textContent = '项目/任务 (外部)';
+          buildExternalSidebar(data, chart.config);
+        }
+
+        function loadDemo2() {
+          const data = getDemo2Data();
+          chart.setData(data);
+          chart.updateConfig({
+            showLeftRemark: false,
+            showRightRemark: false,
+            showCenterRemark: true,
+            showActual: true,
+            showPlan: true,
+            rowHeight: 60,
+            tooltipColor: 'white',
+            tooltipFormat: null
+          });
+          demo2Btn.classList.replace('bg-gray-100', 'bg-blue-600');
+          demo2Btn.classList.replace('text-gray-700', 'text-white');
+          demo1Btn.classList.replace('bg-blue-600', 'bg-gray-100');
+          demo1Btn.classList.replace('text-white', 'text-gray-700');
+          extTableHeader.textContent = '人员/资源 (外部)';
+          buildExternalSidebar(data, chart.config);
+        }
+
+        demo1Btn.addEventListener('click', loadDemo1);
+        demo2Btn.addEventListener('click', loadDemo2);
+
+        document.querySelectorAll('.btn-view').forEach(btn => {
+          btn.addEventListener('click', () => {
+            chart.updateConfig({ viewMode: btn.dataset.view });
+            document.querySelectorAll('.btn-view').forEach(b => {
+              b.classList.remove('bg-blue-500', 'text-white');
+              b.classList.add('bg-gray-100', 'text-gray-700');
+            });
+            btn.classList.add('bg-blue-500', 'text-white');
+            btn.classList.remove('bg-gray-100', 'text-gray-700');
+          });
+        });
+
+        let isGanttScrolling = false,
+          isTableScrolling = false;
+        chart.container.addEventListener('ganttscroll', e => {
+          if (isTableScrolling) return;
+          isGanttScrolling = true;
+          extTableScroll.scrollTop = e.detail.scrollTop;
+          setTimeout(() => {
+            isGanttScrolling = false;
+          }, 0);
+        });
+        extTableScroll.addEventListener('scroll', () => {
+          if (isGanttScrolling) return;
+          isTableScrolling = true;
+          chart.setScrollTop(extTableScroll.scrollTop);
+          setTimeout(() => {
+            isTableScrolling = false;
+          }, 0);
+        });
+
+        loadDemo1();
+        document.querySelector('.btn-view[data-view="Week"]').click();
+      });
+    </script>
+  </body>
+</html>

@@ -29,7 +29,7 @@ export default defineConfig({
       fileName: format => `task-table.${format}.js`,
     },
     rollupOptions: {
-      external: ['vue', 'vue-i18n', 'sortablejs', 'dayjs'],
+      external: ['vue', 'vue-i18n', 'sortablejs', 'dayjs', 'sculp-js', 'gantt-canvas-chart', 'lodash-es'],
       output: {
         exports: 'named',
         globals: {

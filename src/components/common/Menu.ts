@@ -1,3 +1,4 @@
+import { ref } from 'vue'
 import { getParentWithClass } from '../../utils/basic'
 import * as eb from '../../components/eventbus'
 
@@ -45,6 +46,8 @@ export enum MenuOffsetKind {
   RIGHT_BOTTOM,
 }
 
+const attachObjTargetOffset = ref<{ left: number, top: number, width: number, height: number }>()
+
 // 菜单位置偏移量
 // Menu position offset
 const DIFF_OFFSET = 10
@@ -66,6 +69,7 @@ export function getInitOffset(attachObj: HTMLElement | MouseEvent, offset: MenuO
   let attachObjWidth
   if (attachObj instanceof HTMLElement) {
     const targetOffset = attachObj.getBoundingClientRect()
+    attachObjTargetOffset.value = targetOffset
     left = targetOffset.left
     top = targetOffset.top
     attachObjHeight = targetOffset.height
@@ -115,8 +119,10 @@ export function getInitOffset(attachObj: HTMLElement | MouseEvent, offset: MenuO
 
   // 根据边界元素修正菜单的位置
   // Correct the position of the menu according to the boundary element
-  if (boundaryEle) {
-    const boundaryEleRect = boundaryEle.getBoundingClientRect()
+  // 边界元素高度不足时无需修正菜单位置
+  // No correction of menu position is required when the boundary element height is insufficient
+  const boundaryEleRect = boundaryEle && boundaryEle.getBoundingClientRect()
+  if (boundaryEle && boundaryEleRect && boundaryEleRect.height > 100) {
     if (left < boundaryEleRect.left) {
       left = boundaryEleRect.left
     }
@@ -132,7 +138,7 @@ export function getInitOffset(attachObj: HTMLElement | MouseEvent, offset: MenuO
     }
   }
 
-  if(eb.getMicroAppOffset){
+  if (eb.getMicroAppOffset) {
     const { left: microAppLeft, top: microAppTop } = eb.getMicroAppOffset()
     left -= microAppLeft
     top -= microAppTop
@@ -269,8 +275,15 @@ function hideUnActiveContextMenus(event: MouseEvent) {
       || event.x > contextMenuRect.left + contextMenuRect.width
       || event.y > contextMenuRect.top + contextMenuRect.height
     ) {
-      if (idx === 0 || (contextmenuEles[idx - 1] as HTMLElement).style.display === 'none')
-        doCloseContextMenu(contextmenuEle as HTMLElement)
+      if (
+        !attachObjTargetOffset.value
+        || event.x < attachObjTargetOffset.value.left
+        || event.y < attachObjTargetOffset.value.top
+        || event.x > attachObjTargetOffset.value.left + attachObjTargetOffset.value.width
+        || event.y > attachObjTargetOffset.value.top + attachObjTargetOffset.value.height) {
+        if (idx === 0 || (contextmenuEles[idx - 1] as HTMLElement).style.display === 'none')
+          doCloseContextMenu(contextmenuEle as HTMLElement)
+      }
     }
   })
 }

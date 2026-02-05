@@ -11,11 +11,11 @@ const selectedRecordPks: Ref<any[]> = ref([])
 const NAME_DICT = [{ title: '星航', value: 'xh', avatar: 'https://pic1.zhimg.com/v2-0d812d532b66d581fd9e0c7ca2541680_r.jpg' }, { title: '星杨', value: 'xy', avatar: 'https://pic1.zhimg.com/v2-770e9580d5febfb49cbb23c409cea85d_r.jpg' }, { title: '星辰', value: 'xc' }]
 const STATS_DICT = [{ title: '初始化', value: 'init', color: '#43ad7f7f' }, { title: '进行中', value: 'progress' }, { title: '有风险', value: 'risk', color: '#be14807f' }, { title: '已完成', value: 'finish' }, { title: '已关闭', value: 'close' }]
 const TREE_DICT = [
-  {no:1,pno: null, title:'d1', value: 'dd'},
-  {no:2,pno: null, title:'d2', value: 'sf'},
-  {no:3,pno:2,title:'d3', value: 's'},
-  {no:4,pno: null, title:'d4', value: 'g'},
-  {no:5,pno:3,title:'d5', value: 'sdf'},
+  { no: 1, pno: null, title: 'd1', value: 'dd' },
+  { no: 2, pno: null, title: 'd2', value: 'sf' },
+  { no: 3, pno: 2, title: 'd3', value: 's' },
+  { no: 4, pno: null, title: 'd4', value: 'g' },
+  { no: 5, pno: 3, title: 'd5', value: 'sdf' },
 ]
 
 const DATA: { [columnName: string]: any }[] = [
@@ -495,7 +495,7 @@ const events: IwProps.TableEventProps = {
         totalNumber,
       }
     }
-    else  if(dictName === 'stats'){
+    else if (dictName === 'stats') {
       let statsDict: IwProps.DictItemProps[] = JSON.parse(JSON.stringify(STATS_DICT))
       if (filterValue) {
         statsDict = statsDict.filter((dict) => {
@@ -511,9 +511,9 @@ const events: IwProps.TableEventProps = {
         totalNumber,
       }
     }
-    else if(dictName === 'module'){
+    else if (dictName === 'module') {
       let moduleDict: { [name: string]: any }[] = JSON.parse(
-        JSON.stringify(TREE_DICT)
+        JSON.stringify(TREE_DICT),
       )
       if (filterValue) {
         const filterData = moduleDict.filter((dict) => {
@@ -527,19 +527,19 @@ const events: IwProps.TableEventProps = {
             item.filter = true
             return item
           }),
-          ...treeParentData
+          ...treeParentData,
         ]
       }
       const totalNumber = moduleDict.length
       if (slice) {
         moduleDict = moduleDict.slice(
           slice.offsetNumber,
-          slice.offsetNumber + slice.fetchNumber
+          slice.offsetNumber + slice.fetchNumber,
         )
       }
       return {
         records: moduleDict,
-        totalNumber
+        totalNumber,
       }
     }
   },
@@ -601,7 +601,7 @@ const columns: IwProps.SimpleTableColumnProps[] = [
   } },
   { name: 'creator', title: '创建人', useDict: true },
   { name: 'stats', title: '状态', useDict: true, multiValue: true },
-  { name: 'module', title: '模块', useDict: true, dictKind: DictKind.TREE_SELECT},
+  { name: 'module', title: '模块', useDict: true, dictKind: DictKind.TREE_SELECT },
   { name: 'avatar', title: '头像', dataKind: IwProps.DataKind.IMAGE },
   { name: 'attachment', title: '附件', dataKind: IwProps.DataKind.FILE },
   { name: 'planStartTime', title: '计划开始时间', dataKind: IwProps.DataKind.DATETIME },

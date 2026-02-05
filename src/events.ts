@@ -77,6 +77,17 @@ export async function selectData(selectedRecordPks: any[]) {
 }
 
 /**
+ * 点击选中行
+ *
+ * click row
+ *
+ * @param selectedRecordPks 选择的数据主键 / Selected data primary keys
+ */
+export async function clickRow(selectedRecordPks: any[]) {
+  await eb.clickRow(selectedRecordPks)
+}
+
+/**
  * 修改样式
  *
  * Modify style
@@ -104,9 +115,12 @@ export async function newLayout(newLayoutProps: SimpleLayoutProps) {
  * Modify current layout
  *
  * @param changedLayoutProps 修改的布局属性 / Changed layout properties
+ * @param byGroupValue 分组值，当分组及分组值存在时修改布局后仅加载对应分组值的数据 / Group value, when group and group value exist, only load the data of the corresponding group value after modifying the layout
+ * @param layoutId 布局ID / Layout ID
+ *
  */
-export async function modifyLayout(changedLayoutProps: LayoutModifyProps) {
-  await eb.modifyLayout(changedLayoutProps)
+export async function modifyLayout(changedLayoutProps: LayoutModifyProps, byGroupValue?: any, layoutId?: string) {
+  await eb.modifyLayout(changedLayoutProps, byGroupValue, layoutId)
 }
 
 /**
@@ -118,4 +132,14 @@ export async function modifyLayout(changedLayoutProps: LayoutModifyProps) {
  */
 export async function deleteLayout(deletedLayoutId: string) {
   await eb.deleteLayout(deletedLayoutId)
+}
+/**
+ * 设置快速搜索内容
+ *
+ * Set quick search content
+ *
+ * @param quickSearchContent 快速搜索内容 / Quick search content
+ */
+export async function setQuickSearchContent(quickSearchContent: string) {
+  await eb.setQuickSearchContent(quickSearchContent)
 }

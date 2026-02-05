@@ -56,7 +56,7 @@ function offsetRight() {
     <button v-show="showLeftButton" class="iw-btn iw-btn-ghost pl-1 pr-1 ml-1 iw-btn-xs" @click="offsetLeft">
       <i :class="iconSvg.PREVIOUS" />
     </button>
-    <div ref="scrollableMainRef" class="flex overflow-hidden">
+    <div ref="scrollableMainRef" class="flex overflow-hidden flex-1">
       <div ref="scrollableContentRef" class="text-nowrap">
         <slot />
       </div>

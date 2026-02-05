@@ -3,17 +3,21 @@ import { ref } from 'vue'
 import * as iconSvg from '../../assets/icon'
 import {
   type LayoutModifyProps,
+  ModeKind,
   SubDataShowKind,
   generateDataSliceProps,
 } from '../../props'
 import IconPickerComp from '../common/IconPicker.vue'
 import { MenuOffsetKind, MenuSizeKind } from '../common/Menu'
 import MenuComp from '../common/Menu.vue'
-import type { LayoutConf } from '../conf'
+import type { LayoutConf, TableConf } from '../conf'
 import * as eb from '../eventbus'
 import { deepToRaw } from '../../utils/vueHelper'
 
 const props = defineProps<{
+  // 表格配置
+  // Layout configuration
+  tableConf: TableConf
   // 布局配置
   // Layout configuration
   layoutConf: LayoutConf
@@ -58,25 +62,39 @@ async function resetLayout() {
     slice: generateDataSliceProps(),
     subDataShowKind: SubDataShowKind.FOLD_SUB_DATA,
   }
-  props.layoutConf.filter
-  && (layout.filter = {
-    enabledColumnNames: props.layoutConf.filter.enabledColumnNames,
-    groups: [],
-  })
-  props.layoutConf.group
-  && (layout.group = {
-    enabledColumnNames: props.layoutConf.group.enabledColumnNames,
-  })
-  props.layoutConf.sort
-  && (layout.sort = {
-    enabledColumnNames: props.layoutConf.sort.enabledColumnNames,
-    items: [],
-  })
-  props.layoutConf.agg
-  && (layout.agg = {
-    enabledColumnNames: props.layoutConf.agg.enabledColumnNames,
-    items: [],
-  })
+  if (props.layoutConf.filter) {
+    layout.filter = {
+      enabledColumnNames: props.layoutConf.filter.enabledColumnNames,
+      groups: [],
+    }
+  }
+  if (props.layoutConf.group) {
+    layout.group = {
+      enabledColumnNames: props.layoutConf.group.enabledColumnNames,
+    }
+  }
+  if (props.layoutConf.sort) {
+    layout.sort = {
+      enabledColumnNames: props.layoutConf.sort.enabledColumnNames,
+      items: [],
+    }
+  }
+  if (props.layoutConf.agg) {
+    layout.agg = {
+      enabledColumnNames: props.layoutConf.agg.enabledColumnNames,
+      items: [],
+    }
+  }
+  if (props.layoutConf.columns) {
+    layout.columns = props.tableConf.columns
+    const pkIdx = layout.columns.findIndex(col => col.name === props.tableConf.pkColumnName)
+    if (pkIdx !== -1) {
+      const pkColumn = layout.columns[pkIdx]
+      pkColumn.hide = false
+      layout.columns.splice(pkIdx, 1)
+      layout.columns.splice(0, 0, pkColumn)
+    }
+  }
   await eb.modifyLayout(layout)
   confirmResetLayoutCompRef.value?.close()
 }
@@ -85,7 +103,7 @@ async function copyLayout() {
   const newLayout = deepToRaw(props.layoutConf)
   delete newLayout.data
   newLayout.selectedDataPks = []
-  newLayout.title = `${props.layoutConf.title} - Copy`
+  newLayout.title = `${props.layoutConf.title} - 副本`
   await eb.newLayout(newLayout)
   props.tableLayoutSettingRef?.close()
 }
@@ -126,11 +144,12 @@ async function copyLayout() {
         "
       />
       <i
+        v-if="![ModeKind.MINI, ModeKind.SIMPLE].includes(tableConf.mode) && tableConf.enabledCreateLayoutKind && tableConf.enabledCreateLayoutKind.length"
         class="text-lg cursor-pointer mr-2" :class="[`${iconSvg.COPY}`]" :title="$t('layout.copy.title')"
         @click="copyLayout"
       />
       <i
-        v-if="layoutLength > 1" class="text-lg cursor-pointer text-[#dc2626]" :class="[`${iconSvg.TRASH}`]" :title="$t('layout.delete.title')" @click="(e) => {
+        v-if="layoutLength > 1 && ![ModeKind.MINI, ModeKind.SIMPLE].includes(tableConf.mode)" class="text-lg cursor-pointer text-[#dc2626]" :class="[`${iconSvg.TRASH}`]" :title="$t('layout.delete.title')" @click="(e) => {
           confirmDeleteLayoutCompRef?.show(
             e,
             MenuOffsetKind.RIGHT_TOP,

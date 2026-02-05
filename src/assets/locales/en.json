@@ -8,7 +8,9 @@
       "distinct": "DISTINCT COUNT",
       "avg": "AVERAGE",
       "median": "MEDIAN VALUE",
-      "stddev": "STDDEV VALUE"
+      "stddev": "STDDEV VALUE",
+      "not_filled": "NOT FILLED",
+      "filled": "FILLED"
     },
     "datakind": {
       "serial": "Serial",
@@ -51,7 +53,8 @@
       "loadDataInvalidScene": "Unable to load data: Invalid scene"
     },
     "table": {
-      "moreSettingTitle": "More settings"
+      "moreSettingTitle": "More settings",
+      "settingTitle": "settings"
     }
   },
   "layout": {
@@ -111,7 +114,9 @@
       "items": "Items",
       "selectColumnPlaceholder": "New column",
       "note": "Between Groups And, Within Groups OR",
-      "confirm": "confirm"
+      "confirm": "confirm",
+      "enable": "enable",
+      "disable": "disable"
     },
     "group": {
       "groupTitle": "Group",
@@ -164,6 +169,8 @@
     "error": {
       "startDateGreaterThanEndDate": "The start date [{startDate}] is greater than the end date [{endDate}] ",
       "timeColumnNotExist": "Not found the field corresponding to the planned or actual time"
-    }
+    },
+    "addActualDate": "Add actual Date",
+    "addPlanDate": "Add plan Date"
   }
 }

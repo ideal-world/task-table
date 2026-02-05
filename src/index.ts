@@ -1,6 +1,7 @@
 import type { App } from 'vue'
 import { defineCustomElement } from 'vue'
 import './assets/main.css'
+import 'gantt-canvas-chart/style.css'
 import * as IwEvents from './events'
 import locales from './locales'
 import * as IwProps from './props/index'

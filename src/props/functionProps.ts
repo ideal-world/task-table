@@ -3,7 +3,7 @@
  */
 
 import type { ChangeAllOptional, ChangeOptionalExcept } from '../utils/tsHelper'
-import type { AggregateKind, LayoutKind, OperatorKind } from './enumProps'
+import type { AggregateKind, GanttDatakind, LayoutKind, OperatorKind } from './enumProps'
 import { GanttShowKind } from './enumProps'
 
 /**
@@ -108,13 +108,19 @@ export interface ActionColumnProps {
    *   IwEvents.deleteData([(e.target as HTMLElement).dataset.id])
    * })
    */
-  render: (record: { [columnName: string]: any }, layoutKind: LayoutKind) => any
+  render?: (record: { [columnName: string]: any }, layoutKind: LayoutKind) => any
   /**
    * 操作列宽度
    *
    * Action column width
    */
-  width: number
+  width?: number
+  /**
+   * 操作列显隐
+   *
+   * Action column show/hide
+   */
+  hide?: boolean
 }
 
 /**
@@ -251,6 +257,12 @@ export interface FilterDataItemProps {
    * Operator
    */
   operator: OperatorKind
+  /**
+   * 是否禁用
+   *
+   * disable
+   */
+  disable?: boolean
   /**
    * 值
    *
@@ -436,6 +448,42 @@ export interface GanttLayoutProps {
    * Actual end time column name
    */
   actualEndTimeColumnName?: string
+
+  /**
+   * 左侧标签
+   *
+   * Left remark
+   */
+  leftMark?: string
+  /**
+   * 右侧标签
+   *
+   * right remark
+   */
+  rightMark?: string
+  /**
+   * 显示计划周期
+   *
+   * Show plan period
+   */
+  showPlanPeriod?: boolean
+  /**
+   * 显示实际周期
+   *
+   * Show actual period
+   */
+  showRealPeriod?: boolean
+  /**
+   * 显示数据类别 (人员)
+   *
+   * Show data kind （member）
+   */
+  dataSeries?: GanttDatakind[]
+
+  /**
+   * 甘特图默认显示的已排序列
+   */
+  baseLayoutShow?: string[]
 }
 /**
  * 简单甘特布局属性
@@ -458,6 +506,11 @@ export function generateGanttLayoutProps(tableSimple?: SimpleGanttLayoutProps, l
     planEndTimeColumnName: (layoutSimple?.planEndTimeColumnName ?? tableSimple?.planEndTimeColumnName)!,
     actualStartTimeColumnName: layoutSimple?.actualStartTimeColumnName ?? tableSimple?.actualStartTimeColumnName,
     actualEndTimeColumnName: layoutSimple?.actualEndTimeColumnName ?? tableSimple?.actualEndTimeColumnName,
+    dataSeries: layoutSimple?.dataSeries ?? tableSimple?.dataSeries,
+    leftMark: layoutSimple?.leftMark ?? tableSimple?.leftMark,
+    rightMark: layoutSimple?.rightMark ?? tableSimple?.rightMark,
+    showPlanPeriod: layoutSimple?.showPlanPeriod ?? tableSimple?.showPlanPeriod ?? true,
+    showRealPeriod: layoutSimple?.showRealPeriod ?? tableSimple?.showRealPeriod ?? true,
   }
 }
 

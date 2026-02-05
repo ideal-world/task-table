@@ -1,11 +1,6 @@
 {
   "vue-i18n.i18nPaths": "src\\assets\\locales",
-  "tailwindCSS.classAttributes": [
-    "class",
-    "className",
-    "ngClass",
-    ":class"
-  ],
+  "tailwindCSS.classAttributes": ["class", "className", "ngClass", ":class"],
   "tailwindCSS.includeLanguages": {
     "vue": "html",
     "vue-html": "html"
@@ -94,8 +89,6 @@
   "[rust]": {
     "editor.defaultFormatter": "rust-lang.rust-analyzer"
   },
-  "i18n-ally.localesPaths": [
-    "src/assets/locales"
-  ],
+  "i18n-ally.localesPaths": ["src/assets/locales"],
   "i18n-ally.keystyle": "nested"
 }

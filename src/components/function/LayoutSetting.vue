@@ -58,7 +58,7 @@ async function createNewLayout(layoutKind: LayoutKind) {
   const newLayout: SimpleLayoutProps = {
     title: t('layout.title.default'),
     layoutKind,
-    columns: props.tableConf.columns.filter(column => !column.hide).map((column) => {
+    columns: props.tableConf.columns.filter(column => !column.innerHide).map((column) => {
       return column
     }),
   }

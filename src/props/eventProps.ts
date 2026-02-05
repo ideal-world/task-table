@@ -2,11 +2,24 @@
  * @fileoverview 事件属性 / Event props
  */
 
-import type { DataGroupResp, DataResp, DictItemsResp } from './basicProps'
-import type { AlertKind, LayoutKind } from './enumProps'
+import type { DataGroupResp, DataResp, DictItemsResp, GanttDataResp } from './basicProps'
+import type { AlertKind, DictTrigger, DragRowPosition, LayoutKind } from './enumProps'
 import type { AggDataProps, ContextMenuItemProps, DataQuerySliceReq, EditableDataResp, FilterDataProps, GroupDataProps, SortDataProps } from './functionProps'
-import type { LayoutModifyProps, LayoutProps, TableStyleModifyProps } from './kernelProps'
+import type { LayoutModifyProps, LayoutProps, LayoutSortProps, SimpleLayoutProps, TableStyleModifyProps } from './kernelProps'
 
+export interface LoadDataParams {
+  quickSearchContent?: string
+  filter?: FilterDataProps
+  sort?: SortDataProps
+  group?: GroupDataProps
+  agg?: AggDataProps
+  hideSubData?: boolean
+  byGroupValue?: any
+  slice?: DataQuerySliceReq
+  returnColumnNames?: string[]
+  returnOnlyAgg?: boolean
+  layoutId?: string
+}
 /**
  * 表格事件属性
  *
@@ -36,17 +49,7 @@ export interface TableEventProps {
    * @returns 数据或分组数据 / Data or grouped data
    */
   loadData: (
-    quickSearchContent?: string,
-    filter?: FilterDataProps,
-    sort?: SortDataProps,
-    group?: GroupDataProps,
-    agg?: AggDataProps,
-    hideSubData?: boolean,
-    byGroupValue?: any,
-    slice?: DataQuerySliceReq,
-    returnColumnNames?: string[],
-    returnOnlyAgg?: boolean,
-    layoutId?: string
+    params: LoadDataParams
   ) => Promise<DataResp | DataGroupResp[]>
 
   /**
@@ -125,9 +128,10 @@ export interface TableEventProps {
    * @param dictName 字典名 / Dictionary name
    * @param filterValue 过滤值 / Filter value
    * @param slice 分片 / Slice
+   * @param trigger 触发 / Trigger
    * @returns 字典项列表 / Dictionary item list
    */
-  loadDictItems?: (dictName: string, filterValue?: any, slice?: DataQuerySliceReq) => Promise<DictItemsResp>
+  loadDictItems?: (dictName: string, filterValue?: any, slice?: DataQuerySliceReq, trigger?: DictTrigger) => Promise<DictItemsResp>
 
   /**
    * 加载多条件字典项列表
@@ -150,6 +154,15 @@ export interface TableEventProps {
   modifyStyles?: (changedStyleProps: TableStyleModifyProps) => Promise<void>
 
   /**
+   * 设置快速搜索内容
+   *
+   * Set quick search content
+   *
+   * @param quickSearchContent 快速搜索内容 / Quick search content
+   */
+  setQuickSearchContent?: (quickSearchContent: string) => Promise<void>
+
+  /**
    * 新建布局
    *
    * Create new layout
@@ -158,6 +171,15 @@ export interface TableEventProps {
    * @returns 新建布局ID / New layout ID
    */
   newLayout?: (newLayoutProps: LayoutProps) => Promise<string>
+
+  /**
+   * 布局排序
+   *
+   * Sort layout
+   *
+   * @param sortLayoutProps 布局排序属性 / Sort layout properties
+   */
+  sortLayout?: (sortLayoutProps: LayoutSortProps) => Promise<SimpleLayoutProps[]>
 
   /**
    * 修改布局
@@ -190,6 +212,26 @@ export interface TableEventProps {
   loadHolidays?: (startTime: Date, endTime: Date) => Promise<Date[]>
 
   /**
+   * 加载计划、实际任务和加班、请假的数据
+   *
+   * Load data of plan/acutal task and overtime/leave
+   *
+   * @param param0 { startTime, endTime, accountIds }
+   * @returns [taskData, attendanceData]
+   */
+  loadWorkTasksAndAttendance?: ({ startTime, endTime, accountIds }: { startTime: Date, endTime: Date, accountIds: string[] }) => Promise<GanttDataResp>
+
+  /**
+   * 加载工作时间、具体时长的数据
+   *
+   * Load data of worktime and work hours
+   *
+   * @param param0
+   * @returns
+   */
+  loadWorktime?: () => Promise<Record<string, any>>
+
+  /**
    * 自定义警告处理
    *
    * Custom alert handling
@@ -215,4 +257,26 @@ export interface TableEventProps {
    * get micro app offset
    */
   getMicroAppOffset?: () => { left: number, top: number }
+
+  /**
+   * 判断是否可以拖拽数据行到某个位置
+   *
+   * Judge whether it is possible to drag data row to a certain position
+   * @param dragRecordPk
+   * @param dropRecordPk
+   * @returns
+   */
+  dragoverDataRow?: (dragRecordPk: string, dropRecordPk: string, position: DragRowPosition) => boolean
+
+  /**
+   * 拖拽某行到目标行
+   *
+   * Drag a row to the target row
+   *
+   * @param dragRecordPk
+   * @param dropRecordPk
+   * @param position
+   * @returns
+   */
+  dropDataRow?: (dragRecordPk: string, dropRecordPk: string, position: DragRowPosition) => Promise<void>
 }

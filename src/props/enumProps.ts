@@ -46,6 +46,42 @@ export const DATA_DICT_POSTFIX = '__dict'
  */
 export const DATA_NAME_POSTFIX = '__name'
 
+// --------------------------------------------------------- Mode ---------------------------------------------------------
+
+/**
+ * 模式类型
+ *
+ * Mode kind
+ */
+export enum ModeKind {
+  /**
+   * 普通模式
+   *
+   * Normal
+   */
+  NORMAL = 'normal',
+  /**
+   * 简洁模式
+   *
+   * Simple
+   *
+   * 不显示布局选项卡，下移快速搜索和设置
+   *
+   * Without showing the layout TAB, scroll down for quick search and Settings
+   */
+  SIMPLE = 'simple',
+  /**
+   * 迷你模式
+   *
+   * Mini
+   *
+   * 启用后只会显示第一个布局，且不会显示过滤、分组、排序、表格配置等功能。
+   *
+   * After enabling, only the first layout will be displayed, and functions such as filter, group, sort, and table configuration will not be displayed.
+   */
+  MINI = 'mini',
+}
+
 // --------------------------------------------------------- SizeKind ---------------------------------------------------------
 
 /**
@@ -95,11 +131,17 @@ export enum LayoutKind {
    */
   LIST = 'LIST',
   /**
-   * 表格
+   * 甘特图
    *
-   * Table
+   * GANTT
    */
   GANTT = 'GANTT',
+  /**
+   * 新甘特图
+   *
+   * New GANTT
+   */
+  GANTT_NEW = 'GANTT_NEW',
   /**
    * 日历
    *
@@ -219,6 +261,26 @@ export enum GanttShowKind {
    * Year
    */
   YEAR = 'YEAR',
+}
+
+/**
+ * 新甘特图显示时间
+ *
+ * New Gantt chart show time
+ */
+export enum GanttTimeShow {
+  /**
+   * 计划周期
+   *
+   * Plan period
+   */
+  PLAN_PERIOD = 'PLAN_PERIOD',
+  /**
+   * 实际周期
+   *
+   * Actual period
+   */
+  ACTUAL_PERIOD = 'ACTUAL_PERIOD',
 }
 
 /**
@@ -583,32 +645,51 @@ export enum OperatorKind {
 }
 
 /**
- * 根据数据类型获取操作符类型
+ * 根据数据类型、是否字典、是否多选、是否固定操作符列表，获取操作符类型
  *
- * Get the operator kind based on the data kind
+ * Get the operator kind based on the data kind 、whether dict and whether multiValue and whether fixed operation items list.
  *
  * @param dataKind 数据类型 / Data kind
+ * @param useDict 使用字典 / Use dict
+ * @param multiValue 多选 / Multiple value
+ * @param fixedOperationItems 固定操作符列表 / Fixed operation items list
  * @returns 操作符类型 / Operator kind
  */
-export function getOperatorKindsByDataKind(dataKind?: DataKind): OperatorKind[] {
+export function getOperatorKindsByDataKind(option: { dataKind?: DataKind, useDict: boolean, multiValue: boolean, fixedOperationItems?: OperatorKind[] } | undefined): OperatorKind[] {
+  if (!option)
+    return []
+  const { dataKind, useDict, multiValue, fixedOperationItems } = option
+  if (fixedOperationItems?.length)
+    return fixedOperationItems
+
   switch (dataKind) {
     case undefined:
       return []
     case DataKind.SERIAL:
     case DataKind.NUMBER:
     case DataKind.AMOUNT:
-      return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.LT, OperatorKind.LE, OperatorKind.GT, OperatorKind.GE, OperatorKind.IN, OperatorKind.NOT_IN, OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]
+      return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.LT, OperatorKind.LE, OperatorKind.GT, OperatorKind.GE, OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]
     case DataKind.BOOLEAN:
-      return [OperatorKind.EQ, OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]
+      return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]
     case DataKind.FILE:
     case DataKind.IMAGE:
       return [OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]
     case DataKind.DATE:
     case DataKind.DATETIME:
     case DataKind.TIME:
-      return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.LT, OperatorKind.LE, OperatorKind.GT, OperatorKind.GE, OperatorKind.IN, OperatorKind.NOT_IN, OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]
+      return [OperatorKind.LT, OperatorKind.LE, OperatorKind.GT, OperatorKind.GE, OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]
     default:
-      return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.LT, OperatorKind.LE, OperatorKind.GT, OperatorKind.GE, OperatorKind.IN, OperatorKind.NOT_IN, OperatorKind.CONTAINS, OperatorKind.NOT_CONTAINS, OperatorKind.STARTWITH, OperatorKind.NOT_STARTWITH, OperatorKind.ENDWITH, OperatorKind.NOT_ENDWITH, OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]
+      if (!useDict) {
+        return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.CONTAINS, OperatorKind.NOT_CONTAINS, OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]
+      }
+      else {
+        if (multiValue) {
+          return [OperatorKind.IN, OperatorKind.NOT_IN, OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]
+        }
+        else {
+          return [OperatorKind.EQ, OperatorKind.NE, OperatorKind.IN, OperatorKind.NOT_IN, OperatorKind.IS_EMPTY, OperatorKind.NOT_EMPTY]
+        }
+      }
   }
 }
 
@@ -698,6 +779,18 @@ export enum AggregateKind {
    * Distinct
    */
   DISTINCT = 'DISTINCT',
+  /**
+   * 未填写
+   *
+   * Notfilled
+   */
+  NOTFILLED = 'NOTFILLED',
+  /**
+   * 已填写
+   *
+   * Filled
+   */
+  FILLED = 'FILLED',
 }
 
 /**
@@ -719,6 +812,8 @@ export function translateAggregateKind(aggKind: AggregateKind): string {
     case AggregateKind.MEDIAN: return t('_.agg.median')
     case AggregateKind.STDDEV: return t('_.agg.stddev')
     case AggregateKind.DISTINCT: return t('_.agg.distinct')
+    case AggregateKind.NOTFILLED: return t('_.agg.not_filled')
+    case AggregateKind.FILLED: return t('_.agg.filled')
   }
 }
 
@@ -733,7 +828,7 @@ export interface AggItem {
    *
    * Aggregate kind
    */
-  kind: AggregateKind
+  kind?: AggregateKind
   /**
    * 显示名称
    *
@@ -752,6 +847,7 @@ export interface AggItem {
  */
 export function showAggMappingByDataKind(dataKind: DataKind): AggItem[] {
   const items = [
+    { title: t('_.agg.not_show') },
     { kind: AggregateKind.COUNT, title: translateAggregateKind(AggregateKind.COUNT) },
     { kind: AggregateKind.DISTINCT, title: translateAggregateKind(AggregateKind.DISTINCT) },
   ]
@@ -766,15 +862,6 @@ export function showAggMappingByDataKind(dataKind: DataKind): AggItem[] {
         { kind: AggregateKind.STDDEV, title: translateAggregateKind(AggregateKind.STDDEV) },
         { kind: AggregateKind.MAX, title: translateAggregateKind(AggregateKind.MAX) },
         { kind: AggregateKind.MIN, title: translateAggregateKind(AggregateKind.MIN) },
-        { kind: AggregateKind.DISTINCT, title: translateAggregateKind(AggregateKind.DISTINCT) },
-      ])
-      break
-    case DataKind.TEXT:
-    case DataKind.TEXTAREA:
-      items.push(...[
-        { kind: AggregateKind.MAX, title: translateAggregateKind(AggregateKind.MAX) },
-        { kind: AggregateKind.MIN, title: translateAggregateKind(AggregateKind.MIN) },
-        { kind: AggregateKind.DISTINCT, title: translateAggregateKind(AggregateKind.DISTINCT) },
       ])
       break
     case DataKind.DATE:
@@ -783,12 +870,15 @@ export function showAggMappingByDataKind(dataKind: DataKind): AggItem[] {
       items.push(...[
         { kind: AggregateKind.MAX, title: translateAggregateKind(AggregateKind.MAX) },
         { kind: AggregateKind.MIN, title: translateAggregateKind(AggregateKind.MIN) },
-        { kind: AggregateKind.DISTINCT, title: translateAggregateKind(AggregateKind.DISTINCT) },
       ])
       break
     default:
       break
   }
+  items.push(...[
+    { kind: AggregateKind.NOTFILLED, title: translateAggregateKind(AggregateKind.NOTFILLED) },
+    { kind: AggregateKind.FILLED, title: translateAggregateKind(AggregateKind.FILLED) },
+  ])
   return items
 }
 
@@ -843,4 +933,73 @@ export enum DictKind {
    * tree select
    */
   TREE_SELECT = 'TREE_SELECT',
+}
+
+/**
+ * 字典触发：筛选、行内编辑
+ *
+ * dictionary kind
+ */
+
+export enum DictTrigger {
+  /**
+   * 筛选
+   *
+   * filter
+   */
+  FILTER = 'FILTER',
+  /**
+   * 单元格编辑
+   *
+   * cell edit
+   */
+  CELL_EDIT = 'CELL_EDIT',
+}
+
+/**
+ * 表格各部位名称
+ *
+ * Names of the parts of the table
+ */
+
+export enum TablePart {
+  /**
+   * 视图选项卡
+   *
+   * Layout tab
+   */
+  TAB = 'TAB',
+  /**
+   * 快速搜索
+   *
+   * Quick search
+   */
+  QUICK_SEARCH = 'QUICK_SEARCH',
+  /**
+   * 分页器
+   *
+   * Layout pagination
+   */
+  PAGINATION = 'PAGINATION',
+}
+
+/**
+ * 拖拽数据行位置
+ *
+ */
+export enum DragRowPosition {
+  AFTER = 'after',
+  BEFORE = 'before',
+  INSIDE = 'inside',
+}
+/**
+ * 人员甘特图显示数据类别
+ *
+ * Member Gantt show data kind
+ */
+export enum GanttDatakind {
+  PLAN = 'plan',
+  ACTUAL = 'actual',
+  LEAVE = 'leave',
+  OVERTIME = 'overtime',
 }

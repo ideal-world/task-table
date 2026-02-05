@@ -4,6 +4,9 @@ import { delegateEvent, getParentWithClass } from '../../../utils/basic'
 import * as eb from '../../eventbus'
 
 const props = defineProps<{
+  // 数据
+  // Data
+  records: { [columnName: string]: any }[]
   // 已选中的主键
   // Selected primary key
   selectedPks: any[]
@@ -22,8 +25,11 @@ const selectEleRef = ref<HTMLElement | null>(null)
 // List element
 let listEle: HTMLElement
 
+let selectAllEle: HTMLInputElement
+
 onMounted(() => {
   listEle = selectEleRef.value!.closest('.iw-row-select-container')! as HTMLElement
+  selectAllEle = listEle.querySelector('.iw-row-select-all-cell__chk') as HTMLInputElement
   delegateEvent(listEle, 'click', '.iw-row-select-cell__chk', onSelectToggle)
   delegateEvent(listEle, 'click', '.iw-row-select-all-cell__chk', onSelectAllToggle)
 })
@@ -102,6 +108,7 @@ async function onSelectAllToggle(event: Event) {
 function addSelect(selectPk: any, selectCheckBoxEle: HTMLInputElement) {
   // 添加主键到已选中列表
   // Add primary key to selected list
+  // eslint-disable-next-line ts/no-unused-expressions
   !props.selectedPks.includes(selectPk) && props.selectedPks.push(selectPk)
   selectCheckBoxEle.checked = true
   selectCheckBoxEle.indeterminate = false
@@ -137,7 +144,6 @@ function removeSelect(selectPk: any, selectCheckBoxEle: HTMLInputElement) {
   })
   // 移除全选的选中状态
   // Remove the selected state of select all
-  const selectAllEle = listEle.querySelector('.iw-row-select-all-cell__chk') as HTMLInputElement
   selectAllEle.checked = false
 }
 
@@ -155,7 +161,7 @@ function processParentSelect(rowEle: HTMLElement) {
       const childrenCheckBoxEle = parentRowEle.querySelector('.iw-row-select-cell__chk') as HTMLInputElement
       const parentPk = props.pkKindIsNumber ? Number.parseInt((parentRowEle as HTMLElement).dataset.pk as string) : (parentRowEle as HTMLElement).dataset.pk
       if (props.selectedPks.includes(parentPk)) {
-        // 已选中，表明这个父节点不是半选状态，是明确选中状态，故受子节点取消选择的影响，直接返回
+        // 已选中，表明这个父节点不是半选状态，是明确选中状态，故不受子节点取消选择的影响，直接返回
         // Already selected, indicating that this parent node is not in an indeterminate state, but in a clear selected state, so it is affected by the deselection of the child node, and the return is directly
         return
       }
@@ -190,21 +196,89 @@ function processParentSelect(rowEle: HTMLElement) {
  *
  */
 function ClearSelect() {
-  const layoutAllSelect = listEle?.querySelector('.iw-row-select-all-cell__chk') as HTMLInputElement
-  layoutAllSelect.checked = false
+  selectAllEle.checked = false
+  selectAllEle.indeterminate = false
   listEle?.querySelectorAll('.iw-row-select-cell__chk')?.forEach((ele) => {
     (ele as HTMLInputElement).checked = false
   })
-  eb.selectData([])
+}
+// 根据pks来选中行
+// Select rows by pks
+function selectRowsByPks(pks: number[] | string[]) {
+  if (!pks?.length) {
+    ClearSelect()
+    return
+  }
+  pks.forEach((pk) => {
+    const { rowEle, chkEle } = getRowElAndChkEle(pk)
+    // 如果行元素存在且复选框未被选中，则添加选择
+    // If the row element exists and the checkbox is not checked, then add the selection
+    if (rowEle && !chkEle.checked) {
+      addSelect(pk, chkEle)
+      // 处理父数据选择
+      // Process parent data selection
+      processParentSelect(rowEle)
+    }
+  })
+}
+// 根据pks清除其他行的选择
+// Clear other row selections based on pks
+function removeRowsByPks(pks: number[] | string[]) {
+  if (!pks?.length) {
+    return
+  }
+  pks.forEach((pk) => {
+    const { rowEle, chkEle } = getRowElAndChkEle(pk)
+    if (chkEle && chkEle.checked) {
+      chkEle.checked = false
+      removeSelect(pk, chkEle)// 处理父数据选择
+      // Process parent data selection
+      processParentSelect(rowEle)
+    }
+  })
+}
+// 获取行元素和复选框元素
+// Get row element and checkbox element
+function getRowElAndChkEle(pk: number | string) {
+  const rowEle = listEle.querySelector(`.iw-data-row[data-pk='${pk}']`) as HTMLElement
+  const chkEle = rowEle?.querySelector('.iw-row-select-cell__chk') as HTMLInputElement
+  return { rowEle, chkEle }
+}
+
+function judgeAllSelected() {
+  const dataPks = props.records.filter(record => props.selectedPks.includes(record[props.pkColumnName]))
+      .map(record => record[props.pkColumnName])
+      if (dataPks.length && (dataPks.length === props.records.length)) {
+      // 全选
+      selectAllEle.checked = true
+    }else {
+      
+      selectAllEle.checked = false
+    }
 }
 
 watch(
   () => props.selectedPks?.length,
-  (newV, oldV) => {
-    if (newV === 0 && oldV !== 0) {
-      ClearSelect()
-    }
+  () => {
+    // selectedPks变化有两种情况，一种是用户点击了选择，另一种是外部传入的selectedPks发生了变化
+    selectRowsByPks(props.selectedPks)
+    // 如果外部传入的selectedPks发生了变化，需要取消当前表格数据其他数据的选择
+    // If the external selectedPks changes, need to unselect other data in the current table data
+    const curUnselectedRecordPks = props.records.filter(record => !props.selectedPks.includes(record[props.pkColumnName])).map(record => record[props.pkColumnName])
+    removeRowsByPks(curUnselectedRecordPks)
+    judgeAllSelected()
   },
+)
+
+watch(
+  () => props.records,
+  () => {
+    const dataPks = props.records.filter(record => props.selectedPks.includes(record[props.pkColumnName]))
+      .map(record => record[props.pkColumnName])
+    selectRowsByPks(dataPks)
+    judgeAllSelected()
+  },
+  { deep: true },
 )
 </script>
 

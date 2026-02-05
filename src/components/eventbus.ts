@@ -1,10 +1,10 @@
 import type { Ref } from 'vue'
 import locales from '../locales'
 
-import type { DataGroupResp, DataQuerySliceReq, DataResp, DictItemsResp, EditableDataResp, LayoutModifyProps, SimpleLayoutProps, TableStyleModifyProps } from '../props'
-import { generateLayoutProps } from '../props'
+import type { DataGroupResp, DataQuerySliceReq, DataResp, DictItemsResp, DictTrigger, EditableDataResp, GanttDataResp, LayoutModifyProps, LayoutSortProps, SimpleLayoutProps, TableStyleModifyProps } from '../props'
+import { DragRowPosition, generateLayoutProps } from '../props'
 
-import { AlertKind, SubDataShowKind } from '../props/enumProps'
+import { AlertKind, ModeKind, SubDataShowKind } from '../props/enumProps'
 import type { TableEventProps } from '../props/eventProps'
 import { getParentWithClass } from '../utils/basic'
 import { deepToRaw } from '../utils/vueHelper'
@@ -27,10 +27,10 @@ export async function init(_tableBConf: TableConf, _layoutsConf: LayoutConf[], _
   events = _events
 }
 
-export async function watch() {
-  layoutsConf.forEach((layout) => {
-    loadData(undefined, undefined, layout.id)
-  })
+export async function watch(currentLayoutId: string) {
+  const layoutConf = layoutsConf.find(layout => layout.id === currentLayoutId)
+  if (!layoutConf?.data)
+    loadData(undefined, undefined, currentLayoutId)
 }
 
 /**
@@ -55,25 +55,27 @@ export async function loadData(byGroupValue?: any, returnOnlyAgg?: boolean, layo
   let resp = null
   try {
     resp = await events.loadData(
-      tableConf.quickSearch?.searchContent,
-      rawLayout.filter,
-      rawLayout.sort,
-      rawLayout.group,
-      rawLayout.agg,
-      rawLayout.subDataShowKind === SubDataShowKind.ONLY_PARENT_DATA,
-      byGroupValue,
-      byGroupValue !== undefined && rawLayout.group && rawLayout.group.slices && rawLayout.group.slices[byGroupValue as string]
-        ? {
-            offsetNumber: rawLayout.group.slices[byGroupValue as string].offsetNumber,
-            fetchNumber: rawLayout.group.slices[byGroupValue as string].fetchNumber,
-          }
-        : {
-            offsetNumber: rawLayout.slice.offsetNumber,
-            fetchNumber: rawLayout.slice.fetchNumber,
-          },
-      showColumns,
-      returnOnlyAgg,
-      layoutId,
+      {
+        quickSearchContent: tableConf.quickSearch?.searchContent,
+        filter: rawLayout.filter,
+        sort: rawLayout.sort,
+        group: rawLayout.group,
+        agg: rawLayout.agg,
+        hideSubData: rawLayout.subDataShowKind === SubDataShowKind.ONLY_PARENT_DATA,
+        byGroupValue,
+        slice: byGroupValue !== undefined && rawLayout.group && rawLayout.group.slices && rawLayout.group.slices[byGroupValue as string]
+          ? {
+              offsetNumber: rawLayout.group.slices[byGroupValue as string].offsetNumber,
+              fetchNumber: rawLayout.group.slices[byGroupValue as string].fetchNumber,
+            }
+          : {
+              offsetNumber: rawLayout.slice.offsetNumber,
+              fetchNumber: rawLayout.slice.fetchNumber,
+            },
+        returnColumnNames: showColumns,
+        returnOnlyAgg,
+        layoutId: layout.id || layoutId,
+      },
     )
   }
   catch (e: any) {
@@ -117,7 +119,7 @@ export async function loadData(byGroupValue?: any, returnOnlyAgg?: boolean, layo
       throw new Error('[events.loadData] Invalid scene')
     }
   }
-  else if (byGroupValue) {
+  else if (byGroupValue !== undefined) {
     // Load a grouped data
     if (!Array.isArray(resp) && Array.isArray(layout.data)) {
       if (!returnOnlyAgg) {
@@ -169,9 +171,10 @@ export async function newData(newRecords: { [columnName: string]: any }[]) {
     throw new Error(`[events.newData] Invoke Error:${e.message}`)
   }
 
-  layoutsConf.forEach(async (layout) => {
-    await loadData(undefined, undefined, layout.id)
-  })
+  await loadData(undefined, undefined)
+  // layoutsConf.forEach(async (layout) => {
+  //   await loadData(undefined, undefined, layout.id)
+  // })
 }
 
 /**
@@ -197,9 +200,10 @@ export async function copyData(targetRecordPks: any[]) {
     throw new Error(`[events.copyData] Invoke Error:${e.message}`)
   }
 
-  layoutsConf.forEach(async (layout) => {
-    await loadData(undefined, undefined, layout.id)
-  })
+  await loadData(undefined, undefined)
+  // layoutsConf.forEach(async (layout) => {
+  //   await loadData(undefined, undefined, layout.id)
+  // })
 }
 
 /**
@@ -225,9 +229,10 @@ export async function modifyData(changedRecords: { [columnName: string]: any }[]
     throw new Error(`[events.modifyData] Invoke Error:${e.message}`)
   }
 
-  layoutsConf.forEach(async (layout) => {
-    await loadData(undefined, undefined, layout.id)
-  })
+  await loadData(undefined, undefined)
+  // layoutsConf.forEach(async (layout) => {
+  //   await loadData(undefined, undefined, layout.id)
+  // })
 }
 
 /**
@@ -255,9 +260,10 @@ export async function deleteData(deletedRecordPks: any[]) {
     throw new Error(`[events.deleteData] Invoke Error:${e.message}`)
   }
 
-  layoutsConf.forEach(async (layout) => {
-    await loadData(undefined, undefined, layout.id)
-  })
+  await loadData(undefined, undefined)
+  // layoutsConf.forEach(async (layout) => {
+  //   await loadData(undefined, undefined, layout.id)
+  // })
 }
 
 /**
@@ -311,6 +317,31 @@ export async function selectData(selectedRecordPks: any[]) {
 
   layout.selectedDataPks = selectedRecordPks
 }
+/**
+ * 点击选中行
+ *
+ * click row
+ *
+ * @param selectedRecordPks 选择的数据主键 / Selected data primary keys
+ */
+export async function clickRow(clickedRowPks: any[]) {
+  clickedRowPks = deepToRaw(clickedRowPks)
+
+  tableConf.clickedRowPks && (tableConf.clickedRowPks = clickedRowPks)
+
+  // if (!events.selectData) {
+  //   handleAlert(AlertKind.EVENT_NOT_CONFIGURED, t('_.event.notConfigured', { name: 'clickRow' }))
+  //   throw new Error('[events.clickRow] Event not Configured')
+  // }
+
+  // try {
+  //   await events.selectData(clickedRowPks)
+  // }
+  // catch (e: any) {
+  //   handleAlert(AlertKind.EVENT_INVOKE_ERROR, t('_.event.invokeError', { msg: e.message }))
+  //   throw new Error(`[events.clickRow] Invoke Error:${e.message}`)
+  // }
+}
 
 /**
  * 点击单元格
@@ -344,9 +375,10 @@ export async function clickCell(clickedRecordPk: any, clickedColumnName: string)
  * @param dictName 字典名 / Dictionary name
  * @param filterValue 过滤值 / Filter value
  * @param slice 分片 / Slice
+ * @param trigger 触发 / Trigger
  * @returns 字典项列表 / Dictionary item list
  */
-export async function loadCellDictItems(dictName: string, filterValue?: any, slice?: DataQuerySliceReq): Promise<DictItemsResp> {
+export async function loadCellDictItems(dictName: string, filterValue?: any, slice?: DataQuerySliceReq, trigger?: DictTrigger): Promise<DictItemsResp> {
   slice = deepToRaw(slice)
 
   if (!events.loadDictItems) {
@@ -354,7 +386,7 @@ export async function loadCellDictItems(dictName: string, filterValue?: any, sli
     throw new Error('[events.loadCellDictItems] Event not Configured')
   }
   try {
-    return await events.loadDictItems(dictName, filterValue, slice)
+    return await events.loadDictItems(dictName, filterValue, slice, trigger)
   }
   catch (e: any) {
     handleAlert(AlertKind.EVENT_INVOKE_ERROR, t('_.event.invokeError', { msg: e.message }))
@@ -438,9 +470,30 @@ export async function setQuickSearchContent(quickSearchContent: string) {
       searchContent: quickSearchContent,
     }
   }
-
+  if (!events.setQuickSearchContent) {
+    handleAlert(AlertKind.EVENT_NOT_CONFIGURED, t('_.event.notConfigured', { name: 'setQuickSearchContent' }))
+    throw new Error('[events.setQuickSearchContent] Event not Configured')
+  }
+  try {
+    await events.setQuickSearchContent(quickSearchContent)
+  }
+  catch (e: any) {
+    handleAlert(AlertKind.EVENT_INVOKE_ERROR, t('_.event.invokeError', { msg: e.message }))
+    throw new Error(`[events.setQuickSearchContent] Invoke Error:${e.message}`)
+  }
+  // 简单模式和迷你模式下，只允许一个布局
+  // in simple mode and mini mode, only one layout is allowed
+  const onlyOneLayout = [ModeKind.MINI, ModeKind.SIMPLE].includes(tableConf.mode)
+  if (onlyOneLayout) {
+    const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
+    if (!layout)
+      return
+    modifyLayout({ slice: layout.slice })
+    return
+  }
   layoutsConf.forEach((layout) => {
-    loadData(undefined, undefined, layout.id)
+    layout.slice.offsetNumber = 0
+    modifyLayout({ slice: layout.slice }, undefined, layout.id)
   })
 }
 
@@ -479,6 +532,30 @@ export async function newLayout(newLayoutProps: SimpleLayoutProps) {
 }
 
 /**
+ * 布局排序
+ *
+ * Layout sorting
+ *
+ * @param sortLayoutProps 布局排序属性 / Sort layout properties
+ */
+export async function sortLayout(sortLayoutProps: LayoutSortProps) {
+  if (!events.sortLayout) {
+    handleAlert(AlertKind.EVENT_NOT_CONFIGURED, t('_.event.notConfigured', { name: 'sortLayout' }))
+    throw new Error('[events.sortLayout] Event not Configured')
+  }
+
+  try {
+    return await events.sortLayout(sortLayoutProps)
+  }
+  catch (e: any) {
+    handleAlert(AlertKind.EVENT_INVOKE_ERROR, t('_.event.invokeError', { msg: e.message }))
+    throw new Error(`[events.sortLayout] Invoke Error:${e.message}`)
+  }
+
+  // await loadData(undefined, undefined, layoutId)
+}
+
+/**
  * 修改当前布局
  *
  * Modify current layout
@@ -486,10 +563,10 @@ export async function newLayout(newLayoutProps: SimpleLayoutProps) {
  * @param changedLayoutProps 修改的布局属性 / Changed layout properties
  * @param byGroupValue 分组值，当分组及分组值存在时修改布局后仅加载对应分组值的数据 / Group value, when group and group value exist, only load the data of the corresponding group value after modifying the layout
  */
-export async function modifyLayout(changedLayoutProps: LayoutModifyProps, byGroupValue?: any) {
+export async function modifyLayout(changedLayoutProps: LayoutModifyProps, byGroupValue?: any, layoutId?: string) {
   changedLayoutProps = deepToRaw(changedLayoutProps)
 
-  const layout = layoutsConf.find(layout => layout.id === currentLayoutId.value)!
+  const layout = layoutsConf.find(layout => layout.id === (layoutId ?? currentLayoutId.value))!
 
   if (!events.modifyLayout) {
     handleAlert(AlertKind.EVENT_NOT_CONFIGURED, t('_.event.notConfigured', { name: 'modifyLayout' }))
@@ -497,7 +574,7 @@ export async function modifyLayout(changedLayoutProps: LayoutModifyProps, byGrou
   }
 
   try {
-    await events.modifyLayout(currentLayoutId.value, changedLayoutProps)
+    await events.modifyLayout((layoutId ?? currentLayoutId.value), changedLayoutProps)
   }
   catch (e: any) {
     handleAlert(AlertKind.EVENT_INVOKE_ERROR, t('_.event.invokeError', { msg: e.message }))
@@ -510,11 +587,12 @@ export async function modifyLayout(changedLayoutProps: LayoutModifyProps, byGrou
 
   changedLayoutProps.slice !== undefined && (layout.slice = changedLayoutProps.slice)
   changedLayoutProps.showSelectColumn !== undefined && (layout.showSelectColumn = changedLayoutProps.showSelectColumn)
-  changedLayoutProps.actionColumn !== undefined && (layout.actionColumn = changedLayoutProps.actionColumn)
+  changedLayoutProps.actionColumn !== undefined && (layout.actionColumn = Object.assign(layout.actionColumn || {}, changedLayoutProps.actionColumn))
 
   changedLayoutProps.subDataShowKind !== undefined && (layout.subDataShowKind = changedLayoutProps.subDataShowKind)
 
   changedLayoutProps.gantt !== undefined && (layout.gantt = changedLayoutProps.gantt)
+  changedLayoutProps.ganttConf !== undefined && (layout.ganttConf = changedLayoutProps.ganttConf)
   changedLayoutProps.filter !== undefined && (layout.filter = changedLayoutProps.filter)
   changedLayoutProps.group !== undefined && (layout.group = changedLayoutProps.group)
   changedLayoutProps.sort !== undefined && (layout.sort = changedLayoutProps.sort)
@@ -531,12 +609,18 @@ export async function modifyLayout(changedLayoutProps: LayoutModifyProps, byGrou
     || changedLayoutProps.group || changedLayoutProps.agg
     || changedLayoutProps.slice || changedLayoutProps.subDataShowKind
   ) {
+    if (changedLayoutProps.filter || changedLayoutProps.sort) {
+      layout.slice.offsetNumber = 0
+    }
     if (Object.entries(changedLayoutProps).length === 1 && changedLayoutProps.agg) {
       await loadData(byGroupValue, true, layout.id)
     }
     else {
       await loadData(byGroupValue, undefined, layout.id)
     }
+    // 表格数据有操作，重置选中数据，暂时处理，后续做响应式处理
+    // Table data has been operated, reset selected data
+    // selectData([])
   }
 }
 
@@ -590,6 +674,42 @@ export async function loadHolidays(startTime: Date, endTime: Date): Promise<Date
 }
 
 /**
+ * 加载计划、实际任务和加班、请假的数据
+ *
+ * Load data of plan/acutal task and overtime/leave
+ *
+ * @param param0 { startTime, endTime, accountIds }
+ * @returns [taskData, attendanceData]
+ */
+export async function loadWorkTasksAndAttendance({ startTime, endTime, accountIds }: { startTime: Date, endTime: Date, accountIds: string[] }): Promise<GanttDataResp> {
+  try {
+    return await events.loadWorkTasksAndAttendance!({ startTime, endTime, accountIds })
+  }
+  catch (e: any) {
+    handleAlert(AlertKind.EVENT_INVOKE_ERROR, t('_.event.invokeError', { msg: e.message }))
+    throw new Error(`[events.loadWorkTasksAndAttendance] Invoke Error:${e.message}`)
+  }
+}
+
+/**
+ * 加载工作时间、具体时长的数据
+ *
+ * Load data of worktime and work hours
+ *
+ * @param param0
+ * @returns
+ */
+export async function loadWorktime(): Promise<Record<string, any>> {
+  try {
+    return await events.loadWorktime!()
+  }
+  catch (e: any) {
+    handleAlert(AlertKind.EVENT_INVOKE_ERROR, t('_.event.invokeError', { msg: e.message }))
+    throw new Error(`[events.loadWorktime] Invoke Error:${e.message}`)
+  }
+}
+
+/**
  * 自定义警告处理
  *
  * Custom alert handling
@@ -634,4 +754,44 @@ export function getMicroAppOffset() {
     return events.getMicroAppOffset()
   }
   return { left: 0, top: 0 }
+}
+
+/**
+ * 拖拽数据行排序
+ *
+ * Drag data row sorting
+ *
+ * @param dragPk 拖拽行的主键 / Drag row primary key
+ * @param dropPk 放置行的主键 / Drop row primary key
+ * @param position 放置位置 / Drop position
+ */
+export async function dropDataRow(dragPk: string, dropPk: string, position: DragRowPosition = DragRowPosition.BEFORE) {
+  if (!events.dropDataRow) {
+    handleAlert(AlertKind.EVENT_NOT_CONFIGURED, t('_.event.notConfigured', { name: 'dropDataRowdropDataRow' }))
+    throw new Error('[events.dropDataRow] Event not Configured')
+  }
+
+  try {
+    await events.dropDataRow(dragPk, dropPk, position)
+    await loadData(undefined, undefined)
+  }
+  catch (e: any) {
+    handleAlert(AlertKind.EVENT_INVOKE_ERROR, t('_.event.invokeError', { msg: e.message }))
+    throw new Error(`[events.dropDataRow] Invoke Error:${e.message}`)
+  }
+}
+
+export function dragoverDataRow(dragPk: string, dropPk: string, position: DragRowPosition = DragRowPosition.BEFORE) {
+  if (!events.dragoverDataRow) {
+    handleAlert(AlertKind.EVENT_NOT_CONFIGURED, t('_.event.notConfigured', { name: 'dragoverDataRow' }))
+    throw new Error('[events.dragoverDataRow] Event not Configured')
+  }
+
+  try {
+    return events?.dragoverDataRow?.(dragPk, dropPk, position)
+  }
+  catch (e: any) {
+    handleAlert(AlertKind.EVENT_INVOKE_ERROR, t('_.event.invokeError', { msg: e.message }))
+    throw new Error(`[events.dragoverDataRow] Invoke Error:${e.message}`)
+  }
 }

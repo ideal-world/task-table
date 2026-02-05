@@ -5,6 +5,7 @@ import { type CommonFunctionProps, type LayoutColumnProps, type LayoutProps, typ
 import type { DataGroupResp, DataResp } from '../props/basicProps'
 import type { QuickSearchProps } from '../props/functionProps'
 import { deepToRaw } from '../utils/vueHelper'
+import type { LayoutKind, ModeKind, TablePart } from '../props/enumProps'
 import * as eb from './eventbus'
 
 export interface TableConf extends CommonFunctionProps {
@@ -15,7 +16,14 @@ export interface TableConf extends CommonFunctionProps {
   columns: TableColumnProps[]
   styles: TableStyleProps
   quickSearch?: QuickSearchProps
+  mode: ModeKind
   mini: boolean
+  clickedRowPks: any[]
+  enabledCreateLayoutKind?: LayoutKind[]
+  hiddenConfig?: {
+    [P in keyof typeof TablePart]?: typeof TablePart[P]
+  }
+  dragSortColumnName?: string
 }
 
 export interface LayoutConf extends LayoutProps {
@@ -46,10 +54,13 @@ export function init(props: SimpleTableProps): {
     pkColumnName: tableProps.pkColumnName,
     parentPkColumnName: tableProps.parentPkColumnName,
     pkColumnShowName: tableProps.pkColumnShowName,
+    dragSortColumnName: tableProps.dragSortColumnName,
     columns: tableProps.columns,
     styles: tableProps.styles,
     quickSearch: tableProps.quickSearch,
+    mode: tableProps.mode,
     mini: tableProps.mini,
+    clickedRowPks: tableProps.clickedRowPks,
 
     slice: tableProps.slice,
     showSelectColumn: tableProps.showSelectColumn,
@@ -57,6 +68,7 @@ export function init(props: SimpleTableProps): {
 
     actionColumn: tableProps.actionColumn,
     gantt: tableProps.gantt,
+    ganttConf: tableProps.ganttConf,
 
     filter: tableProps.filter,
     group: tableProps.group,
@@ -64,6 +76,8 @@ export function init(props: SimpleTableProps): {
     agg: tableProps.agg,
     edit: tableProps.edit,
     contextMenu: tableProps.contextMenu,
+    enabledCreateLayoutKind: tableProps.enabledCreateLayoutKind,
+    hiddenConfig: tableProps.hiddenConfig,
   })
   const layoutsConf = reactive(tableProps.layouts.map((layout) => {
     return {

@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+
 const props = defineProps<{
   title: string
   isShow?: boolean
 }>()
 
 const isShow = ref(props.isShow || false)
-
-
 </script>
 
 <template>
@@ -21,10 +20,10 @@ const isShow = ref(props.isShow || false)
       </div>
       <i
         class="octicon-triangle-down-16 pointer-events-none duration-200"
-        :style="{ transform: isShow ? 'rotate(-180deg)': 'rotate(0deg)'}"
+        :style="{ transform: isShow ? 'rotate(-180deg)' : 'rotate(0deg)' }"
       />
     </div>
-    <div class="w-full p-3" :style="{ display: isShow ? 'block':'none' }">
+    <div class="w-full p-3" :style="{ display: isShow ? 'block' : 'none' }">
       <slot />
     </div>
   </div>

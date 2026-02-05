@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import { onMounted, ref, computed, watch } from 'vue'
-import MenuComp from '../common/Menu.vue'
-import MInput from './MInput/index.vue'
-import MenuSelectComp from './MenuSelect/index.vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import type MenuComp from '../common/Menu.vue'
 
-import type { DictItemProps } from '../../props'
+import type { DictItemProps, DictTrigger } from '../../props'
 import { MenuOffsetKind } from '../common/Menu'
 import * as eb from '../eventbus'
-import * as iconSvg from '../../assets/icon'
+import MenuSelectComp from './MenuSelect/index.vue'
+import MInput from './MInput/index.vue'
 
 const props = defineProps<{
   // 已选中的字典值
@@ -20,6 +19,7 @@ const props = defineProps<{
   // whether remote filter
   remote?: boolean
   dictName?: string
+  trigger?: DictTrigger
   clearable?: boolean
 }>()
 
@@ -42,9 +42,10 @@ const selectedOptions = ref<DictItemProps[]>([])
 watch(
   () => props.value,
   (val) => {
-    if (props.multiple) return
+    if (props.multiple)
+      return
     inputVal.value = val
-  }
+  },
 )
 
 // watch(
@@ -64,21 +65,24 @@ onMounted(async () => {
     selectedOptions.value = [...dictItems]
   }
 
-  if (props.filterable) MInputRef.value?.inputRef?.focus()
-  if (props.remote) await getRemoteOptions('')
+  if (props.filterable)
+    MInputRef.value?.inputRef?.focus()
+  if (props.remote)
+    await getRemoteOptions('')
   MInputRef.value?.inputRef?.click()
 })
 
 // 已选中的值 eg:['value']
-const selectedVals = computed(() => selectedOptions.value.map((e) => e.value))
+const selectedVals = computed(() => selectedOptions.value.map(e => e.value))
 
 // 最终展示options finally show options
 const showOptions = computed(() => {
   if (props.remote) {
     return remoteOptions.value
-  } else {
+  }
+  else {
     return inputVal.value
-      ? props.options!.filter((e) => e.title.includes(inputVal.value))
+      ? props.options!.filter(e => e.title.includes(inputVal.value))
       : props.options
   }
 }) as any
@@ -96,18 +100,18 @@ async function showMenuComp(inputValue: any, _: number, e: Event) {
     await getRemoteOptions(inputValue)
   }
   selectContainerCompRef.value?.show(
-    e.target as HTMLElement,
+    (e.target as HTMLElement).closest('.iw-edit-container') as HTMLElement,
     MenuOffsetKind.LEFT_TOP,
     undefined,
-    true
+    true,
   )
 }
 
 async function getRemoteOptions(inputValue: any) {
   const res = await eb.loadCellDictItems(props.dictName!, inputValue, {
     offsetNumber: 0,
-    fetchNumber: 20
-  })
+    fetchNumber: 20,
+  }, props.trigger)
   remoteOptions.value = [...res.records] as any[]
 }
 
@@ -126,19 +130,36 @@ function addSelectedDictValue(e: Event) {
   if (!itemEle || !(itemEle instanceof HTMLElement)) {
     return
   }
+  // 禁用字段不触发添加
+  if (itemEle.dataset.disable === 'true')
+    return
   // 获取选中的字典项
   // Get selected dictionary item
   const value = itemEle.dataset.value
   const selectedDictItem = showOptions.value.find((item: any) => item.value === value)
   if (
-    !selectedVals.value.some((item: any) => item === selectedDictItem.value)
+    !selectedVals.value.includes(selectedDictItem.value)
   ) {
     // 不存在，添加字典项
-    selectedOptions.value.push(selectedDictItem)
-  } else {
-    // 存在，不能选
-    // Exists, not allow choosed
-    return
+    if (props.multiple) {
+      selectedOptions.value.push(selectedDictItem)
+    }
+    else {
+      selectedOptions.value = [selectedDictItem]
+    }
+  }
+  else {
+    // 存在
+    // Exists
+
+    if (selectedOptions.value.length > 1) {
+      (selectedOptions.value = selectedOptions.value.filter(item => item.value !== selectedDictItem.value))
+    }
+    else {
+      // 长度小于1 返回
+      // length < 1 return
+      return
+    }
   }
   if (!props.multiple) {
     // 不支持多选，关闭字典选择容器
@@ -163,14 +184,14 @@ function addSelectedDictValue(e: Event) {
 function deleteSelectedDictValue(index: number) {
   selectedOptions.value.splice(
     index,
-    1
+    1,
   )
   updateValueFn()
 }
 
 function updateValueFn() {
   const val = props.multiple
-    ? selectedOptions.value.map((e) => e.value)
+    ? selectedOptions.value.map(e => e.value)
     : selectedOptions.value?.[selectedOptions.value.length - 1]?.value
   emits('update:value', val)
 }
@@ -185,22 +206,25 @@ function updateValueFn() {
  */
 async function loadDictItems(
   dictName: string,
-  dictValues: any[]
+  dictValues: any[],
 ): Promise<DictItemProps[]> {
   const dictResp = await eb.loadCellDictItemsWithMultiConds(
     {
-      [dictName]: dictValues
+      [dictName]: dictValues,
     },
     {
       offsetNumber: 0,
-      fetchNumber: dictValues.length
-    }
+      fetchNumber: dictValues.length,
+    },
   )
   return dictResp[dictName].records as DictItemProps[]
 }
 </script>
+
 <template>
-  <MInput ref="MInputRef" :options="selectedOptions" :showDictItems="showMenuComp" :deleteAValue="(_:number, index:number)=> deleteSelectedDictValue(index)" />
-    <MenuSelectComp ref="selectContainerCompRef" :values="selectedOptions.map(e=>e.value)"
-    :options="showOptions" @click="addSelectedDictValue" />
+  <MInput ref="MInputRef" :options="selectedOptions" :show-dict-items="showMenuComp" :delete-a-value="(_:number, index:number) => deleteSelectedDictValue(index)" />
+  <MenuSelectComp
+    ref="selectContainerCompRef" :values="selectedOptions.map(e => e.value)"
+    :options="showOptions" @click="addSelectedDictValue"
+  />
 </template>

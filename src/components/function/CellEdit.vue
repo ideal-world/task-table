@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import dayjs from 'dayjs'
 import type { EditDataProps, EditableDataResp } from '../../props'
 import type { DataGroupResp, DataResp } from '../../props/basicProps'
-import { DataKind, DictKind, getInputTypeByDataKind } from '../../props/enumProps'
-import { delegateEvent } from '../../utils/basic'
+import { DataKind, DictKind, DictTrigger, getInputTypeByDataKind } from '../../props/enumProps'
+import { debounce, delegateEvent, formatDateToUTC } from '../../utils/basic'
 import type { ColumnConf } from '../conf'
 import * as eb from '../eventbus'
 import DictSelect from '../base/DictSelect.vue'
 import TreeSelect from '../base/TreeSelect.vue'
-import DictSelectComp from './DictSelect.vue'
 
 const props = defineProps<{
   // 容器类名，用于标识编辑元素的共同父元素。父元素必须是 ``relative`` 定位
@@ -60,9 +60,21 @@ const curColumnConf = ref<ColumnConf>()
 // 当前正在编辑的主键值
 // Primary key value currently being edited
 const curPk = ref()
-// 当前正在编辑的值
-// Value currently being edited
-const curValue = ref()
+// 编辑的原值
+// Original value being edited
+const originalValue = ref()
+// 编辑中的值
+// Editing value
+const editingValue = ref()
+// 是日期列
+// is date column
+const isDateColumn = computed(() => curColumnConf.value && [DataKind.DATE].includes(curColumnConf.value.dataKind))
+// 是日期时间列
+// is datetime column
+const isDateTimeColumn = computed(() => curColumnConf.value && [DataKind.DATETIME].includes(curColumnConf.value.dataKind))
+// 是时间列
+// is date column
+const isTimeColumn = computed(() => curColumnConf.value && [DataKind.TIME].includes(curColumnConf.value.dataKind))
 
 /**
  * 进入编辑模式
@@ -86,7 +98,8 @@ async function enterEditMode(
 ) {
   curColumnConf.value = columnConf
   curPk.value = pkValue
-  curValue.value = value
+  originalValue.value = value
+  editingValue.value = value
   const {
     offsetLeft,
     offsetTop,
@@ -94,12 +107,18 @@ async function enterEditMode(
     offsetHeight,
   } = editCellEle
 
-  cellEditContainerRef.value!.style.cssText
-   = `display: flex;left: ${offsetLeft - 1}px;top: ${offsetTop - 1}px;width: ${offsetWidth + 2}px;;height: ${offsetHeight + 2}px;`
+  // eslint-disable-next-line ts/no-unused-expressions
+  cellEditContainerRef.value && (cellEditContainerRef.value.style.cssText
+   = `display: flex;left: ${offsetLeft - 1}px;top: ${offsetTop - 1}px;min-width: ${offsetWidth + 2}px;;height: ${offsetHeight + 2}px;`)
 
   if (!curColumnConf.value.useDict) {
-    const inputEle = cellEditContainerRef.value!.children[0] as HTMLElement
-    inputEle.focus()
+    setTimeout(() => {
+      const inputEle = cellEditContainerRef.value!.children[0] as HTMLInputElement
+      inputEle.focus()
+      if (isDateColumn.value || isDateTimeColumn.value || isTimeColumn.value) {
+        inputEle.showPicker()
+      }
+    }, 0)
   }
 }
 
@@ -108,12 +127,30 @@ async function enterEditMode(
  *
  * Leave edit mode
  */
-async function leaveEditMode() {
-  curColumnConf.value = undefined
-  curPk.value = undefined
-  curValue.value = undefined
-  cellEditContainerRef.value!.style.display = `none`
-}
+const leaveEditMode = debounce(async () => {
+  try {
+    // 必填项，不允许为空
+    // required item is not allowed to be empty
+    if (editingValue.value !== originalValue.value) {
+      if (curColumnConf.value?.required && (!editingValue.value || !editingValue.value.length))
+        return
+      await eb.modifyData([
+        {
+          [props.pkColumnName]: curPk.value,
+          [curColumnConf.value!.name]: editingValue.value,
+        },
+      ])
+    }
+  }
+  finally {
+    // eslint-disable-next-line ts/no-unused-expressions
+    cellEditContainerRef.value && (cellEditContainerRef.value.style.display = `none`)
+    curColumnConf.value = undefined
+    curPk.value = undefined
+    originalValue.value = undefined
+    editingValue.value = undefined
+  }
+}, 100)
 
 /**
  * 设置值
@@ -122,19 +159,18 @@ async function leaveEditMode() {
  *
  * @param value 值 / Value
  */
-async function setValue(value: any) {
-  if (value !== curValue.value) {
-    await eb.modifyData([
-      {
-        [props.pkColumnName]: curPk.value,
-        [curColumnConf.value!.name]: value,
-      },
-    ])
+const setValue = debounce((value: any) => {
+  if (value !== editingValue.value) {
+    editingValue.value = value
+    if (isDateColumn.value || isDateTimeColumn.value) {
+      // editingValue.value = value ? dayjs(value).format(curColumnConf.value?.kindDateTimeFormat) : value
+      editingValue.value = formatDateToUTC(value)
+    }
   }
-  if (!curColumnConf.value?.multiValue) {
+  if (!curColumnConf.value?.multiValue && editingValue.value) {
     leaveEditMode()
   }
-}
+}, 50)
 
 /**
  * 检查是否可编辑
@@ -211,7 +247,9 @@ function markEditable(containerEle: HTMLElement) {
       const columnName = editCellEle.dataset[props.editCellColumnNameProp] as string
       const columnConf = props.columnsConf.find(column => column.name === columnName)!
       if (checkEditable(pkValue, columnConf?.name, editableDataResp.value)) {
-        hoverEditEle ? ((hoverEditEle as HTMLElement)!.style!.display = 'flex') : editCellEle.appendChild(editableMarkEles.cloneNode(true))
+        // hoverEditEle ? ((hoverEditEle as HTMLElement)!.style!.display = 'flex') : editCellEle.appendChild(editableMarkEles.cloneNode(true))
+        // eslint-disable-next-line ts/no-unused-expressions
+        hoverEditEle ? ((hoverEditEle as HTMLElement)!.style!.display = 'flex') : editCellEle.classList.add('editable-cell')
       }
     })
   })
@@ -246,16 +284,30 @@ onMounted(() => {
       !curColumnConf.value
       || (e.target
       && e.target instanceof HTMLElement
-      && e.target.closest(`.iw-edit-container`))
+      && (e.target.closest(`.iw-edit-container`) || e.target.closest(`.iw-badge-delete`)))
     ) {
       return
     }
     // 在编辑模式下，且点击的不是编辑容器(cellEditContainerRef)，则尝试离开编辑模式
     // In edit mode, and if you click on something other than the edit container, try to leave edit mode
+
+    // console.log('点击表格空白')
     leaveEditMode()
   })
-  // 双击尝试进入编辑模式
-  // Double-click to try to enter edit mode
+  // 点击容器外部，尝试离开编辑模式
+  // Click on the outside of the container, try to leave edit mode
+  document.addEventListener('click', (e) => {
+    if ((e.target
+      && e.target instanceof HTMLElement
+      && (e.target.closest(`.iw-list`) || e.target.closest(`.iw-badge-delete`)))
+    ) {
+      return
+    }
+    // console.log('点击容器外部')
+    leaveEditMode()
+  })
+  // 单击尝试进入编辑模式
+  // single-click to try to enter edit mode
   delegateEvent(containerEle, 'click', `.${props.editCellClass}`, (e) => {
     if (!e.target || !(e.target instanceof HTMLElement)) {
       return
@@ -278,6 +330,10 @@ onMounted(() => {
  * @param isHoverEdit 是否是鼠标悬停编辑 whether it is mouse hover edit
  */
 function clickEvent(e: Event, isHoverEdit: boolean) {
+  // 已在单元格编辑状态下不再触发
+  if (editingValue.value || curPk.value || curColumnConf.value) {
+    return
+  }
   const editCellEle = (e.target as HTMLElement).closest(`.${props.editCellClass}`) as HTMLElement
   const columnName = editCellEle.dataset[props.editCellColumnNameProp] as string
   const editRowEle = editCellEle.closest(`.${props.editRowClass}`) as HTMLElement
@@ -299,45 +355,52 @@ function clickEvent(e: Event, isHoverEdit: boolean) {
 <template>
   <div
     ref="cellEditContainerRef"
-    class="iw-edit-container absolute z-auto hidden border-2 border-base-300 bg-base-100"
+    class="iw-edit-container absolute z-[10000] hidden border-2 border-base-300 bg-base-100 justify-center items-center"
   >
     <template v-if="curColumnConf?.dataKind === DataKind.BOOLEAN">
       <input
-        class="iw-edit-input iw-toggle iw-input-bordered ml-1"
+        class="iw-edit-input iw-toggle iw-input-bordered ml-1 iw-toggle-primary"
         type="checkbox"
-        :checked="curValue"
+        :checked="editingValue"
         @click="event => setValue((event.target as HTMLInputElement).checked)"
       >
     </template>
     <template v-else-if="!curColumnConf?.useDict">
+      <!-- 时间控件 -->
       <input
+        v-if="isDateColumn || isDateTimeColumn || isTimeColumn"
         class="iw-edit-input iw-input rounded-none pl-0.5 pr-0.5 h-full w-full"
         :type="getInputTypeByDataKind(curColumnConf?.dataKind)"
-        :value="curValue"
+        :step="1"
+        :value="editingValue && (isDateColumn || isDateTimeColumn) ? dayjs(editingValue).format(isDateTimeColumn ? 'YYYY-MM-DDTHH:mm:ss' : 'YYYY-MM-DD') : editingValue"
+        @change="event => setValue((event.target as HTMLInputElement).value)"
+      >
+
+      <input
+        v-else
+        class="iw-edit-input iw-input rounded-none pl-0.5 pr-0.5 h-full w-full"
+        :type="getInputTypeByDataKind(curColumnConf?.dataKind)"
+        :value="editingValue"
         @change="event => setValue((event.target as HTMLInputElement).value)"
       >
     </template>
     <template v-else-if="curColumnConf.dictKind === DictKind.TREE_SELECT">
       <TreeSelect
-        :value="curValue"
+        :value="originalValue"
         :dict-name="curColumnConf.name"
+        :trigger="DictTrigger.CELL_EDIT"
         filterable
         remote
         :multiple="curColumnConf.multiValue"
         @update:value="setValue"
       />
-      <!-- <DictSelectComp
-        :dict-name="curColumnConf.name"
-        :selected-dict-values="curValue"
-        :multi-value="curColumnConf.multiValue"
-        :set-values="setValue"
-      /> -->
     </template>
 
-    <template v-else>
+    <template v-else-if="curColumnConf.dictKind === DictKind.SELECT">
       <DictSelect
-        :value="curValue"
+        :value="originalValue"
         :dict-name="curColumnConf.name"
+        :trigger="DictTrigger.CELL_EDIT"
         filterable
         remote
         :multiple="curColumnConf.multiValue"

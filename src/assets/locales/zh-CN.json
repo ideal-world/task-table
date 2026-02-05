@@ -8,7 +8,10 @@
       "distinct": "去重合计",
       "avg": "平均值",
       "median": "中值",
-      "stddev": "标准差值"
+      "stddev": "标准差值",
+      "not_filled": "未填写",
+      "filled": "已填写",
+      "not_show": "不显示"
     },
     "datakind": {
       "serial": "序列",
@@ -34,8 +37,8 @@
       "le": "<=",
       "gt": ">",
       "ge": ">=",
-      "in": "存在",
-      "nin": "不存在",
+      "in": "包含",
+      "nin": "不包含",
       "contains": "包含",
       "ncontains": "不包含",
       "startwith": "开始于",
@@ -51,7 +54,8 @@
       "loadDataInvalidScene": "数据加载失败：场景不合法"
     },
     "table": {
-      "moreSettingTitle": "更多设置"
+      "moreSettingTitle": "更多设置",
+      "settingTitle": "设置"
     }
   },
   "layout": {
@@ -108,10 +112,12 @@
     },
     "filter": {
       "new": "新的过滤",
-      "items": "条件",
+      "items": "个条件",
       "selectColumnPlaceholder": "新增列",
       "note": "组内多个条件为AND，组间为OR",
-      "confirm": "确定"
+      "confirm": "确定",
+      "enable": "启用",
+      "disable": "禁用"
     },
     "group": {
       "groupTitle": "分组",
@@ -158,12 +164,29 @@
       "MONTH": "月",
       "YEAR": "年"
     },
+    "showTime": "显示时间",
+    "planPeriod": "计划周期",
+    "planDurationPeriod": "计划持续时间",
+    "actualPeriod": "实际周期",
+    "actualDurationPeriod": "实际持续时间",
+    "leavePeriod": "请假周期",
+    "overtimePeriod": "加班周期",
+    "showDataSeries": "显示数据",
+    "blockRemark": "甘特图条块标签",
+    "leftRemark": "左侧标签",
+    "rightRemark": "右侧标签",
+    "showPeriod": "显示周期",
+
     "planTimeTitle": "计划时间",
     "actualTimeTitle": "实际时间",
     "totalWeekDays": "共 {days} 工作日",
     "error": {
       "startDateGreaterThanEndDate": "存在开始时间 [{startDate}] 大于结束时间 [{endDate}]的错误数据",
-      "timeColumnNotExist": "找不到计划或实际时间对应的字段"
-    }
+      "timeColumnNotExist": "找不到计划或实际时间对应的字段",
+
+      "queryDateRangeError": "查询的开始日期不能大于结束日期，且查询时间范围不能超过：{msg}天"
+    },
+    "addActualDate": "添加实际周期",
+    "addPlanDate": "添加计划周期"
   }
 }

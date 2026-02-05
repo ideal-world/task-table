@@ -10,29 +10,27 @@ const props = defineProps<{
   quickSearch: QuickSearchProps
 }>()
 
-const showInput = ref(false)
+// const showInput = ref(false)
+const inputVal = ref(props.quickSearch.searchContent || '')
 
-async function setQuickSearchContent(e: Event) {
-  const target = e.target as HTMLInputElement
-  await eb.setQuickSearchContent(target.value)
+async function setQuickSearchContent() {
+  await eb.setQuickSearchContent(inputVal.value)
 }
 
-function handleQuickShow() {
-  showInput.value = !showInput.value
-}
+// function handleQuickShow() {
+//   showInput.value = !showInput.value
+// }
 </script>
 
 <template>
-  <label class="iw-input iw-input-xs flex items-center" :class="`${showInput && 'iw-input-bordered'}`">
+  <form class="iw-input iw-input-xs flex items-center iw-input-bordered" @submit.prevent="setQuickSearchContent">
     <input
+      v-model="inputVal"
       type="text"
-      class="iw-grow border-none"
-      :class="`${showInput ? 'w-[150px]' : 'w-0'}`"
-      :value="props.quickSearch.searchContent || ''"
+      class="iw-grow border-none w-[150px]"
       :placeholder="props.quickSearch.placeholder"
-      style="transition: all 0.2s ease-in-out"
-      @change="setQuickSearchContent"
+      style="transition: width 0.2s ease-in-out"
     >
-    <i :class="iconSvg.SEARCH" class="text-base" @click="handleQuickShow" />
-  </label>
+    <i :class="iconSvg.SEARCH" class="text-base cursor-pointer" @click="setQuickSearchContent" />
+  </form>
 </template>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 const props = defineProps<{
   // 可调整大小的元素类名。必须是 ``relative`` 定位
@@ -17,6 +17,9 @@ const props = defineProps<{
   // 设置元素调整后大小的方法
   // Method to set the size of the element after adjustment
   setSize: (width: number, itemId?: string) => Promise<void>
+  // 是否有操作栏
+  // Whether has operation
+  hasOperation?: boolean
 }>()
 
 // 可调整大小的元素，当存在``resizeContainerClass``时对应于父元素，否则对应于自身
@@ -29,6 +32,10 @@ let currItemEle: HTMLElement
 // 是否正在拖动
 // Whether it is being dragged
 let isDragging = false
+// 拖动的是否为操作列
+// Whether operate
+const handleLeft = ref(props.handleLeft)
+// const isOperate = computed(() => props.resizeItemIdProp && currItemEle.dataset[props.resizeItemIdProp] === 'operate')
 
 /**
  * 准备调整大小，显示拖动手柄
@@ -42,7 +49,7 @@ let isDragging = false
 function prepareResize(dragEle: HTMLElement, targetEle: HTMLElement, e: PointerEvent) {
   dragEle.style.display = 'flex'
   dragEle.style.height = `${targetEle.offsetHeight - 4}px`
-  const left = !props.handleLeft ? targetEle.offsetLeft + targetEle.offsetWidth - 12 : targetEle.offsetLeft - 12
+  const left = !handleLeft.value ? targetEle.offsetLeft + targetEle.offsetWidth - 12 : targetEle.offsetLeft - 12
   dragEle.style.left = `${left}px`
   // 记录鼠标位置和元素位置
   // Record mouse position and element position
@@ -94,7 +101,7 @@ async function stopResize(dragEle: HTMLElement, e: PointerEvent, saveResize: boo
   dragEle.releasePointerCapture(e.pointerId)
   // 获取新的宽度
   // Get the new width
-  const newWidth = props.handleLeft
+  const newWidth = handleLeft.value
     ? currItemEle.offsetWidth - (e.clientX - currItemEle.getBoundingClientRect().left)
     : e.clientX - currItemEle.getBoundingClientRect().left
   const currResizeItemId = props.resizeItemIdProp ? currItemEle.dataset[props.resizeItemIdProp] : undefined
@@ -137,8 +144,12 @@ onMounted(() => {
     const targetEleRect = targetEle.getBoundingClientRect()
     // 边界计算
     // Boundary calculation
-    if ((!props.handleLeft && targetEleRect.right - e.clientX < 5)
-      || (props.handleLeft && e.clientX - targetEleRect.left < 5)
+    const isOperate = props.resizeItemIdProp ? targetEle.dataset[props.resizeItemIdProp] === 'operate' : false
+    if (props.hasOperation) {
+      handleLeft.value = isOperate
+    }
+    if ((!handleLeft.value && (targetEleRect.right - e.clientX < 5))
+      || (handleLeft.value && e.clientX - targetEleRect.left < 5)
     ) {
       prepareResize(dragEle, targetEle, e)
     }

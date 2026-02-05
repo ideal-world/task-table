@@ -1,3 +1,9 @@
+* {
+  scrollbar-color: unset !important;
+}
+*:hover {
+  scrollbar-color: unset !important;
+}
 /* button  start*/
 .iw-tt .iw-btn-primary {
   background-color: var(--sys-primary);
@@ -25,19 +31,27 @@
   color: #fff;
 }
 
+.iw-tt .iw-btn.iw-btn-disabled,
+.iw-tt .iw-btn[disabled],
+.iw-btn:disabled,
+.iw-tt .iw-input:has(> input[disabled]),
+.iw-tt .iw-input-disabled,
+.iw-tt .iw-input:disabled {
+  --tw-bg-opacity: 0.1;
+  --tw-text-opacity: 0.4;
+  background-color: var(--btn-color, var(--fallback-b2));
+  border-color: rgb(179, 176, 176);
+}
 /* button  end*/
 
 /* tabs start*/
-.iw-tt
-  .iw-tabs-boxed
-  :is(.iw-tab-active, [aria-selected='true']):not(.iw-tab-disabled):not(
-    [disabled]
-  ),
+.iw-tt .iw-tabs-boxed :is(.iw-tab-active, [aria-selected='true']):not(.iw-tab-disabled):not([disabled]),
 .iw-tabs-boxed :is(input:checked) {
   background-color: var(--sys-primary);
   color: #fff;
 }
 /* tabs end*/
+
 /* switch start*/
 .iw-tt .iw-toggle-primary:checked,
 .iw-toggle-primary[aria-checked='true'] {
@@ -46,17 +60,41 @@
 }
 /* switch  end*/
 
+/* checkbox start*/
+.iw-tt .iw-checkbox-primary:checked,
+.iw-tt .iw-checkbox-primary[aria-checked='true'],
+.iw-tt .iw-checkbox:indeterminate {
+  background-color: var(--sys-primary);
+  border-color: var(--sys-primary);
+  background-image: linear-gradient(-45deg, transparent 65%, var(--sys-primary) 65.99%),
+    linear-gradient(45deg, transparent 75%, var(--sys-primary) 75.99%),
+    linear-gradient(-45deg, var(--sys-primary) 40%, transparent 40.99%),
+    linear-gradient(45deg, var(--sys-primary) 30%, var(--chkfg) 30.99%, var(--chkfg) 40%, transparent 40.99%),
+    linear-gradient(-45deg, var(--chkfg) 50%, var(--sys-primary) 50.99%);
+}
+.iw-tt .iw-checkbox-primary:hover {
+  border-color: var(--sys-primary);
+}
+.iw-tt .iw-checkbox:indeterminate {
+  background-image: linear-gradient(90deg, transparent 80%, var(--sys-primary) 80%),
+    linear-gradient(-90deg, transparent 80%, var(--sys-primary) 80%),
+    linear-gradient(0deg, var(--sys-primary) 43%, var(--chkfg) 43%, var(--chkfg) 57%, var(--sys-primary) 57%);
+}
+/* checkbox  end*/
+
 /* badge start */
 .iw-tt .iw-badge-primary {
   background-color: var(--sys-primary);
   border-color: var(--sys-primary);
 }
 /* badge end */
+
 /* text start */
 .iw-tt .text-primary {
   color: var(--sys-primary);
 }
 /* text end */
+
 /* date start */
 input[type='date'],
 input[type='datetime'],
@@ -72,5 +110,16 @@ input[type='datetime-local']::-webkit-calendar-picker-indicator {
   top: 5px;
   height: 100%;
   padding-left: 100%;
+  opacity: 0;
 }
 /* date end */
+.iw-tt .bg-primary {
+  background-color: var(--sys-primary);
+}
+.iw-tt .bg-primary-color-2 {
+  background-color: var(--sys-primary-color-2);
+}
+
+.iw-select-primary {
+  background-color: var(--sys-primary);
+}

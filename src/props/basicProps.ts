@@ -33,6 +33,11 @@ export interface DataResp {
 }
 
 /**
+ * 人员资源分配甘特图接口数据
+ */
+export type GanttDataResp = Record<string, Record<string, { account_attendance_list: object[], idp: Record<string, object> | null }>>
+
+/**
  * 带分组的数据返回对象
  *
  * Data response object with grouping
@@ -119,6 +124,50 @@ export interface DictItemProps {
 }
 
 /**
+ * 树的字典项
+ *
+ * tree dictionary
+ */
+export interface DictTreeItemProps {
+  /**
+   * id
+   *
+   *
+   */
+  no: any
+  /**
+   * 父id
+   *
+   * parent id
+   */
+  pno: any
+  /**
+   * 字典项标题
+   *
+   * Dictionary item title
+   */
+  title: string
+  /**
+   * 字典项值
+   *
+   * Dictionary item value
+   */
+  value: any
+  /**
+   * 字典项颜色
+   *
+   * Dictionary item color
+   */
+  color?: string
+  /**
+   * 字典项图标
+   *
+   * Dictionary item icon
+   */
+  avatar?: string
+}
+
+/**
  * 字典项返回对象
  *
  * Dictionary item response object
@@ -127,7 +176,7 @@ export interface DictItemsResp {
   /**
    * 字典项列表
    */
-  records: DictItemProps[] | { [name: string]: any }[]
+  records: DictItemProps[] | DictTreeItemProps[] | { [name: string]: any }[]
   /**
    * 总数
    */

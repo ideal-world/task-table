@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import type { LayoutModifyProps } from '../../../props'
 import MenuComp from '../../common/Menu.vue'
 import type { ColumnConf, LayoutConf, TableConf } from '../../conf'
 import * as eb from '../../eventbus'
 import ColumnResizeComp from '../../function/ColumnResize.vue'
+import { getChildrenWidth } from '../../../utils/basic'
 import ColumnFixedComp from './ListColumnFixed.vue'
 import ColumnWrapComp from './ListColumnWrap.vue'
 
@@ -24,6 +25,9 @@ const props = defineProps<{
   // 设置列样式
   // Set column style
   setColumnStyles: (colIdx: number, width?: number) => any
+  // 是否显示主键列
+  // Whether the primary key column is show
+  showPkColumn: boolean
 }>()
 
 const ORDER_ENUM = {
@@ -38,6 +42,15 @@ const headerMenuCompRef = ref<InstanceType<typeof MenuComp>>()
 // 当前选择的列配置
 // Currently selected column configuration
 const selectedColumnConf = ref<ColumnConf | undefined>()
+// 操作列中最大值的最小宽度
+// The minimum width of the operation column with the maximum value
+const maxMinWidth = ref(0)
+
+watch(() => props.layoutConf?.data, () => {
+  setTimeout(() => {
+    setOperationColumnMinWidth()
+  }, 0)
+})
 
 function showHeaderContextMenu(event: MouseEvent, columName: string) {
   selectedColumnConf.value = props.columnsConf.find(col => col.name === columName)
@@ -88,12 +101,13 @@ const cateColumns = computed(() => {
  * Assemble sort data into columns
  */
 const columnsWithSort = computed(() => {
-  const a = props.columnsConf.map((e) => {
+  const a = props.columnsConf.filter(column => (props.showPkColumn ? column.name : column.name !== props.tableConf.pkColumnName)).map((e) => {
     const canSort = props.layoutConf.sort!.enabledColumnNames.includes(e.name)
     // if(canSort) {
     return {
       ...e,
       orderDesc: canSort ? props.layoutConf.sort!.items?.find(f => f.columnName === e.name)?.orderDesc ?? ORDER_ENUM.UNDEFINED : ORDER_ENUM.UNDEFINED,
+      canSort,
     }
     // }
     // return e;
@@ -119,6 +133,29 @@ async function setNewWidth(newWidth: number, columnName?: string) {
       },
     }
     await eb.modifyLayout(changedLayoutReq)
+  }
+  else if (columnName === 'operate' && props.layoutConf.actionColumn) {
+    const changedLayoutReq: LayoutModifyProps = {
+      actionColumn: {
+        // render: props.layoutConf.actionColumn?.render,
+        width: (newWidth > maxMinWidth.value) ? newWidth : maxMinWidth.value,
+      },
+    }
+    await eb.modifyLayout(changedLayoutReq)
+  }
+}
+
+// 设置操作列的最小宽度
+// Set the minimum width of the operation column
+function setOperationColumnMinWidth() {
+  const operationColumns = document.querySelectorAll('.iw-active-cell')
+  for (const operationColumn of Array.from(operationColumns)) {
+    const minWidth = getChildrenWidth(operationColumn, 'btn-row')
+    if (minWidth > maxMinWidth.value)
+      maxMinWidth.value = minWidth
+  }
+  for (const operationColumn of Array.from(operationColumns)) {
+    (operationColumn as HTMLElement).style.minWidth = maxMinWidth.value ? `${maxMinWidth.value + 20}px` : 'auto'
   }
 }
 
@@ -165,7 +202,7 @@ function handleSort(column: ColumnConfWithSort) {
   <!-- sticky 确保表头固定在顶部，z-[1500] 确保不会被覆盖 -->
   <!-- sticky ensures that the header is fixed at the top, z-[1500] ensures that it is not covered -->
   <div
-    :class="`${props.tableConf.styles.headerClass} flex flex-col sticky top-0 z-[1500] bg-base-200 border-b border-b-base-300`"
+    :class="`${props.tableConf.styles.headerClass} flex flex-col sticky top-0 z-[1500] bg-base-200 border-b border-b-base-300 font-bold`"
   >
     <!-- 分类表头 -->
     <!-- Category header -->
@@ -204,20 +241,20 @@ function handleSort(column: ColumnConfWithSort) {
       >
         <!-- 选择列 -->
         <!-- Select column -->
-        <input type="checkbox" class="iw-row-select-all-cell__chk iw-checkbox iw-checkbox-xs rounded">
+        <input type="checkbox" class="iw-row-select-all-cell__chk iw-checkbox  iw-checkbox-primary border-gray-300 iw-checkbox-xs rounded">
       </div>
       <!-- 数据列 -->
       <!-- Data column -->
       <div
         v-for="(column, colIdx) in columnsWithSort" :key="`${props.layoutConf.id}-${column.name}`"
-        :class="`${props.tableConf.styles.cellClass} iw-list-cell iw-resize-item flex items-center bg-base-200 ${(colIdx !== 0 || props.layoutConf.showSelectColumn) && 'border-l border-l-base-300'} whitespace-nowrap overflow-hidden text-ellipsis flex-nowrap hover:cursor-pointer hover:drop-shadow-lg hover:z-10`"
+        :class="`${props.tableConf.styles.cellClass} iw-list-cell iw-resize-item flex items-center bg-base-200 ${((colIdx) !== 0 || props.layoutConf.showSelectColumn) && 'border-l border-l-base-300'} whitespace-nowrap overflow-hidden text-ellipsis flex-nowrap hover:cursor-pointer hover:drop-shadow-lg hover:z-10`"
         :data-column-name="column.name"
         :style="props.setColumnStyles(colIdx)"
         :title="column.title"
         @click="(event: MouseEvent) => showHeaderContextMenu(event, column.name)"
       >
         {{ column.title }}
-        <div v-if="column.hasOwnProperty('orderDesc')" class="sort-box flex flex-col items-center justify-center ml-2" @click.stop="handleSort(column as ColumnConfWithSort)">
+        <div v-if="column.hasOwnProperty('orderDesc') && column.canSort" class="sort-box flex flex-col items-center justify-center ml-2" @click.stop="handleSort(column as ColumnConfWithSort)">
           <i class="sort-icon octicon-triangle-down-24 text-[rgb(192,196,204)] rotate-180 hover:text-[var(--sys-primary)]" :class="`${column.orderDesc === false ? 'text-primary' : ''}`" />
           <i class="sort-icon octicon-triangle-down-24 text-[rgb(192,196,204)] mt-[-12px] hover:text-[var(--sys-primary)]" :class="column.orderDesc ? 'text-primary' : ''" />
         </div>
@@ -225,13 +262,14 @@ function handleSort(column: ColumnConfWithSort) {
       <!-- 操作列 -->
       <!-- Action column -->
       <div
-        v-if="props.layoutConf.actionColumn"
-        :class="`${props.tableConf.styles.cellClass} iw-list-cell flex justify-center items-center bg-base-200 border-l border-l-base-300`"
+        v-if="props.layoutConf.actionColumn && !props.layoutConf.actionColumn.hide"
+        data-column-name="operate"
+        :class="`${props.tableConf.styles.cellClass} iw-list-cell iw-active-cell iw-resize-item flex justify-center items-center bg-base-200 border-l border-l-base-300`"
         :style="props.setColumnStyles(-2)"
       >
         {{ $t('layout.action.title') }}
       </div>
-      <ColumnResizeComp resize-item-class="iw-resize-item" resize-item-id-prop="columnName" resize-container-class="iw-column-header" :set-size="setNewWidth" />
+      <ColumnResizeComp resize-item-class="iw-resize-item" has-operation resize-item-id-prop="columnName" resize-container-class="iw-column-header" :set-size="setNewWidth" />
     </div>
   </div>
   <MenuComp ref="headerMenuCompRef" class="text-sm">

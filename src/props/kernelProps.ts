@@ -2,10 +2,12 @@
  * @fileoverview 核心属性 / Kernel props
  */
 
-import { getRandomString } from '../utils/basic'
+import { formatDate, getRandomString } from '../utils/basic'
 import type { ChangeAllOptional, ChangeOptionalExcept } from '../utils/tsHelper'
+import { deepToRaw } from '../utils/vueHelper'
 import type { DictItemProps } from './basicProps'
-import { DataKind, DictKind, LayoutKind, SizeKind, SubDataShowKind, getDefaultIconByDataKind, getDefaultIconByLayoutKind } from './enumProps'
+import type { OperatorKind, TablePart } from './enumProps'
+import { DataKind, DictKind, LayoutKind, ModeKind, SizeKind, SubDataShowKind, getDefaultIconByDataKind, getDefaultIconByLayoutKind } from './enumProps'
 
 import type { TableEventProps } from './eventProps'
 import type { ActionColumnProps, AggDataProps, ContextMenuProps, DataSliceProps, EditDataProps, FilterDataProps, GanttLayoutProps, GroupDataProps, QuickSearchProps, SimpleAggDataProps, SimpleContextMenuProps, SimpleDataSliceProps, SimpleEditDataProps, SimpleFilterDataProps, SimpleGanttLayoutProps, SimpleGroupDataProps, SimpleSortDataProps, SortDataProps } from './functionProps'
@@ -52,6 +54,13 @@ export interface CommonFunctionProps {
   gantt?: GanttLayoutProps
 
   /**
+   * 甘特图固定配置项
+   *
+   * Gantt chart fixed options
+   */
+  ganttConf?: GanttFixedOptions
+
+  /**
    * 过滤
    *
    * Filter
@@ -88,6 +97,31 @@ export interface CommonFunctionProps {
    */
   contextMenu?: ContextMenuProps
 }
+
+/**
+ * 新甘特图的配置项，不存储到服务端
+ *
+ * New Gantt chart configuration
+ */
+export interface GanttFixedOptions {
+  kind: 'task' | 'member'
+  theme?: 'white' | 'black'
+  headerHeight?: number
+  rowHeight?: number
+  remarkOptionKeys?: string[]
+  queryStartDate?: string
+  queryEndDate?: string
+  defaultQueryStartDate?: string
+  defaultQueryEndDate?: string
+  holidays?: string[] // format: yyyy-MM-dd or yyyy/MM/dd (recommend)
+
+  worktime?: {
+    start_time: string
+    end_time: string
+    count: number
+  }
+}
+
 /**
  * 表格级别与布局级别共用的简单公共功能属性
  *
@@ -125,6 +159,13 @@ interface SimpleCommonFunctionProps {
    * Gantt chart
    */
   gantt?: SimpleGanttLayoutProps
+
+  /**
+   * 甘特图固定配置项
+   *
+   * Gantt chart fixed options
+   */
+  ganttConf?: GanttFixedOptions
 
   /**
    * 过滤
@@ -172,13 +213,16 @@ interface SimpleCommonFunctionProps {
  * @param layoutSimple 布局级别简单公共功能属性 / Layout level simple common function properties
  * @returns 公共功能属性 / Common function properties
  */
-function generateCommonFunctionProps(tableSimple: SimpleCommonFunctionProps, layoutSimple?: SimpleCommonFunctionProps): CommonFunctionProps {
+function generateCommonFunctionProps(tableSimple: SimpleCommonFunctionProps, _layoutSimple?: SimpleCommonFunctionProps): CommonFunctionProps {
+  const layoutSimple = _layoutSimple && JSON.parse(JSON.stringify(_layoutSimple))
   return {
     showSelectColumn: layoutSimple?.showSelectColumn ?? tableSimple.showSelectColumn ?? false,
     subDataShowKind: layoutSimple?.subDataShowKind ?? tableSimple.subDataShowKind ?? SubDataShowKind.FOLD_SUB_DATA,
-    actionColumn: layoutSimple?.actionColumn ?? tableSimple.actionColumn,
+    // actionColumn: layoutSimple?.actionColumn ?? tableSimple.actionColumn,
+    actionColumn: layoutSimple?.actionColumn ? (Object.assign(tableSimple.actionColumn || {}, layoutSimple.actionColumn)) : tableSimple.actionColumn,
     slice: generateDataSliceProps(tableSimple.slice, layoutSimple?.slice),
     gantt: (layoutSimple?.gantt ?? tableSimple.gantt) && generateGanttLayoutProps(tableSimple.gantt, layoutSimple?.gantt),
+    ganttConf: layoutSimple?.ganttConf ?? tableSimple.ganttConf,
     filter: (layoutSimple?.filter ?? tableSimple.filter) && generateFilterDataProps(tableSimple.filter, layoutSimple?.filter),
     group: (layoutSimple?.group ?? tableSimple.group) && generateGroupDataProps(tableSimple.group, layoutSimple?.group),
     sort: (layoutSimple?.sort ?? tableSimple.sort) && generateSortDataProps(tableSimple.sort, layoutSimple?.sort),
@@ -247,6 +291,18 @@ export interface CommonColumnProps {
    * Custom render
    */
   render?: (record: { [columnName: string]: any }, layoutKind: LayoutKind) => any
+  /**
+   * 布局列新建是否隐藏
+   *
+   * Only used in new layout
+   */
+  innerHide?: boolean
+  /**
+   * 是否为必填字段
+   *
+   * whether required field
+   */
+  required?: boolean
 }
 /**
  * 表格级别与布局级别共用的简单公共列属性
@@ -270,6 +326,8 @@ function generateCommonColumnProps(tableSimple: SimpleCommonColumnProps, layoutS
     fixed: layoutSimple?.fixed ?? tableSimple?.fixed ?? false,
     width: layoutSimple?.width ?? tableSimple?.width ?? 100,
     hide: layoutSimple?.hide ?? tableSimple?.hide ?? false,
+    innerHide: layoutSimple?.innerHide ?? tableSimple?.innerHide ?? false,
+    required: layoutSimple?.required ?? tableSimple?.required ?? false,
     styles: layoutSimple?.styles ?? tableSimple?.styles ?? {},
     categoryTitle: layoutSimple?.categoryTitle ?? tableSimple?.categoryTitle,
     render: layoutSimple?.render ?? tableSimple?.render,
@@ -335,7 +393,18 @@ export interface TableProps extends CommonFunctionProps {
   quickSearch?: QuickSearchProps
 
   /**
-   * 迷你模式
+   * 模式
+   *
+   * Mode
+   *
+   * 默认为普通模式。
+   *
+   *The default mode is normal.
+   */
+  mode: ModeKind
+
+  /**
+   * 迷你模式（待废弃）
    *
    * Mini mode
    *
@@ -345,11 +414,39 @@ export interface TableProps extends CommonFunctionProps {
    */
   mini: boolean
   /**
+   * 点击行
+   *
+   * Clicked rows
+   */
+  clickedRowPks: any[]
+
+  /**
    * 主键列显示名
    *
    * Primary key column show name
    */
   pkColumnShowName?: string
+  /**
+   * 可以创建的布局种类
+   *
+   * Layout kinds that can be created
+   */
+  enabledCreateLayoutKind?: LayoutKind[]
+  /**
+   * 需要隐藏配置
+   *
+   * The configuration needs to be hidden
+   */
+  hiddenConfig?: {
+    [P in keyof typeof TablePart]?: typeof TablePart[P]
+  }
+
+  /**
+   * 支持拖拽排序的字段名
+   *
+   * Support drag and drop sorting field name
+   */
+  dragSortColumnName?: string
 }
 /**
  * 简单表格属性
@@ -542,6 +639,17 @@ export interface SimpleTableProps extends SimpleCommonFunctionProps {
   quickSearch?: QuickSearchProps
 
   /**
+   * 模式
+   *
+   * Mode
+   *
+   * 默认为普通模式。
+   *
+   *The default mode is normal.
+   */
+  mode?: ModeKind
+
+  /**
    * 迷你模式
    *
    * Mini mode
@@ -552,11 +660,37 @@ export interface SimpleTableProps extends SimpleCommonFunctionProps {
    */
   mini?: boolean
   /**
+   * 点击行
+   *
+   * Clicked rows
+   */
+  clickedRowPks?: any[]
+  /**
    * 主键列显示名
    *
    * Primary key column show name
    */
   pkColumnShowName?: string
+  /**
+   * 可以创建的布局种类
+   *
+   * Layout kinds that can be created
+   */
+  enabledCreateLayoutKind?: LayoutKind[]
+  /**
+   * 需要隐藏配置
+   *
+   * The configuration needs to be hidden
+   */
+  hiddenConfig?: {
+    [P in keyof typeof TablePart]?: typeof TablePart[P]
+  }
+  /**
+   * 拖拽排序列名
+   *
+   * Drag and drop sort column name
+   */
+  dragSortColumnName?: string
 }
 /**
  * 生成表格属性
@@ -575,16 +709,21 @@ export function generateTableProps(simple: SimpleTableProps): TableProps {
     parentPkColumnName: simple.parentPkColumnName,
     quickSearch: simple.quickSearch,
     events: simple.events,
-    ...commonFunctions,
+    ...deepToRaw(commonFunctions),
     columns,
     layouts: simple.layouts.map(layout => generateLayoutProps(layout, {
       pkColumnName: simple.pkColumnName,
       columns,
-      ...commonFunctions,
+      ...deepToRaw(commonFunctions),
     })),
     styles: generateTableStyleProps(simple.styles ?? {}),
+    mode: simple.mode ?? (simple.mini ? ModeKind.MINI : ModeKind.NORMAL),
     mini: simple.mini ?? false,
+    clickedRowPks: simple.clickedRowPks ?? [],
     pkColumnShowName: simple.pkColumnShowName,
+    enabledCreateLayoutKind: simple.enabledCreateLayoutKind,
+    hiddenConfig: simple.hiddenConfig,
+    dragSortColumnName: simple.dragSortColumnName,
   }
 }
 
@@ -738,6 +877,12 @@ export interface TableColumnProps extends CommonColumnProps {
    * Date-time format
    */
   kindDateTimeFormat?: string
+  /**
+   * 固定操作项
+   *
+   * Fixed operation items
+   */
+  fixedOperationItems?: OperatorKind[]
 }
 /**
  * 简单表格列属性
@@ -762,6 +907,8 @@ function generateTableColumnProps(simple: SimpleTableColumnProps): TableColumnPr
     multiValue: simple.multiValue ?? false,
     fixedDictItems: simple.fixedDictItems,
     dictKind: simple.useDict ? simple.dictKind || DictKind.SELECT : undefined,
+    kindDateTimeFormat: simple.kindDateTimeFormat ? formatDate(simple.kindDateTimeFormat) : simple.kindDateTimeFormat,
+    fixedOperationItems: simple.fixedOperationItems,
     ...generateCommonColumnProps(simple),
   }
 }
@@ -786,6 +933,12 @@ export interface LayoutProps extends CommonFunctionProps {
    * Title
    */
   title: string
+  /**
+   * 排序
+   *
+   * index
+   */
+  index?: number
   /**
    * 布局类型
    *
@@ -824,6 +977,12 @@ export interface SimpleLayoutProps extends SimpleCommonFunctionProps {
    */
   title: string
   /**
+   * 排序
+   *
+   * index
+   */
+  index?: number
+  /**
    * 布局类型
    *
    * Layout kind
@@ -854,10 +1013,10 @@ export interface SimpleLayoutProps extends SimpleCommonFunctionProps {
 export function generateLayoutProps(layoutSimple: SimpleLayoutProps, tableSimple: { pkColumnName: string, columns: TableColumnProps[] } & CommonFunctionProps): LayoutProps {
   let layoutColumns = null
   if (layoutSimple.columns) {
-    layoutColumns = layoutSimple.columns.map(col => generateLayoutColumnProps(col, tableSimple.columns.find(tcol => tcol.name === col.name)!))
+    layoutColumns = layoutSimple.columns.filter(col => tableSimple.columns.some(tcol => tcol.name === col.name)).map(col => generateLayoutColumnProps(col, tableSimple.columns.find(tcol => tcol?.name === col?.name)!))
   }
   else {
-    layoutColumns = tableSimple.columns.map(tcol => generateLayoutColumnProps({ name: tcol.name }, tcol))
+    layoutColumns = tableSimple.columns.map(tcol => generateLayoutColumnProps({ name: tcol?.name }, tcol))
   }
   // Make sure the primary key is in the first column
   const pkIdx = layoutColumns.findIndex(col => col.name === tableSimple.pkColumnName)
@@ -871,6 +1030,7 @@ export function generateLayoutProps(layoutSimple: SimpleLayoutProps, tableSimple
   return {
     id: layoutSimple.id ?? `iw-layout-${getRandomString(12)}`,
     title: layoutSimple.title,
+    index: layoutSimple.index,
     layoutKind: layoutSimple.layoutKind ?? LayoutKind.LIST,
     icon: layoutSimple.icon ?? getDefaultIconByLayoutKind(layoutSimple.layoutKind ?? LayoutKind.LIST),
     columns: layoutColumns,
@@ -937,4 +1097,24 @@ export interface LayoutModifyProps extends Partial<CommonFunctionProps> {
    * columns
    */
   columns?: LayoutColumnProps[]
+}
+
+/**
+ * 布局排序属性
+ *
+ * Layout sort props
+ */
+export interface LayoutSortProps {
+  /**
+   * ID
+   *
+   * ID
+   */
+  id: string
+  /**
+   * 将插入的上一个ID
+   *
+   * previous ID
+   */
+  preId?: string
 }
