@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { AlertKind, showAlert } from '../../src/components/common/Alert'
+import { AlertLevel, showAlert } from '../../src/components/common/Alert'
 
 describe('showAlert', () => {
   function checkAlert(className: string, message: string) {
@@ -10,7 +10,7 @@ describe('showAlert', () => {
 
   it('should display an error alert', () => {
     vi.useFakeTimers()
-    showAlert('Error message', 4, AlertKind.ERROR)
+    showAlert('Error message', 4, AlertLevel.ERROR)
     checkAlert('iw-alert-wrap--error', 'Error message')
     vi.advanceTimersByTime(4000)
     expect(document.querySelector('.iw-alert-wrap--error')).toBeNull()
@@ -19,7 +19,7 @@ describe('showAlert', () => {
 
   it('should display a warning alert', () => {
     vi.useFakeTimers()
-    showAlert('Warning message', 4, AlertKind.WARNING)
+    showAlert('Warning message', 4, AlertLevel.WARNING)
     checkAlert('iw-alert-wrap--warning', 'Warning message')
     vi.advanceTimersByTime(4000)
     expect(document.querySelector('.iw-alert-wrap--warning')).toBeNull()
@@ -28,7 +28,7 @@ describe('showAlert', () => {
 
   it('should display an info alert', () => {
     vi.useFakeTimers()
-    showAlert('Info message', 4, AlertKind.INFO)
+    showAlert('Info message', 4, AlertLevel.INFO)
     checkAlert('iw-alert-wrap--info', 'Info message')
     vi.advanceTimersByTime(4000)
     expect(document.querySelector('.iw-alert-wrap--info')).toBeNull()
@@ -37,7 +37,7 @@ describe('showAlert', () => {
 
   it('should display a success alert', () => {
     vi.useFakeTimers()
-    showAlert('Success message', 4, AlertKind.SUCCESS)
+    showAlert('Success message', 4, AlertLevel.SUCCESS)
     checkAlert('iw-alert-wrap--success', 'Success message')
     vi.advanceTimersByTime(4000)
     expect(document.querySelector('.iw-alert-wrap--success')).toBeNull()
@@ -46,7 +46,7 @@ describe('showAlert', () => {
 
   it('should remove the alert after the specified time', () => {
     vi.useFakeTimers()
-    showAlert('Temporary message', 2, AlertKind.INFO)
+    showAlert('Temporary message', 2, AlertLevel.INFO)
     checkAlert('iw-alert-wrap--info', 'Temporary message')
     vi.advanceTimersByTime(2000)
     expect(document.querySelector('.iw-alert-wrap--info')).toBeNull()
@@ -57,7 +57,7 @@ describe('showAlert', () => {
     vi.useFakeTimers()
     const attachEle = document.createElement('div')
     document.body.append(attachEle)
-    showAlert('Attached message', 4, AlertKind.WARNING, attachEle)
+    showAlert('Attached message', 4, AlertLevel.WARNING, attachEle)
     const alert = attachEle.querySelector('.iw-alert-wrap--warning')!
     expect(alert).not.toBeNull()
     expect(alert.textContent).toBe('Attached message')
