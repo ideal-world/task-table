@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { Ref } from 'vue'
-import { ref, watch } from 'vue'
+import { ref, computed } from 'vue'
 import MenuComp from '../../common/Menu.vue'
 
 const props = defineProps<{
@@ -11,14 +11,8 @@ const emits = defineEmits(['click'])
 const menuSelectRef = ref<InstanceType<typeof MenuComp>>(
   {} as InstanceType<typeof MenuComp>,
 )
-const selectOptions = ref<any[]>([])
 
-watch(
-  () => props.options,
-  () => {
-    selectOptions.value = props.options || []
-  },
-)
+const selectOptions = computed(() => props.options || [])
 
 function handleShow(
   ...args: Parameters<typeof menuSelectRef.value.show>
